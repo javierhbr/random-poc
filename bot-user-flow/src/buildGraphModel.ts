@@ -7,6 +7,12 @@ import type {
   StepId,
   StepLogsFile,
 } from "./types";
+import {
+  parseConversationFile,
+  parseMiniAppsFile,
+  parseRunLogsFile,
+  parseStepLogsFile,
+} from "./service/parser";
 
 function safeOrder(n?: number) {
   return typeof n === "number" ? n : 10_000;
@@ -22,50 +28,28 @@ export function buildGraphModel(args: {
 }): GraphModel {
   const { conversation, stepLogs, miniApps, runLogs } = args;
 
-  const conversationId = conversation.conversation_id;
+  const parsedConversation = parseConversationFile(conversation);
+  const parsedStepLogs = parseStepLogsFile(stepLogs);
+  const parsedMiniApps = parseMiniAppsFile(miniApps);
+  const parsedRunLogs = parseRunLogsFile(runLogs);
+
+  const conversationId = parsedConversation.conversationId;
 
   const stepsById: GraphModel["stepsById"] = {};
-  for (const s of conversation.steps) {
-    stepsById[s.step_id] = {
-      stepId: s.step_id,
-      ts: s.ts,
-      userText: s.user?.text ?? "",
-      botText: s.bot?.text ?? "",
+  for (const step of parsedConversation.steps) {
+    stepsById[step.stepId] = {
+      stepId: step.stepId,
+      ts: step.ts,
+      userText: step.userText,
+      botText: step.botText,
     };
   }
 
-  const stepLogsByStepId: GraphModel["stepLogsByStepId"] = {};
-  if (stepLogs?.step_logs?.length) {
-    for (const sl of stepLogs.step_logs) {
-      stepLogsByStepId[sl.step_id] = sl.events ?? [];
-    }
-  }
+  const stepLogsByStepId: GraphModel["stepLogsByStepId"] = parsedStepLogs.byStepId;
+  const runsByStepId: GraphModel["runsByStepId"] = parsedMiniApps.byStepId;
+  const runLogsByRunId: GraphModel["runLogsByRunId"] = parsedRunLogs.byRunId;
 
-  const runsByStepId: GraphModel["runsByStepId"] = {};
-  if (miniApps?.mini_app_runs?.length) {
-    for (const item of miniApps.mini_app_runs) {
-      runsByStepId[item.step_id] = (item.runs ?? []).map((r) => ({
-        runId: r.run_id,
-        name: r.name,
-        order: r.order,
-        dependsOn: r.depends_on ?? [],
-      }));
-      runsByStepId[item.step_id].sort((a, b) => safeOrder(a.order) - safeOrder(b.order));
-    }
-  }
-
-  const runLogsByRunId: GraphModel["runLogsByRunId"] = {};
-  if (runLogs?.run_logs?.length) {
-    for (const rl of runLogs.run_logs) {
-      runLogsByRunId[rl.run_id] = {
-        kvps: rl.kvps,
-        raw: rl.raw ?? rl,
-        http: rl.http,
-      };
-    }
-  }
-
-  const stepIds = conversation.steps.map((s) => s.step_id);
+  const stepIds = parsedConversation.steps.map((s) => s.stepId);
   const stepNodes = stepIds.map((id, idx) => ({
     id: `step:${id}`,
     type: "graphNode",

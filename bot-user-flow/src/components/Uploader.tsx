@@ -34,21 +34,21 @@ export function Uploader({ onLoad, onLoadDemo }: Props) {
   return (
     <div className="uploader">
       <button className="btn btn--primary" onClick={onLoadDemo}>
-        Load full demo
+        Try example data
       </button>
 
       <label className="file-field">
-        Conversation JSON
+        Chat messages JSON
         <input type="file" accept="application/json" onChange={pick("conversation")} />
       </label>
 
       <label className="file-field">
-        Step Logs JSON
+        Activity logs JSON
         <input type="file" accept="application/json" onChange={pick("stepLogs")} />
       </label>
 
       <label className="file-field">
-        Mini-app Runs JSON
+        Mini-app runs JSON
         <input type="file" accept="application/json" onChange={pick("miniApps")} />
       </label>
 
@@ -63,7 +63,7 @@ export function Uploader({ onLoad, onLoadDemo }: Props) {
         disabled={!state.conversation}
         title={!state.conversation ? "Upload Conversation JSON first" : ""}
       >
-        Parse & Render
+        Show flow
       </button>
     </div>
   );

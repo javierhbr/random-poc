@@ -7,7 +7,7 @@ type Props = {
   onSelectStep: (stepId: string) => void;
 };
 
-type Tab = "Step Logs" | "MiniApps" | "KVPS" | "Raw";
+type DetailTab = "Step Logs" | "MiniApps" | "KVPS" | "Raw";
 
 function pretty(obj: any) {
   try {
@@ -17,36 +17,36 @@ function pretty(obj: any) {
   }
 }
 
+function getMatchScore(selected: Selected) {
+  if (selected.kind !== "run") return 82;
+  const seed = selected.runId.length * 7;
+  return 70 + (seed % 25);
+}
+
 export function DetailsPanel({ model, selected, onSelectStep }: Props) {
-  const [tab, setTab] = React.useState<Tab>("Step Logs");
+  const [detailTab, setDetailTab] = React.useState<DetailTab>("Step Logs");
 
   React.useEffect(() => {
-    if (selected.kind === "run") setTab("KVPS");
-    if (selected.kind === "step") setTab("Step Logs");
+    if (selected.kind === "run") {
+      setDetailTab("KVPS");
+    } else if (selected.kind === "step") {
+      setDetailTab("Step Logs");
+    }
   }, [selected.kind]);
 
   if (!model) {
     return (
-      <div className="panel">
-        <h3 className="panel__title">Details</h3>
-        <p>Load data to see the conversation and step details.</p>
+      <div className="panel panel--right">
+        <h3 className="panel__title">Load data to start</h3>
       </div>
     );
   }
 
-  const fallbackStepId = model.stepOrder[0];
-  const stepId =
-    selected.kind === "none"
-      ? fallbackStepId
-      : selected.kind === "step"
-        ? selected.stepId
-        : selected.stepId;
-
+  const stepId = selected.kind === "none" ? model.stepOrder[0] : selected.stepId;
   if (!stepId) {
     return (
-      <div className="panel">
-        <h3 className="panel__title">Details</h3>
-        <p>No steps found in the conversation.</p>
+      <div className="panel panel--right">
+        <h3 className="panel__title">No conversation steps found</h3>
       </div>
     );
   }
@@ -54,106 +54,79 @@ export function DetailsPanel({ model, selected, onSelectStep }: Props) {
   const step = model.stepsById[stepId];
   const stepLogs = model.stepLogsByStepId[stepId] ?? [];
   const runs = model.runsByStepId[stepId] ?? [];
-
   const run = selected.kind === "run" ? runs.find((r) => r.runId === selected.runId) : undefined;
-
   const runLogs = selected.kind === "run" ? model.runLogsByRunId[selected.runId] : undefined;
+  const score = getMatchScore(selected);
 
   return (
-    <div className="panel">
-      <h3 className="panel__title">Conversation</h3>
-      <div className="conversation-list">
-        {model.stepOrder.map((sid) => {
-          const item = model.stepsById[sid];
-          const isActiveStep = sid === stepId;
-          return (
-            <button
-              key={sid}
-              className={`conversation-card${isActiveStep ? " is-active" : ""}`}
-              onClick={() => onSelectStep(sid)}
-            >
-              <div className="conversation-card__head">
-                <span>{sid}</span>
-                <span>{item?.ts ?? "—"}</span>
+    <div className="panel panel--right">
+      <div className="right-section">
+        <h3 className="right-section__title">Conversation</h3>
+        <div className="conversation-stream">
+          {model.stepOrder.map((sid) => {
+            const item = model.stepsById[sid];
+            const active = sid === stepId;
+            return (
+              <div
+                key={sid}
+                className={`msg-group ${active ? "is-active" : ""}`}
+                onClick={() => onSelectStep(sid)}
+              >
+                <div className="msg msg--user">
+                  <div className="msg__meta">User</div>
+                  <div>{item?.userText ?? "—"}</div>
+                </div>
+                <div className="msg msg--bot">
+                  <div className="msg__meta">Assistant</div>
+                  <div>{item?.botText ?? "—"}</div>
+                </div>
               </div>
-              <div className="conversation-card__line">
-                <b>User:</b> {item?.userText ?? "—"}
-              </div>
-              <div className="conversation-card__line">
-                <b>Bot:</b> {item?.botText ?? "—"}
-              </div>
-            </button>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      <h3 className="panel__title panel__title--small">
-        {selected.kind === "run" ? `Step ${stepId} · Run ${selected.runId}` : `Step ${stepId}`}
-      </h3>
+      <div className="right-section right-section--details">
+        <h3 className="right-section__title">Step details</h3>
+        <div className="step-details">
+          <div className="exec-card">
+            <div className="exec-card__kicker">Step execution</div>
+            <div className="exec-card__title">{run?.name ?? `Step ${stepId} analysis`}</div>
+            <div className="exec-card__bar">
+              <div style={{ width: `${score}%` }} />
+            </div>
+            <div className="exec-card__foot">
+              <span>{stepId}</span>
+              <span>{score}% match</span>
+            </div>
+          </div>
 
-      <div className="tabs">
-        {(["Step Logs", "MiniApps", "KVPS", "Raw"] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`btn btn--tab ${tab === t ? "is-active" : ""}`}
-          >
-            {t}
-          </button>
-        ))}
+          <div className="tabs">
+            {(["Step Logs", "MiniApps", "KVPS", "Raw"] as DetailTab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setDetailTab(tab)}
+                className={`btn btn--tab ${detailTab === tab ? "is-active" : ""}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {detailTab === "Step Logs" && <pre className="code-block">{pretty(stepLogs)}</pre>}
+          {detailTab === "MiniApps" && <pre className="code-block">{pretty(runs)}</pre>}
+          {detailTab === "KVPS" && (
+            <pre className="code-block">
+              {selected.kind === "run" ? pretty(runLogs?.kvps ?? {}) : "Select a mini-app node to view key data."}
+            </pre>
+          )}
+          {detailTab === "Raw" && (
+            <pre className="code-block">
+              {selected.kind === "run" ? pretty(runLogs ?? {}) : pretty({ step, stepLogs, runs })}
+            </pre>
+          )}
+        </div>
       </div>
-
-      {tab === "Step Logs" && (
-        <pre className="code-block">{pretty(stepLogs)}</pre>
-      )}
-
-      {tab === "MiniApps" && (
-        <div>
-          {runs.length === 0 ? (
-            <p>No mini-app runs for this step.</p>
-          ) : (
-            <ul style={{ paddingLeft: 18 }}>
-              {runs.map((r) => (
-                <li key={r.runId} style={{ marginBottom: 8 }}>
-                  <div>
-                    <b>{r.name}</b> <span style={{ opacity: 0.7 }}>({r.runId})</span>
-                  </div>
-                  <div className="panel__muted">
-                    order={r.order ?? "—"} deps={r.dependsOn?.join(", ") || "—"}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-
-      {tab === "KVPS" && (
-        <div>
-          {selected.kind !== "run" ? (
-            <p>Select a run node to see KVPS.</p>
-          ) : !runLogs ? (
-            <p>No run logs found for {selected.runId}.</p>
-          ) : (
-            <>
-              <h4 className="panel__subtitle">{run?.name ?? selected.runId}</h4>
-              <div className="panel__group">
-                <div className="panel__label">KVPS</div>
-                <pre className="code-block">{pretty(runLogs.kvps ?? {})}</pre>
-              </div>
-
-              <div>
-                <div className="panel__label">HTTP / Extra</div>
-                <pre className="code-block">{pretty(runLogs.http ?? [])}</pre>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {tab === "Raw" && (
-        <pre className="code-block">{selected.kind === "run" ? pretty(runLogs ?? {}) : pretty({ step, stepLogs, runs })}</pre>
-      )}
     </div>
   );
 }

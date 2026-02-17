@@ -20,6 +20,8 @@ type LayoutMode = "horizontal" | "vertical";
 
 export default function App() {
   const nodeTypes = React.useMemo(() => ({ graphNode: FlowNode }), []);
+  const prevLayoutRef = React.useRef<LayoutMode>("horizontal");
+  const prevGraphKeyRef = React.useRef<string>("");
 
   const [model, setModel] = React.useState<GraphModel | undefined>(undefined);
   const [selected, setSelected] = React.useState<Selected>({ kind: "none" });
@@ -74,6 +76,16 @@ export default function App() {
         },
       };
     });
+  }
+
+  function applyNodeLayoutDirection(nodes: any[], layout: LayoutMode) {
+    return nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        layout,
+      },
+    }));
   }
 
   function preserveDraggedPositions(baseNodes: any[], prevNodes: any[]) {
@@ -213,6 +225,8 @@ export default function App() {
     let baseNodes: any[] = [];
     let baseEdges: any[] = [];
 
+    let graphKey = "steps";
+
     if (viewMode === "steps") {
       baseNodes = transformNodesLayout(model.stepNodes, layoutMode);
       baseEdges = model.stepEdges;
@@ -223,18 +237,27 @@ export default function App() {
         setFlowEdges([]);
         return;
       }
+      graphKey = `miniapps:${sid}`;
       baseNodes = transformNodesLayout(model.runNodesByStepId[sid] ?? [], layoutMode);
       baseEdges = model.runEdgesByStepId[sid] ?? [];
     }
 
     setFlowEdges(baseEdges);
+    const shouldPreserveDragged =
+      prevLayoutRef.current === layoutMode && prevGraphKeyRef.current === graphKey;
+
+    const nodesWithDirection = applyNodeLayoutDirection(baseNodes, layoutMode);
     setFlowNodes((prev) =>
       applyNodeHighlighting(
-        preserveDraggedPositions(baseNodes, prev),
+        shouldPreserveDragged
+          ? preserveDraggedPositions(nodesWithDirection, prev)
+          : nodesWithDirection,
         activeStepId,
         activeRunId,
       ),
     );
+    prevLayoutRef.current = layoutMode;
+    prevGraphKeyRef.current = graphKey;
   }, [layoutMode, miniAppsStepId, model, selected, viewMode]);
 
   React.useEffect(() => {
@@ -247,38 +270,63 @@ export default function App() {
   return (
     <div className="page">
       <div className="topbar">
-        <div className="brand">
-          <div className="brand__kicker">Conversation Graph</div>
-          <h1 className="brand__title">Flow Inspector</h1>
-        </div>
-        <Uploader onLoad={loadModelFromFiles} onLoadDemo={loadDemo} />
+        <div className="topbar__row topbar__row--main">
+          <div className="brand brand--product">
+            <div className="brand__logo">◫</div>
+            <div>
+              <h1 className="brand__title">Metuur Flow</h1>
+              <div className="brand__breadcrumb">Projects  ›  Inspector  ›  conversation_trace.json</div>
+            </div>
+          </div>
 
-        <div className="view-controls">
-          <span className="mode-pill">
-            Mode <b>{viewMode}</b>
-          </span>
-          <span className="mode-pill">
-            Layout <b>{layoutMode}</b>
-          </span>
-          <button className="btn" onClick={switchToSteps} disabled={!model || viewMode === "steps"}>
-            Steps view
-          </button>
-          <button
-            className="btn"
-            onClick={() => switchToMiniApps()}
-            disabled={!model || viewMode === "miniapps"}
-          >
-            Mini-apps view
-          </button>
-          <button className="btn" onClick={() => setLayoutMode("horizontal")} disabled={layoutMode === "horizontal"}>
-            Re-org horizontal
-          </button>
-          <button className="btn" onClick={() => setLayoutMode("vertical")} disabled={layoutMode === "vertical"}>
-            Re-org vertical
-          </button>
-          <button className="btn" onClick={() => setDragEnabled((v) => !v)}>
-            {dragEnabled ? "Drag: on" : "Drag: off"}
-          </button>
+          <div className="header-status">
+            <span className="status-pill">
+              Conversation <b>{model?.conversationId ?? "—"}</b>
+            </span>
+            <span className="status-pill">
+              Active step{" "}
+              <b>{selected.kind === "none" ? model?.stepOrder?.[0] ?? "—" : selected.stepId}</b>
+            </span>
+            <span className="status-pill">
+              Nodes <b>{flowNodes.length}</b>
+            </span>
+          </div>
+        </div>
+
+        <div className="topbar__row topbar__row--controls">
+          <div className="toolbar-section toolbar-section--inline">
+            <div className="toolbar-title">Data</div>
+            <Uploader onLoad={loadModelFromFiles} onLoadDemo={loadDemo} />
+          </div>
+
+          <div className="view-controls toolbar-section toolbar-section--inline">
+            <div className="toolbar-title">Explore</div>
+            <span className="mode-pill">
+              View <b>{viewMode === "steps" ? "Conversation steps" : "Mini-app tree"}</b>
+            </span>
+            <span className="mode-pill">
+              Layout <b>{layoutMode}</b>
+            </span>
+            <button className="btn" onClick={switchToSteps} disabled={!model || viewMode === "steps"}>
+              Conversation flow
+            </button>
+            <button
+              className="btn"
+              onClick={() => switchToMiniApps()}
+              disabled={!model || viewMode === "miniapps"}
+            >
+              Mini-app tree
+            </button>
+            <button className="btn" onClick={() => setLayoutMode("horizontal")} disabled={layoutMode === "horizontal"}>
+              Horizontal
+            </button>
+            <button className="btn" onClick={() => setLayoutMode("vertical")} disabled={layoutMode === "vertical"}>
+              Vertical
+            </button>
+            <button className="btn" onClick={() => setDragEnabled((v) => !v)}>
+              {dragEnabled ? "Drag on" : "Drag off"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -286,14 +334,20 @@ export default function App() {
         <div className="canvas-wrap">
           {viewMode === "miniapps" && miniAppsStepId ? (
             <div className="tree-indicator">
-              Tree step <b>{miniAppsStepId}</b>
+              Showing tree for <b>{miniAppsStepId}</b>
             </div>
           ) : null}
+          <div className="flow-legend">
+            <span className="flow-legend__item"><i className="dot dot--active" />Selected</span>
+            <span className="flow-legend__item"><i className="dot dot--step" />Step</span>
+            <span className="flow-legend__item"><i className="dot dot--mini" />Mini-app</span>
+          </div>
           <ReactFlow
             nodes={flowNodes}
             edges={flowEdges.map((edge) => ({
               ...edge,
               markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 },
+              type: layoutMode === "vertical" ? "bezier" : edge.type,
             }))}
             nodeTypes={nodeTypes}
             onNodeClick={onNodeClick}
@@ -309,9 +363,9 @@ export default function App() {
 
           {model && viewMode === "steps" && selected.kind === "step" && (
             <div className="tip">
-              <div className="tip__kicker">Tip</div>
+              <div className="tip__kicker">Next</div>
               <div className="tip__text">
-                Click <b>Mini-apps view</b> to drill into step <b>{selected.stepId}</b>.
+                Open <b>Mini-app tree</b> to see how step <b>{selected.stepId}</b> was generated.
               </div>
             </div>
           )}
