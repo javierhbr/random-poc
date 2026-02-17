@@ -1,0 +1,32 @@
+{
+  "conversation_id": "conv_tree_001",
+  "step_logs": [
+    {
+      "step_id": "s01",
+      "events": [
+        { "level": "info", "msg": "route=intent_transfer_help" },
+        { "level": "debug", "lang": "en-US" }
+      ]
+    },
+    {
+      "step_id": "s02",
+      "events": [
+        { "level": "info", "msg": "route=intent_transfer_details" },
+        { "level": "info", "from_country": "MX", "to_country": "ES", "currency": "EUR" }
+      ]
+    },
+    {
+      "step_id": "s03",
+      "events": [
+        { "level": "info", "msg": "route=intent_sla_question" }
+      ]
+    },
+    {
+      "step_id": "s04",
+      "events": [
+        { "level": "info", "msg": "route=intent_execute_transfer" },
+        { "level": "info", "status": "accepted" }
+      ]
+    }
+  ]
+}

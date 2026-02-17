@@ -1,0 +1,29 @@
+{
+  "conversation_id": "conv_tree_001",
+  "steps": [
+    {
+      "step_id": "s01",
+      "ts": "2026-02-17T12:00:00Z",
+      "user": { "text": "Hi, I need to send money to Spain today." },
+      "bot": { "text": "Sure, I can help. I will check KYC, limits, and fees first." }
+    },
+    {
+      "step_id": "s02",
+      "ts": "2026-02-17T12:00:09Z",
+      "user": { "text": "Amount is 2500 EUR from Mexico." },
+      "bot": { "text": "Got it. Running quote and policy checks now." }
+    },
+    {
+      "step_id": "s03",
+      "ts": "2026-02-17T12:00:17Z",
+      "user": { "text": "How long will it take?" },
+      "bot": { "text": "Usually 5-120 minutes depending on receiving bank and verification state." }
+    },
+    {
+      "step_id": "s04",
+      "ts": "2026-02-17T12:00:26Z",
+      "user": { "text": "Perfect, go ahead and create it." },
+      "bot": { "text": "Done. Your transfer is created and tracking is enabled." }
+    }
+  ]
+}

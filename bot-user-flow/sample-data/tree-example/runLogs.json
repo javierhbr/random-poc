@@ -1,0 +1,25 @@
+{
+  "run_logs": [
+    { "run_id": "r001", "kvps": { "intent": "transfer_help", "confidence": 0.97 } },
+    { "run_id": "r002", "kvps": { "tier": "gold", "locale": "en-US" }, "http": [{ "url": "/customer", "status": 200, "ms": 31 }] },
+    { "run_id": "r003", "kvps": { "template": "transfer_intro_v2" } },
+
+    { "run_id": "r004", "kvps": { "intent": "transfer_details", "confidence": 0.95 } },
+    { "run_id": "r005", "kvps": { "source_country": "MX", "target_country": "ES", "currency": "EUR" } },
+    { "run_id": "r006", "kvps": { "risk_score": 0.11, "result": "allow" } },
+    { "run_id": "r007", "kvps": { "pair": "MXN_EUR", "rate": 0.0526 }, "http": [{ "url": "/fx/quote", "status": 200, "ms": 44 }] },
+    { "run_id": "r008", "kvps": { "policy": "EU_TRANSFER_BASELINE", "allowed": true } },
+    { "run_id": "r009", "kvps": { "stream": "audit", "enabled": true } },
+    { "run_id": "r010", "kvps": { "rules_applied": 3, "dropped": 0 } },
+    { "run_id": "r011", "kvps": { "summary": "All checks passed. Ready to execute." } },
+
+    { "run_id": "r012", "kvps": { "intent": "sla_question", "confidence": 0.93 } },
+    { "run_id": "r013", "kvps": { "min_minutes": 5, "max_minutes": 120 } },
+    { "run_id": "r014", "kvps": { "tone": "transparent", "template": "sla_answer_v1" } },
+
+    { "run_id": "r015", "kvps": { "intent": "execute_transfer", "confidence": 0.96 } },
+    { "run_id": "r016", "kvps": { "transfer_id": "tr_a91f2c", "status": "accepted" }, "http": [{ "url": "/transfers", "status": 201, "ms": 82 }] },
+    { "run_id": "r017", "kvps": { "receipt_id": "rc_88214", "channel": "inbox" } },
+    { "run_id": "r018", "kvps": { "push": true, "email": true } }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "conversation_id": "conv_tree_001",
+  "mini_app_runs": [
+    {
+      "step_id": "s01",
+      "runs": [
+        { "run_id": "r001", "name": "intent_classifier", "order": 1 },
+        { "run_id": "r002", "name": "customer_context_fetch", "order": 2, "depends_on": ["r001"] },
+        { "run_id": "r003", "name": "assistant_response_generator", "order": 3, "depends_on": ["r002"] }
+      ]
+    },
+    {
+      "step_id": "s02",
+      "runs": [
+        { "run_id": "r004", "name": "intent_classifier", "order": 1 },
+        { "run_id": "r005", "name": "context_enricher", "order": 2, "depends_on": ["r004"] },
+        { "run_id": "r006", "name": "risk_scanner", "order": 2, "depends_on": ["r004"] },
+        { "run_id": "r007", "name": "fx_quote_provider", "order": 3, "depends_on": ["r005"] },
+        { "run_id": "r008", "name": "compliance_guard", "order": 3, "depends_on": ["r005", "r006"] },
+        { "run_id": "r009", "name": "audit_stream", "order": 1 },
+        { "run_id": "r010", "name": "audit_policy_filter", "order": 2, "depends_on": ["r009"] },
+        { "run_id": "r011", "name": "response_builder", "order": 4, "depends_on": ["r007", "r008", "r010"] }
+      ]
+    },
+    {
+      "step_id": "s03",
+      "runs": [
+        { "run_id": "r012", "name": "intent_classifier", "order": 1 },
+        { "run_id": "r013", "name": "sla_estimator", "order": 2, "depends_on": ["r012"] },
+        { "run_id": "r014", "name": "assistant_response_generator", "order": 3, "depends_on": ["r013"] }
+      ]
+    },
+    {
+      "step_id": "s04",
+      "runs": [
+        { "run_id": "r015", "name": "intent_classifier", "order": 1 },
+        { "run_id": "r016", "name": "transfer_executor", "order": 2, "depends_on": ["r015"] },
+        { "run_id": "r017", "name": "receipt_writer", "order": 3, "depends_on": ["r016"] },
+        { "run_id": "r018", "name": "notifications_publisher", "order": 3, "depends_on": ["r016"] }
+      ]
+    }
+  ]
+}
