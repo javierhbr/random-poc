@@ -1,0 +1,33 @@
+level: "medium"
+description: "Touches PII or is external-facing, but not payments"
+
+triggers:
+  - "touches_pii == true AND external_facing == false"
+  - "external_facing == true AND touches_payments == false"
+  - "change_type == migration"
+
+constitution_sections:
+  required:
+    - principles
+    - observability
+  conditional:
+    - section: "data-governance"
+      when: "touches_pii == true"
+    - section: "security"
+      when: "external_facing == true"
+    - section: "ux-principles"
+      when: "external_facing == true"
+
+speckit:
+  additional_template_sections:
+    - "## Observability Plan"
+  gate_overrides:
+    - gate: "spec"
+      add_rules: ["SPEC-010"]    # data migration plan if migration type
+
+approvals_required:
+  - "tech-lead"
+  - "product"
+
+deploy_strategy: "standard"
+rollback_window_hours: 48

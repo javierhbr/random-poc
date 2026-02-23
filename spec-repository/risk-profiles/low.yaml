@@ -1,0 +1,22 @@
+level: "low"
+description: "Internal-only change, no PII, no payments, no external APIs"
+
+triggers:
+  - "touches_pii == false AND touches_payments == false AND external_facing == false"
+  - "change_type == refactor"
+
+constitution_sections:
+  required:
+    - principles
+  optional:
+    - observability
+
+speckit:
+  additional_template_sections: []
+  gate_overrides: []
+
+approvals_required:
+  - "tech-lead"
+
+deploy_strategy: "standard"
+rollback_window_hours: 24

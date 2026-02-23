@@ -1,0 +1,55 @@
+id: "ECO-124"
+title: "Guest Checkout con Save-for-Later y Recomendaciones Anónimas"
+status: "in-progress"
+created_at: "2024-01-10"
+owner: "product-team"
+priority: "P1"
+
+context: |
+  El 34% del abandono de checkout ocurre en el paso de autenticación.
+  Los usuarios guest no pueden completar compras sin crear una cuenta.
+  Esta iniciativa elimina ese bloqueo y añade save-for-later para guests.
+
+affects_domains:
+  - cart
+  - checkout
+  - payments
+  - search
+
+contract_changes:
+  - contract: "events/OrderPlaced"
+    from_version: "v1"
+    to_version: "v2"
+    change_spec: "CCH-001-order-placed-v2"
+    breaking: false
+    strategy: "additive"
+  - contract: "events/CartUpdated"
+    from_version: "v1"
+    to_version: "v1"
+    change_spec: null
+    breaking: false
+    strategy: "additive-field"
+
+implements:
+  platform_spec: "ECO-124-platform-spec"
+  component_specs:
+    - component: "cart"
+      spec: "ECO-124-save-for-later"
+      status: "approved"
+    - component: "checkout"
+      spec: "ECO-124-checkout-orchestration"
+      status: "in-progress"
+    - component: "payments"
+      spec: "ECO-124-guest-payment"
+      status: "draft"
+    - component: "search"
+      spec: "ECO-124-anonymous-recommendations"
+      status: "not-started"
+
+context_used:
+  constitution_version: "1.0.0"
+  speckit_version: "1.0.0"
+  risk_level: "critical"
+  touches_payments: true
+  touches_pii: true
+  external_facing: true

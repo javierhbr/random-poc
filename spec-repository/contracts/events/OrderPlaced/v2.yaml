@@ -1,0 +1,66 @@
+id: "events/OrderPlaced"
+version: "v2"
+status: "approved"
+introduced_at: "2024-01-14"
+introduced_in_initiative: "ECO-124"
+change_spec: "contracts/change-specs/CCH-001-order-placed-v2.md"
+
+producer: "checkout-service"
+consumers:
+  - service: "fulfilment-service"
+    min_version: "v1"
+  - service: "analytics-service"
+    min_version: "v1"
+  - service: "notifications-service"
+    min_version: "v1"
+  - service: "loyalty-service"
+    min_version: "v1"
+
+compatibility:
+  backwards_compatible: true
+  strategy: "additive"
+  breaking: false
+  notes: |
+    v2 agrega 2 campos opcionales. Los consumers de v1 que ignoren
+    los campos nuevos seguirán funcionando correctamente.
+    v1 se mantiene activo hasta 2024-04-14 (90 días).
+
+schema:
+  envelope:
+    event_id: { type: UUID, required: true }
+    event_type: { type: string, value: "OrderPlaced" }
+    version: { type: string, value: "2.0.0" }
+    occurred_at: { type: ISO8601, required: true }
+    producer: { type: string, value: "checkout-service" }
+  payload:
+    order_id: { type: UUID, required: true }
+    customer_id:
+      type: UUID
+      required: false                  # CHANGED: ahora opcional (null para guests)
+      nullable: true
+      since: "v1"
+    guest_session_id:                  # NEW in v2
+      type: UUID
+      required: false
+      nullable: true
+      since: "v2"
+      description: "Populated when order placed as guest. Null for authenticated users."
+    guest_email:                       # NEW in v2
+      type: string
+      required: false
+      nullable: true
+      since: "v2"
+      description: "Hashed SHA-256. Only present for guest orders. Used for order tracking."
+      pii: true
+    items:
+      type: array
+      required: true
+      items:
+        product_id: UUID
+        variant_id: UUID
+        quantity: integer
+        unit_price: number
+    total_amount: { type: number, required: true }
+    currency: { type: string, required: true }
+    shipping_address: { type: object, required: true }
+    placed_at: { type: ISO8601, required: true }

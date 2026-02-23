@@ -1,0 +1,33 @@
+level: "critical"
+description: "Touches payment processing — highest risk level"
+
+triggers:
+  - "touches_payments == true"
+
+constitution_sections:
+  required:
+    - principles
+    - security
+    - observability
+    - data-governance
+    - compliance
+    - agent-contracts
+
+speckit:
+  additional_template_sections:
+    - "## Threat Model"
+    - "## Observability Plan"
+    - "## Data Migration"
+    - "## Canary Strategy"
+  gate_overrides:
+    - gate: "spec"
+      add_rules: ["SPEC-010", "SPEC-011", "SPEC-012"]
+
+approvals_required:
+  - "tech-lead"
+  - "product"
+  - "security-review"
+  - "platform-lead"
+
+deploy_strategy: "canary"
+rollback_window_hours: 168    # 7 days

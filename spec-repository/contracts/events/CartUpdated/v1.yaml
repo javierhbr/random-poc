@@ -1,0 +1,51 @@
+id: "events/CartUpdated"
+version: "v1"
+status: "active"
+introduced_at: "2023-06-01"
+
+producer: "cart-service"
+consumers:
+  - service: "checkout-service"
+    min_version: "v1"
+  - service: "analytics-service"
+    min_version: "v1"
+  - service: "search-service"
+    min_version: "v1"
+
+compatibility:
+  backwards_compatible: true
+  strategy: "additive-field"
+  notes: |
+    ECO-124 añade el campo saved_items[] al payload.
+    Array vacío por defecto — consumers existentes no se rompen.
+    No requiere bump de versión (campo additive con default).
+
+schema:
+  envelope:
+    event_id: { type: UUID, required: true }
+    event_type: { type: string, value: "CartUpdated" }
+    version: { type: string, value: "1.0.0" }
+    occurred_at: { type: ISO8601, required: true }
+    producer: { type: string, value: "cart-service" }
+  payload:
+    session_id: { type: string, required: true }
+    session_type: { type: string, enum: [user, guest], required: true }
+    cart_items:
+      type: array
+      required: true
+      items:
+        cart_item_id: UUID
+        product_id: UUID
+        quantity: integer
+        unit_price: number
+    cart_total: { type: number, required: true }
+    saved_items:                       # Added: ECO-124
+      type: array
+      required: false
+      default: []
+      items:
+        saved_item_id: UUID
+        product_id: UUID
+        quantity: integer
+        expires_at: ISO8601
+    saved_count: { type: integer, required: false, default: 0 }

@@ -1,0 +1,29 @@
+id: "checkout"
+title: "Checkout Service"
+description: "Orchestrates the checkout flow: cart validation, shipping, payment, order creation"
+owner: "checkout-team"
+repo: "acme-org/checkout-service"
+tech_stack:
+  language: "Node.js / TypeScript"
+  database: "PostgreSQL"
+
+emits:
+  - event: "events/CheckoutStarted"
+    version: "v1"
+  - event: "events/OrderPlaced"
+    version: "v2"
+
+consumes:
+  - api: "apis/cart-api"
+    version: "v1"
+  - api: "apis/payments-api"
+    version: "v1"
+  - event: "events/PaymentAuthorized"
+    version: "v1"
+
+active_specs:
+  - id: "ECO-124-checkout-orchestration"
+    initiative: "ECO-124"
+    status: "in-progress"
+
+adrs: []

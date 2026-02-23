@@ -1,0 +1,24 @@
+id: "search"
+title: "Search & Recommendations Service"
+description: "Product search, filtering, and personalized/anonymous recommendations"
+owner: "search-team"
+repo: "acme-org/search-service"
+tech_stack:
+  language: "Python"
+  search_engine: "Elasticsearch"
+  cache: "Redis"
+
+emits: []
+
+consumes:
+  - event: "events/CartUpdated"
+    version: "v1"
+  - event: "events/OrderPlaced"
+    version: "v2"
+
+active_specs:
+  - id: "ECO-124-anonymous-recommendations"
+    initiative: "ECO-124"
+    status: "not-started"
+
+adrs: []

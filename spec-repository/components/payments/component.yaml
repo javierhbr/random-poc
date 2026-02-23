@@ -1,0 +1,28 @@
+id: "payments"
+title: "Payments Service"
+description: "Handles payment authorization, capture, refunds via Stripe. PCI scope boundary."
+owner: "payments-team"
+repo: "acme-org/payments-service"
+tech_stack:
+  language: "Go"
+  database: "PostgreSQL"
+  external: "Stripe"
+
+emits:
+  - event: "events/PaymentAuthorized"
+    version: "v1"
+  - event: "events/PaymentFailed"
+    version: "v1"
+  - event: "events/PaymentRefunded"
+    version: "v1"
+
+consumes:
+  - api: "stripe-api"
+    version: "external"
+
+active_specs:
+  - id: "ECO-124-guest-payment"
+    initiative: "ECO-124"
+    status: "draft"
+
+adrs: []

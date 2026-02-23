@@ -1,0 +1,27 @@
+id: "events/CartAbandoned"
+version: "v1"
+status: "active"
+introduced_at: "2023-09-01"
+
+producer: "cart-service"
+consumers:
+  - service: "notifications-service"
+    min_version: "v1"
+  - service: "analytics-service"
+    min_version: "v1"
+
+schema:
+  envelope:
+    event_id: { type: UUID, required: true }
+    event_type: { type: string, value: "CartAbandoned" }
+    version: { type: string, value: "1.0.0" }
+    occurred_at: { type: ISO8601, required: true }
+    producer: { type: string, value: "cart-service" }
+  payload:
+    session_id: { type: string, required: true }
+    session_type: { type: string, enum: [user, guest], required: true }
+    customer_id: { type: UUID, required: false, nullable: true }
+    cart_items_count: { type: integer, required: true }
+    cart_total: { type: number, required: true }
+    abandoned_at: { type: ISO8601, required: true }
+    last_active_step: { type: string, enum: [cart, shipping, payment], required: false }

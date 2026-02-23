@@ -1,0 +1,44 @@
+{
+  "_comment": "SDD MCP Servers configuration for Claude Code / Claude Desktop.",
+  "_instructions": "Copy the 'mcpServers' block into your Claude config file.",
+  "_claude_code_path": "~/.claude.json  (add under 'mcpServers' key)",
+  "_claude_desktop_path": "~/Library/Application Support/Claude/claude_desktop_config.json  (macOS)",
+
+  "mcpServers": {
+    "sdd-platform": {
+      "command": "node",
+      "args": ["./mcp-servers/platform-mcp/dist/index.js"],
+      "description": "Platform policies, NFR baselines, Definition of Done — Gate 4 enforcement"
+    },
+    "sdd-domain": {
+      "command": "node",
+      "args": ["./mcp-servers/domain-mcp/dist/index.js"],
+      "description": "Domain invariants, entities, events, boundaries — Gate 2 enforcement"
+    },
+    "sdd-integration": {
+      "command": "node",
+      "args": ["./mcp-servers/integration-mcp/dist/index.js"],
+      "description": "Versioned API/event contracts, consumer lists, breaking change detection — Gate 3 enforcement"
+    },
+    "sdd-component": {
+      "command": "node",
+      "args": ["./mcp-servers/component-mcp/dist/index.js"],
+      "description": "Per-service tech stacks, approved patterns, constraints — Technical Approach guidance"
+    },
+    "sdd-router": {
+      "command": "node",
+      "args": ["./mcp-servers/router/dist/index.js"],
+      "description": "Context Pack generator, Spec Graph updater — run before /speckit.specify"
+    }
+  },
+
+  "_usage": {
+    "before_speckit_specify": "Use sdd-router: generate_context_pack(initiativeId, domains, components)",
+    "when_writing_spec_sections": "Use sdd-domain: get_domain_invariants, sdd-integration: get_contract, sdd-platform: get_policy_by_category",
+    "for_gate_2": "Use sdd-domain: check_invariant_violation",
+    "for_gate_3": "Use sdd-integration: get_contract_consumers, check_breaking_change",
+    "for_gate_4": "Use sdd-platform: validate_spec_section, get_nfr_baselines",
+    "after_implementation": "Use sdd-router: update_spec_graph",
+    "for_technical_approach": "Use sdd-component: get_approved_patterns, validate_tech_choice"
+  }
+}

@@ -1,0 +1,21 @@
+version: "1.0.0"
+phases:
+  - id: "discovery"
+    template: "templates/discovery.md"
+    gate: "gates/discovery.yaml"
+    description: "Problem definition, user research, scope boundaries"
+
+  - id: "spec"
+    template: "templates/spec.md"
+    gate: "gates/spec.yaml"
+    description: "Functional requirements, NFRs, design decisions, rollback"
+
+  - id: "plan"
+    template: "templates/plan.md"
+    gate: "gates/plan.yaml"
+    description: "Task breakdown, dependencies, rollout strategy"
+
+  - id: "verify"
+    template: "templates/verify.md"
+    gate: "gates/verify.yaml"
+    description: "Acceptance criteria verification, DoD checklist"

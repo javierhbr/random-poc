@@ -1,0 +1,64 @@
+version: "1.0.0"
+phase: "verify"
+description: "Gate rules for Verify phase documents"
+
+rules:
+  - id: "VERIF-001"
+    level: "MUST"
+    description: "All acceptance criteria must be verified"
+    applies_to: ["new_feature", "migration", "integration", "refactor"]
+    check:
+      type: "pattern_match"
+      patterns:
+        - "- \\[x\\] AC-"
+      min_matches: 1
+    how_to_fix: |
+      Check off each AC in the Verify doc as it is verified.
+      Format: '- [x] AC-001: ...'
+
+  - id: "VERIF-002"
+    level: "MUST"
+    description: "NFRs must be met with evidence (load test)"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "keyword_present"
+      keywords: ["load test", "p99"]
+      case_insensitive: true
+    how_to_fix: |
+      Run a load test and document results: target p99, actual p99,
+      error rate under load.
+
+  - id: "VERIF-003"
+    level: "MUST"
+    description: "Observability must be in place before shipping"
+    applies_to: ["new_feature", "integration", "migration"]
+    check:
+      type: "all_keywords_present"
+      keywords: ["metrics", "alert", "runbook"]
+      case_insensitive: true
+    how_to_fix: |
+      Confirm: metrics are emitting, alerts are configured and tested
+      in staging, runbook is written.
+
+  - id: "VERIF-004"
+    level: "MUST"
+    description: "Rollback must be tested in staging"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "keyword_present"
+      keywords: ["rollback tested", "rollback verified"]
+      case_insensitive: true
+    how_to_fix: |
+      Test the rollback procedure in staging and document
+      'Rollback tested: [date] by [who]'.
+
+  - id: "VERIF-005"
+    level: "MUST"
+    description: "Sign-offs must be obtained"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "section_exists"
+      section: "## Sign-off"
+    how_to_fix: |
+      Obtain and record sign-offs from Tech Lead and Product.
+      Critical changes also require Platform sign-off.

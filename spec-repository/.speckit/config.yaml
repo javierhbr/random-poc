@@ -1,0 +1,19 @@
+version: "1.0.0"
+schema: "speckit-repo-v1"
+name: "acme-ecommerce-platform-specs"
+description: "Platform constitution and SpecKit definitions for Acme E-Commerce Platform"
+
+capabilities:
+  - constitution
+  - product
+  - speckit
+  - quality
+  - risk-profiles
+  - initiatives
+  - components
+  - contracts
+  - graph
+
+locale: "en"
+owner: "platform-team"
+contact: "platform@acme.com"

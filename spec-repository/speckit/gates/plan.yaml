@@ -1,0 +1,51 @@
+version: "1.0.0"
+phase: "plan"
+description: "Gate rules for Plan phase documents"
+
+rules:
+  - id: "PLAN-001"
+    level: "MUST"
+    description: "All tasks must have an owner and estimate"
+    applies_to: ["new_feature", "migration", "integration", "refactor"]
+    check:
+      type: "section_exists"
+      section: "## Task Breakdown"
+    how_to_fix: |
+      Add '## Task Breakdown' with tasks that have: ID, description,
+      point estimate, owner, and status.
+
+  - id: "PLAN-002"
+    level: "MUST"
+    description: "Dependencies and sequencing must be defined"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "section_exists_any"
+      sections:
+        - "## Dependencies"
+        - "## Sequencing"
+        - "## Dependencies & Sequencing"
+    how_to_fix: |
+      Add '## Dependencies & Sequencing' showing which tasks
+      block others (a simple diagram is sufficient).
+
+  - id: "PLAN-003"
+    level: "MUST"
+    description: "Rollout plan with success criteria must be defined"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Rollout Plan"
+    how_to_fix: |
+      Add '## Rollout Plan' table with phases (canary %, duration,
+      success criteria for each phase).
+
+  - id: "PLAN-004"
+    level: "MUST"
+    description: "Rollback triggers must be specified"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "section_exists"
+      section: "## Rollback Triggers"
+    how_to_fix: |
+      Add '## Rollback Triggers' listing the conditions that
+      automatically trigger a rollback (error rate, latency thresholds).

@@ -1,0 +1,34 @@
+id: "cart"
+title: "Cart Service"
+description: "Manages shopping cart state, items, pricing, and saved-for-later lists"
+owner: "cart-team"
+repo: "acme-org/cart-service"
+tech_stack:
+  language: "Node.js / TypeScript"
+  database: "PostgreSQL"
+  cache: "Redis"
+
+emits:
+  - event: "events/CartUpdated"
+    version: "v1"
+  - event: "events/CartAbandoned"
+    version: "v1"
+
+consumes:
+  - event: "events/ProductPriceChanged"
+    version: "v1"
+  - api: "apis/catalog-api"
+    version: "v1"
+
+active_specs:
+  - id: "ECO-124-save-for-later"
+    initiative: "ECO-124"
+    status: "approved"
+    gate_passed_at: "2024-01-14"
+
+adrs:
+  - id: "ADR-001"
+    title: "Save-for-later usa tabla separada, no flag en cart_items"
+    status: "accepted"
+    date: "2024-01-13"
+    initiative: "ECO-124"

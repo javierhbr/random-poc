@@ -1,0 +1,25 @@
+version: "1.0.0"
+policies:
+  - id: "ux-principles"
+    file: "ux-principles.md"
+    title: "UX Principles"
+    always_apply: false
+    tags:
+      - external_facing
+      - new_feature
+
+  - id: "accessibility"
+    file: "accessibility.md"
+    title: "Accessibility Standards"
+    always_apply: false
+    tags:
+      - external_facing
+
+  - id: "performance-budgets"
+    file: "performance-budgets.md"
+    title: "Performance Budgets"
+    always_apply: false
+    tags:
+      - external_facing
+      - new_feature
+      - migration

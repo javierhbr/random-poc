@@ -1,0 +1,29 @@
+level: "high"
+description: "Touches PII AND is external-facing, or is a large migration"
+
+triggers:
+  - "touches_pii == true AND external_facing == true"
+  - "change_type == migration AND external_facing == true"
+
+constitution_sections:
+  required:
+    - principles
+    - security
+    - observability
+    - data-governance
+
+speckit:
+  additional_template_sections:
+    - "## Observability Plan"
+    - "## Data Migration"
+  gate_overrides:
+    - gate: "spec"
+      add_rules: ["SPEC-010", "SPEC-011"]
+
+approvals_required:
+  - "tech-lead"
+  - "product"
+  - "security-review"
+
+deploy_strategy: "canary"
+rollback_window_hours: 72

@@ -1,0 +1,173 @@
+version: "1.0.0"
+last_updated: "2024-01-17"
+description: "Central index of all initiatives, specs, contracts, and ADRs in the platform"
+
+# ── Initiatives ───────────────────────────────────────────────────────────────
+initiatives:
+  ECO-124:
+    title: "Guest Checkout con Save-for-Later y Recomendaciones Anónimas"
+    status: "in-progress"
+    risk_level: "critical"
+    owner: "product-team"
+    path: "initiatives/ECO-124-guest-checkout/initiative.yaml"
+    platform_spec: "ECO-124-platform-spec"
+    component_specs:
+      - "ECO-124-save-for-later"
+      - "ECO-124-checkout-orchestration"
+      - "ECO-124-guest-payment"
+      - "ECO-124-anonymous-recommendations"
+    contract_changes:
+      - "CCH-001"
+
+# ── Specs ─────────────────────────────────────────────────────────────────────
+specs:
+  ECO-124-platform-spec:
+    type: "platform"
+    initiative: "ECO-124"
+    status: "approved"
+    path: "initiatives/ECO-124-guest-checkout/platform-spec.md"
+    affects_domains: [cart, checkout, payments, search]
+
+  ECO-124-save-for-later:
+    type: "component"
+    component: "cart"
+    initiative: "ECO-124"
+    implements: "ECO-124-platform-spec"
+    status: "approved"
+    path: "components/cart/specs/ECO-124-save-for-later.md"
+    implementation_spec: "cart-service/docs/specs/ECO-124-save-for-later/"
+    depends_on_contracts:
+      - "events/CartUpdated@v1"
+    produces_contracts:
+      - "events/CartUpdated@v1"
+
+  ECO-124-checkout-orchestration:
+    type: "component"
+    component: "checkout"
+    initiative: "ECO-124"
+    implements: "ECO-124-platform-spec"
+    status: "in-progress"
+    path: "components/checkout/specs/ECO-124-checkout-orchestration.md"
+    implementation_spec: "checkout-service/docs/specs/ECO-124-checkout-orchestration/"
+    depends_on_contracts:
+      - "apis/cart-api@v1"
+      - "apis/payments-api@v1"
+      - "events/PaymentAuthorized@v1"
+    produces_contracts:
+      - "events/OrderPlaced@v2"
+
+  ECO-124-guest-payment:
+    type: "component"
+    component: "payments"
+    initiative: "ECO-124"
+    implements: "ECO-124-platform-spec"
+    status: "draft"
+    path: "components/payments/specs/ECO-124-guest-payment.md"
+    implementation_spec: "payments-service/docs/specs/ECO-124-guest-payment/"
+    blockers:
+      - "Threat model sign-off pendiente"
+      - "Fraud score threshold sin definir"
+    produces_contracts:
+      - "events/PaymentAuthorized@v1"
+      - "events/PaymentFailed@v1"
+
+  ECO-124-anonymous-recommendations:
+    type: "component"
+    component: "search"
+    initiative: "ECO-124"
+    implements: "ECO-124-platform-spec"
+    status: "not-started"
+    path: "components/search/specs/ECO-124-anonymous-recommendations.md"
+    depends_on_contracts:
+      - "events/CartUpdated@v1"
+
+# ── Contract Change Specs ──────────────────────────────────────────────────────
+contract_changes:
+  CCH-001:
+    title: "OrderPlaced → v2: Soporte para órdenes guest"
+    initiative: "ECO-124"
+    contract: "events/OrderPlaced"
+    from_version: "v1"
+    to_version: "v2"
+    breaking: false
+    status: "approved"
+    path: "contracts/change-specs/CCH-001-order-placed-v2.md"
+
+# ── Contracts ────────────────────────────────────────────────────────────────
+contracts:
+  "events/OrderPlaced":
+    current_version: "v2"
+    versions: ["v1", "v2"]
+    producer: "checkout-service"
+    consumers:
+      - "fulfilment-service"
+      - "analytics-service"
+      - "notifications-service"
+      - "loyalty-service"
+    v1_sunset: "2024-04-14"
+
+  "events/CartUpdated":
+    current_version: "v1"
+    versions: ["v1"]
+    producer: "cart-service"
+    consumers:
+      - "checkout-service"
+      - "analytics-service"
+      - "search-service"
+
+  "events/PaymentAuthorized":
+    current_version: "v1"
+    versions: ["v1"]
+    producer: "payments-service"
+    consumers:
+      - "checkout-service"
+      - "analytics-service"
+
+  "events/CartAbandoned":
+    current_version: "v1"
+    versions: ["v1"]
+    producer: "cart-service"
+    consumers:
+      - "notifications-service"
+      - "analytics-service"
+
+  "apis/checkout-api":
+    current_version: "v1"
+    versions: ["v1"]
+    producer: "checkout-service"
+    path: "contracts/apis/checkout-api/v1.yaml"
+
+  "apis/cart-api":
+    current_version: "v1"
+    versions: ["v1"]
+    producer: "cart-service"
+    path: "contracts/apis/cart-api/v1.yaml"
+
+# ── ADRs ─────────────────────────────────────────────────────────────────────
+adrs:
+  "cart/ADR-001":
+    title: "Save-for-later: tabla separada vs flag en cart_items"
+    component: "cart"
+    initiative: "ECO-124"
+    status: "accepted"
+    date: "2024-01-13"
+    path: "components/cart/adrs/ADR-001-save-for-later-model.md"
+
+# ── Components ───────────────────────────────────────────────────────────────
+components:
+  cart:
+    path: "components/cart/component.yaml"
+    repo: "acme-org/cart-service"
+    owner: "cart-team"
+  checkout:
+    path: "components/checkout/component.yaml"
+    repo: "acme-org/checkout-service"
+    owner: "checkout-team"
+  payments:
+    path: "components/payments/component.yaml"
+    repo: "acme-org/payments-service"
+    owner: "payments-team"
+  search:
+    path: "components/search/component.yaml"
+    repo: "acme-org/search-service"
+    owner: "search-team"

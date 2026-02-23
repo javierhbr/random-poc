@@ -1,0 +1,117 @@
+version: "1.0.0"
+phase: "spec"
+description: "Gate rules for Spec phase documents"
+
+rules:
+  - id: "SPEC-001"
+    level: "MUST"
+    description: "Functional requirements defined (minimum 3 ACs)"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "pattern_match"
+      patterns:
+        - "AC-\\d+:"
+        - "Given .+ When .+ Then"
+      min_matches: 3
+    how_to_fix: |
+      Add '## Functional Requirements' with at least 3 acceptance criteria
+      in AC-NNN: or Given/When/Then format.
+
+  - id: "SPEC-002"
+    level: "MUST"
+    description: "Non-functional requirements must be defined"
+    applies_to: ["new_feature", "migration", "integration", "refactor"]
+    check:
+      type: "section_exists_any"
+      sections:
+        - "## Non-Functional Requirements"
+        - "## NFRs"
+    how_to_fix: |
+      Add '## Non-Functional Requirements' with latency budget,
+      availability SLA, and error rate target.
+
+  - id: "SPEC-003"
+    level: "MUST"
+    description: "Out of scope must be explicitly listed"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "section_exists_any"
+      sections:
+        - "## Out of Scope"
+        - "### Out of Scope"
+    how_to_fix: |
+      Add '## Out of Scope' with at least 2 explicit exclusions.
+
+  - id: "SPEC-004"
+    level: "MUST"
+    description: "Rollback strategy must be defined"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "keyword_present"
+      keywords: ["rollback"]
+      case_insensitive: true
+    how_to_fix: |
+      Add a rollback strategy to '## Risk & Rollback'.
+      Include: feature flag name, rollback steps, rollback triggers.
+
+  - id: "SPEC-005"
+    level: "MUST"
+    description: "Contract changes must be identified (or explicitly none)"
+    applies_to: ["new_feature", "integration", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Contract Changes"
+    how_to_fix: |
+      Add '## Contract Changes' section. Either list new/modified
+      events and APIs, or explicitly state 'No contract changes'.
+
+  - id: "SPEC-006"
+    level: "SHOULD"
+    description: "Design decisions should be documented"
+    applies_to: ["new_feature", "refactor", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Design Decisions"
+    how_to_fix: |
+      Add '## Design Decisions' table with options considered and
+      rationale for the chosen approach.
+
+  - id: "SPEC-010"
+    level: "MUST"
+    description: "High-risk: data migration plan required"
+    applies_to: ["migration", "new_feature"]
+    risk_levels: ["high", "critical"]
+    check:
+      type: "section_exists_any"
+      sections:
+        - "## Data Migration"
+        - "migration plan"
+    how_to_fix: |
+      Add '## Data Migration' with backwards compatibility strategy,
+      data backfill plan, and zero-downtime migration approach.
+
+  - id: "SPEC-011"
+    level: "MUST"
+    description: "High-risk: observability plan required"
+    applies_to: ["new_feature", "migration", "integration"]
+    risk_levels: ["high", "critical"]
+    check:
+      type: "all_keywords_present"
+      keywords: ["metrics", "alert"]
+      case_insensitive: true
+    how_to_fix: |
+      Add observability plan: which metrics to emit, alert thresholds,
+      and dashboard to update.
+
+  - id: "SPEC-012"
+    level: "MUST"
+    description: "Critical-risk: threat model required"
+    applies_to: ["new_feature", "integration"]
+    risk_levels: ["critical"]
+    check:
+      type: "keyword_present"
+      keywords: ["threat model", "security review"]
+      case_insensitive: true
+    how_to_fix: |
+      Add threat model or reference security review ticket.
+      Required for all critical-risk changes (touches_payments = true).

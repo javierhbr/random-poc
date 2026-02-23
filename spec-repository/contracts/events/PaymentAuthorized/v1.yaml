@@ -1,0 +1,29 @@
+id: "events/PaymentAuthorized"
+version: "v1"
+status: "active"
+introduced_at: "2023-06-01"
+
+producer: "payments-service"
+consumers:
+  - service: "checkout-service"
+    min_version: "v1"
+  - service: "analytics-service"
+    min_version: "v1"
+
+schema:
+  envelope:
+    event_id: { type: UUID, required: true }
+    event_type: { type: string, value: "PaymentAuthorized" }
+    version: { type: string, value: "1.0.0" }
+    occurred_at: { type: ISO8601, required: true }
+    producer: { type: string, value: "payments-service" }
+  payload:
+    payment_id: { type: UUID, required: true }
+    order_id: { type: UUID, required: true }
+    customer_id: { type: UUID, required: false, nullable: true }
+    guest_session_id: { type: UUID, required: false, nullable: true }
+    amount: { type: number, required: true }
+    currency: { type: string, required: true }
+    payment_method: { type: string, enum: [card, apple_pay, google_pay], required: true }
+    stripe_payment_intent_id: { type: string, required: true }
+    authorized_at: { type: ISO8601, required: true }

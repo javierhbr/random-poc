@@ -1,0 +1,40 @@
+id: "events/OrderPlaced"
+version: "v1"
+status: "deprecated"
+deprecated_at: "2024-01-14"
+sunset_at: "2024-04-14"            # 90-day window
+superseded_by: "v2"
+
+producer: "checkout-service"
+consumers:
+  - service: "fulfilment-service"
+    min_version: "v1"
+  - service: "analytics-service"
+    min_version: "v1"
+  - service: "notifications-service"
+    min_version: "v1"
+  - service: "loyalty-service"
+    min_version: "v1"
+
+schema:
+  envelope:
+    event_id: { type: UUID, required: true }
+    event_type: { type: string, value: "OrderPlaced" }
+    version: { type: string, value: "1.0.0" }
+    occurred_at: { type: ISO8601, required: true }
+    producer: { type: string, value: "checkout-service" }
+  payload:
+    order_id: { type: UUID, required: true }
+    customer_id: { type: UUID, required: true }  # en v1 siempre required
+    items:
+      type: array
+      required: true
+      items:
+        product_id: UUID
+        variant_id: UUID
+        quantity: integer
+        unit_price: number
+    total_amount: { type: number, required: true }
+    currency: { type: string, required: true }
+    shipping_address: { type: object, required: true }
+    placed_at: { type: ISO8601, required: true }

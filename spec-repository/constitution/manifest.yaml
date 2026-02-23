@@ -1,0 +1,51 @@
+version: "1.0.0"
+policies:
+  - id: "principles"
+    file: "principles.md"
+    title: "Core Engineering Principles"
+    always_apply: true
+    tags: []
+
+  - id: "security"
+    file: "security.md"
+    title: "Security Standards"
+    always_apply: false
+    tags:
+      - external_facing
+      - touches_payments
+      - touches_pii
+
+  - id: "observability"
+    file: "observability.md"
+    title: "Observability Requirements"
+    always_apply: false
+    tags:
+      - new_feature
+      - integration
+      - migration
+
+  - id: "data-governance"
+    file: "data-governance.md"
+    title: "Data Governance & PII"
+    always_apply: false
+    tags:
+      - touches_pii
+      - touches_payments
+
+  - id: "compliance"
+    file: "compliance.md"
+    title: "Regulatory Compliance"
+    always_apply: false
+    tags:
+      - touches_payments
+      - touches_pii
+      - external_facing
+
+  - id: "agent-contracts"
+    file: "agent-contracts.md"
+    title: "Inter-Service Communication Contracts"
+    always_apply: false
+    tags:
+      - integration
+      - touches_events
+      - touches_apis

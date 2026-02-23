@@ -1,0 +1,84 @@
+version: "1.0.0"
+phase: "discovery"
+description: "Gate rules for Discovery phase documents"
+
+rules:
+  - id: "DISC-001"
+    level: "MUST"
+    description: "Problem statement must include measurable impact"
+    applies_to: ["new_feature", "migration", "integration", "refactor"]
+    check:
+      type: "section_exists"
+      section: "## Problem Statement"
+    how_to_fix: |
+      Add '## Problem Statement' with a measurable impact metric
+      (e.g. abandonment rate, support ticket volume, revenue impact).
+
+  - id: "DISC-002"
+    level: "MUST"
+    description: "Evidence or data must be provided"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Evidence & Data"
+    how_to_fix: |
+      Add '## Evidence & Data' section with at least one data point
+      (analytics, user research, support tickets, A/B test results).
+
+  - id: "DISC-003"
+    level: "MUST"
+    description: "At least 2 user stories must be written"
+    applies_to: ["new_feature"]
+    check:
+      type: "pattern_match"
+      patterns:
+        - "As a .+ I want to"
+        - "As a .+, I want"
+      min_matches: 2
+    how_to_fix: |
+      Add at least 2 user stories in the format:
+      "As a [user type], I want to [action], so that [outcome]."
+
+  - id: "DISC-004"
+    level: "MUST"
+    description: "Out of scope must be explicitly listed"
+    applies_to: ["new_feature", "migration", "integration"]
+    check:
+      type: "section_exists_any"
+      sections:
+        - "### Out of Scope"
+        - "## Out of Scope"
+    how_to_fix: |
+      Add '### Out of Scope' section listing at least 2 explicit exclusions.
+
+  - id: "DISC-005"
+    level: "MUST"
+    description: "Affected domains must be identified"
+    applies_to: ["new_feature", "integration", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Affected Domains"
+    how_to_fix: |
+      Add '## Affected Domains' table listing each bounded context
+      that is touched, the type of impact, and the owning team.
+
+  - id: "DISC-006"
+    level: "MUST"
+    description: "Success metrics must be defined"
+    applies_to: ["new_feature", "migration"]
+    check:
+      type: "section_exists"
+      section: "## Success Metrics"
+    how_to_fix: |
+      Add '## Success Metrics' table with current value, target, and timeframe.
+
+  - id: "DISC-007"
+    level: "SHOULD"
+    description: "Open questions should be listed"
+    applies_to: ["new_feature", "integration"]
+    check:
+      type: "section_exists"
+      section: "## Open Questions"
+    how_to_fix: |
+      Add '## Open Questions' section. List anything that must be
+      resolved before the Spec phase begins.
