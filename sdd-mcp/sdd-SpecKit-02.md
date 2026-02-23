@@ -1,10 +1,3 @@
-You can use the **SpecKit CLI** as the _operational backbone_ of this methodology: it standardizes the lifecycle (spec → plan → tasks → implement), while **MCPs** supply the _authoritative context_ (platform policies, domain invariants, integration contracts, component constraints) at each step.
-
-  
-
-SpecKit is explicitly designed as a CLI-guided workflow for spec-driven / agentic development. 
-
----
 
 ## **How SpecKit CLI fits into “SDD + MCPs”**
 

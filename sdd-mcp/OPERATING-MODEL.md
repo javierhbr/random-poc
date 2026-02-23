@@ -830,20 +830,3 @@ Each agent becomes:
 Spec Consumer + Spec Producer
 ```
 
----
-
-# **4) NEXT STEP (RECOMMENDED)**
-
-  
-
-If you want to go deeper, the next level would be:
-
-1. **OpenClaw Agent Architecture (real implementation)**
-    
-2. **Spec Graph schema (JSON / DB)**
-    
-3. **MCP Router design (API + CLI)**
-    
-4. **Validator (automatic gates enforcement)**
-    
-

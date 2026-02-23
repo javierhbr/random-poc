@@ -1,6 +1,3 @@
-Now I have a complete picture. Let me synthesize both your project methodology and the actual SpecKit tool capabilities into a concrete integration guide.
-
----
 
 ## How to Leverage `specify-cli` to Implement Your SDD Methodology
 

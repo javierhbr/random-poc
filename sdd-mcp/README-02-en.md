@@ -1,7 +1,3 @@
-Here is the English translation:
-
-
-
 
 # Spec-Driven Development with MCP
 

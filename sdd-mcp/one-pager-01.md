@@ -1,6 +1,3 @@
-Here is the **One Pager translated and refined in English**, keeping it **executive-ready and clear**, with roles included.
-
--
 
 # **📄 One Pager**
 
