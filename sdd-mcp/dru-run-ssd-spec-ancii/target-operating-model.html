@@ -528,9 +528,6 @@ footer em { font-style: italic; color: var(--ink-ghost); }
 .dsb-xp    { background: rgba(45,95,204,.08);  color: var(--blue);  border-color: rgba(45,95,204,.22); }
 .dsb-lean  { background: rgba(42,125,79,.08);  color: var(--green); border-color: rgba(42,125,79,.22); }
 .dsb-drop  { background: rgba(185,48,48,.07);  color: var(--red);   border-color: rgba(185,48,48,.2); }
-.dsb-bmad  { background: rgba(120,60,180,.08); color: #7828c8;      border-color: rgba(120,60,180,.25); }
-.dsb-ospec { background: rgba(30,45,107,.06);  color: var(--navy);  border-color: rgba(30,45,107,.18); }
-.dsb-skit  { background: rgba(196,125,14,.06); color: var(--amber); border-color: rgba(196,125,14,.18); }
 .dna-src-name { font-family: var(--display); font-size: 15px; font-weight: 700; margin-bottom: .2rem; }
 .dna-src-origin { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: .04em; }
 .dna-content { padding: 1.5rem; background: var(--surface); }
@@ -567,7 +564,7 @@ footer em { font-style: italic; color: var(--ink-ghost); }
 <nav>
   <div class="nav-brand">TOM · v3.0 · Feb 2026</div>
   <ul class="nav-links">
-    <li><a href="#dna">Methodology Origins</a></li>
+    <li><a href="#dna">Why This Model</a></li>
     <li><a href="#tools">Tools</a></li>
     <li><a href="#layers">Layers</a></li>
     <li><a href="#lifecycle">Lifecycle</a></li>
@@ -652,7 +649,6 @@ footer em { font-style: italic; color: var(--ink-ghost); }
 
   <div class="dna-intro">
     <p>Every component in this operating model was borrowed from an existing discipline. The selection criterion was ruthless: <em>"Does this piece change the output of the person or agent doing the work? If not, it's eliminated."</em> The result is a model where all process lives in Markdown files — versionable, readable, editable by anyone on the team via PR — and zero process lives in infrastructure.</p>
-    <p style="margin-top:.75rem;">Three frameworks contributed the core structural ideas: <strong>BMAD</strong> (Breakthrough Method for Agile AI Development) defined the four-role agent architecture and handoff protocol. <strong>OpenSpec</strong> defined the spec format, mandatory traceability metadata, and the Spec Graph linking all artifacts. <strong>SpecKit</strong> defined the template-driven assembly pattern — templates with embedded exit gate checklists and the Context Pack versioning mechanism. All three are documented below alongside SDD, MCP, ADR, Agile/XP, and Lean.</p>
   </div>
 
   <div class="dna-grid">
@@ -790,113 +786,6 @@ footer em { font-style: italic; color: var(--ink-ghost); }
           <div class="dna-piece">
             <div class="dna-piece-desc"><strong>Knowledge feedback loop</strong> — every implementation cycle updates component MCP sources (patterns, invariants, ADRs), making the next initiative start from a richer context. The system learns.</div>
             <div class="dna-piece-why">compound knowledge accumulation</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- BMAD -->
-    <div class="dna-row">
-      <div class="dna-source" style="background:rgba(120,60,180,.03);">
-        <div class="dna-src-badge dsb-bmad">🤖 BMAD</div>
-        <div class="dna-src-name">Breakthrough Method for Agile AI Development</div>
-        <div class="dna-src-origin">From: BMAD-METHOD · AI-native multi-agent workflow design</div>
-      </div>
-      <div class="dna-content">
-        <div class="dna-content-hd">What we took — and why</div>
-        <div class="dna-pieces">
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Four bounded agent roles</strong> — analyst, architect, developer, verifier. Each role has a single, non-overlapping responsibility and produces exactly one or two artifacts before handing off. An agent never does another agent's job. <em>Why: role-scoped context prevents agents from overreaching and generating untraceable outputs.</em></div>
-            <div class="dna-piece-why">no scope creep per agent</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Sequential handoff with hard stops</strong> — each agent must complete its exit gate checklist before the next agent starts. The Verifier is a hard stop: no merge until every AC has observable evidence. <em>Why: handoffs make quality gates enforceable without an external service — the agent itself is the gate.</em></div>
-            <div class="dna-piece-why">quality enforced at each transition</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Parallel fan-out from Architect</strong> — once feature-spec.md is approved, one Developer agent runs per affected component simultaneously. The Verifier waits for all. <em>Why: eliminates the sequential bottleneck that makes large cross-domain features slow — components that don't depend on each other can be built concurrently.</em></div>
-            <div class="dna-piece-why">parallel execution without loss of traceability</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Agent definitions as Markdown files</strong> — each agent is a `.md` file in `.claude/agents/` loaded on demand. Behaviour lives in text, not code. <em>Why: the team can evolve agent behaviour via PR without a deployment — the same update path as specs and templates.</em></div>
-            <div class="dna-piece-why">agent evolution without deploys</div>
-          </div>
-          <div class="dna-piece dropped">
-            <div class="dna-piece-desc"><strong>Orchestrator agent</strong> — a meta-agent that decides which specialist agent to invoke, routing requests based on request type classification.</div>
-            <div class="dna-piece-why">Platform MCP get_workflow() replaces this — risk level determines the agent sequence, not a separate agent</div>
-          </div>
-          <div class="dna-piece dropped">
-            <div class="dna-piece-desc"><strong>Persona-based agent naming</strong> — agents named after team member personas ("Alex the Architect", "Dev Dana") to guide interaction style.</div>
-            <div class="dna-piece-why">role names are sufficient — persona framing doesn't change what gets written</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- OpenSpec -->
-    <div class="dna-row">
-      <div class="dna-source" style="background:rgba(30,45,107,.03);">
-        <div class="dna-src-badge dsb-ospec">📄 OpenSpec</div>
-        <div class="dna-src-name">OpenSpec</div>
-        <div class="dna-src-origin">From: OpenSpec format · structured spec authoring for distributed systems</div>
-      </div>
-      <div class="dna-content">
-        <div class="dna-content-hd">What we took — and why</div>
-        <div class="dna-pieces">
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Mandatory traceability metadata on every spec</strong> — <code>implements</code> (parent spec ID + version), <code>context_pack</code> (the versioned snapshot used when the spec was authored), <code>blocked_by</code> (open ADR IDs), and <code>status</code>. <em>Why: without these fields, a spec is an island — you cannot tell what it is implementing, what context it was written against, or whether it is safe to act on.</em></div>
-            <div class="dna-piece-why">spec is never an island</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Spec Graph — <code>graph/index.yaml</code></strong> — a machine-readable index linking every artifact in a chain: Initiative → feature-spec → component-specs → impl-specs → verify.md → ADRs. Updated by the Verifier after every merge. <em>Why: the graph is the audit trail. It answers "what was built, why, against what context, and was it verified?" — questions that matter in regulated environments and post-incident analysis.</em></div>
-            <div class="dna-piece-why">complete audit trail</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>MCP source citation per section</strong> — every section of a spec declares where its content came from: which MCP tool, which version. <em>Why: a spec section without a source is an assertion without evidence. Citing the source makes the spec verifiable and makes it easy to see when a spec is stale relative to a newer MCP context.</em></div>
-            <div class="dna-piece-why">every claim has a cited source</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Specs are never deleted — only versioned</strong> — status transitions from Approved → Implementing → Done, or → Paused, or → Blocked. A spec is never removed from the graph. <em>Why: deleted specs create invisible debt. A Paused spec with its context pack pinned can be rebased and resumed; a deleted spec is lost work that gets redone from scratch.</em></div>
-            <div class="dna-piece-why">no invisible technical debt</div>
-          </div>
-          <div class="dna-piece dropped">
-            <div class="dna-piece-desc"><strong>Spec versioning server</strong> — a dedicated service managing spec versions with diff APIs, conflict detection, and branch-per-initiative spec trees.</div>
-            <div class="dna-piece-why">git already handles versioning — the spec graph provides the links without a separate server</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SpecKit -->
-    <div class="dna-row">
-      <div class="dna-source" style="background:rgba(196,125,14,.03);">
-        <div class="dna-src-badge dsb-skit">📦 SpecKit</div>
-        <div class="dna-src-name">SpecKit</div>
-        <div class="dna-src-origin">From: SpecKit · template-driven spec assembly for AI-assisted development</div>
-      </div>
-      <div class="dna-content">
-        <div class="dna-content-hd">What we took — and why</div>
-        <div class="dna-pieces">
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Templates with embedded exit gate checklists</strong> — spec templates are not blank forms. Each section of the template includes the checklist the agent must self-verify before handing off. <em>Why: separating "how to write the spec" from "how to verify the spec" creates a gap where quality degrades. Embedding the gate in the template closes that gap — the agent writes and checks in one pass.</em></div>
-            <div class="dna-piece-why">write and verify in one pass</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Context Pack — versioned snapshot assembled before spec writing</strong> — before any spec is written, the agent calls Platform MCP to assemble a pinned snapshot of all applicable policies, NFR baselines, and workflow config for this intent. <em>Why: writing a spec against a moving context is the root cause of spec drift. Pinning the context pack version makes the spec reproducible — another agent reading the same spec can retrieve the same context and understand exactly what constraints were in effect.</em></div>
-            <div class="dna-piece-why">specs are reproducible</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Template-driven spec types</strong> — feature-spec, component-spec, impl-spec, and verify.md each have a dedicated template. Every instance of a spec type has the same structure. <em>Why: uniform structure means agents, humans, and CI can parse and validate specs without special-casing. The Verifier knows exactly where to find the ACs because every component-spec has them in the same place.</em></div>
-            <div class="dna-piece-why">consistent structure → parseable by agents and CI</div>
-          </div>
-          <div class="dna-piece">
-            <div class="dna-piece-desc"><strong>Templates served by Platform MCP (<code>get_template(name)</code>)</strong> — templates are not stored locally with the agent. The agent calls the Platform MCP to fetch the current template version. <em>Why: this makes template evolution zero-friction — update the template in the specs repo and every agent immediately gets the new version on the next call, with no agent file changes required.</em></div>
-            <div class="dna-piece-why">template updates propagate instantly</div>
-          </div>
-          <div class="dna-piece dropped">
-            <div class="dna-piece-desc"><strong>Spec scaffolding CLI</strong> — a command-line tool that generates spec file stubs, pre-fills metadata, and validates spec structure on creation.</div>
-            <div class="dna-piece-why">Platform MCP get_template() replaces this — the agent fetches and fills the template inline, no CLI required</div>
           </div>
         </div>
       </div>
