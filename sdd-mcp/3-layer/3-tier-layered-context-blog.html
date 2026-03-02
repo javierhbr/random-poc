@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stop Feeding Your AI Everything — The 3-Tier Layered Context Model</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f7f4ee;
+      --bg2:       #edeade;
+      --surface:   #ffffff;
+      --ink:       #1a1814;
+      --ink-mid:   #4a4640;
+      --ink-light: #8a8680;
+      --accent:    #c4862a;
+      --accent2:   #2a6fc4;
+      --accent3:   #b83535;
+      --border:    rgba(26,24,20,0.1);
+      --border-strong: rgba(26,24,20,0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      line-height: 1.85;
+      overflow-x: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      border-bottom: 2px solid var(--ink);
+      padding: 0.8rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .topbar-tags {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .topbar-tags span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+
+    /* ── HERO ── */
+    header {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 3rem 4rem;
+    }
+
+    .kicker {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .kicker::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 2px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--ink);
+      max-width: 16ch;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--ink-mid);
+      max-width: 52ch;
+      line-height: 1.7;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .hero-meta {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-strong);
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .meta-item { display: flex; flex-direction: column; gap: 0.2rem; }
+
+    .meta-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+
+    .meta-value { font-size: 0.85rem; color: var(--ink-mid); font-weight: 400; }
+
+    /* ── DIVIDER ── */
+    .full-rule { border: none; border-top: 2px solid var(--ink); margin: 0; }
+
+    /* ── MAIN ── */
+    .page-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    section {
+      padding: 4.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section:last-child { border-bottom: none; }
+
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+
+    h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 2.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h3::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-strong);
+    }
+
+    p { margin-bottom: 1.4rem; font-size: 1.02rem; }
+    p:last-child { margin-bottom: 0; }
+    p strong { font-weight: 700; color: var(--ink); }
+
+    code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85em;
+      background: var(--bg2);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--ink-mid);
+    }
+
+    /* ── PULL QUOTE ── */
+    .pull-quote {
+      border-left: 4px solid var(--accent);
+      padding: 1.5rem 2rem;
+      margin: 3rem 0;
+      background: rgba(196,134,42,0.05);
+    }
+
+    .pull-quote p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* ── PROBLEM BOX ── */
+    .problem-box {
+      background: rgba(184,53,53,0.05);
+      border: 1px solid rgba(184,53,53,0.2);
+      border-left: 4px solid var(--accent3);
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+    }
+
+    .problem-box::before {
+      content: 'THE PROBLEM';
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--accent3);
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+
+    .problem-box p { font-size: 1rem; margin: 0; }
+
+    /* ── TIER CARDS ── */
+    .tier-grid {
+      display: grid;
+      gap: 1px;
+      margin: 2.5rem 0;
+      border: 1px solid var(--border-strong);
+      background: var(--border-strong);
+    }
+
+    .tier-card {
+      background: var(--surface);
+      padding: 2rem 2.5rem;
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      transition: background 0.15s;
+    }
+
+    .tier-card:hover { background: #fdfbf7; }
+
+    .tier-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .tier-card:nth-child(1) .tier-num { color: var(--accent); }
+    .tier-card:nth-child(2) .tier-num { color: var(--accent2); }
+    .tier-card:nth-child(3) .tier-num { color: var(--accent3); }
+
+    .tier-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 0.3rem;
+    }
+
+    .tier-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .tier-desc { font-size: 0.95rem; color: var(--ink-mid); margin: 0; }
+
+    .tier-pill {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      padding: 0.25rem 0.7rem;
+      margin-top: 0.8rem;
+      border-radius: 20px;
+    }
+
+    .tier-card:nth-child(1) .tier-pill { background: rgba(196,134,42,0.1); color: var(--accent); }
+    .tier-card:nth-child(2) .tier-pill { background: rgba(42,111,196,0.1); color: var(--accent2); }
+    .tier-card:nth-child(3) .tier-pill { background: rgba(184,53,53,0.1); color: var(--accent3); }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      background: #f0ece4;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 1.5rem 1.8rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .code-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-block pre {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.75;
+      color: var(--ink-mid);
+      white-space: pre;
+    }
+
+    .c-red   { color: var(--accent3); }
+    .c-green { color: #2a7a3a; }
+    .c-amber { color: var(--accent); font-weight: 500; }
+    .c-blue  { color: var(--accent2); }
+    .c-muted { color: var(--ink-light); }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1px;
+      margin: 2.5rem 0;
+      background: var(--border-strong);
+      border: 1px solid var(--border-strong);
+    }
+
+    .stat-card {
+      background: var(--surface);
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-top: 0.5rem;
+    }
+
+    /* ── HEALTH CARDS ── */
+    .health-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .health-card { border: 1px solid; padding: 1.5rem; border-radius: 3px; }
+    .health-card.green  { border-color: rgba(42,122,58,0.3);  background: rgba(42,122,58,0.04); }
+    .health-card.yellow { border-color: rgba(196,134,42,0.3); background: rgba(196,134,42,0.04); }
+    .health-card.red    { border-color: rgba(184,53,53,0.3);  background: rgba(184,53,53,0.04); }
+
+    .health-icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+    .health-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+    }
+
+    .green  .health-title { color: #2a7a3a; }
+    .yellow .health-title { color: var(--accent); }
+    .red    .health-title { color: var(--accent3); }
+
+    .health-card ul { list-style: none; }
+    .health-card ul li {
+      font-size: 0.85rem;
+      color: var(--ink-mid);
+      padding: 0.2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .health-card ul li:last-child { border-bottom: none; }
+    .health-action { font-size: 0.82rem; font-weight: 700; margin-top: 1rem; color: var(--ink); }
+
+    /* ── DECISION EXAMPLES ── */
+    .decision-item {
+      border-left: 3px solid var(--border-strong);
+      padding: 1rem 1.5rem;
+      margin: 1.2rem 0;
+      background: var(--surface);
+    }
+
+    .decision-item p { margin: 0; font-size: 0.95rem; }
+    .decision-item .dq { font-weight: 700; color: var(--ink); margin-bottom: 0.3rem; }
+    .decision-item .da { color: var(--ink-mid); }
+
+    .dt {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      margin-left: 0.4rem;
+      font-weight: 500;
+      vertical-align: middle;
+    }
+
+    .dt-2 { background: rgba(196,134,42,0.1); color: var(--accent); }
+    .dt-3 { background: rgba(42,111,196,0.1); color: var(--accent2); }
+
+    /* ── GOLDEN RULE ── */
+    .golden-rule {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 3.5rem;
+      margin: 3rem 0;
+      text-align: center;
+    }
+
+    .golden-rule .gr-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .golden-rule .gr-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-style: italic;
+      color: #f7f4ee;
+      line-height: 1.3;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 2px solid var(--ink);
+      padding: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .footer-note {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-light);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .topbar { padding: 0.8rem 1.5rem; }
+      .topbar-tags { display: none; }
+      header, .page-wrap { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .tier-card { grid-template-columns: 1fr; gap: 0.5rem; }
+      .tier-num { font-size: 2.5rem; }
+      .golden-rule { padding: 2.5rem 1.5rem; }
+      footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span class="topbar-brand">Context Architecture Series</span>
+    <div class="topbar-tags">
+      <span>AI Systems</span>
+      <span>Developer Guide</span>
+      <span>2024</span>
+    </div>
+  </div>
+
+  <header>
+    <div class="kicker">Engineering Insight</div>
+    <h1>Stop Feeding Your AI <em>Everything.</em></h1>
+    <p class="hero-sub">There's a smarter way to structure agent guidance — and once you see it, you can't unsee the waste happening everywhere else.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <span class="meta-label">Topic</span>
+        <span class="meta-value">3-Tier Layered Context Model</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Read time</span>
+        <span class="meta-value">8 minutes</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Audience</span>
+        <span class="meta-value">Developers · Architects · Team Leads</span>
+      </div>
+    </div>
+  </header>
+
+  <hr class="full-rule" />
+
+  <div class="page-wrap">
+
+    <section>
+      <h2>You're Paying for Instructions Your AI Never Reads</h2>
+
+      <p>You've set up an AI agent for your dev team. Skill files for API docs, hotfixes, spec writing, component design. A <code>.CLAUDE.md</code> or <code>AGENTS.md</code> with project conventions. Everything carefully written, properly organised. The team is using it daily. It looks like it's working.</p>
+
+      <p>Now someone opens a session and types: <strong>"write unit tests for <code>validateEmail()</code>."</strong></p>
+
+      <p>The agent produces decent tests in two minutes. Everyone moves on. But before it wrote the first <code>describe()</code> block, here is exactly what happened under the hood — silently, automatically, on every single request:</p>
+
+      <div class="code-block">
+        <div class="code-label">What your agent actually loaded to write one unit test</div>
+        <pre><span class="c-muted">Step 1 — Session starts. Agent loads root instruction file:</span>
+<span class="c-red">AGENTS.md                              847 lines  ← always, every session</span>
+  ├─ Project coding conventions        ✓ relevant
+  ├─ Git commit message format         ✗ not needed for a test
+  ├─ Hotfix escalation policy          ✗ not needed for a test
+  ├─ Platform spec template (full)     ✗ not needed for a test
+  ├─ Deployment runbook                ✗ not needed for a test
+  ├─ PR review checklist               ✗ not needed for a test
+  └─ New developer onboarding guide    ✗ not needed for a test
+
+<span class="c-muted">Step 2 — Trigger matched. Agent loads skill file:</span>
+<span class="c-red">testing/SKILL.md                       312 lines  ← loaded on "test" trigger</span>
+  ├─ Unit test steps                   ✓ relevant
+  ├─ Integration test guide            ✗ you asked for unit tests only
+  ├─ E2E test setup walkthrough        ✗ you asked for unit tests only
+  ├─ 18 full example test suites       ✗ you needed 1 pattern
+  └─ Jest config troubleshooting       ✗ nothing is broken
+
+<span class="c-muted">Step 3 — Agent finally writes tests.</span>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="c-red">TOTAL LOADED:    1,159 lines</span>
+<span class="c-green">TOTAL NEEDED:      ~90 lines</span>
+<span class="c-red">WASTE:              92% — billed, loaded, ignored</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      </div>
+
+      <p>And this wasn't a one-off. Every single task your team ran — rename a variable, update a doc comment, scaffold a new route, review a PR — began with 1,159 lines loading in the background. The agent wasn't consciously reading the hotfix policy when writing unit tests. But it was <strong>present</strong>. It coloured every response. It's the reason outputs felt slightly generic, slightly misaligned, like they were written for a different project than the one you actually have.</p>
+
+      <div class="problem-box">
+        <p>You asked for one focused thing. Your agent loaded an entire knowledge base. 92% of that context was pure noise — and you were billed for every token of it, on every request, every time anyone on your team opened a session.</p>
+      </div>
+
+      <p>Multiply that by a team of eight engineers running fifteen sessions a day. You're not paying for AI assistance anymore. You're paying to repeatedly load a library no one asked for.</p>
+
+      <p>This is context bloat. It's not a prompting problem. It's not a model limitation. It's an <strong>architecture problem</strong> — and it has a clean architectural fix.</p>
+
+      <p>Enter the <strong>3-Tier Layered Context Model.</strong></p>
+    </section>
+
+    <section>
+      <h2>Breaking Point: Outputs Start Drifting and Nobody Knows Why</h2>
+
+      <p>The wasted tokens are the part you can measure. The degraded outputs are the part that actually hurts the team. And here's the cruel thing about context bloat: it doesn't fail loudly. There's no crash, no error, no obvious signal that something is wrong. It degrades quietly — and the symptoms look like team problems, not system problems.</p>
+
+      <div class="health-row" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
+        <div class="health-card red">
+          <div class="health-icon">📉</div>
+          <div class="health-title">Drift Signal 1</div>
+          <ul><li>Responses become generic "best practices" instead of the specific action you needed</li></ul>
+        </div>
+        <div class="health-card red">
+          <div class="health-icon">🔀</div>
+          <div class="health-title">Drift Signal 2</div>
+          <ul><li>The agent stops following steps in order — it improvises a path through the noise</li></ul>
+        </div>
+        <div class="health-card red">
+          <div class="health-icon">🎲</div>
+          <div class="health-title">Drift Signal 3</div>
+          <ul><li>Two people on the same team get meaningfully different answers for the identical prompt</li></ul>
+        </div>
+        <div class="health-card red">
+          <div class="health-icon">🔥</div>
+          <div class="health-title">Drift Signal 4</div>
+          <ul><li>The team starts debating prompt wording — trying to fix a system problem with better words</li></ul>
+        </div>
+      </div>
+
+      <h3>Real-World Problem: "Hotfix" Mixes With "Standard Release" Because Both Live Everywhere</h3>
+
+      <p>We asked:</p>
+
+      <div class="pull-quote" style="margin: 1.5rem 0;">
+        <p style="font-size:1.1rem;">"Walk me through the production hotfix process."</p>
+      </div>
+
+      <p>The output looked plausible. Confident. Detailed. Step-numbered. It read like something you could hand to a junior engineer and have them follow. Until you tried to actually follow it.</p>
+
+      <p>Buried in the middle were steps from the standard release flow — change freeze windows, stakeholder sign-off, staged rollout percentages. None of that belongs in an emergency hotfix. But the agent had no way to know that, because hotfix guidance and release guidance were both present in its context simultaneously, with no clear boundary between them:</p>
+
+      <div class="code-block">
+        <div class="code-label">Why the hotfix output was contaminated</div>
+        <pre><span class="c-muted">User: "Walk me through the production hotfix process."</span>
+
+<span class="c-muted">Agent's context at the time of answering:</span>
+  <span class="c-amber">AGENTS.md</span>                ← hotfix escalation rules lived here (global)
+  <span class="c-blue">sdd/hotfix/SKILL.md</span>      ← hotfix steps lived here (correct)
+  <span class="c-red">shared-conventions.md</span>    ← standard release steps, copied here "for reference"
+  <span class="c-red">platform-spec/SKILL.md</span>   ← loaded because trigger matched loosely
+
+<span class="c-muted">The agent had no canonical source to trust.</span>
+<span class="c-muted">It averaged across all four. The output was a blend.</span>
+
+<span class="c-red">Result: plausible-looking. Step-numbered. Confident.</span>
+<span class="c-red">And wrong in the three places that matter most under pressure.</span>
+
+<span class="c-muted">Nobody caught it in review. The failure surfaced in production.</span></pre>
+      </div>
+
+      <p>That's the hidden cost of context bloat. Not just wasted tokens — <strong>wasted trust.</strong> An agent that averages across conflicting sources will always produce output that sounds authoritative and is subtly wrong. And subtle wrongness in a hotfix process is the most dangerous kind of wrong there is.</p>
+
+      <p>The 3-tier model eliminates this failure mode by design. Hotfix guidance lives in exactly one place. The root file routes to it. Nothing else loads. When you ask about hotfixes, you get hotfix answers — not a blend of everything the system happens to know.</p>
+    </section>
+
+    <section>
+      <h2>The Core Idea Is Embarrassingly Simple</h2>
+      <p>Think about how a good surgeon works. She doesn't walk into the operating room carrying every instrument in the hospital. She starts with a few core tools, asks for specific instruments as the procedure unfolds, and knows exactly where the specialized equipment lives.</p>
+      <p>Your AI agent should work the same way.</p>
+      <div class="pull-quote">
+        <p>"An agent that loads everything knows nothing useful."</p>
+      </div>
+      <p>The 3-Tier Layered Context Model organizes agent guidance into three distinct layers — each one loaded at a different moment, for a different reason. Stop front-loading everything. Start loading on demand.</p>
+
+      <div class="tier-grid">
+        <div class="tier-card">
+          <div class="tier-num">1</div>
+          <div>
+            <div class="tier-tag">Tier One</div>
+            <div class="tier-title">The Router</div>
+            <p class="tier-desc">A lean master file — 53 to 70 lines — that maps trigger words to skill files. It's the agent's GPS: it knows where everything lives, but it doesn't carry the whole map in memory. Routers never grow. One line per skill, plus formatting — nothing more.</p>
+            <span class="tier-pill">Loaded once per session</span>
+          </div>
+        </div>
+        <div class="tier-card">
+          <div class="tier-num">2</div>
+          <div>
+            <div class="tier-tag">Tier Two</div>
+            <div class="tier-title">The Skill File</div>
+            <p class="tier-desc">A focused instruction file — 54 to 130 lines — that tells the agent exactly what to do for a specific task. Step-by-step. Output format. Done condition. No bloat, no digressions. If it can't be said in 130 lines, something needs to move to Tier 3.</p>
+            <span class="tier-pill">Loaded when triggered</span>
+          </div>
+        </div>
+        <div class="tier-card">
+          <div class="tier-num">3</div>
+          <div>
+            <div class="tier-tag">Tier Three</div>
+            <div class="tier-title">The Resource File</div>
+            <p class="tier-desc">The detail layer — 150 to 500 lines — housing templates, full questionnaires, examples, and edge cases. Rich and comprehensive. But loaded <em>only</em> when the task actually needs it. A resource file can grow large. The point is it doesn't load unless it's asked for.</p>
+            <span class="tier-pill">Loaded on demand</span>
+          </div>
+        </div>
+      </div>
+
+      <p>That's it. Three tiers. Three loading moments. Radical efficiency without sacrificing depth.</p>
+    </section>
+
+    <section>
+      <h2>What Bloat Looks Like in the Real World</h2>
+      <p>Let's be specific, because vague warnings about "context bloat" don't stick. Concrete examples do.</p>
+
+      <h3>Real-World Example: The API Docs Skill</h3>
+      <p>Imagine you're running a dev platform where agents help engineers write API documentation. You have one skill, triggered by the keyword <strong>"api-docs"</strong>.</p>
+      <p>In the <em>bloated</em> model, your skill file is a 450-line monolith. It contains every documentation template for every endpoint type, plus 40 example requests and responses, plus a style guide with 12 edge cases, plus onboarding notes for junior engineers.</p>
+      <p>When someone says "api-docs for my <code>/users</code> endpoint," your agent loads all 450 lines. The engineer gets their five-paragraph doc. The other 390 lines? Wasted.</p>
+
+      <div class="code-block">
+        <div class="code-label">Bloated Model — What actually gets loaded</div>
+        <pre><span class="c-red">api-docs/SKILL.md          450 lines ← EVERY TRIGGER</span>
+  ├─ Step 1 (needed)
+  ├─ Step 2 (needed)
+  ├─ All 40 example responses (3 used)
+  ├─ REST template (used)
+  ├─ GraphQL template (not used)
+  ├─ gRPC template (not used)
+  └─ Style guide appendix (not used)
+
+<span class="c-muted">10 triggers × 450 lines =</span> <span class="c-red">4,500 lines of overhead</span>
+<span class="c-red">~80% of it: never read by the agent</span></pre>
+      </div>
+
+      <p>In the <em>3-tier model</em>, the skill file is 58 lines. Only when the engineer explicitly asks to see a GraphQL template does the resource file load. Otherwise? Done at 111 lines total.</p>
+
+      <div class="code-block">
+        <div class="code-label">3-Tier Model — What actually gets loaded</div>
+        <pre><span class="c-amber">SKILLS.md</span>                  <span class="c-green">53 lines  ← loaded once</span>
+<span class="c-blue">api-docs/SKILL.md</span>          <span class="c-green">58 lines  ← loaded on trigger</span>
+<span class="c-muted">api-docs/resources/*.md</span>    <span class="c-muted">only if detail requested</span>
+
+<span class="c-muted">10 triggers × 111 lines =</span> <span class="c-green">1,110 lines baseline</span>
+<span class="c-green">Savings: 92% of baseline token cost</span></pre>
+      </div>
+
+      <h3>Real-World Example: The Complex Platform Spec</h3>
+      <p>Now flip the scenario. An architect is using your <strong>"platform-spec"</strong> skill to model a guest checkout flow. This <em>does</em> need deep detail — domain models, event schemas, API contracts, the full template.</p>
+      <p>The 3-tier model handles this gracefully. The skill file loads, the agent runs the first three steps without resources, then — when it needs the Domain Model section — it pulls the resource file. Right moment. Right content. No waste.</p>
+
+      <div class="code-block">
+        <div class="code-label">Multi-Step Load — Detail pulled mid-task</div>
+        <pre><span class="c-amber">SKILLS.md</span>                           <span class="c-green">53 lines</span>
+<span class="c-amber">sdd/SKILLS.md</span>                       <span class="c-green">59 lines</span>
+<span class="c-blue">sdd/platform-spec/SKILL.md</span>         <span class="c-green">128 lines</span>
+  Steps 1–3 complete...
+  Agent: "Need the Domain Model template"
+<span class="c-blue">resources/platform-spec-template.md</span> <span class="c-green">331 lines ← now loaded</span>
+
+<span class="c-muted">TOTAL: 571 lines</span>
+<span class="c-green">BASELINE (without detail): 240 lines</span></pre>
+      </div>
+
+      <p>Full power when you need it. Lean baseline when you don't.</p>
+    </section>
+
+    <section>
+      <h2>The Problem Even Hit Our Own Instruction Files</h2>
+
+      <p>Here's the part that tends to land hardest when we explain this model to teams: the bloat problem didn't just hit our skill files. It hit our <strong><code>.CLAUDE.md</code></strong> and <strong><code>AGENTS.md</code></strong> files too — the very files meant to instruct Claude how to behave in a project.</p>
+
+      <p>If you've worked with AI agents long enough, you've written one of these. It starts innocently: a few lines about the project's coding conventions, maybe a note on how to name files. Then someone adds the deployment process. Then the PR review checklist. Then the onboarding notes for new team members. Then the full test strategy. Before long, your <code>.CLAUDE.md</code> is 800 lines long — and Claude reads every single line of it at the start of <em>every session</em>, whether the session is fixing a typo or architecting a new service.</p>
+
+      <div class="problem-box">
+        <p>Claude is told "here are your project instructions." But what it actually receives is the equivalent of handing a surgeon the entire hospital manual before they're allowed to pick up a scalpel.</p>
+      </div>
+
+      <p>We saw this directly. Our <code>.CLAUDE.md</code> had grown to contain: project architecture decisions, full git commit conventions, deployment runbooks, maintenance checklists, skill file templates, PR review criteria, onboarding flows, and troubleshooting guides. All of it loaded upfront. All of it present for a session where someone just wanted Claude to help rename a variable.</p>
+
+      <h3>Applying the 3-Tier Model to .CLAUDE.md</h3>
+
+      <p>The fix was exactly what you'd expect: apply the same tiered thinking to the instruction file itself.</p>
+
+      <div class="code-block">
+        <div class="code-label">Before — Monolithic .CLAUDE.md</div>
+        <pre><span class="c-red">.CLAUDE.md                          847 lines ← loaded every session</span>
+  ├─ Project overview (needed)
+  ├─ Coding conventions (sometimes needed)
+  ├─ Git commit format (rarely needed)
+  ├─ Full deployment runbook (almost never needed)
+  ├─ PR review checklist (needed during reviews only)
+  ├─ Onboarding guide (needed once, by new members)
+  ├─ Maintenance checklists (needed monthly)
+  ├─ Full skill file templates (needed when adding skills)
+  └─ Troubleshooting guide (needed when things break)
+
+<span class="c-red">Every session × 847 lines = constant overhead</span>
+<span class="c-red">~85% of it irrelevant to the task at hand</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label">After — Tiered .CLAUDE.md</div>
+        <pre><span class="c-amber">.CLAUDE.md</span>                         <span class="c-green">~90 lines ← Tier 1 router</span>
+  ├─ Project overview (always relevant)
+  ├─ Output preferences (always relevant)
+  ├─ Architecture summary (always relevant)
+  └─ → docs/SKILL-GUIDE.md when adding skills
+     → docs/DEPLOYMENT.md when deploying
+     → docs/MAINTENANCE.md when auditing
+     → docs/ONBOARDING.md for new team members
+
+<span class="c-blue">docs/SKILL-GUIDE.md</span>                <span class="c-green">~130 lines ← Tier 2, loaded on demand</span>
+<span class="c-blue">docs/DEPLOYMENT.md</span>                 <span class="c-green">~200 lines ← Tier 2, loaded on demand</span>
+<span class="c-blue">docs/MAINTENANCE.md</span>                <span class="c-green">~180 lines ← Tier 2, loaded on demand</span>
+
+<span class="c-muted">Session fixing a variable rename:</span>
+<span class="c-green">Loaded: 90 lines. That's it.</span>
+
+<span class="c-muted">Session adding a new skill:</span>
+<span class="c-green">Loaded: 90 + 130 = 220 lines. Exactly what's needed.</span></pre>
+      </div>
+
+      <p>The same principle. The same result. Claude walks into every session carrying a sharp briefing — not a binder. When it needs the deployment runbook, it knows exactly where to find it. When it's just fixing a bug, it never has to read it at all.</p>
+
+      <p>This is also why <code>AGENTS.md</code> files — used by frameworks like AutoGPT, CrewAI, and others to define agent behavior — suffer identically. A monolithic <code>AGENTS.md</code> that defines every agent's full persona, capabilities, constraints, examples, and edge cases gets loaded in full for every task, by every agent. Apply the 3-tier model: slim the <code>AGENTS.md</code> to routing and essential rules, push capability detail to per-agent files, push examples and edge cases to resource files. The gains are the same.</p>
+
+      <p><strong>The lesson:</strong> the 3-tier model isn't a skill-file pattern. It's a thinking pattern. Apply it wherever instructions accumulate — and they will always accumulate.</p>
+    </section>
+
+    <section>
+      <h2>The Root Cause: We Were "Helpful" in the Wrong Places</h2>
+
+      <p>Here's the thing about context bloat — it never happens because someone was careless. It happens because everyone was <em>trying to help</em>. Two well-intended patterns combined into a mess:</p>
+
+      <div class="decision-item">
+        <p class="dq">Pattern 1</p>
+        <p class="da">Our root <code>AGENTS.md</code> / <code>.CLAUDE.md</code> had grown into a mini playbook library. Every time someone thought "Claude should know about this," they added it to the root file. It felt like the right call every single time.</p>
+      </div>
+      <div class="decision-item">
+        <p class="dq">Pattern 2</p>
+        <p class="da">Several <code>SKILL.md</code> files had become long and template-heavy. Adding a template inline felt more convenient than creating a separate resource file — so that's what people did, over and over.</p>
+      </div>
+
+      <h3>Real-World Problem: Root File Pollution Is Permanent Pollution</h3>
+
+      <p>Because <code>AGENTS.md</code> is loaded every session, anything you add there becomes background noise for <strong>every</strong> task — forever. Our root doc wasn't just "global rules" anymore. It contained workflow details, templates, examples, and policy reminders that belonged to specific contexts.</p>
+
+      <p>So even a simple API docs request began with the agent already "thinking about" hotfix governance, platform spec conventions, and onboarding procedures it had no business knowing about for that task.</p>
+
+      <div class="code-block">
+        <div class="code-label">What was in our root AGENTS.md — and what it contaminated</div>
+        <pre><span class="c-amber">AGENTS.md</span> contained:
+  ├─ Global coding rules           <span class="c-green">← relevant everywhere</span>
+  ├─ Hotfix workflow details       <span class="c-red">← relevant 2% of sessions</span>
+  ├─ Platform spec templates       <span class="c-red">← relevant 5% of sessions</span>
+  ├─ PR review checklist           <span class="c-red">← relevant during reviews only</span>
+  ├─ Onboarding policy reminders   <span class="c-red">← relevant to new members only</span>
+  └─ Incident response examples    <span class="c-red">← relevant when things break only</span>
+
+<span class="c-muted">User: "Generate API docs for /users"</span>
+<span class="c-red">Agent context already contains: hotfix templates, incident examples,</span>
+<span class="c-red">onboarding policies. None of it requested. All of it present.</span></pre>
+      </div>
+
+      <p>The model's diagnosis is blunt and accurate: big upfront context creates noise, and noise creates generic outputs. The agent isn't lazy — it's overwhelmed. It starts averaging across everything it was handed instead of focusing on what the task actually needs.</p>
+    </section>
+
+    <section>
+      <h2>Let's Talk Numbers</h2>
+      <p>Architecture decisions live or die by measurable outcomes, not elegant theory.</p>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num">92%</div>
+          <div class="stat-label">Baseline token reduction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">19</div>
+          <div class="stat-label">Skills refactored</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">16</div>
+          <div class="stat-label">Resource files created</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">85</div>
+          <div class="stat-label">Avg lines per skill file</div>
+        </div>
+      </div>
+      <p>The 92% baseline reduction is the headline, but the precision gain matters just as much. When an agent's context is 111 focused lines instead of 700 mixed ones, its outputs are sharper. Fewer hallucinations. Less context confusion. The agent is reading a sharp briefing, not wading through a bureaucratic binder.</p>
+      <p>And when you do need full depth? You get it. Resource files are comprehensive — 150 to 500 lines of rich detail — right there waiting. You're not trading depth for efficiency. You're unlocking both simultaneously.</p>
+    </section>
+
+    <section>
+      <h2>Keeping the System Healthy Over Time</h2>
+      <p>Here's the uncomfortable truth about any architecture: it will drift if you let it. Engineers add content inline. Skill files grow. Routers accumulate explanation. Six months later, you're back to the bloat you started with.</p>
+      <p>The 3-tier model comes with clear health signals — so you always know where you stand.</p>
+
+      <div class="health-row">
+        <div class="health-card green">
+          <div class="health-icon">🟢</div>
+          <div class="health-title">Green — Healthy</div>
+          <ul>
+            <li>Routers: 50–70 lines</li>
+            <li>Skill files: 54–130 lines</li>
+            <li>Resources: 150–500 lines</li>
+            <li>Zero broken links</li>
+            <li>Maintenance &lt; 1 month ago</li>
+          </ul>
+          <p class="health-action">Monthly checks only.</p>
+        </div>
+        <div class="health-card yellow">
+          <div class="health-icon">🟡</div>
+          <div class="health-title">Yellow — Attention</div>
+          <ul>
+            <li>Router: 80–100 lines</li>
+            <li>Skill file: 130–180 lines</li>
+            <li>Resource: 450–550 lines</li>
+            <li>1–2 broken links</li>
+            <li>Maintenance: 1–2 months ago</li>
+          </ul>
+          <p class="health-action">Refactor within 2 weeks.</p>
+        </div>
+        <div class="health-card red">
+          <div class="health-icon">🔴</div>
+          <div class="health-title">Red — Critical</div>
+          <ul>
+            <li>Router: 100+ lines</li>
+            <li>Skill file: 180+ lines</li>
+            <li>Resource: 800+ lines</li>
+            <li>3+ broken links</li>
+            <li>Maintenance: 3+ months ago</li>
+          </ul>
+          <p class="health-action">Refactoring sprint now.</p>
+        </div>
+      </div>
+
+      <h3>The Monthly 15-Minute Habit</h3>
+      <p>Real-world example: your team ships a new <strong>"hotfix"</strong> skill in November. By January, two engineers have added inline templates and a decision flowchart directly to the skill file. It's now 190 lines. Red zone. The fix: extract the templates to <code>resources/hotfix-templates.md</code>, replace inline content with a single link, verify the skill file drops back under 100 lines. Twenty minutes. System restored.</p>
+
+      <div class="code-block">
+        <div class="code-label">Monthly check — paste and run</div>
+        <pre><span class="c-muted"># Router sizes — should be ~53 and ~59 lines</span>
+<span class="c-amber">wc -l</span> internal/skills/packs/SKILLS.md \
+        internal/skills/packs/sdd/SKILLS.md
+
+<span class="c-muted"># Skill files — all should be &lt; 130 lines</span>
+<span class="c-amber">find</span> internal/skills/packs -name <span class="c-blue">"SKILL.md"</span> \
+  -exec wc -l {} + | sort -rn | head -5
+
+<span class="c-muted"># Resource files — flag anything over 500 lines</span>
+<span class="c-amber">find</span> internal/skills/packs -path <span class="c-blue">"*/resources/*.md"</span> \
+  -exec wc -l {} + | awk <span class="c-blue">'$1 > 500 {print}'</span></pre>
+      </div>
+
+      <p>Three commands. One habit. Healthy system indefinitely.</p>
+    </section>
+
+    <section>
+      <h2>The Question Every Developer Needs to Ask</h2>
+      <p>When adding new content, one question cuts through all ambiguity: <strong>"Does this fit in one or two sentences?"</strong></p>
+      <p>If yes — Tier 2. The skill file. Keep it there. If no — Tier 3. A resource file, linked from the skill file, available on demand. Let's make it concrete:</p>
+
+      <div class="decision-item">
+        <p class="dq">Q: What are the three phases of our openspec process?</p>
+        <p class="da">One sentence: "Phase 1: Requirements, Phase 2: Design, Phase 3: Review." → <span class="dt dt-2">Tier 2</span></p>
+      </div>
+      <div class="decision-item">
+        <p class="dq">Q: Can you show me the full Phase 1 requirements questionnaire?</p>
+        <p class="da">Needs 40+ lines of structured questions. Lives in <code>resources/phases.md</code>, linked from the skill file. → <span class="dt dt-3">Tier 3</span></p>
+      </div>
+      <div class="decision-item">
+        <p class="dq">Q: Here's an example of a complete API response for a nested object.</p>
+        <p class="da">It's an example. Long by nature. Always a resource file. → <span class="dt dt-3">Tier 3</span></p>
+      </div>
+
+      <p style="margin-top:2rem;">Once you internalize this decision, you'll catch bloat before it happens. Not after.</p>
+    </section>
+
+    <section>
+      <h2>This Isn't Just About Tokens</h2>
+      <p>Yes, the 92% baseline token reduction is real and meaningful — especially at scale, where every trigger is a cost center. But reducing the model to a cost-saving measure undersells it.</p>
+      <p>This architecture makes your AI system more <em>honest</em>. An agent reading 58 focused lines knows exactly what it's supposed to do. An agent reading 700 mixed lines is guessing what matters. The precision difference shows up in output quality, in edge case handling, in fewer "I think you might mean..." hedges.</p>
+      <p>It also makes your system more maintainable. When every skill file is under 130 lines and every resource file has a clear purpose, your team can navigate, update, and extend the system confidently. No one-file monoliths that everyone fears touching. No mystery content buried 300 lines down.</p>
+
+      <div class="golden-rule">
+        <div class="gr-label">The Golden Rule</div>
+        <p class="gr-text">"Load what you need, nothing else."</p>
+      </div>
+
+      <p>Apply it consistently and two things happen: your AI gets sharper, and your engineering costs drop. That's not really a trade-off at all. It's just better engineering.</p>
+      <p>The 3-tier model is documented, production-ready, and waiting. The only thing left is to start using it.</p>
+    </section>
+
+  </div>
+
+  <hr class="full-rule" />
+
+  <footer>
+    <div class="footer-brand">Context Architecture Series</div>
+    <div class="footer-note">Part of an ongoing series on building efficient, precise AI-powered development workflows.</div>
+  </footer>
+
+</body>
+</html>
