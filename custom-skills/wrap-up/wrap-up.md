@@ -8,8 +8,8 @@ description: Use when user says "wrap up", "close session", "end session",
 # Session Wrap-Up
 
 Run four phases in order. Each phase is conversational and inline — no
-separate documents. All phases auto-apply without asking; present a
-consolidated report at the end.
+separate documents. Phases 1 and 2 auto-apply without asking. Phase 3 pauses
+per finding for approval. Present a consolidated report at the end.
 
 ## Phase 1: Ship It
 
@@ -74,9 +74,14 @@ Analyze the conversation for self-improvement findings. If the session was
 short or routine with nothing notable, say "Nothing to improve" and proceed
 to Phase 4.
 
-**Auto-apply all actionable findings immediately** — do not ask for approval
-on each one. Apply the changes, commit them, then present a summary of what
-was done.
+**For each finding, pause for user approval before applying:**
+
+Present the finding and its proposed action. Ask `[Y/n]`:
+
+- **Y (apply)**: Apply the change immediately and mark it applied.
+- **N (decline)**: Save the finding to `.claude/observations/YYYY-MM-DD-{short-title}.md`
+  in the current project directory. Use a short kebab-case title derived from the
+  finding (e.g., `2026-03-08-token-counting-table.md`). Do not apply the change.
 
 **Finding categories:**
 - **Skill gap** — Things Claude struggled with, got wrong, or needed multiple
@@ -95,8 +100,7 @@ was done.
 - **Skill / Hook** — Document a new skill or hook spec for implementation
 - **CLAUDE.local.md** — Create or update per-project local memory
 
-Present a summary after applying, in two sections — applied items first,
-then no-action items:
+Present a summary after processing all findings, in three sections:
 
 Findings (applied):
 
@@ -106,14 +110,45 @@ Findings (applied):
 2. ✅ Knowledge: Worker crashes on 429/400 instead of retrying
    → [Rules] Added error-handling rules for worker
 
-3. ✅ Automation: Checking service health after deploy is manual
-   → [Skill] Created post-deploy health check skill spec
+---
+Declined (saved for later):
+
+1. 🚫 Automation: Checking service health after deploy is manual
+   → Saved to .claude/observations/2026-03-08-post-deploy-health-check.md
 
 ---
 No action needed:
 
-4. Knowledge: Discovered X works this way
+1. Knowledge: Discovered X works this way
    Already documented in CLAUDE.md
+
+**Observations file format:**
+
+Each declined finding is saved to `.claude/observations/YYYY-MM-DD-{short-title}.md`
+with this structure:
+
+```markdown
+# {Finding title}
+
+**Date:** YYYY-MM-DD
+**Category:** {Skill gap | Friction | Knowledge | Automation}
+**Proposed action:** {CLAUDE.md | Rules | Auto memory | Skill / Hook | CLAUDE.local.md}
+
+## Finding
+
+{Full description of the finding from the session}
+
+## Proposed Change
+
+{Exact text that would have been applied}
+
+## Why Declined
+
+(Leave blank — user can fill in later)
+```
+
+Review these observations periodically to decide whether to apply them in future
+sessions or discard them.
 
 ## Phase 4: Publish It
 
