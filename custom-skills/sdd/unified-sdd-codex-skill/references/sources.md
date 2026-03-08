@@ -4,9 +4,10 @@ This unified skill is derived from:
 
 ## Methodology docs
 
-- `../unified-sdd-methodology/team-proposal.md`
-- `../unified-sdd-methodology/iteration-1-playbook.md`
-- `../unified-sdd-methodology/iteration-2-playbook.md`
+- `../../unified-sdd-methodology/team-proposal.md`
+- `../../unified-sdd-methodology/iteration-1-playbook.md`
+- `../../unified-sdd-methodology/iteration-2-playbook.md`
+- `../../unified-sdd-methodology/canonical-platform-truth-and-component-alignment.md`
 
 ## Source skills
 
@@ -25,3 +26,4 @@ This unified skill is derived from:
 - `../speckit-codex-skill/rules/spec-rules.md`
 - `../speckit-codex-skill/rules/plan-rules.md`
 - `../speckit-codex-skill/rules/task-rules.md`
+- `rules/alignment-and-traceability-rules.md`

@@ -140,3 +140,17 @@ Use this phase to:
   - use `OpenSpec` to capture durable team-level context that should become shared
 ###### Prompt examples:
   - "Using the BMAD and OpenSpec skills, document the current team conventions, handoff points, and delivery constraints that the shared platform baseline must respect."
+
+
+
+
+
+
+Add examples from top to bottom for each phase, role, and skill usage, to make it super clear and actionable for the teams to follow. For example, in the Platform phase, show how the Architect would use the BMAD skill to review the current platform and identify architectural constraints, then use the OpenSpec skill to encode durable context, and finally use the Speckit skill to turn principles into explicit rules. Provide specific prompts that the Architect could use at each step, and do the same for the Team Lead and Product roles. This will help teams understand exactly how to apply the skills in each phase and role, and what kind of outputs they should aim for.
+
+For example, in the Platform phase, show how the Product define the feature  detaila and indentify the components that will be impacted by the new feature, and how they will use the OpenSpec skill to define user stories and acceptance criteria that are aligned with the business goals and user needs. Provide specific prompts that the Product could use at each step, and do the same for the Architect and Team Lead roles. This will help teams understand exactly how to apply the skills in each phase and role, and what kind of outputs they should aim for.
+
+How the components teams will interact with the platform specification to ensure that the new feature is designed and implemented in a way that is consistent with the platform's principles and constraints, and how they will use the skills to facilitate this interaction. For example, show how the Team Lead can use the OpenSpec skill to create a roadmap for the development team that is aligned with the platform's architecture, and how the Developer can use the Speckit skill to write executable specifications that are consistent with the platform's design. Provide specific prompts for these interactions as well.
+
+
+Example of the 3 diffrent entry points for changes from platform initiative, product requirement, or component/team proposal. and bug fix, and how the agents and skills will help to identify the right entry point, gather the necessary context, and create the appropriate specifications and plans for each type of change. For example, show how a Product requirement would trigger the Product role to use the OpenSpec skill to define user stories and acceptance criteria, while a component proposal might trigger the Team Lead to use the BMAD skill to assess architectural impact and then use the OpenSpec skill to create a component spec. Provide specific prompts for each type of change and role interaction.

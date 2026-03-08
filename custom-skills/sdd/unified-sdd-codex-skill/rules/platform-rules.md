@@ -18,6 +18,9 @@ Define durable context that later changes can reuse.
 - keep stable context separate from change-specific detail
 - encode durable context in reusable project config
 - define the default role model for later phases
+- define where canonical platform truth lives
+- define the platform versioning and durable ref model for component repos
+- define the JIRA hierarchy or issue-link conventions for platform and component work
 - keep the baseline small enough that teams can follow it
 
 ## Avoid
@@ -32,6 +35,8 @@ Define durable context that later changes can reuse.
 - reusable OpenSpec config
 - shared role map
 - common language for quality and documentation
+- platform versioning and ref conventions
+- alignment-ready templates and issue-link conventions
 
 ## Exit gate
 

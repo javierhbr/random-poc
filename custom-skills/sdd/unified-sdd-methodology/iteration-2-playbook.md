@@ -21,6 +21,7 @@ Use this document after Iteration 1 is working consistently.
 - start `Plan` only when `Specify` is ready
 - run `Deliver` only when the plan is strong enough to execute without guesswork
 - keep delivery incremental, reviewable, and traceable back to the spec
+- keep platform version, JIRA chain, and local OpenSpec artifacts aligned through delivery
 
 The rule is simple:
 
@@ -97,6 +98,7 @@ Main activities:
 - identify integrations, dependencies, failure modes, and rollout concerns
 - document ADRs when a new pattern or major tradeoff is introduced
 - break the work into ordered tasks and delivery slices that can be reviewed safely
+- map tasks to stories and keep platform refs visible in the plan
 
 ### 3. Agent roles and responsibilities
 
@@ -150,6 +152,9 @@ Expected outputs:
 - dependency and rollout notes
 - delivery slices with clear sequencing
 - pull request strategy or review grouping notes when the change is non-trivial
+- finalized `platform-ref.yaml`
+- finalized `jira-traceability.yaml`
+- task-to-story mapping
 
 ### 7. Criteria for moving to the next phase
 
@@ -160,6 +165,7 @@ Move to `Deliver` when:
 - tasks are executable without large hidden gaps
 - dependencies, risks, and validation needs are visible
 - the team agrees the work can be delivered in controlled slices
+- stories or story groups are clear enough to support reviewable PRs
 
 ### 8. Potential challenges and mitigation strategies
 
@@ -240,6 +246,7 @@ Main activities:
 - collect validation evidence continuously
 - coordinate deploy timing, dependencies, and rollback readiness
 - archive the change when it is truly complete
+- keep story, PR, and platform alignment links current as work moves
 
 ### 3. Agent roles and responsibilities
 
@@ -288,7 +295,7 @@ Apply these rules:
 Apply these additional review expectations:
 
 - each delivery slice should produce one reviewable pull request unless there is a clear reason to batch more work
-- PR descriptions should reference the change package, affected tasks, and validation performed
+- PR descriptions should reference the change package, affected tasks, story keys, and validation performed
 - review feedback must be resolved or explicitly deferred before deploy
 
 ### 6. Expected artifacts and deliverables
@@ -302,6 +309,8 @@ Expected outputs:
 - validation evidence and test updates
 - rollout or rollback notes when relevant
 - archived change package
+- updated story and epic links
+- final traceability from platform issue to component epic to story to PR
 
 ### 7. Criteria for moving to the next phase
 
@@ -315,6 +324,7 @@ Close the change only when:
 - key artifacts reflect what was actually delivered
 - deploy decisions and rollback notes are captured when relevant
 - the change package is archived
+- the JIRA and platform alignment chain reflects the delivered reality
 
 ### 8. Potential challenges and mitigation strategies
 

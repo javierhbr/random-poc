@@ -16,8 +16,11 @@ Turn an incoming request into a scoped change package with the right next step.
 
 - classify greenfield or brownfield
 - classify size and impact separately
+- classify the change as component-only, shared, or platform-rule adoption
 - choose the lightest workflow that is still safe
 - create or frame one change package
+- identify affected platform refs and component repositories
+- create the initial JIRA issue chain when the work is material enough to track
 - identify the next artifact and owner
 - call out unknowns explicitly
 
@@ -34,6 +37,8 @@ Turn an incoming request into a scoped change package with the right next step.
 - selected path depth
 - next artifact
 - known unknowns
+- initial platform/component alignment metadata
+- initial JIRA traceability metadata
 
 ## Exit gate
 

@@ -20,7 +20,8 @@ Step 3
         v
 Step 4
 [Draft platform baseline]
-  principles, config, role map, quality language
+  principles, config, role map, quality language,
+  versioning, component alignment, JIRA conventions
         |
         v
 Step 5

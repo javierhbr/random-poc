@@ -34,6 +34,9 @@ Use this skill to:
 - document current conventions, constraints, artifacts, and team interactions
 - identify gaps, drift, and missing standards
 - draft a practical baseline for the Platform phase
+- define where canonical platform truth should live
+- define how component repositories should align to the platform truth
+- define how JIRA should track platform and component execution
 - prepare the platform for Route and Specify in Iteration 1
 
 ## Core idea
@@ -109,6 +112,8 @@ The skill should normally produce:
 - platform gap register
 - draft platform principles or constitution
 - draft reusable project context / config notes
+- draft platform versioning and ref model
+- draft JIRA hierarchy and issue-link conventions
 - role and interaction map
 - open questions and follow-up actions
 
@@ -121,9 +126,10 @@ When using this skill, structure the output as:
 3. Gaps and risks
 4. Durable context to keep
 5. Durable rules to introduce
-6. Artifacts to create or update
-7. Open questions
-8. Recommended next step for Platform phase
+6. Platform/component alignment model
+7. Artifacts to create or update
+8. Open questions
+9. Recommended next step for Platform phase
 
 ## Rules
 

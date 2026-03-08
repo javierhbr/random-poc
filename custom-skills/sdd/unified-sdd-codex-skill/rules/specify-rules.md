@@ -17,6 +17,8 @@ Define the required behavior before planning starts.
 - write the problem in plain language
 - separate goals from non-goals
 - express behavior changes in explicit delta specs
+- keep platform version and platform refs visible in the component spec context
+- decide whether the change updates only component truth or also shared platform truth
 - run clarify before planning
 - use scenarios and acceptance outcomes that another team can test
 - keep implementation detail out unless it is a hard requirement
@@ -34,6 +36,8 @@ Define the required behavior before planning starts.
 - delta specs with `ADDED`, `MODIFIED`, and `REMOVED`
 - clarification notes
 - checklist or readiness result
+- confirmed `platform-ref.yaml`
+- linked platform delta when shared truth changes
 
 ## Exit gate
 

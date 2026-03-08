@@ -26,11 +26,16 @@ methodology.
 Helpful starter skill for existing platforms:
 
 - [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
+- Detailed alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- Templates:
+  - [templates/platform-ref.yaml](templates/platform-ref.yaml)
+  - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
 
 The rule is simple:
 
 - do not plan before `Specify` is ready
 - do not implement from a weak or ambiguous spec
+- treat the platform repo as the canonical shared truth and component repos as version-aligned local truth
 
 ## Iteration 1 at a glance
 
@@ -109,6 +114,8 @@ Main activities:
 - separate permanent standards from temporary project details
 - define the minimum quality bar for specs and delivery
 - agree on the phase owners and support roles
+- define the platform versioning and ref model for component repositories
+- define the JIRA hierarchy or issue-link conventions for platform and component work
 
 ### 3. Agent roles and responsibilities
 
@@ -157,6 +164,9 @@ Expected outputs:
 - `openspec/config.yaml` or equivalent reusable config
 - shared role map for the workflow
 - common language for quality and artifact expectations
+- platform versioning and ref model
+- JIRA hierarchy conventions for platform issue, component epic, and stories
+- adoption-ready templates for `platform-ref.yaml` and `jira-traceability.yaml`
 
 ### 7. Criteria for moving to the next phase
 
@@ -231,14 +241,19 @@ Core concepts:
 - size vs impact
 - quick path vs deeper path
 - greenfield vs brownfield
+- platform-only vs component-only vs shared change
+- platform issue -> component epic -> story traceability
 
 Main activities:
 
 - review the incoming request and its entry point
 - identify affected scope, teams, and dependencies
+- identify affected platform refs and affected component repositories
 - classify size and impact separately
+- classify the change as local-only, shared, or platform rule adoption
 - choose the BMAD path depth
 - open the change package and define the next artifact
+- create the initial JIRA issue chain and alignment metadata
 
 ### 3. Agent roles and responsibilities
 
@@ -292,6 +307,8 @@ Expected outputs:
 - size and impact classification
 - selected path and next artifact
 - known unknowns and open questions
+- initial `platform-ref.yaml`
+- initial `jira-traceability.yaml`
 
 ### 7. Criteria for moving to the next phase
 
@@ -302,6 +319,7 @@ Move to `Specify` when:
 - the affected scope is bounded enough to specify
 - the next artifact is clear
 - major unknowns are visible, even if not all are resolved yet
+- the initial platform refs and issue chain are visible
 
 ### 8. Potential challenges and mitigation strategies
 
@@ -368,12 +386,16 @@ Core concepts:
 - goals and non-goals
 - testable requirements and scenarios
 - clarify before plan
+- component-local behavior vs shared platform truth
+- platform version and platform refs as part of spec context
 
 Main activities:
 
 - write the problem statement in plain language
 - define goals, non-goals, and affected behavior
+- confirm the platform version and platform refs that constrain the change
 - draft delta specs using explicit `ADDED`, `MODIFIED`, and `REMOVED` sections
+- decide whether the change needs a linked platform delta or only a component delta
 - run clarify to expose hidden assumptions
 - run a checklist pass before planning
 
@@ -426,6 +448,9 @@ Expected outputs:
 - clarification notes or resolved ambiguity log
 - checklist results
 - ready-for-plan decision
+- confirmed `platform-ref.yaml`
+- updated `jira-traceability.yaml`
+- linked platform delta when shared truth changes
 
 ### 7. Criteria for moving to the next phase
 
@@ -436,6 +461,7 @@ Move to `Plan` when:
 - the spec is understandable by Product and engineering
 - important ambiguity is resolved or explicitly tracked
 - the team agrees that planning can start without guessing
+- the component spec is aligned to explicit platform refs
 
 ### 8. Potential challenges and mitigation strategies
 

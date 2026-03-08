@@ -27,6 +27,7 @@ deploy, and archive.
 - deliver in slices, not one large batch
 - keep task status and artifacts current during execution
 - create a PR for each reviewable slice or tightly related slice set
+- keep story, epic, and platform issue links current
 - collect validation evidence before closure
 - capture deploy and rollback notes when relevant
 - archive the change package after delivery is complete
@@ -45,6 +46,7 @@ deploy, and archive.
 - validation evidence
 - deploy notes when needed
 - archived change package
+- final traceability from platform issue to story to PR
 
 ## Exit gate
 

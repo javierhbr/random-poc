@@ -71,7 +71,21 @@ The change package is the canonical execution unit for:
 - verification evidence
 - archive history
 
-### 4. Keep humans accountable and agents supportive
+### 4. Use canonical platform truth + versioned component alignment
+
+When the platform uses one master repository plus many component repositories:
+
+- keep shared platform truth upstream in the platform repo
+- keep local OpenSpec artifacts in the component repo
+- pin platform version and platform refs in each affected component repo
+- use JIRA for issue hierarchy and delivery status, not as the full spec store
+
+Use:
+
+- `platform-ref.yaml` for platform version and platform refs
+- `jira-traceability.yaml` for platform issue, component epic, and stories
+
+### 5. Keep humans accountable and agents supportive
 
 Humans own:
 
@@ -88,25 +102,25 @@ Agents support:
 - ambiguity checks
 - review guidance
 
-### 5. Route by size and impact
+### 6. Route by size and impact
 
 Use size to choose planning depth.
 Use impact to choose validation and control depth.
 
 Do not mix them.
 
-### 6. Prefer the smallest sufficient workflow
+### 7. Prefer the smallest sufficient workflow
 
 - small work -> compact planning artifacts
 - medium work -> standard path
 - large or architecture-heavy work -> deeper planning and phased delivery
 
-### 7. Keep delivery reviewable
+### 8. Keep delivery reviewable
 
 Deliver in slices.
 Each slice should normally produce one reviewable pull request.
 
-### 8. Update artifacts as reality changes
+### 9. Update artifacts as reality changes
 
 Do not let specs, design, tasks, PR state, or archive drift from what was
 actually implemented.
@@ -117,6 +131,7 @@ actually implemented.
 
 - Owner: Architect
 - Goal: define durable context, constitution, config, and role expectations
+- Also define the platform truth location, versioning, and alignment conventions
 - Use first in Iteration 1
 - Primary rules: `rules/platform-rules.md`
 
@@ -124,6 +139,7 @@ actually implemented.
 
 - Owner: Team Lead
 - Goal: classify the request, open the change package, and select the next artifact
+- Also classify whether the change is component-only or shared with platform truth
 - Use for every new change
 - Primary rules: `rules/route-rules.md`
 
@@ -131,6 +147,7 @@ actually implemented.
 
 - Owner: Product
 - Goal: define behavior, remove ambiguity, and produce a ready-for-plan spec package
+- Also confirm platform refs and whether a linked platform delta is needed
 - Finish Iteration 1 here
 - Primary rules: `rules/specify-rules.md`
 
@@ -138,6 +155,7 @@ actually implemented.
 
 - Owner: Architect
 - Goal: convert the approved spec into design, tasks, and delivery slices
+- Also map tasks to stories and keep platform alignment visible in planning
 - Start Iteration 2 here
 - Primary rules: `rules/plan-rules.md`
 
@@ -145,6 +163,7 @@ actually implemented.
 
 - Owner: Team Lead
 - Goal: execute slices through PR, review, verification, deploy, and archive
+- Also keep PR, story, epic, and platform alignment traceability current
 - Final phase in v1
 - Primary rules: `rules/deliver-rules.md`
 - PR-specific rules: `rules/pr-review-rules.md`
@@ -202,10 +221,12 @@ When using this skill in a response, structure the output as:
 - `../unified-sdd-methodology/team-proposal.md`
 - `../unified-sdd-methodology/iteration-1-playbook.md`
 - `../unified-sdd-methodology/iteration-2-playbook.md`
+- `../unified-sdd-methodology/canonical-platform-truth-and-component-alignment.md`
 
 ### Rules
 
 - `rules/platform-rules.md`
+- `rules/alignment-and-traceability-rules.md`
 - `rules/route-rules.md`
 - `rules/specify-rules.md`
 - `rules/plan-rules.md`
@@ -216,6 +237,7 @@ When using this skill in a response, structure the output as:
 
 - `references/overview-and-philosophy.md`
 - `references/phase-model.md`
+- `references/platform-component-alignment.md`
 - `references/agent-interaction-model.md`
 - `references/sources.md`
 - `../platform-contextualizer-codex-skill/SKILL.md`
