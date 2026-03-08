@@ -18,7 +18,8 @@ triggers:
 
 Use this skill when the team wants one practical workflow across multiple
 teams, artifacts, and delivery phases without losing the strengths of BMAD,
-OpenSpec, and Speckit.
+OpenSpec, and Speckit. Use `../explain-code-codex-skill/SKILL.md` as a support
+skill when roles need to explain existing code, planned behavior, or PR impact.
 
 This skill is phase-first, not artifact-first.
 
@@ -218,6 +219,7 @@ When using this skill in a response, structure the output as:
 - `references/agent-interaction-model.md`
 - `references/sources.md`
 - `../platform-contextualizer-codex-skill/SKILL.md`
+- `../explain-code-codex-skill/SKILL.md`
 
 ### Role agents
 

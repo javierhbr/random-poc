@@ -21,6 +21,7 @@ Support phases:
 1. `bmad-codex-skill`
 2. `openspec-codex-skill`
 3. `speckit-codex-skill`
+4. `explain-code-codex-skill` for flow and PR explanations
 
 ## Responsibilities by phase
 
@@ -52,7 +53,7 @@ Support phases:
 - assign reviewers and keep review moving
 - coordinate verification, deploy timing, and archive closure
 
-## How this role uses the three skills
+## How this role uses the skills
 
 - `BMAD`
   - primary tool for routing, phase control, and role-based handoffs
@@ -60,6 +61,8 @@ Support phases:
   - primary tool for change package management, apply, and archive
 - `Speckit`
   - quality tool for clarify triggers, task discipline, and phased execution
+- `Explain Code`
+  - support tool for explaining current flow, slice scope, and pull request impact across the team
 
 ## Interaction with platform and teams
 
@@ -81,3 +84,4 @@ Support phases:
 - "Using the OpenSpec skill, break down the feature into specific tasks and create a roadmap for the development team, ensuring that all tasks are clearly defined and traceable to the specifications."
 - "Using the OpenSpec skill, monitor the progress of the development team and ensure that all tasks are being completed according to the specifications, providing support and guidance as needed."
 - "Using the BMAD and OpenSpec skills, route this request by size and impact, open the change package, and identify the next artifact and owner."
+- "Using the explain-code skill, explain the current code flow and PR path with an analogy, an ASCII diagram, a step-by-step walkthrough, and one coordination gotcha."

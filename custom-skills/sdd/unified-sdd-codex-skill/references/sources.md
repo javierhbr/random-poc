@@ -13,6 +13,7 @@ This unified skill is derived from:
 - `../bmad-codex-skill/SKILL.md`
 - `../openspec-codex-skill/SKILL.md`
 - `../speckit-codex-skill/SKILL.md`
+- `../explain-code-codex-skill/SKILL.md`
 
 ## Source rule files
 
