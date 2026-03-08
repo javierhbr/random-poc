@@ -22,6 +22,8 @@ Important boundary:
 - platform-level work may use the combined skill set
 - once the work enters a component repository, the local change package uses
   `OpenSpec` only
+- when teams need local access to platform truth, use the local read-only
+  platform MCP gateway instead of copying platform artifacts into the component repo
 
 Use this file as the phase-by-phase instruction guide and prompt catalog for the
 role agents.
@@ -64,6 +66,9 @@ For explanation-heavy work, use
 
 For detailed worked examples by phase, role, and entry point, use
 `../../unified-sdd-methodology/example/README.md`.
+
+For local platform query and alignment validation, use
+`../../platform-truth-mcp-codex-skill/SKILL.md`.
 
 ## Phase ownership
 

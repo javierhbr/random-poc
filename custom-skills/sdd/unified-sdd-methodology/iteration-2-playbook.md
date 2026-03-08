@@ -22,6 +22,7 @@ Use this document after Iteration 1 is working consistently.
 - run `Deliver` only when the plan is strong enough to execute without guesswork
 - keep delivery incremental, reviewable, and traceable back to the spec
 - keep platform version, JIRA chain, and local OpenSpec artifacts aligned through delivery
+- use [local-platform-mcp-model.md](local-platform-mcp-model.md) when component teams need local query and validation of platform truth
 - use [example/README.md](example/README.md) when teams need step-by-step prompts by role
 
 The rule is simple:
@@ -100,6 +101,7 @@ Use the platform handoff to:
 
 - pin `platform-ref.yaml`
 - pin `jira-traceability.yaml`
+- query the local platform MCP gateway when teams need platform refs or contract checks without manual repo browsing
 - convert shared decisions into local `design.md`
 - break the design into local `tasks.md`
 - keep the local PR and archive chain aligned to the same platform baseline

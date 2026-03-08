@@ -84,6 +84,8 @@ Use:
 
 - `platform-ref.yaml` for platform version and platform refs
 - `jira-traceability.yaml` for platform issue, component epic, and stories
+- a local read-only platform MCP gateway when teams need fast local access to
+  platform truth without hosted infrastructure
 
 ### 5. Keep humans accountable and agents supportive
 
@@ -222,6 +224,7 @@ When using this skill in a response, structure the output as:
 - `../unified-sdd-methodology/iteration-1-playbook.md`
 - `../unified-sdd-methodology/iteration-2-playbook.md`
 - `../unified-sdd-methodology/canonical-platform-truth-and-component-alignment.md`
+- `../unified-sdd-methodology/local-platform-mcp-model.md`
 - `../unified-sdd-methodology/example/README.md`
 
 ### Rules
@@ -242,6 +245,7 @@ When using this skill in a response, structure the output as:
 - `references/agent-interaction-model.md`
 - `references/sources.md`
 - `../platform-contextualizer-codex-skill/SKILL.md`
+- `../platform-truth-mcp-codex-skill/SKILL.md`
 - `../explain-code-codex-skill/SKILL.md`
 
 ### Role agents

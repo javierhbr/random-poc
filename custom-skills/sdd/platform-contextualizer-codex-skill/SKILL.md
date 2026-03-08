@@ -37,6 +37,7 @@ Use this skill to:
 - define where canonical platform truth should live
 - define how component repositories should align to the platform truth
 - define how JIRA should track platform and component execution
+- define whether teams will use a local read-only platform MCP gateway
 - prepare the platform for Route and Specify in Iteration 1
 
 ## Core idea
@@ -114,6 +115,7 @@ The skill should normally produce:
 - draft reusable project context / config notes
 - draft platform versioning and ref model
 - draft JIRA hierarchy and issue-link conventions
+- draft the local platform MCP usage model when local query and validation is needed
 - role and interaction map
 - open questions and follow-up actions
 
@@ -148,4 +150,5 @@ When using this skill, structure the output as:
 - `../bmad-codex-skill/SKILL.md`
 - `../openspec-codex-skill/SKILL.md`
 - `../speckit-codex-skill/SKILL.md`
+- `../platform-truth-mcp-codex-skill/SKILL.md`
 - `../unified-sdd-codex-skill/SKILL.md`

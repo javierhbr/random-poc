@@ -61,6 +61,7 @@ Affected components:
 - `06-entry-point-examples.md`
 - `07-platform-component-interaction.md`
 - `08-platform-plan-to-component-openspec.md`
+- `09-local-platform-mcp-usage.md`
 
 ## Concrete artifacts in this directory
 
@@ -85,6 +86,7 @@ If you want reusable starting points instead of filled examples, use:
 - `../templates/README.md`
 - `../templates/platform-template/README.md`
 - `../templates/component-boilerplate/README.md`
+- `../templates/platform-mcp-boilerplate/README.md`
 
 ## How to use this package
 
@@ -92,4 +94,5 @@ If you want reusable starting points instead of filled examples, use:
 2. use `06-entry-point-examples.md` when deciding how a new request starts
 3. use `07-platform-component-interaction.md` when teams need to align local work to platform truth
 4. use `08-platform-plan-to-component-openspec.md` when a component team is receiving a platform `Plan` handoff
-5. open the artifact examples when you need a concrete target shape
+5. use `09-local-platform-mcp-usage.md` when teams are consuming platform truth through a local MCP server
+6. open the artifact examples when you need a concrete target shape

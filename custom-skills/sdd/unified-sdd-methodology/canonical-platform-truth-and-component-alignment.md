@@ -47,6 +47,8 @@ The model is simple:
 - the platform repository owns shared truth
 - component repositories own local implementation truth
 - JIRA owns workflow status and coordination
+- a local read-only platform MCP gateway may expose that platform truth to
+  developers without changing the source-of-truth model
 
 Do not let one of those layers silently replace another.
 
@@ -134,6 +136,21 @@ Each component repository should normally contain:
 
 The component repository is where implementation is planned and executed. It
 should not hold a copied editable version of the full platform truth.
+
+### Optional local platform MCP gateway
+
+When hosted infrastructure is not available, developers may run a small local,
+read-only MCP server against their local platform clone.
+
+Use it to:
+
+- query platform refs and contracts locally
+- validate component alignment against the pinned platform version
+- inspect JIRA-linked metadata that is already part of the local artifact chain
+
+Reference:
+
+- [local-platform-mcp-model.md](local-platform-mcp-model.md)
 
 ## JIRA model
 
@@ -502,6 +519,7 @@ Use these templates:
 - [templates/README.md](templates/README.md)
 - [templates/platform-template/README.md](templates/platform-template/README.md)
 - [templates/component-boilerplate/README.md](templates/component-boilerplate/README.md)
+- [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
 - [templates/platform-ref.yaml](templates/platform-ref.yaml)
 - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
 

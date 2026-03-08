@@ -27,10 +27,12 @@ Helpful starter skill for existing platforms:
 
 - [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
 - Detailed alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- Local MCP guide: [local-platform-mcp-model.md](local-platform-mcp-model.md)
 - Worked examples: [example/README.md](example/README.md)
 - Templates:
   - [templates/platform-ref.yaml](templates/platform-ref.yaml)
   - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
+  - [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
 
 The rule is simple:
 
@@ -117,6 +119,7 @@ Main activities:
 - agree on the phase owners and support roles
 - define the platform versioning and ref model for component repositories
 - define the JIRA hierarchy or issue-link conventions for platform and component work
+- define whether teams will use a local read-only platform MCP gateway
 
 ### 3. Agent roles and responsibilities
 
@@ -167,6 +170,7 @@ Expected outputs:
 - common language for quality and artifact expectations
 - platform versioning and ref model
 - JIRA hierarchy conventions for platform issue, component epic, and stories
+- local platform MCP usage model when teams need local query and validation
 - adoption-ready templates for `platform-ref.yaml` and `jira-traceability.yaml`
 
 ### 7. Criteria for moving to the next phase

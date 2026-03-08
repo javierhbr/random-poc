@@ -80,14 +80,18 @@ Detailed operational guide:
 - Iteration 1 playbook: [iteration-1-playbook.md](iteration-1-playbook.md)
 - Iteration 2 playbook: [iteration-2-playbook.md](iteration-2-playbook.md)
 - Platform/component alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- Local platform MCP model: [local-platform-mcp-model.md](local-platform-mcp-model.md)
 - Worked examples by phase, role, and skill: [example/README.md](example/README.md)
 - Unified agent/skill package: [../unified-sdd-codex-skill/SKILL.md](../unified-sdd-codex-skill/SKILL.md)
 - Role agents: [../unified-sdd-codex-skill/agents/README.md](../unified-sdd-codex-skill/agents/README.md)
 - Existing-platform starter skill: [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
+- Local platform MCP skill: [../platform-truth-mcp-codex-skill/SKILL.md](../platform-truth-mcp-codex-skill/SKILL.md)
+- Go MCP server scaffold: [../platform-truth-mcp-server/README.md](../platform-truth-mcp-server/README.md)
 - Templates:
   - [templates/README.md](templates/README.md)
   - [templates/platform-template/README.md](templates/platform-template/README.md)
   - [templates/component-boilerplate/README.md](templates/component-boilerplate/README.md)
+  - [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
   - [templates/platform-ref.yaml](templates/platform-ref.yaml)
   - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
 
@@ -166,6 +170,8 @@ The methodology now assumes:
 - one master platform repository for shared truth
 - one or more component repositories for local implementation truth
 - JIRA as the delivery tracking chain
+- an optional local read-only platform MCP gateway for developer access to the
+  platform truth
 
 The model is:
 
@@ -193,6 +199,7 @@ Use this rule:
 - platform repo = canonical shared truth
 - component repo = local implementation truth
 - JIRA = workflow and ownership truth
+- local platform MCP = read-only developer access layer to platform truth
 
 Only shared changes should update both platform and component truth.
 
@@ -222,8 +229,10 @@ Shared platform + component change
 Detailed reference:
 
 - [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- [local-platform-mcp-model.md](local-platform-mcp-model.md)
 - [templates/platform-ref.yaml](templates/platform-ref.yaml)
 - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
+- [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
 - [example/08-platform-plan-to-component-openspec.md](example/08-platform-plan-to-component-openspec.md)
 
 ## Platform Plan to component OpenSpec handoff
@@ -275,6 +284,38 @@ The component team then uses OpenSpec to:
 Do not treat the platform plan as the component implementation plan. The
 platform plan sets shared boundaries. The component repo turns those
 boundaries into local executable OpenSpec artifacts.
+
+## Local platform MCP gateway
+
+When hosted infrastructure is not available, teams may use a local read-only
+platform MCP gateway.
+
+```text
+[Local platform clone]
+        |
+        v
+[Local platform MCP]
+  read-only query and validation
+        |
+        v
+[Component repo]
+  OpenSpec local artifacts
+```
+
+Use this rule:
+
+- the MCP gateway reads platform truth and JIRA-linked metadata locally
+- the MCP gateway stays read-only in v1
+- component work validates against the pinned platform version by default
+- component repos still keep local truth in OpenSpec artifacts
+
+Current v1 implementation:
+
+- Go
+- stdio
+- newline-delimited JSON-RPC
+- read-only only
+- local binary scaffold under `../platform-truth-mcp-server/`
 
 ## Phase-by-phase operating model
 
@@ -427,6 +468,8 @@ Speckit strengthens Platform, Specify, and Plan. It gives the methodology:
 - ADR-007 proposes making pull request creation and review explicit in Deliver
 - ADR-010 proposes canonical platform truth with versioned component alignment and JIRA-linked execution
 - ADR-011 proposes OpenSpec-only local workflows inside component repositories
+- ADR-012 proposes a local read-only platform MCP gateway for developer access to platform truth
+- ADR-013 proposes implementing the first local MCP server as a self-contained Go stdio server
 
 ## Evolution path
 
