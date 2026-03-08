@@ -8,6 +8,7 @@ This unified skill is derived from:
 - `../../unified-sdd-methodology/iteration-1-playbook.md`
 - `../../unified-sdd-methodology/iteration-2-playbook.md`
 - `../../unified-sdd-methodology/canonical-platform-truth-and-component-alignment.md`
+- `../../unified-sdd-methodology/example/README.md`
 
 ## Source skills
 

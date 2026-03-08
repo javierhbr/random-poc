@@ -34,5 +34,8 @@ Detailed methodology reference:
 
 Template references:
 
+- `../../unified-sdd-methodology/templates/README.md`
+- `../../unified-sdd-methodology/templates/platform-template/README.md`
+- `../../unified-sdd-methodology/templates/component-boilerplate/README.md`
 - `../../unified-sdd-methodology/templates/platform-ref.yaml`
 - `../../unified-sdd-methodology/templates/jira-traceability.yaml`

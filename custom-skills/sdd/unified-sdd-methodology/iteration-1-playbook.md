@@ -27,6 +27,7 @@ Helpful starter skill for existing platforms:
 
 - [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
 - Detailed alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- Worked examples: [example/README.md](example/README.md)
 - Templates:
   - [templates/platform-ref.yaml](templates/platform-ref.yaml)
   - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
@@ -350,9 +351,8 @@ Move to `Specify` when:
 [Product owns behavior definition]
   Support: Team Lead + Architect + Developers
             |
-            +--> OpenSpec: draft proposal.md and delta specs
-            +--> Speckit: clarify ambiguity and run checklist
-            +--> BMAD: keep the output concise and implementation-friendly
+            +--> OpenSpec: draft proposal.md, delta specs, and local traceability
+            +--> platform-side review: clarify and scope support only when needed
             |
             v
 [Spec package]
@@ -411,20 +411,20 @@ Human roles:
 Agent roles:
 
 - OpenSpec artifact agent drafts `proposal.md` and delta specs
-- Speckit clarify and checklist agents expose ambiguity and readiness gaps
-- BMAD PM-style agent keeps the spec concrete, concise, and implementation-friendly
+- platform-side review agents may expose ambiguity and readiness gaps before the
+  component package is approved
 
 ### 4. Skills used and how they are applied
 
 - `openspec-codex-skill`
-  - use first to create `proposal.md` and delta specs
+  - use first and use it as the only component-repo skill
+  - use it to create `proposal.md`, delta specs, `platform-ref.yaml`, and
+    `jira-traceability.yaml`
   - keep behavior changes explicit and comparable to current reality
-- `speckit-codex-skill`
-  - use second to run `specify`, `clarify`, and `checklist` discipline
-  - use it to turn vague statements into testable requirements
-- `bmad-codex-skill`
-  - use third to keep outputs right-sized and ready for later planning
-  - use it to preserve traceability from intent to implementation
+- platform-side support
+  - BMAD or Speckit may still help upstream when the shared change needs scope
+    control or clarification before the component package is approved
+  - do not mix them into the local component change package
 
 ### 5. Rules that govern interactions and outputs
 
@@ -433,11 +433,9 @@ Apply these rules:
 - `openspec-codex-skill/rules/artifact-rules.md`
   - proposal must separate goals from non-goals
   - specs must use concrete behavior and scenarios
-- `speckit-codex-skill/rules/spec-rules.md`
-  - include user goals, business behavior, constraints, acceptance outcomes, failure behavior, and non-goals
-  - avoid premature technical design
-- `bmad-codex-skill/rules/artifact-rules.md`
-  - include assumptions, risks, success criteria, and implementation implications
+- component rule
+  - once the work is inside the component repo, use OpenSpec only
+  - do not mix platform-side methodology support into the local artifact chain
 
 ### 6. Expected artifacts and deliverables
 

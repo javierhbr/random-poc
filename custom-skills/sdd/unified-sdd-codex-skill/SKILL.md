@@ -222,6 +222,7 @@ When using this skill in a response, structure the output as:
 - `../unified-sdd-methodology/iteration-1-playbook.md`
 - `../unified-sdd-methodology/iteration-2-playbook.md`
 - `../unified-sdd-methodology/canonical-platform-truth-and-component-alignment.md`
+- `../unified-sdd-methodology/example/README.md`
 
 ### Rules
 

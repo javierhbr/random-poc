@@ -17,6 +17,12 @@ according to phase ownership, decision rights, and expected outputs, and uses
 `Explain Code` when the team needs a clear explanation of existing code,
 planned behavior, or pull request impact.
 
+Important boundary:
+
+- platform-level work may use the combined skill set
+- once the work enters a component repository, the local change package uses
+  `OpenSpec` only
+
 Use this file as the phase-by-phase instruction guide and prompt catalog for the
 role agents.
 
@@ -24,10 +30,10 @@ role agents.
 
 | Role | Primary phases | Default skill emphasis | Typical outputs |
 | --- | --- | --- | --- |
-| Architect | Platform, Plan | BMAD -> OpenSpec -> Speckit (+ Explain Code) | platform baseline, architecture plan, ADRs, design review |
-| Team Lead | Route, Deliver | BMAD -> OpenSpec -> Speckit (+ Explain Code) | routed change package, delivery slices, PR/review coordination, archive closure |
-| Product | Specify | OpenSpec -> Speckit -> BMAD (+ Explain Code) | proposal, user stories, acceptance criteria, clarified scope |
-| Developer | Deliver, future Build | Speckit -> OpenSpec -> BMAD (+ Explain Code) | executable tasks, code, tests, PRs, review fixes |
+| Architect | Platform, Plan | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | platform baseline, architecture plan, ADRs, design review |
+| Team Lead | Route, Deliver | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | routed change package, delivery slices, PR/review coordination, archive closure |
+| Product | Specify | platform: OpenSpec -> Speckit -> BMAD; component: OpenSpec (+ Explain Code) | proposal, user stories, acceptance criteria, clarified scope |
+| Developer | Deliver, future Build | component: OpenSpec (+ Explain Code) | executable tasks, code, tests, PRs, review fixes |
 
 ## Shared rules for all role agents
 
@@ -38,6 +44,9 @@ role agents.
 - keep PRs reviewable and traceable to the spec
 - escalate ambiguity before implementation, not after
 - use `Explain Code` when a role needs to teach, onboard, or explain code flow
+- platform phases may use the combined skill set
+- once the work enters a component repository, use `OpenSpec` only for the
+  local change package, local planning, and local delivery updates
 
 ## How to use this guide
 
@@ -52,6 +61,9 @@ For existing platforms, start the Platform phase with
 
 For explanation-heavy work, use
 `../../explain-code-codex-skill/SKILL.md`.
+
+For detailed worked examples by phase, role, and entry point, use
+`../../unified-sdd-methodology/example/README.md`.
 
 ## Phase ownership
 
@@ -235,8 +247,7 @@ Use this phase to:
 
 ##### `Product`
 - use `OpenSpec` first for proposal and delta specs
-- use `Speckit` for clarify and checklist discipline
-- use `BMAD` to keep scope right-sized
+- use `OpenSpec` only inside the component repo
 - use `Explain Code` to compare current behavior vs proposed behavior
 
 ###### Prompt examples:
@@ -246,32 +257,31 @@ Use this phase to:
 
 ##### `Team Lead`
 - protect scope boundaries and confirm readiness for planning
-- use `BMAD` to prevent over-expansion
 - use `OpenSpec` to check artifact completeness
+- use `OpenSpec` only inside the component repo
 - use `Explain Code` when the team needs the current flow explained before approving readiness
 
 ###### Prompt examples:
-- prompt: "Using the BMAD and OpenSpec skills, review this spec package for scope control, traceability, and readiness to move into planning."
+- prompt: "Using the OpenSpec skill, review this spec package for scope control, traceability, and readiness to move into planning."
 - prompt: "Using the explain-code skill, explain the current implementation flow behind this spec so the team can judge whether the proposed scope is realistic."
 
 ##### `Architect`
 - identify hard technical constraints without over-designing the spec
-- use `BMAD` for system-level constraints
-- use `Speckit` to make non-functional expectations explicit
+- use `OpenSpec` to capture local constraints and alignment to platform refs
 - use `Explain Code` to explain current architecture behavior behind the spec
 
 ###### Prompt examples:
-- prompt: "Using the BMAD skill, review the proposed behavior and identify any architectural constraints, major dependencies, or platform rules that must be reflected before planning."
-- prompt: "Using the BMAD skill, review the architecture plan and provide feedback on any potential risks or improvements, ensuring that it remains aligned with our platform's principles and constraints."
+- prompt: "Using the OpenSpec skill, review the proposed behavior and identify any architectural constraints, major dependencies, or platform rules that must be reflected before planning."
+- prompt: "Using the OpenSpec skill, review the local component package and confirm that it stays aligned with the approved platform refs and shared contracts."
 - prompt: "Using the explain-code skill, explain the current architecture path affected by this spec with an analogy, an ASCII diagram, a walkthrough, and one design gotcha."
 
 ##### `Developer`
 - surface failure behavior, operational edges, and testability concerns
-- use `Speckit` for executable acceptance behavior
+- use `OpenSpec` for executable acceptance behavior
 - use `Explain Code` to explain existing behavior before writing executable expectations
 
 ###### Prompt examples:
-- prompt: "Using the Speckit skill, write executable specifications for the assigned tasks, ensuring that they are clear, testable, and aligned with the overall architecture and roadmap."
+- prompt: "Using the OpenSpec skill, write executable expectations for the assigned tasks, ensuring that they are clear, testable, and aligned with the approved component spec and platform refs."
 - prompt: "Using the explain-code skill, explain the current code behavior with an analogy, an ASCII diagram, a walkthrough, and one testing gotcha before writing executable specifications."
 
 Exit output:
@@ -294,14 +304,13 @@ Use this phase to:
 #### Role instructions and prompt examples:
 
 ##### `Architect`
-- use `BMAD` first for architecture and tradeoffs
 - use `OpenSpec` for `design.md` and `tasks.md`
-- use `Speckit` to keep tasks executable and phased
+- use `OpenSpec` only inside the component repo
 - use `Explain Code` to teach the planned architecture and affected code paths
 
 ###### Prompt examples:
-- prompt: "Using the BMAD skill, create a high-level architecture plan for the new feature, ensuring it aligns with our platform's principles and constraints."
-- prompt: "Using the BMAD skill, review the architecture plan and provide feedback on any potential risks or improvements, ensuring that it remains aligned with our platform's principles and constraints."
+- prompt: "Using the OpenSpec skill, create the component `design.md` for the new feature, ensuring it aligns with the approved platform refs, shared contracts, and local repository boundaries."
+- prompt: "Using the OpenSpec skill, review the component plan and confirm that the design and tasks stay aligned with the approved platform handoff."
 - prompt: "Using the explain-code skill, explain the planned architecture path with an analogy, an ASCII diagram, a walkthrough, and one implementation gotcha."
 
 ##### `Team Lead`
@@ -324,11 +333,11 @@ Use this phase to:
 
 ##### `Developer`
 - validate task feasibility and testing practicality
-- use `Speckit` to keep tasks implementable and verifiable
+- use `OpenSpec` to keep tasks implementable and verifiable
 - use `Explain Code` to explain the target code path before implementation starts
 
 ###### Prompt examples:
-- prompt: "Using the Speckit skill, review the proposed task breakdown and identify whether the work is executable in small, testable slices."
+- prompt: "Using the OpenSpec skill, review the proposed task breakdown and identify whether the work is executable in small, testable slices."
 - prompt: "Using the explain-code skill, explain the affected code path with an analogy, an ASCII diagram, a walkthrough, and one technical gotcha before implementation begins."
 
 Exit output:
@@ -361,33 +370,31 @@ Internal flow:
 
 ##### `Team Lead`
 - use `OpenSpec` to keep task and change state current
-- use `BMAD` for review routing and role handoff control
-- use `Speckit` to protect slice quality
+- use `OpenSpec` only inside the component repo
 - use `Explain Code` to explain PR scope and review focus to the team
 
 ###### Prompt examples:
 - prompt: "Using the OpenSpec skill, monitor the progress of the development team and ensure that all tasks are being completed according to the specifications, providing support and guidance as needed."
-- prompt: "Using the BMAD and OpenSpec skills, coordinate the current delivery slice through build, PR creation, review, verification, deploy, and archive."
+- prompt: "Using the OpenSpec skill, coordinate the current delivery slice through build, PR creation, review, verification, deploy, and archive."
 - prompt: "Using the explain-code skill, explain the current delivery slice and PR scope with an analogy, an ASCII diagram, a walkthrough, and one review gotcha."
 
 ##### `Developer`
-- use `Speckit` first for executable task execution
+- use `OpenSpec` for executable task execution
 - use `OpenSpec` to update task status and PR traceability
-- use `BMAD` when story execution or review support is needed
 - use `Explain Code` to explain the code path and PR change to reviewers
 
 ###### Prompt examples:
-- prompt: "Using the Speckit skill, implement the assigned tasks according to the executable specifications, ensuring that all code is well-documented and tested."
-- prompt: "Using the OpenSpec and BMAD skills, update the task state, create a reviewable PR for this slice, and summarize the validation performed."
+- prompt: "Using the OpenSpec skill, implement the assigned tasks according to the approved component spec, ensuring that the code and tests remain aligned with the local OpenSpec package."
+- prompt: "Using the OpenSpec skill, update the task state, create a reviewable PR for this slice, and summarize the validation performed."
 - prompt: "Using the explain-code skill, explain this PR change with an analogy, an ASCII diagram, a walkthrough, and one gotcha reviewers should watch."
 
 ##### `Architect`
 - review architecture-sensitive PRs and late technical tradeoffs
-- use `BMAD` for design integrity review
+- use `OpenSpec` for design integrity review inside the component repo
 - use `Explain Code` when reviewers need the architecture impact made explicit
 
 ###### Prompt examples:
-- prompt: "Using the BMAD skill, review this PR for architecture integrity, interface compatibility, and design drift against the approved plan."
+- prompt: "Using the OpenSpec skill, review this PR for architecture integrity, interface compatibility, and design drift against the approved component plan."
 - prompt: "Using the explain-code skill, explain how this PR changes the architecture path, using an analogy, an ASCII diagram, a walkthrough, and one risk."
 
 ##### `Product`

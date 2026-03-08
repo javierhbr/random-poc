@@ -229,6 +229,66 @@ Use OpenSpec inside the component repository for:
 
 Those artifacts are the detailed implementation-facing truth for the component.
 
+## Component repository skill rule
+
+Use this boundary rule throughout the methodology:
+
+- platform-level work may use BMAD, OpenSpec, and Speckit together
+- once the work enters a component repository, use OpenSpec only
+
+This means the component repository uses OpenSpec for:
+
+- `platform-ref.yaml`
+- `jira-traceability.yaml`
+- `proposal.md`
+- component delta specs
+- `design.md`
+- `tasks.md`
+- delivery traceability updates through PR and archive
+
+Do not mix BMAD or Speckit into the local component change package. Use them
+upstream on the platform side when teams are still framing, routing, or
+governing shared work.
+
+## Platform Plan to component OpenSpec handoff
+
+The platform `Plan` phase must hand the component team enough information to
+start local OpenSpec work without guessing.
+
+Required handoff inputs:
+
+- platform version
+- platform refs
+- shared design and contract decisions
+- migration, rollout, or rollback constraints
+- platform issue and component epic chain
+
+The handoff flow is:
+
+```text
+[Platform Plan]
+  shared boundaries
+        |
+        v
+[Component repo alignment]
+  platform-ref.yaml
+  jira-traceability.yaml
+        |
+        v
+[Component OpenSpec]
+  proposal.md -> spec.md -> design.md -> tasks.md
+        |
+        v
+[PR + verification + archive]
+```
+
+The platform plan sets shared boundaries. The component repository converts
+those boundaries into local executable OpenSpec artifacts.
+
+Worked example:
+
+- [example/08-platform-plan-to-component-openspec.md](example/08-platform-plan-to-component-openspec.md)
+
 ## Phase-by-phase workflow inside the methodology
 
 ### Platform
@@ -439,6 +499,9 @@ Expected pattern:
 
 Use these templates:
 
+- [templates/README.md](templates/README.md)
+- [templates/platform-template/README.md](templates/platform-template/README.md)
+- [templates/component-boilerplate/README.md](templates/component-boilerplate/README.md)
 - [templates/platform-ref.yaml](templates/platform-ref.yaml)
 - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
 

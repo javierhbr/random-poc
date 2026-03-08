@@ -80,10 +80,14 @@ Detailed operational guide:
 - Iteration 1 playbook: [iteration-1-playbook.md](iteration-1-playbook.md)
 - Iteration 2 playbook: [iteration-2-playbook.md](iteration-2-playbook.md)
 - Platform/component alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
+- Worked examples by phase, role, and skill: [example/README.md](example/README.md)
 - Unified agent/skill package: [../unified-sdd-codex-skill/SKILL.md](../unified-sdd-codex-skill/SKILL.md)
 - Role agents: [../unified-sdd-codex-skill/agents/README.md](../unified-sdd-codex-skill/agents/README.md)
 - Existing-platform starter skill: [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
 - Templates:
+  - [templates/README.md](templates/README.md)
+  - [templates/platform-template/README.md](templates/platform-template/README.md)
+  - [templates/component-boilerplate/README.md](templates/component-boilerplate/README.md)
   - [templates/platform-ref.yaml](templates/platform-ref.yaml)
   - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
 
@@ -152,6 +156,9 @@ The basic interaction pattern is the same in every phase:
 - agents produce structured drafts, comparisons, and checks
 - the phase owner decides when the work is ready to move on
 
+Inside component repositories, the local artifact chain stays OpenSpec-only even
+when the platform side used the combined methodology earlier in the flow.
+
 ## Platform spec and component spec interaction
 
 The methodology now assumes:
@@ -217,6 +224,57 @@ Detailed reference:
 - [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
 - [templates/platform-ref.yaml](templates/platform-ref.yaml)
 - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
+- [example/08-platform-plan-to-component-openspec.md](example/08-platform-plan-to-component-openspec.md)
+
+## Platform Plan to component OpenSpec handoff
+
+Use this boundary rule:
+
+- platform phases may use BMAD, OpenSpec, and Speckit together
+- once the work enters a component repository, use OpenSpec only
+
+The handoff should look like this:
+
+```text
+[Platform Plan]
+  platform version
+  platform refs
+  shared decisions
+  rollout constraints
+  platform issue
+        |
+        v
+[Component repo]
+  platform-ref.yaml
+  jira-traceability.yaml
+  OpenSpec proposal/spec/design/tasks
+        |
+        v
+[Component delivery]
+  stories -> PRs -> verification -> archive
+```
+
+The platform handoff must give the component team:
+
+- the platform version to pin
+- the platform refs that constrain the change
+- the shared design and contract decisions
+- the rollout or migration expectations
+- the JIRA chain that the component epic belongs to
+
+The component team then uses OpenSpec to:
+
+- pin alignment in `platform-ref.yaml`
+- pin the issue chain in `jira-traceability.yaml`
+- write the local `proposal.md`
+- write the local component spec delta
+- write `design.md`
+- write `tasks.md`
+- keep delivery traceability current through PR and archive
+
+Do not treat the platform plan as the component implementation plan. The
+platform plan sets shared boundaries. The component repo turns those
+boundaries into local executable OpenSpec artifacts.
 
 ## Phase-by-phase operating model
 
@@ -224,9 +282,9 @@ Detailed reference:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Platform | Define durable context for all future changes | Architect | Platform stakeholders, Product, and Team Leads agree on guardrails, quality standards, common context, versioning, and JIRA conventions | Speckit creates or refreshes the constitution, OpenSpec encodes durable project config, BMAD frames context for later routing and roles | `speckit-codex-skill`, `openspec-codex-skill`, `bmad-codex-skill` | `speckit-codex-skill/rules/constitution-rules.md`, `openspec-codex-skill/rules/project-config-template.yaml` | constitution, project config, common context, platform ref model |
 | Route | Turn a request into a routed change package | Team Lead | Product, Architect, and Manager classify the request, affected scope, platform refs, and issue chain | BMAD selects the right track, OpenSpec frames the change package, agents call out size, impact, unknowns, and the next artifact | `bmad-codex-skill`, `openspec-codex-skill` | `bmad-codex-skill/rules/track-selection-rules.md`, `openspec-codex-skill/rules/artifact-rules.md` | scoped change package, selected path, initial platform/component/JIRA traceability |
-| Specify | Define the required behavior before implementation | Product | Product works with impacted teams to define goals, non-goals, acceptance behavior, and whether the change is local or shared | OpenSpec drafts `proposal.md` and delta specs, Speckit runs clarify and checklist passes, BMAD keeps the scope implementation-friendly | `openspec-codex-skill`, `speckit-codex-skill`, `bmad-codex-skill` | `openspec-codex-skill/rules/artifact-rules.md`, `speckit-codex-skill/rules/spec-rules.md`, `bmad-codex-skill/rules/artifact-rules.md` | approved proposal, delta specs, resolved ambiguity, confirmed platform refs |
-| Plan | Convert the approved spec into a technical execution plan | Architect | Architect, Team Lead, and Developers agree on design, dependencies, rollout approach, and story mapping | BMAD uses the architect role and progressive planning, OpenSpec drafts `design.md` and `tasks.md`, Speckit checks coverage through plan and task discipline | `bmad-codex-skill`, `openspec-codex-skill`, `speckit-codex-skill` | `bmad-codex-skill/rules/artifact-rules.md`, `openspec-codex-skill/rules/artifact-rules.md`, `speckit-codex-skill/rules/plan-rules.md`, `speckit-codex-skill/rules/task-rules.md` | design, ADRs when needed, tasks, delivery slices, task-to-story traceability |
-| Deliver | Execute the plan in controlled slices through review, deploy, and archive | Team Lead | Team Lead coordinates Developers, QA, Architect, and Product across execution and release | BMAD Dev-role and QA/review support implementation and code review, OpenSpec applies tasks and keeps artifacts current, Speckit enforces task quality and phased execution | `bmad-codex-skill`, `openspec-codex-skill`, `speckit-codex-skill` | `speckit-codex-skill/rules/task-rules.md`, `openspec-codex-skill/rules/artifact-rules.md`, `bmad-codex-skill/rules/artifact-rules.md` | implemented slices, reviewed PRs, verification evidence, deployed change, archived package with traceability |
+| Specify | Define the required behavior before implementation | Product | Product works with impacted teams to define goals, non-goals, acceptance behavior, and whether the change is local or shared | Platform-side support may use BMAD and Speckit, but component repos use OpenSpec only for `proposal.md`, delta specs, and local traceability files | platform: `openspec-codex-skill`, `speckit-codex-skill`, `bmad-codex-skill`; component: `openspec-codex-skill` | `openspec-codex-skill/rules/artifact-rules.md`, platform-side review rules as needed | approved proposal, delta specs, resolved ambiguity, confirmed platform refs |
+| Plan | Convert the approved spec into a technical execution plan | Architect | Architect, Team Lead, and Developers agree on design, dependencies, rollout approach, and story mapping | Platform planning may use BMAD and Speckit, but component repos turn the handoff into local OpenSpec `design.md` and `tasks.md` | platform: `bmad-codex-skill`, `openspec-codex-skill`, `speckit-codex-skill`; component: `openspec-codex-skill` | `openspec-codex-skill/rules/artifact-rules.md`, platform-side planning rules as needed | design, ADRs when needed, tasks, delivery slices, task-to-story traceability |
+| Deliver | Execute the plan in controlled slices through review, deploy, and archive | Team Lead | Team Lead coordinates Developers, QA, Architect, and Product across execution and release | Component repos execute through OpenSpec task updates, PR traceability, verification notes, and archive-ready closure | component: `openspec-codex-skill`; platform-side review support optional outside the component repo | `openspec-codex-skill/rules/artifact-rules.md` | implemented slices, reviewed PRs, verification evidence, deployed change, archived package with traceability |
 
 ## What each phase contains
 
@@ -264,10 +322,11 @@ Specify defines the "what" before the "how."
 This phase combines:
 
 - OpenSpec proposal and delta specs
-- Speckit clarify and checklist
-- BMAD artifact quality expectations
+- platform-side clarify and scope support when needed
 
 The result is a change package that is clear enough for planning.
+
+Inside component repositories, use OpenSpec only for the local spec package.
 
 ### 4. Plan
 
@@ -275,9 +334,8 @@ Plan defines the technical execution model.
 
 This phase combines:
 
-- BMAD architect and planning roles
-- OpenSpec design and tasks artifacts
-- Speckit plan and task quality rules
+- platform-side planning support where needed
+- OpenSpec design and task artifacts in the component repo
 
 The plan should end with implementation slices, not one large execution block.
 
@@ -297,6 +355,8 @@ Deliver contains six internal slices:
 This keeps release activity inside the main delivery phase while the teams are
 still adopting the methodology.
 
+Inside component repositories, Deliver is an OpenSpec-driven execution flow.
+
 ## Deliver phase: internal slices
 
 ```text
@@ -313,11 +373,11 @@ still adopting the methodology.
         |
         +--> [Review PR]
         |      Team Lead assigns reviewers
-        |      BMAD review support helps structure code-review feedback
+        |      Review stays linked to the local OpenSpec package
         |
         +--> [Verify]
         |      QA / Validation and Developers collect evidence
-        |      Speckit task discipline keeps validation explicit
+        |      OpenSpec keeps verification notes explicit and traceable
         |
         +--> [Deploy]
         |      Team Lead coordinates release timing, dependencies, and rollback readiness
@@ -366,6 +426,7 @@ Speckit strengthens Platform, Specify, and Plan. It gives the methodology:
 - ADR-006 proposes rolling out the 5-phase model in two iterations
 - ADR-007 proposes making pull request creation and review explicit in Deliver
 - ADR-010 proposes canonical platform truth with versioned component alignment and JIRA-linked execution
+- ADR-011 proposes OpenSpec-only local workflows inside component repositories
 
 ## Evolution path
 

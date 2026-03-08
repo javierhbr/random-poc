@@ -22,6 +22,7 @@ Use this document after Iteration 1 is working consistently.
 - run `Deliver` only when the plan is strong enough to execute without guesswork
 - keep delivery incremental, reviewable, and traceable back to the spec
 - keep platform version, JIRA chain, and local OpenSpec artifacts aligned through delivery
+- use [example/README.md](example/README.md) when teams need step-by-step prompts by role
 
 The rule is simple:
 
@@ -54,9 +55,8 @@ Change complete
 [Architect owns planning]
   Support: Team Lead + Developers + Product
             |
-            +--> BMAD: architect role, planning depth, implementation framing
-            +--> OpenSpec: draft design.md and tasks.md
-            +--> Speckit: apply plan and task discipline
+            +--> Platform-side support: shared planning and boundary review
+            +--> OpenSpec: draft component design.md and tasks.md
             |
             v
 [Implementation-ready plan]
@@ -65,6 +65,48 @@ Change complete
             v
 Ready for Deliver
 ```
+
+### Platform Plan to component OpenSpec handoff
+
+Use this rule in Iteration 2:
+
+- the platform `Plan` phase may use the combined methodology
+- the component repository uses OpenSpec only
+
+The handoff should look like this:
+
+```text
+[Platform Plan output]
+  platform version
+  platform refs
+  shared decisions
+  rollout constraints
+  issue chain
+        |
+        v
+[Component repo]
+  platform-ref.yaml
+  jira-traceability.yaml
+  proposal.md when needed
+  design.md
+  tasks.md
+        |
+        v
+[Component Deliver]
+  PRs -> verification -> archive
+```
+
+Use the platform handoff to:
+
+- pin `platform-ref.yaml`
+- pin `jira-traceability.yaml`
+- convert shared decisions into local `design.md`
+- break the design into local `tasks.md`
+- keep the local PR and archive chain aligned to the same platform baseline
+
+Worked example:
+
+- [example/08-platform-plan-to-component-openspec.md](example/08-platform-plan-to-component-openspec.md)
 
 ### 1. Main objectives and outcomes
 
@@ -111,36 +153,31 @@ Human roles:
 
 Agent roles:
 
-- BMAD Architect agent helps choose planning depth and structure the design
 - OpenSpec design agent drafts `design.md` and `tasks.md`
-- Speckit plan and task agents check completeness, traceability, and execution quality
+- platform-side review support may still validate shared boundaries before the
+  component plan is approved
 
 ### 4. Skills used and how they are applied
 
-- `bmad-codex-skill`
-  - use first to select the right planning depth and apply architect-style reasoning
-  - use it to keep the plan progressive and scoped to the approved change
 - `openspec-codex-skill`
-  - use second to create or refine `design.md` and `tasks.md`
-  - use it to keep artifacts aligned with the change package
-- `speckit-codex-skill`
-  - use third to enforce plan and task quality
-  - use it to ensure the plan is executable and the tasks are traceable
+  - use it as the only component-repo skill in Plan
+  - use it to create or refine `design.md` and `tasks.md`
+  - use it to keep artifacts aligned with the platform handoff and change package
+- platform-side support
+  - BMAD and Speckit may still help upstream when the platform team is framing
+    shared planning depth, cross-team constraints, or review criteria
+  - do not mix them into the local component plan
 
 ### 5. Rules that govern interactions and outputs
 
 Apply these rules:
 
-- `speckit-codex-skill/rules/plan-rules.md`
-  - include architecture, modules, data flow, integration points, operational concerns, and testing strategy
-  - map major technical choices back to the spec
-- `speckit-codex-skill/rules/task-rules.md`
-  - tasks must be specific, sequential when needed, easy to validate, and traceable
 - `openspec-codex-skill/rules/artifact-rules.md`
   - design must explain why the chosen solution is preferred
   - tasks must be narrow, testable, and dependency-aware
-- `bmad-codex-skill/rules/artifact-rules.md`
-  - planning artifacts must include assumptions, constraints, risks, success criteria, and implementation implications
+- component rule
+  - once the work is inside the component repo, use OpenSpec only
+  - do not mix platform-side methodology support into the local component plan
 
 ### 6. Expected artifacts and deliverables
 
@@ -197,9 +234,7 @@ Move to `Deliver` when:
 [Team Lead owns delivery]
   Support: Developers + QA / Validation + Architect + Product
             |
-            +--> BMAD: dev-style execution support and implementation notes
             +--> OpenSpec: apply tasks, update artifacts, archive the change
-            +--> Speckit: keep tasks explicit, phased, and verifiable
             |
             v
 [Controlled delivery]
@@ -262,35 +297,31 @@ Human roles:
 
 Agent roles:
 
-- BMAD Dev agent supports implementation framing, tests, and story-level execution notes
-- BMAD QA / review agent supports code-review checklists and review findings
 - OpenSpec apply/archive agent keeps the change package current through execution and closure
-- Speckit task/implement discipline keeps slices explicit, reviewable, and validated
+- the component team uses the same OpenSpec package to track slice progress,
+  PR links, and archive readiness
 
 ### 4. Skills used and how they are applied
 
-- `bmad-codex-skill`
-  - use first for implementation framing, testing expectations, and dev-story style support
-  - use it when delivery teams need role-based execution guidance and review framing
 - `openspec-codex-skill`
-  - use second for `/opsx:apply` during execution and `/opsx:archive` at closure
-  - use it to keep artifacts and implementation state aligned
-- `speckit-codex-skill`
-  - use throughout delivery to keep tasks narrow, phased, and verifiable
-  - use it to resist large vague implementation jumps
+  - use it as the only component-repo skill in Deliver
+  - use it for task updates, PR traceability, verification notes, and archive
+  - use it to keep artifacts and implementation state aligned through delivery
+- platform-side support
+  - platform review support can still exist outside the component repo
+  - do not mix BMAD or Speckit into the local component delivery package
 
 ### 5. Rules that govern interactions and outputs
 
 Apply these rules:
 
-- `speckit-codex-skill/rules/task-rules.md`
-  - each task must remain specific, reviewable, and easy to validate
-  - avoid vague or mixed-concern execution steps
 - `openspec-codex-skill/rules/artifact-rules.md`
   - keep artifacts consistent with the current reality
   - prefer incremental, reviewable change sets
-- `bmad-codex-skill/rules/artifact-rules.md`
-  - execution outputs should preserve scope, tests, acceptance criteria, and implementation implications
+- component rule
+  - once the work is inside the component repo, use OpenSpec only
+  - keep the local task, PR, verification, and archive chain inside the same
+    OpenSpec change package
 
 Apply these additional review expectations:
 
