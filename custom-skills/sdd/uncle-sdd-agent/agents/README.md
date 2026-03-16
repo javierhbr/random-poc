@@ -1,5 +1,8 @@
 # Role Agents
 
+> This file is human-facing documentation only. Skill loading happens via the
+> role SKILL.md files in `architect/`, `team-lead/`, `product/`, `developer/`.
+
 These role agents sit on top of the unified SDD skill package.
 
 They all have access to the same three core SDD skills:
@@ -449,7 +452,7 @@ Exit output:
 
 ## Agent files
 
-- `architect-agent.md`
-- `team-lead-agent.md`
-- `product-agent.md`
-- `developer-agent.md`
+- `architect/SKILL.md`
+- `team-lead/SKILL.md`
+- `product/SKILL.md`
+- `developer/SKILL.md`

@@ -294,17 +294,17 @@ When using this skill in a response, structure the output as:
 - `references/platform-component-alignment.md`
 - `references/agent-interaction-model.md`
 - `references/sources.md`
+- `../platform-spec/SKILL.md`
 - `../platform-contextualizer-codex-skill/SKILL.md`
-- `../platform-truth-mcp-codex-skill/SKILL.md`
 - `../explain-code-codex-skill/SKILL.md`
 
 ### Role agents
 
-- `agents/README.md`
-- `agents/architect-agent.md`
-- `agents/team-lead-agent.md`
-- `agents/product-agent.md`
-- `agents/developer-agent.md`
+- `agents/README.md` — human-facing phase guide and prompt catalog
+- `agents/architect/SKILL.md`
+- `agents/team-lead/SKILL.md`
+- `agents/product/SKILL.md`
+- `agents/developer/SKILL.md`
 
 ### Source skills
 
