@@ -82,7 +82,7 @@ Ready for Platform phase
 
 ### 1. Start with BMAD
 
-Use `bmad-codex-skill` first to:
+Use `sdd-bmad` first to:
 
 - treat the platform as brownfield
 - inspect existing conventions before proposing new ones
@@ -91,7 +91,7 @@ Use `bmad-codex-skill` first to:
 
 ### 2. Use OpenSpec second
 
-Use `openspec-codex-skill` to:
+Use `sdd-openspec` to:
 
 - encode stable context
 - structure reusable configuration
@@ -99,7 +99,7 @@ Use `openspec-codex-skill` to:
 
 ### 3. Use Speckit third
 
-Use `speckit-codex-skill` to:
+Use `sdd-speckit` to:
 
 - turn vague values into explicit principles
 - define quality and testing guardrails
@@ -147,8 +147,8 @@ When using this skill, structure the output as:
 
 ## Related skills
 
-- `../bmad-codex-skill/SKILL.md`
-- `../openspec-codex-skill/SKILL.md`
-- `../speckit-codex-skill/SKILL.md`
-- `../platform-truth-mcp-codex-skill/SKILL.md`
-- `../unified-sdd-codex-skill/SKILL.md`
+- `../sdd-bmad/SKILL.md`
+- `../sdd-openspec/SKILL.md`
+- `../sdd-speckit/SKILL.md`
+- `../platform-truth-mcp-skill/SKILL.md`
+- `../uncle-sdd-agent/SKILL.md`

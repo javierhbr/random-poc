@@ -1,41 +1,40 @@
-# Local Platform MCP Model
+# Local Platform Access Model
 
 ## Purpose
 
-This document defines how teams can use a local MCP server to query and
-validate canonical platform truth without needing hosted infrastructure.
+This document defines how teams query and validate canonical platform truth
+locally without needing hosted infrastructure.
 
 Use this model when:
 
 - the platform repository is the source of truth
 - component repositories need fast local access to platform rules and refs
-- developers can run a small local process on their machine
-- the organization is not ready yet for a centrally hosted MCP service
+- developers keep a local clone of the platform repository
+- the organization is not ready yet for a centrally hosted service
 
 Related assets:
 
-- [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
-- [../platform-truth-mcp-codex-skill/SKILL.md](../platform-truth-mcp-codex-skill/SKILL.md)
+- [../platform-spec/SKILL.md](../platform-spec/SKILL.md)
+- [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
 - [example/09-local-platform-mcp-usage.md](example/09-local-platform-mcp-usage.md)
-- [../platform-truth-mcp-server/README.md](../platform-truth-mcp-server/README.md)
 
 ## Core idea
 
 Do not copy platform truth into component repositories. Instead, keep a local
-clone of the platform repository and run a read-only MCP server against it.
+clone of the platform repository and use `platform-spec` to index and search it.
 
 ```text
 [platform repo clone]
-  platform specs
+  platform specs (.md, .mdx, .txt)
   contracts
   ADRs
   refs
-  JIRA metadata
+  ownership artifacts
         |
         v
-[local platform MCP]
-  read-only query tools
-  alignment validation tools
+[platform-spec index]
+  SQLite FTS5 full-text index
+  built from local clone
         |
         v
 [component repo]
@@ -47,23 +46,59 @@ clone of the platform repository and run a read-only MCP server against it.
   tasks.md
 ```
 
+## The platform-spec tool
+
+`platform-spec` is a CLI tool and a Claude skill. It indexes `.md`, `.mdx`,
+and `.txt` files across one or more local repositories and provides instant
+full-text search via SQLite FTS5. Single bash script, zero dependencies beyond
+`sqlite3`.
+
+Skill location: `../platform-spec/SKILL.md`
+
+### Setup
+
+Register your local platform clone as a repo:
+
+```bash
+platform-spec repo add /path/to/platform-repo platform
+platform-spec search "component ownership"   # ready immediately
+```
+
+The index auto-rebuilds when repos are added and auto-detects file changes on
+next search.
+
+### Core commands
+
+```bash
+# Search
+platform-spec search "payment eligibility"
+platform-spec search "tier 1 OR tier 2" platform
+platform-spec search "contract NOT deprecated"
+
+# Read a spec
+platform-spec read component-ownership
+platform-spec read dependency-map
+
+# Browse
+platform-spec list platform
+platform-spec related component-ownership
+
+# JSON output for agent pipelines
+platform-spec json search "impact tier"
+platform-spec json read glossary
+```
+
 ## Why this model fits the methodology
 
-This model preserves the source-of-truth separation already defined in the
-methodology:
+This model preserves the source-of-truth separation defined in the methodology:
 
 - platform repo = canonical shared truth
 - component repo = local OpenSpec truth
 - JIRA = workflow and coordination truth
 
-The local MCP server does not change those roles. It only makes the platform
-truth easier to consume and validate from a developer workstation.
-
-That makes it a good fit for the current stage of adoption:
-
-- local enough to start now
-- structured enough to reduce drift
-- small enough to replace later with a hosted MCP service if needed
+`platform-spec` does not change those roles. It makes the platform truth
+searchable and queryable from a developer workstation with no server process
+required.
 
 ## Workspace model
 
@@ -71,7 +106,7 @@ Use a side-by-side workspace, not nested clones.
 
 ```text
 /workspaces
-  /platform-repo
+  /platform-repo       ← register with platform-spec
   /profile-service
   /auth-service
   /notification-service
@@ -81,156 +116,107 @@ Recommended rule:
 
 - developers keep `platform-repo` cloned locally
 - component repositories do not vendor or mirror the platform repository
-- the local MCP server points to the local `platform-repo` path
+- `platform-spec` points to the local `platform-repo` path
 
 ## Versioning rule
 
-This is the most important rule.
+Local component work must validate against the pinned platform version in
+`platform-ref.yaml` by default, even when the local clone is more recent.
 
-Developers may keep the local platform clone updated. That is good. But local
-component work must validate against the pinned platform version in
-`platform-ref.yaml` by default.
+Use `platform-spec` with a scoped search to stay aligned with the pinned
+version:
 
-That means the MCP server should support two modes:
+```bash
+# Search only within the pinned platform context
+platform-spec search "contract" platform
+platform-spec read ownership/dependency-map
+```
 
-- `pinned`
-  - default for component work
-  - answers questions from the version or ref declared by the component
-- `latest`
-  - optional for platform exploration or impact analysis
-  - should not be the default validation mode for component delivery
+Without this discipline, two developers can get different answers from the same
+local platform clone.
 
-Without this rule, two developers can get different answers from the same local
-platform clone.
+## How component teams use platform-spec by phase
 
-## What the MCP server should read
+### Platform
 
-The first MCP version should read both platform truth and JIRA-linked metadata.
+- register the platform repo: `platform-spec repo add /path/to/platform platform`
+- verify ownership artifacts are indexed: `platform-spec list platform`
 
-### Platform truth inputs
+### Assess
 
-- platform baseline
-- capability refs
-- contract refs
-- ADRs
-- version markers or tags
-- ownership maps
-- shared planning notes that are already part of platform truth
+- confirm component ownership before opening a JIRA epic (rule O-1):
 
-### JIRA-linked inputs
+```bash
+platform-spec search "component-ownership auth-service"
+platform-spec read ownership/component-ownership-auth-service
+```
 
-Read only the JIRA information that is already represented in the platform or
-component artifact chain, or a locally synced export.
+- read the dependency map and classify impact tiers:
 
-Examples:
+```bash
+platform-spec read ownership/dependency-map
+```
 
-- platform issue keys
-- component epic keys
-- story mappings
-- issue-link relationships
+### Specify
 
-Do not make JIRA the detailed spec source. The MCP server should help teams
-locate the right issue chain, not replace the platform or component specs.
+- look up glossary terms before writing `proposal.md` (rule O-2):
 
-## Recommended first tool surface
+```bash
+platform-spec search "eligibility" platform
+platform-spec read ownership/glossary
+```
 
-Keep the first version small and useful.
+### Plan
 
-### Full target tool surface
+- read platform impact tiers before designing:
 
-- `get_platform_version`
-- `list_platform_refs`
-- `get_platform_ref`
-- `get_contract`
-- `get_capability`
-- `get_platform_adr`
-- `list_platform_changes_since_version`
-- `get_jira_mapping`
+```bash
+platform-spec json read ownership/dependency-map
+```
 
-### Validation tools
+- validate that `design.md` and `tasks.md` align to platform refs
 
-- `validate_platform_ref_exists`
-- `validate_component_alignment`
-- `validate_component_jira_chain`
-- `explain_constraints_for_component`
-- `detect_platform_drift_from_pinned_version`
+### Deliver
 
-### Implemented v1 tools
+- detect drift against the pinned platform version before merge:
 
-The current Go server scaffold implements:
+```bash
+platform-spec search "contract" platform
+platform-spec related component-ownership-auth-service
+```
 
-- `get_platform_version`
-- `list_platform_refs`
-- `get_platform_ref`
-- `get_jira_mapping`
-- `validate_component_alignment`
-- `validate_component_jira_chain`
-- `detect_platform_drift_from_pinned_version`
+## Agentic directory integration
 
-## How component teams should use it
+When working inside a `.agentic/` project directory, `platform-spec` integrates
+with the agentic workflow:
 
-Use the MCP server as a local read-only gateway during component work.
+```text
+/.agentic/
+  skills/
+    openspec/          ← local OpenSpec task execution
+    ...
+  tasks/               ← current task state
+```
 
-### In Specify
+Register the platform repo once per workspace:
 
-- confirm the pinned platform version
-- confirm the platform refs used by the component spec
-- confirm whether the change is local-only or shared
+```bash
+platform-spec repo add /path/to/platform-repo platform
+```
 
-### In Plan
-
-- read the platform planning decisions for the pinned version
-- confirm contract expectations
-- validate that local `design.md` and `tasks.md` still align to platform refs
-
-### In Deliver
-
-- validate the active component package against the pinned platform refs
-- confirm the JIRA chain is still aligned
-- capture PR and verification traceability without re-reading platform docs by hand
+From that point, any agentic skill or Claude session in the workspace can query
+platform truth during Assess, Specify, Plan, and Deliver without manual file
+lookups.
 
 ## Operational rules
 
-Keep the local MCP server simple.
+Keep the local setup simple.
 
-- read-only only
-- no writes to the platform repo
-- no writes to the component repo
-- no database required for v1
-- local filesystem + git metadata + optional local cache only
-- small startup cost
+- read-only queries only — `platform-spec` never writes to the platform repo
+- no server process required — single SQLite file, single bash script
+- no external dependencies beyond `sqlite3` (pre-installed on macOS and Linux)
+- small startup cost — index rebuilds automatically on file change
 - clear failure messages when the local platform clone is stale or missing
-
-## Recommended implementation approach
-
-Both Rust and Go fit this. For v1, prefer the language the team can ship
-fastest.
-
-Recommended default:
-
-- use `Go` if the goal is the fastest path to a small cross-platform binary
-- use `Rust` if the team already has strong Rust experience and wants stricter
-  control of binary size and safety
-
-For a first internal tool, Go is usually the faster path.
-
-## Suggested local workflow
-
-```text
-developer updates local platform clone
-        |
-        v
-component repo loads pinned platform version
-        |
-        v
-local MCP answers against pinned version
-        |
-        v
-component team writes local OpenSpec artifacts
-        |
-        v
-validation runs before PR and before archive
-```
 
 ## Adoption path
 
@@ -238,17 +224,24 @@ Start small.
 
 ### Step 1
 
-Use the local MCP server for platform query only.
+Register the platform repo and run your first search.
+
+```bash
+platform-spec repo add /path/to/platform-repo platform
+platform-spec search "ownership"
+```
 
 ### Step 2
 
-Add alignment validation for `platform-ref.yaml` and `jira-traceability.yaml`.
+Use `platform-spec` during Assess to confirm ownership and classify impact
+tiers before opening JIRA epics.
 
 ### Step 3
 
-Add plan and delivery support for component teams.
+Use `platform-spec` during Specify to verify all proposal terms exist in the
+shared glossary.
 
 ### Step 4
 
-Reuse the same tool contract later for a hosted MCP server if the platform team
-adds shared infrastructure.
+Use `platform-spec` during Plan and Deliver to validate alignment and detect
+drift before PRs and before archive.

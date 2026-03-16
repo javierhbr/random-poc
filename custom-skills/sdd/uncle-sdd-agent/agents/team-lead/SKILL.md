@@ -42,7 +42,7 @@ Load in this order:
 1. `../../../sdd-bmad/SKILL.md` — assessment, routing, handoffs, impact classification
 2. `../../../sdd-openspec/SKILL.md` — open and frame the change package
 3. `../../../platform-spec/SKILL.md` — query ownership artifacts and dependency map
-4. `../../../explain-code-codex-skill/SKILL.md` — show current flow when routing depends on code impact
+4. `../../../explain-code-skill/SKILL.md` — show current flow when routing depends on code impact
 
 Load `../../../sdd-speckit/SKILL.md` only when ambiguity blocks safe assessment.
 
@@ -52,7 +52,7 @@ Load in this order:
 
 1. `../../../sdd-openspec/SKILL.md` — task state, apply, archive; component repo only
 2. `../../../platform-spec/SKILL.md` — drift check and alignment validation before deploy
-3. `../../../explain-code-codex-skill/SKILL.md` — explain PR scope and review focus to the team
+3. `../../../explain-code-skill/SKILL.md` — explain PR scope and review focus to the team
 
 ### Platform support
 
@@ -66,7 +66,7 @@ Load:
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — validate tasks stay traceable to the specs
-2. `../../../explain-code-codex-skill/SKILL.md` — help the team understand task sequencing
+2. `../../../explain-code-skill/SKILL.md` — help the team understand task sequencing
 
 ### Specify support
 

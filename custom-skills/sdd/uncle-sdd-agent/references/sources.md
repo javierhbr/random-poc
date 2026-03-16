@@ -29,9 +29,9 @@ This unified skill is derived from:
 - `../sdd-bmad/SKILL.md`
 - `../sdd-openspec/SKILL.md`
 - `../sdd-speckit/SKILL.md`
-- `../explain-code-codex-skill/SKILL.md`
-- `../platform-contextualizer-codex-skill/SKILL.md`
-- `../platform-truth-mcp-codex-skill/SKILL.md`
+- `../explain-code-skill/SKILL.md`
+- `../platform-contextualizer-skill/SKILL.md`
+- `../platform-truth-mcp-skill/SKILL.md`
 - `../methodology-tools/SKILLS.md`
 
 ## Source rule files

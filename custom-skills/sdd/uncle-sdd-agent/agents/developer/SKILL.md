@@ -41,7 +41,7 @@ Load in this order:
 
 1. `../../../sdd-openspec/SKILL.md` — execute tasks, update task state, create PR, archive; component repo only
 2. `../../../sdd-speckit/SKILL.md` — executable task interpretation, phased execution, validation discipline
-3. `../../../explain-code-codex-skill/SKILL.md` — explain code path and PR change to reviewers
+3. `../../../explain-code-skill/SKILL.md` — explain code path and PR change to reviewers
 
 Load `../../../sdd-bmad/SKILL.md` for dev-story style execution notes, testing expectations, and review support.
 
@@ -50,14 +50,14 @@ Load `../../../sdd-bmad/SKILL.md` for dev-story style execution notes, testing e
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — write executable expectations
-2. `../../../explain-code-codex-skill/SKILL.md` — explain existing behavior before writing executable specs
+2. `../../../explain-code-skill/SKILL.md` — explain existing behavior before writing executable specs
 
 ### Plan support
 
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — validate tasks are implementable and verifiable
-2. `../../../explain-code-codex-skill/SKILL.md` — explain the target code path before implementation starts
+2. `../../../explain-code-skill/SKILL.md` — explain the target code path before implementation starts
 
 ## Responsibilities by phase
 

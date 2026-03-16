@@ -80,13 +80,13 @@ Detailed operational guide:
 - Iteration 1 playbook: [iteration-1-playbook.md](iteration-1-playbook.md)
 - Iteration 2 playbook: [iteration-2-playbook.md](iteration-2-playbook.md)
 - Platform/component alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
-- Local platform MCP model: [local-platform-mcp-model.md](local-platform-mcp-model.md)
+- Local platform access model: [local-platform-mcp-model.md](local-platform-mcp-model.md)
 - Worked examples by phase, role, and skill: [example/README.md](example/README.md)
-- Unified agent/skill package: [../unified-sdd-codex-skill/SKILL.md](../unified-sdd-codex-skill/SKILL.md)
-- Role agents: [../unified-sdd-codex-skill/agents/README.md](../unified-sdd-codex-skill/agents/README.md)
-- Existing-platform starter skill: [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
-- Local platform MCP skill: [../platform-truth-mcp-codex-skill/SKILL.md](../platform-truth-mcp-codex-skill/SKILL.md)
-- Go MCP server scaffold: [../platform-truth-mcp-server/README.md](../platform-truth-mcp-server/README.md)
+- Unified agent/skill package: [../uncle-sdd-agent/SKILL.md](../uncle-sdd-agent/SKILL.md)
+- Role agents: [../uncle-sdd-agent/agents/README.md](../uncle-sdd-agent/agents/README.md)
+- Existing-platform starter skill: [../platform-contextualizer-skill/SKILL.md](../platform-contextualizer-skill/SKILL.md)
+- Platform spec search skill: [../platform-spec/SKILL.md](../platform-spec/SKILL.md)
+- Agentic skills directory: `~/.agentic/skills/`
 - Templates:
   - [templates/README.md](templates/README.md)
   - [templates/platform-template/README.md](templates/platform-template/README.md)
@@ -319,7 +319,8 @@ Current v1 implementation:
 - stdio
 - newline-delimited JSON-RPC
 - read-only only
-- local binary scaffold under `../platform-truth-mcp-server/`
+- `platform-spec` CLI tool: `../platform-spec/SKILL.md`
+- agentic skills: `~/.agentic/skills/`
 
 ## Phase-by-phase operating model
 

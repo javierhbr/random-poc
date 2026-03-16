@@ -25,9 +25,11 @@ methodology.
 
 Helpful starter skill for existing platforms:
 
-- [../platform-contextualizer-codex-skill/SKILL.md](../platform-contextualizer-codex-skill/SKILL.md)
+- [../platform-contextualizer-skill/SKILL.md](../platform-contextualizer-skill/SKILL.md)
 - Detailed alignment guide: [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
-- Local MCP guide: [local-platform-mcp-model.md](local-platform-mcp-model.md)
+- Local platform access guide: [local-platform-mcp-model.md](local-platform-mcp-model.md)
+- Platform spec search skill: [../platform-spec/SKILL.md](../platform-spec/SKILL.md)
+- Agentic skills directory: `~/.agentic/skills/`
 - Worked examples: [example/README.md](example/README.md)
 - Templates:
   - [templates/platform-ref.yaml](templates/platform-ref.yaml)

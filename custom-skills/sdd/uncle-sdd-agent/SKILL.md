@@ -295,8 +295,8 @@ When using this skill in a response, structure the output as:
 - `references/agent-interaction-model.md`
 - `references/sources.md`
 - `../platform-spec/SKILL.md`
-- `../platform-contextualizer-codex-skill/SKILL.md`
-- `../explain-code-codex-skill/SKILL.md`
+- `../platform-contextualizer-skill/SKILL.md`
+- `../explain-code-skill/SKILL.md`
 
 ### Role agents
 

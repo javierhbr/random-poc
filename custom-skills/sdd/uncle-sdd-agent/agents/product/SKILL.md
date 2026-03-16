@@ -38,7 +38,7 @@ Load in this order:
 1. `../../../sdd-openspec/SKILL.md` — proposal, delta specs, change-package framing; component repo only
 2. `../../../sdd-speckit/SKILL.md` — clarify, checklist, testable acceptance behavior
 3. `../../../platform-spec/SKILL.md` — look up glossary terms, confirm shared definitions before writing
-4. `../../../explain-code-codex-skill/SKILL.md` — compare current behavior vs proposed behavior
+4. `../../../explain-code-skill/SKILL.md` — compare current behavior vs proposed behavior
 
 Load `../../../sdd-bmad/SKILL.md` for right-sized scope, acceptance criteria, and traceability to implementation.
 
@@ -53,14 +53,14 @@ Load:
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — make scope boundaries explicit
-2. `../../../explain-code-codex-skill/SKILL.md` — explain current implementation before scoping
+2. `../../../explain-code-skill/SKILL.md` — explain current implementation before scoping
 
 ### Deliver support
 
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — confirm delivered behavior matches the spec
-2. `../../../explain-code-codex-skill/SKILL.md` — explain implementation behavior clearly
+2. `../../../explain-code-skill/SKILL.md` — explain implementation behavior clearly
 
 ## Responsibilities by phase
 

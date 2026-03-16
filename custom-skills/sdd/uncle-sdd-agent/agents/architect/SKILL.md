@@ -38,11 +38,11 @@ Support phases:
 
 Load in this order:
 
-1. `../../../platform-contextualizer-codex-skill/SKILL.md` — use first on any existing platform
+1. `../../../platform-contextualizer-skill/SKILL.md` — use first on any existing platform
 2. `../../../sdd-bmad/SKILL.md` — brownfield framing, role framing, architecture depth
 3. `../../../sdd-openspec/SKILL.md` — encode durable context, write ownership artifacts
 4. `../../../sdd-speckit/SKILL.md` — turn principles into explicit rules
-5. `../../../explain-code-codex-skill/SKILL.md` — explain existing architecture to teams
+5. `../../../explain-code-skill/SKILL.md` — explain existing architecture to teams
 
 ### Plan phase
 
@@ -51,28 +51,28 @@ Load in this order:
 1. `../../../sdd-bmad/SKILL.md` — progressive planning, architecture decisions
 2. `../../../sdd-openspec/SKILL.md` — design.md, tasks.md, change package alignment
 3. `../../../platform-spec/SKILL.md` — query platform truth, validate impact tiers before designing
-4. `../../../explain-code-codex-skill/SKILL.md` — teach planned architecture and affected code paths
+4. `../../../explain-code-skill/SKILL.md` — teach planned architecture and affected code paths
 
 ### Assess support
 
 Load:
 
 1. `../../../sdd-bmad/SKILL.md` — signal when work must escalate to architecture-heavy planning
-2. `../../../explain-code-codex-skill/SKILL.md` — make system impact visible to non-architects
+2. `../../../explain-code-skill/SKILL.md` — make system impact visible to non-architects
 
 ### Specify support
 
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — capture local constraints and alignment to platform refs
-2. `../../../explain-code-codex-skill/SKILL.md` — explain current architecture behavior behind the spec
+2. `../../../explain-code-skill/SKILL.md` — explain current architecture behavior behind the spec
 
 ### Deliver review support
 
 Load:
 
 1. `../../../sdd-openspec/SKILL.md` — design integrity review inside the component repo
-2. `../../../explain-code-codex-skill/SKILL.md` — make architecture impact explicit for reviewers
+2. `../../../explain-code-skill/SKILL.md` — make architecture impact explicit for reviewers
 
 ## Responsibilities by phase
 

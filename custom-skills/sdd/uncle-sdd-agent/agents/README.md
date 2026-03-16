@@ -62,16 +62,16 @@ role agents.
 5. produce the phase output before moving forward
 
 For existing platforms, start the Platform phase with
-`../../platform-contextualizer-codex-skill/SKILL.md`.
+`../../platform-contextualizer-skill/SKILL.md`.
 
 For explanation-heavy work, use
-`../../explain-code-codex-skill/SKILL.md`.
+`../../explain-code-skill/SKILL.md`.
 
 For detailed worked examples by phase, role, and entry point, use
 `../../unified-sdd-methodology/example/README.md`.
 
 For local platform query and alignment validation, use
-`../../platform-truth-mcp-codex-skill/SKILL.md`.
+`../../platform-truth-mcp-skill/SKILL.md`.
 
 ## Phase ownership
 
