@@ -50,7 +50,7 @@ Load in this order:
 
 1. `../../../sdd-bmad/SKILL.md` — progressive planning, architecture decisions
 2. `../../../sdd-openspec/SKILL.md` — design.md, tasks.md, change package alignment
-3. `../../../platform-spec/SKILL.md` — query platform truth, validate impact tiers before designing
+3. `../../../local-doc/SKILL.md` — query platform truth, validate impact tiers before designing
 4. `../../../explain-code-skill/SKILL.md` — teach planned architecture and affected code paths
 
 ### Assess support
@@ -131,7 +131,7 @@ Load:
 
 ### Plan
 
-- "Using platform-spec, search for the platform refs that apply to this component and list any tier 1 impact entries."
+- "Using local-doc, search for the platform refs that apply to this component and list any tier 1 impact entries."
 - "Read platform-ref.yaml impact tiers. For each tier 1 entry, add a named coordination requirement to design.md. For each tier 2 entry, add a rollout risk note."
 - "Using the OpenSpec skill, create the component design.md, ensuring it aligns with the approved platform refs, shared contracts, and local repository boundaries."
 - "Using the explain-code skill, explain the planned architecture path with an analogy, an ASCII diagram, a walkthrough, and one implementation gotcha."

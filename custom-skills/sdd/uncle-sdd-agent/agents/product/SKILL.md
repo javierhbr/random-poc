@@ -37,7 +37,7 @@ Load in this order:
 
 1. `../../../sdd-openspec/SKILL.md` — proposal, delta specs, change-package framing; component repo only
 2. `../../../sdd-speckit/SKILL.md` — clarify, checklist, testable acceptance behavior
-3. `../../../platform-spec/SKILL.md` — look up glossary terms, confirm shared definitions before writing
+3. `../../../local-doc/SKILL.md` — look up glossary terms, confirm shared definitions before writing
 4. `../../../explain-code-skill/SKILL.md` — compare current behavior vs proposed behavior
 
 Load `../../../sdd-bmad/SKILL.md` for right-sized scope, acceptance criteria, and traceability to implementation.
@@ -74,7 +74,7 @@ Load:
 
 ### Specify
 
-- use platform-spec to look up glossary terms before writing `proposal.md`; all
+- use local-doc to look up glossary terms before writing `proposal.md`; all
   terms in goals and acceptance criteria must be in the glossary (rule O-2)
 - own the proposal and behavior definition using only glossary terms
 - define goals, non-goals, and acceptance outcomes
@@ -102,7 +102,7 @@ Load:
 
 ### Specify
 
-- "Using platform-spec, search the shared glossary for all terms used in the proposal goals and acceptance criteria. Flag any that are missing before writing."
+- "Using local-doc, search the shared glossary for all terms used in the proposal goals and acceptance criteria. Flag any that are missing before writing."
 - "Using the OpenSpec skill, define the user stories and acceptance criteria for the new feature, ensuring that they are aligned with the business goals and user needs."
 - "Using the Speckit and BMAD skills, clarify ambiguity in this proposal and turn it into a spec package that is ready for planning."
 - "Using the explain-code skill, explain how the current implementation behaves with an analogy, an ASCII diagram, a step-by-step walkthrough, and one gotcha that matters for product decisions."

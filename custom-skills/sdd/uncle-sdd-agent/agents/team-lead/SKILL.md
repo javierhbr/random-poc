@@ -41,7 +41,7 @@ Load in this order:
 
 1. `../../../sdd-bmad/SKILL.md` — assessment, routing, handoffs, impact classification
 2. `../../../sdd-openspec/SKILL.md` — open and frame the change package
-3. `../../../platform-spec/SKILL.md` — query ownership artifacts and dependency map
+3. `../../../local-doc/SKILL.md` — query ownership artifacts and dependency map
 4. `../../../explain-code-skill/SKILL.md` — show current flow when routing depends on code impact
 
 Load `../../../sdd-speckit/SKILL.md` only when ambiguity blocks safe assessment.
@@ -51,7 +51,7 @@ Load `../../../sdd-speckit/SKILL.md` only when ambiguity blocks safe assessment.
 Load in this order:
 
 1. `../../../sdd-openspec/SKILL.md` — task state, apply, archive; component repo only
-2. `../../../platform-spec/SKILL.md` — drift check and alignment validation before deploy
+2. `../../../local-doc/SKILL.md` — drift check and alignment validation before deploy
 3. `../../../explain-code-skill/SKILL.md` — explain PR scope and review focus to the team
 
 ### Platform support
@@ -123,12 +123,12 @@ Load:
 ### Assess
 
 - "Using the BMAD and OpenSpec skills, assess this request by size and impact, open the change package, and identify the next artifact and owner."
-- "Using platform-spec, search for the component ownership file for [component] and confirm which team owns this request."
+- "Using local-doc, search for the component ownership file for [component] and confirm which team owns this request."
 - "Read ownership/component-ownership-<name>.md and confirm which component owns this request. Then read ownership/dependency-map.md and populate the impact tier fields in platform-ref.yaml."
 - "Using the explain-code skill, explain the current code path and blast radius with an analogy, an ASCII diagram, a walkthrough, and one routing risk."
 
 ### Deliver
 
 - "Using the OpenSpec skill, coordinate the current delivery slice through build, PR creation, review, verification, deploy, and archive."
-- "Using platform-spec, run a drift check against the pinned platform version before merge."
+- "Using local-doc, run a drift check against the pinned platform version before merge."
 - "Using the explain-code skill, explain the current delivery slice and PR scope with an analogy, an ASCII diagram, a walkthrough, and one review gotcha."

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────
-# platform-spec — multi-repo spec registry with full-text search
+# local-doc — multi-repo spec registry with full-text search
 #
 # Scan multiple spec repos, search across all of them instantly.
 # Powered by SQLite FTS5. Uses pre-installed sqlite3.
@@ -14,7 +14,7 @@ set -euo pipefail
 
 # ── Config ──────────────────────────────────────────────
 
-APP_DIR="${HOME}/.platform-spec"
+APP_DIR="${HOME}/.local-doc"
 REPOS_FILE="${APP_DIR}/repos"
 DB_FILE="${APP_DIR}/specs.db"
 
@@ -34,7 +34,7 @@ ensure_sqlite() {
 }
 
 ensure_repos() {
-  [[ -f "$REPOS_FILE" ]] || die "No repos added yet. Run: platform-spec repo add /path/to/specs"
+  [[ -f "$REPOS_FILE" ]] || die "No repos added yet. Run: local-doc repo add /path/to/specs"
 }
 
 is_git_repo() {
@@ -277,7 +277,7 @@ cmd_repo() {
 
   case "$subcmd" in
     add)
-      local dir="${1:?Usage: platform-spec repo add /path/to/specs [name]}"
+      local dir="${1:?Usage: local-doc repo add /path/to/specs [name]}"
       dir="$(cd "$dir" 2>/dev/null && pwd)" || die "Folder not found: $1"
       local rname="${2:-$(basename "$dir")}"
 
@@ -294,7 +294,7 @@ cmd_repo() {
       ;;
 
     remove|rm)
-      local rname="${1:?Usage: platform-spec repo remove <name>}"
+      local rname="${1:?Usage: local-doc repo remove <name>}"
       ensure_repos
       if ! grep -q "^${rname}|" "$REPOS_FILE"; then
         die "Repo '${rname}' not found."
@@ -316,7 +316,7 @@ cmd_repo() {
       if [[ ! -f "$REPOS_FILE" ]] || [[ ! -s "$REPOS_FILE" ]]; then
         echo "No repos added yet."
         echo ""
-        echo "Add one:  platform-spec repo add /path/to/specs"
+        echo "Add one:  local-doc repo add /path/to/specs"
         return 0
       fi
       echo "Registered repos:"
@@ -332,7 +332,7 @@ cmd_repo() {
       ;;
 
     *)
-      echo "Usage: platform-spec repo <add|remove|list>"
+      echo "Usage: local-doc repo <add|remove|list>"
       echo ""
       echo "  repo add /path [name]   Add a spec repo"
       echo "  repo remove <name>      Remove a repo"
@@ -435,7 +435,7 @@ cmd_scan() {
     # Scan a specific repo
     local rpath
     rpath="$(grep "^${target}|" "$REPOS_FILE" | cut -d'|' -f2)"
-    [[ -n "$rpath" ]] || die "Repo '${target}' not found. Run: platform-spec repo list"
+    [[ -n "$rpath" ]] || die "Repo '${target}' not found. Run: local-doc repo list"
     index_repo "$target" "$rpath" || true
     total=$?
   fi
@@ -461,13 +461,13 @@ cmd_scan() {
   sql "INSERT OR REPLACE INTO meta VALUES ('last_scan', datetime('now'));"
 
   echo ""
-  echo "Done. Run 'platform-spec search <keyword>' to find specs."
+  echo "Done. Run 'local-doc search <keyword>' to find specs."
 }
 
 # ── Search ──────────────────────────────────────────────
 
 cmd_search() {
-  local query="${1:?Usage: platform-spec search <query>}"
+  local query="${1:?Usage: local-doc search <query>}"
   local repo_filter="${2:-}"
   ensure_repos; ensure_db
 
@@ -481,9 +481,9 @@ cmd_search() {
     echo "No specs found for: ${query}"
     echo ""
     echo "Tips:"
-    echo "  Broader term, or prefix: platform-spec search \"ref*\""
-    echo "  Boolean: platform-spec search \"refund OR chargeback\""
-    echo "  Browse: platform-spec list"
+    echo "  Broader term, or prefix: local-doc search \"ref*\""
+    echo "  Boolean: local-doc search \"refund OR chargeback\""
+    echo "  Browse: local-doc list"
     return 0
   fi
 
@@ -504,7 +504,7 @@ cmd_search() {
 # ── Read ────────────────────────────────────────────────
 
 cmd_read() {
-  local query="${1:?Usage: platform-spec read <name>}"
+  local query="${1:?Usage: local-doc read <name>}"
   local repo_filter="${2:-}"
   ensure_repos; ensure_db
 
@@ -592,7 +592,7 @@ cmd_projects() {
 # ── Related ─────────────────────────────────────────────
 
 cmd_related() {
-  local query="${1:?Usage: platform-spec related <name>}"
+  local query="${1:?Usage: local-doc related <name>}"
   ensure_repos; ensure_db
 
   local spec_name spec_title spec_tags
@@ -657,7 +657,7 @@ cmd_tags() {
 cmd_stats() {
   ensure_repos; ensure_db
 
-  echo "Platform Spec Stats"
+  echo "Local Doc Stats"
   echo ""
   echo "  Repos:          $(sql "SELECT COUNT(*) FROM repos;")"
   echo "  Total specs:    $(sql "SELECT COUNT(*) FROM specs;")"
@@ -690,7 +690,7 @@ SELECT repo, path, project, title, ext FROM specs ORDER BY repo, project, name;"
   sql "SELECT tag || ': ' || GROUP_CONCAT(s.name, ', ') FROM spec_tags t JOIN specs s ON t.spec_id = s.id GROUP BY LOWER(t.tag) ORDER BY LOWER(t.tag);"
   echo ""
   echo "Database: ${DB_FILE} ($(du -h "$DB_FILE" 2>/dev/null | cut -f1))"
-  echo "Tip: this .db is a cache. Delete it + run 'platform-spec scan' to rebuild."
+  echo "Tip: this .db is a cache. Delete it + run 'local-doc scan' to rebuild."
 }
 
 # ── JSON (for agents) ──────────────────────────────────
@@ -702,7 +702,7 @@ cmd_json() {
 
   case "$subcmd" in
     search)
-      local query="${1:?Usage: platform-spec json search <query>}"
+      local query="${1:?Usage: local-doc json search <query>}"
       local repo_filter="${2:-}"
       local where="specs_fts MATCH '${query//\'/\'\'}'"
       [[ -n "$repo_filter" ]] && where="${where} AND s.repo = '${repo_filter//\'/\'\'}'"
@@ -710,7 +710,7 @@ cmd_json() {
       ;;
 
     read)
-      local query="${1:?Usage: platform-spec json read <name>}"
+      local query="${1:?Usage: local-doc json read <name>}"
       local fullpath
       fullpath="$(sql "SELECT fullpath FROM specs WHERE LOWER(name) LIKE '%$(echo "$query" | tr '[:upper:]' '[:lower:]' | sed "s/'/''/g")%' LIMIT 1;")"
       if [[ -n "$fullpath" && -f "$fullpath" ]]; then
@@ -741,7 +741,7 @@ with open('${fullpath}') as f:
       ;;
 
     related)
-      local query="${1:?Usage: platform-spec json related <name>}"
+      local query="${1:?Usage: local-doc json related <name>}"
       local spec_name spec_title spec_tags
       spec_name="$(sql "SELECT name FROM specs WHERE LOWER(name) LIKE '%$(echo "$query" | tr '[:upper:]' '[:lower:]' | sed "s/'/''/g")%' LIMIT 1;")"
       spec_title="$(sql "SELECT title FROM specs WHERE name = '${spec_name//\'/\'\'}' LIMIT 1;")"
@@ -774,7 +774,7 @@ cmd_reset() {
   read -r -p "Are you sure? (y/N) " confirm
   if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     rm -rf "$APP_DIR"
-    echo "Reset complete. Start fresh with: platform-spec repo add /path/to/specs"
+    echo "Reset complete. Start fresh with: local-doc repo add /path/to/specs"
   else
     echo "Cancelled."
   fi
@@ -785,52 +785,53 @@ cmd_reset() {
 cmd_help() {
   cat << 'EOF'
 
-  platform-spec — search your project specs across multiple repos
+  local-doc — search your project specs across multiple repos
 
   REPO MANAGEMENT:
 
-    platform-spec repo add <folder> [name]   Register a spec repo
-    platform-spec repo remove <name>         Remove a repo
-    platform-spec repo list                  Show all repos
+    local-doc repo add <folder> [name]   Register a spec repo
+    local-doc repo remove <name>         Remove a repo
+    local-doc repo list                  Show all repos
 
   SCANNING:
 
-    platform-spec scan                       Scan all repos
-    platform-spec scan <repo-name>           Scan one repo
+    local-doc scan                       Scan all repos
+    local-doc scan <repo-name>           Scan one repo
 
   SEARCHING:
 
-    platform-spec search <query>             Search all repos
-    platform-spec search <query> <repo>      Search one repo
-    platform-spec read <name>                Read a spec
-    platform-spec read <name> <repo>         Read from specific repo
-    platform-spec related <name>             Find related specs
+    local-doc search <query>             Search all repos
+    local-doc search <query> <repo>      Search one repo
+    local-doc read <name>                Read a spec
+    local-doc read <name> <repo>         Read from specific repo
+    local-doc related <name>             Find related specs
 
   BROWSING:
 
-    platform-spec list                       All specs, all repos
-    platform-spec list <repo-or-project>     Filter by repo or project
-    platform-spec projects                   List all projects
-    platform-spec tags                       List all tags
-    platform-spec tags <tag>                 Specs with a tag
-    platform-spec recent [n]                 Recently modified
+    local-doc list                       All specs, all repos
+    local-doc list <repo-or-project>     Filter by repo or project
+    local-doc projects                   List all projects
+    local-doc tags                       List all tags
+    local-doc tags <tag>                 Specs with a tag
+    local-doc recent [n]                 Recently modified
 
   INFO:
 
-    platform-spec stats                      Index statistics
-    platform-spec inspect                    Dump full index
-    platform-spec reset                      Delete everything and start over
-    platform-spec help                       This help
+    local-doc stats                      Index statistics
+    local-doc db                         Print database file path
+    local-doc inspect                    Dump full index
+    local-doc reset                      Delete everything and start over
+    local-doc help                       This help
 
   AGENT COMMANDS (JSON):
 
-    platform-spec json search <query> [repo]
-    platform-spec json read <name>
-    platform-spec json list [repo-or-project]
-    platform-spec json repos
-    platform-spec json related <name>
-    platform-spec json tags
-    platform-spec json stats
+    local-doc json search <query> [repo]
+    local-doc json read <name>
+    local-doc json list [repo-or-project]
+    local-doc json repos
+    local-doc json related <name>
+    local-doc json tags
+    local-doc json stats
 
   SEARCH FEATURES:
 
@@ -846,11 +847,11 @@ cmd_help() {
   TROUBLESHOOTING:
 
     Something broken? Delete the cache and rebuild:
-      rm ~/.platform-spec/specs.db
-      platform-spec scan
+      rm ~/.local-doc/specs.db
+      local-doc scan
 
     Nuclear reset (removes repo list too):
-      platform-spec reset
+      local-doc reset
 
 EOF
 }
@@ -870,6 +871,7 @@ case "${1:-help}" in
   recent)               shift; cmd_recent "$@" ;;
   tags|t)               shift; cmd_tags "$@" ;;
   stats)                shift; cmd_stats ;;
+  db)                   echo "$DB_FILE" ;;
   inspect|dump|debug)   shift; cmd_inspect ;;
   json|j)               shift; cmd_json "$@" ;;
   reset)                shift; cmd_reset ;;

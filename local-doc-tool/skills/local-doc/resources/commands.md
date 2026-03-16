@@ -1,6 +1,6 @@
 # Command reference
 
-Complete documentation for all `platform-spec` commands.
+Complete documentation for all `local-doc` commands.
 
 ## Table of contents
 
@@ -19,7 +19,7 @@ Complete documentation for all `platform-spec` commands.
 ### repo add
 
 ```bash
-platform-spec repo add <folder> [name]
+local-doc repo add <folder> [name]
 ```
 
 Register a spec folder. Automatically triggers a full scan.
@@ -30,14 +30,14 @@ Register a spec folder. Automatically triggers a full scan.
 - Indexes `.md`, `.mdx`, and `.txt` files
 
 ```bash
-platform-spec repo add ./product-specs product
-platform-spec repo add /home/team/docs
+local-doc repo add ./product-specs product
+local-doc repo add /home/team/docs
 ```
 
 ### repo remove
 
 ```bash
-platform-spec repo remove <n>
+local-doc repo remove <n>
 ```
 
 Unregister a repo. Automatically rebuilds the index without it.
@@ -45,7 +45,7 @@ Unregister a repo. Automatically rebuilds the index without it.
 ### repo list
 
 ```bash
-platform-spec repo list
+local-doc repo list
 ```
 
 Shows all registered repos with paths and file counts.
@@ -69,8 +69,8 @@ Registered repos:
 ### scan
 
 ```bash
-platform-spec scan            # all repos
-platform-spec scan <repo>     # one repo
+local-doc scan            # all repos
+local-doc scan <repo>     # one repo
 ```
 
 Rebuilds the search index. Usually not needed — the index auto-rebuilds when:
@@ -86,7 +86,7 @@ Force a manual scan if auto-detection isn't catching changes.
 ### search
 
 ```bash
-platform-spec search <query> [repo]
+local-doc search <query> [repo]
 ```
 
 Full-text search across all repos (or one repo if specified).
@@ -122,14 +122,14 @@ Results for "refund":
 ### read
 
 ```bash
-platform-spec read <n> [repo]
+local-doc read <n> [repo]
 ```
 
 Print the full content of a spec. Matches by name (partial match).
 
 ```bash
-platform-spec read refund              # first match across all repos
-platform-spec read signup product      # from specific repo
+local-doc read refund              # first match across all repos
+local-doc read signup product      # from specific repo
 ```
 
 If multiple specs match, shows all matches and displays the first.
@@ -141,28 +141,28 @@ If multiple specs match, shows all matches and displays the first.
 ### list
 
 ```bash
-platform-spec list                     # all specs, all repos
-platform-spec list <repo>              # one repo
-platform-spec list <project>           # one project (if not a repo name)
+local-doc list                     # all specs, all repos
+local-doc list <repo>              # one repo
+local-doc list <project>           # one project (if not a repo name)
 ```
 
 ### projects
 
 ```bash
-platform-spec projects
+local-doc projects
 ```
 
 ### tags
 
 ```bash
-platform-spec tags                     # all tags with counts
-platform-spec tags billing             # specs tagged "billing"
+local-doc tags                     # all tags with counts
+local-doc tags billing             # specs tagged "billing"
 ```
 
 ### related
 
 ```bash
-platform-spec related <n>
+local-doc related <n>
 ```
 
 Finds specs related to a given spec by analyzing its title and tags.
@@ -170,7 +170,7 @@ Finds specs related to a given spec by analyzing its title and tags.
 ### recent
 
 ```bash
-platform-spec recent [n]               # default: last 10
+local-doc recent [n]               # default: last 10
 ```
 
 ---
@@ -182,7 +182,7 @@ Every command has a JSON equivalent for programmatic use by agents.
 ### json search
 
 ```bash
-platform-spec json search <query> [repo]
+local-doc json search <query> [repo]
 ```
 
 Returns:
@@ -204,7 +204,7 @@ Returns:
 ### json read
 
 ```bash
-platform-spec json read <n>
+local-doc json read <n>
 ```
 
 Returns:
@@ -217,7 +217,7 @@ Returns:
 
 ### json list / json repos / json related / json tags / json stats
 
-All return JSON arrays or objects. See `platform-spec json help` for details.
+All return JSON arrays or objects. See `local-doc json help` for details.
 
 ---
 
@@ -226,7 +226,7 @@ All return JSON arrays or objects. See `platform-spec json help` for details.
 ### stats
 
 ```bash
-platform-spec stats
+local-doc stats
 ```
 
 Shows repo count, spec count, projects, tags, file types, DB size, last scan time.
@@ -234,7 +234,7 @@ Shows repo count, spec count, projects, tags, file types, DB size, last scan tim
 ### inspect
 
 ```bash
-platform-spec inspect
+local-doc inspect
 ```
 
 Dumps the full index as readable text. Useful for debugging.
@@ -242,7 +242,7 @@ Dumps the full index as readable text. Useful for debugging.
 ### reset
 
 ```bash
-platform-spec reset
+local-doc reset
 ```
 
 Deletes everything (index + repo list) and starts fresh. Asks for confirmation.
@@ -250,8 +250,8 @@ Deletes everything (index + repo list) and starts fresh. Asks for confirmation.
 ### Manual rebuild
 
 ```bash
-rm ~/.platform-spec/specs.db
-platform-spec scan
+rm ~/.local-doc/specs.db
+local-doc scan
 ```
 
 The nuclear option. Deletes the cache and rebuilds from source files.

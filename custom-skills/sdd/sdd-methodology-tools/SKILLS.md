@@ -27,7 +27,7 @@ One trigger. One skill per phase. Load only what the current role needs.
 | `sdd:hotfix` | Developer | `../hotfix/SKILL.md` | Production hotfix path with minimal spec |
 | `sdd:workflow` | Any role | `../workflow-router/SKILL.md` | Route initiative to correct SDD workflow (Quick/Standard/Full) |
 | `sdd:constitution` | Platform Architect | `../platform-constitution/SKILL.md` | Author platform governance policy |
-| `sdd:platform-spec` | Platform Architect | `../platform-spec/SKILL.md` | Create platform specs with SpecKit MCP |
+| `sdd:local-doc` | Platform Architect | `../local-doc/SKILL.md` | Create platform specs with SpecKit MCP |
 | `sdd:process-guide` | All roles | `../process-guide/SKILL.md` | Complete step-by-step guide for entire SDD workflow |
 | `sdd:stakeholder` | Product Manager | `../stakeholder-communication/SKILL.md` | Communicate SDD status to non-technical stakeholders |
 

@@ -294,7 +294,7 @@ When using this skill in a response, structure the output as:
 - `references/platform-component-alignment.md`
 - `references/agent-interaction-model.md`
 - `references/sources.md`
-- `../platform-spec/SKILL.md`
+- `../local-doc/SKILL.md`
 - `../platform-contextualizer-skill/SKILL.md`
 - `../explain-code-skill/SKILL.md`
 
