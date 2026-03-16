@@ -8,7 +8,7 @@ practical guide for teams.
 Iteration 1 covers the first three phases:
 
 1. Platform
-2. Route
+2. Assess
 3. Specify
 
 The purpose of Iteration 1 is to improve the quality of shared context and
@@ -20,7 +20,7 @@ Use this document as the day-to-day guide for the first rollout of the
 methodology.
 
 - start with `Platform` once for the shared environment
-- run `Route` for each new request or change
+- run `Assess` for each new request or change
 - run `Specify` before any technical planning starts
 
 Helpful starter skill for existing platforms:
@@ -47,7 +47,7 @@ The rule is simple:
   create shared context and durable rules
         |
         v
-[ROUTE]
+[ASSESS]
   turn a request into a scoped change package
         |
         v
@@ -85,7 +85,7 @@ to define the durable baseline.
   constitution + config + role map + quality language
             |
             v
-Ready for Route
+Ready for Assess
 ```
 
 ### 1. Main objectives and outcomes
@@ -175,11 +175,11 @@ Expected outputs:
 
 ### 7. Criteria for moving to the next phase
 
-Move to `Route` when:
+Move to `Assess` when:
 
 - principles are explicit enough for teams to follow
 - durable context is separated from temporary change detail
-- role ownership is clear for Platform, Route, and Specify
+- role ownership is clear for Platform, Assess, and Specify
 - there is a reusable config or rules baseline for future changes
 
 ### 8. Potential challenges and mitigation strategies
@@ -193,12 +193,12 @@ Move to `Route` when:
 
 ### 9. Feedback and iteration process
 
-- review the first few routed changes against the constitution
+- review the first few assessed changes against the constitution
 - track which rules teams actually use and which ones they ignore
 - refine the constitution and config after each pilot or retro
 - keep the platform baseline small, practical, and easy to maintain
 
-## Phase 2: Route
+## Phase 2: Assess
 
 ### Phase flow
 
@@ -207,7 +207,7 @@ Move to `Route` when:
   initiative / requirement / team proposal
             |
             v
-[Team Lead owns routing]
+[Team Lead owns assessment]
   Support: Product + Architect + Engineering Manager
             |
             +--> BMAD: classify greenfield/brownfield, size, and track
@@ -215,7 +215,7 @@ Move to `Route` when:
             +--> Speckit: clarify only if the request is too vague
             |
             v
-[Routed change package]
+[Assessed change package]
   scope + size + impact + path + next artifact + known unknowns
             |
             v
@@ -232,7 +232,7 @@ Objectives:
 
 Outcomes:
 
-- one routed change package
+- one assessed change package
 - a size and impact classification
 - a selected track for the next step
 - a short list of known unknowns
@@ -264,16 +264,16 @@ Main activities:
 
 Human roles:
 
-- Team Lead owns the phase and makes the routing decision
+- Team Lead owns the phase and makes the assessment decision
 - Product clarifies business priority, intent, and non-goals
 - Architect identifies architecture, integration, and cross-team impact
 - Engineering Manager supports prioritization, staffing, and escalation
 
 Agent roles:
 
-- BMAD routing agent classifies project type, size, and track
+- BMAD classification agent classifies project type, size, and track
 - OpenSpec change agent frames the change package and the next artifact
-- Speckit clarify agent is optional here when the request is too vague to route safely
+- Speckit clarify agent is optional here when the request is too vague to assess safely
 
 ### 4. Skills used and how they are applied
 
@@ -285,7 +285,7 @@ Agent roles:
   - use `/opsx:explore` when the request is still fuzzy
   - use `/opsx:propose` when the team is ready to open the change
 - `speckit-codex-skill`
-  - use only when ambiguity blocks safe routing
+  - use only when ambiguity blocks safe assessment
   - keep it lightweight at this phase
 
 ### 5. Rules that govern interactions and outputs
@@ -301,13 +301,13 @@ Apply these rules:
   - keep the change small, clear, and reviewable
   - call out unknowns instead of hiding them
 - `bmad-codex-skill/rules/artifact-rules.md`
-  - the routed output must include scope, assumptions, risks, and success criteria
+  - the assessed output must include scope, assumptions, risks, and success criteria
 
 ### 6. Expected artifacts and deliverables
 
 Expected outputs:
 
-- routed change package
+- assessed change package
 - intake summary
 - size and impact classification
 - selected path and next artifact
@@ -329,7 +329,7 @@ Move to `Specify` when:
 ### 8. Potential challenges and mitigation strategies
 
 - Challenge: the team jumps straight to implementation
-  - Mitigation: require a routed change package before any planning starts
+  - Mitigation: require an assessed change package before any planning starts
 - Challenge: size and impact are mixed together
   - Mitigation: classify them separately every time
 - Challenge: brownfield constraints are missed
@@ -339,17 +339,17 @@ Move to `Specify` when:
 
 ### 9. Feedback and iteration process
 
-- compare route decisions with actual downstream effort
+- compare assessment decisions with actual downstream effort
 - track where teams under-classified or over-classified changes
 - refine size and impact examples after each pilot
-- update routing guidance when repeated mistakes appear
+- update assessment guidance when repeated mistakes appear
 
 ## Phase 3: Specify
 
 ### Phase flow
 
 ```text
-[Routed change package]
+[Assessed change package]
             |
             v
 [Product owns behavior definition]
@@ -472,7 +472,7 @@ Move to `Plan` when:
 - Challenge: requirements are vague or promotional
   - Mitigation: rewrite them as specific behaviors and scenarios
 - Challenge: scope keeps expanding during specification
-  - Mitigation: keep non-goals visible and route out-of-scope work into a separate change
+  - Mitigation: keep non-goals visible and move out-of-scope work into a separate change
 - Challenge: edge cases are missed
   - Mitigation: include Developers and Architect in clarify review
 
@@ -488,7 +488,7 @@ Move to `Plan` when:
 Iteration 1 is successful when teams can do the following consistently:
 
 - define shared context once instead of repeating it in every change
-- route work into one clear change package
+- assess work into one clear change package
 - produce specs that are clear enough to plan without guesswork
 
 At that point, the organization is ready to move into Iteration 2:

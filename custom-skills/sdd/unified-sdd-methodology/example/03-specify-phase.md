@@ -11,7 +11,7 @@ Rule:
 ## Flow
 
 ```text
-[Routed change]
+[Assessed change]
   PLAT-123 + component epics
         |
         v

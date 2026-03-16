@@ -16,7 +16,7 @@ Main entry points:
 
 - `example/README.md`
 - `example/01-platform-phase.md`
-- `example/02-route-phase.md`
+- `example/02-assess-phase.md`
 - `example/03-specify-phase.md`
 - `example/04-plan-phase.md`
 - `example/05-deliver-phase.md`

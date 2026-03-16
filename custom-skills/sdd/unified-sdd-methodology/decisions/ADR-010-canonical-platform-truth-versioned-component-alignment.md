@@ -112,7 +112,7 @@ Shared changes must update:
 ## Consequences
 
 - Platform phase must define the master repo baseline, versioning approach, and shared ref IDs
-- Route must classify changes as platform-only, component-only, or shared
+- Assess must classify changes as platform-only, component-only, or shared
 - Specify must keep component specs aligned to platform refs and open linked platform deltas when shared truth changes
 - Plan must trace tasks to stories and keep platform refs visible in design and task artifacts
 - Deliver must link PRs, stories, verification, and archive records back to the same aligned change
