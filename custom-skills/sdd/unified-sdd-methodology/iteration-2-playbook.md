@@ -138,8 +138,14 @@ Core concepts:
 Main activities:
 
 - review the approved spec and confirm planning boundaries
+- read `platform-ref.yaml` impact tiers before designing:
+  - `impact.must_change_together` entries become hard constraints in `design.md`
+  - `impact.watch_for_breakage` entries become rollout risks in `design.md`
+  - `impact.adapts_independently` entries require no coordination in the plan
 - design the architecture, data flow, interfaces, and testing strategy
 - identify integrations, dependencies, failure modes, and rollout concerns
+- make tier 1 cross-component dependencies explicit in `design.md` with named
+  coordination requirements (which other component, which contract)
 - document ADRs when a new pattern or major tradeoff is introduced
 - break the work into ordered tasks and delivery slices that can be reviewed safely
 - map tasks to stories and keep platform refs visible in the plan
@@ -278,12 +284,20 @@ Main activities:
 
 - implement tasks in the agreed slice order
 - create a pull request for each delivery slice or tightly related slice set
+- include in the PR description which tier 1 dependencies (`must_change_together`)
+  were verified as part of this slice
+- include in the PR description which tier 2 dependencies (`watch_for_breakage`)
+  were checked after deploy
 - run review with the right reviewers before deploy
 - update artifacts when execution reveals better information
 - collect validation evidence continuously
-- coordinate deploy timing, dependencies, and rollback readiness
+- coordinate deploy timing, dependencies, and rollback readiness; confirm that
+  all tier 1 dependent components are ready before merging
 - archive the change when it is truly complete
 - keep story, PR, and platform alignment links current as work moves
+- at archive time, note in the archive record whether any ownership boundary
+  or dependency tier changed during delivery; if yes, flag the relevant
+  `component-ownership-<name>.md` or `dependency-map.md` for update
 
 ### 3. Agent roles and responsibilities
 
@@ -356,6 +370,10 @@ Close the change only when:
 - validation evidence is recorded
 - key artifacts reflect what was actually delivered
 - deploy decisions and rollback notes are captured when relevant
+- tier 1 dependency verification is recorded in the archive
+- tier 2 consumer checks are noted when they were performed
+- if an ownership boundary or dependency tier changed, the platform repo
+  artifacts are flagged for update or already updated
 - the change package is archived
 - the JIRA and platform alignment chain reflects the delivered reality
 

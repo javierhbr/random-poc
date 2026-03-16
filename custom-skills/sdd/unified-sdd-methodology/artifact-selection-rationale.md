@@ -95,6 +95,89 @@ BMAD's contribution.
 
 ---
 
+### Artifact: Component ownership boundary files
+**Tool:** Architect (human-authored) — `ownership/component-ownership-<name>.md`
+
+**Why this artifact at this phase:**
+
+Without explicit ownership records, two problems recur in every Assess step:
+scope bleeds across components because nobody wrote down where one component's
+responsibility ends, and impact assessment relies on informal memory that varies
+by Team Lead.
+
+The ownership boundary file records what each component owns, what it explicitly
+does NOT own, and which contracts it publishes or consumes. It is written once
+during Platform and updated only when the platform structure changes.
+
+This is not produced by BMAD, OpenSpec, or Speckit because it is not a
+change-package artifact — it is a durable platform truth artifact. Its home is
+the platform repo alongside the platform baseline and shared contracts.
+
+In Assess, the Team Lead reads it to confirm the correct epic owner before any
+JIRA issue is created. This makes ownership classification a lookup, not a
+judgment call.
+
+See: [platform-ddd-spec.md](platform-ddd-spec.md) — Concept 1
+
+---
+
+### Artifact: Dependency map
+**Tool:** Architect (human-authored) — `ownership/dependency-map.md`
+
+**Why this artifact at this phase:**
+
+Impact assessment in Assess has historically been the most variable step in the
+methodology. Different Team Leads classify the same type of change differently,
+leading to missing JIRA epics, uncoordinated releases, and silent breakage in
+consuming components.
+
+The dependency map replaces that variable judgment with a deterministic lookup.
+It records which components depend on which other components, what the
+dependency is (contract, event, data), and which impact tier applies:
+
+- `must_change_together` — both must ship in the same release
+- `watch_for_breakage` — consumer may break; monitor after deploy
+- `adapts_independently` — no forced coordination
+
+The tier directly drives the JIRA structure at Assess time. This connection
+makes the JIRA decision mechanical: read the tier, apply the rule.
+
+This is not produced by BMAD, OpenSpec, or Speckit because it is a platform
+governance artifact, not a change-package artifact. It must exist before any
+change starts and it must not be recreated per change.
+
+See: [platform-ddd-spec.md](platform-ddd-spec.md) — Concept 2
+
+---
+
+### Artifact: Shared glossary
+**Tool:** Architect (human-authored, team-maintained) — `ownership/glossary.md`
+
+**Why this artifact at this phase:**
+
+Spec ambiguity almost always originates from undefined or overloaded terms.
+Product and Engineering may use the same word ("validation", "customer",
+"profile") with different meanings. The mismatch surfaces in review cycles or
+in production, not during Specify.
+
+The shared glossary is seeded during Platform — when shared contracts and
+capabilities are defined — because that is when terms first acquire precise
+meaning. Once seeded, the glossary grows incrementally: a term is added whenever
+a spec review surfaces ambiguity.
+
+The critical rule: every term used in a proposal, delta spec, or acceptance
+criterion must appear in the glossary. This constraint belongs at Platform
+because it must be in place before the first Specify phase can run.
+
+This is not produced by Speckit (which produces governance rules) or OpenSpec
+(which manages change packages). The glossary is a durable platform artifact
+with a different lifecycle — it lives in the platform repo, not inside any
+component change package.
+
+See: [platform-ddd-spec.md](platform-ddd-spec.md) — Concept 3
+
+---
+
 ## Phase 2: Assess
 
 **Owner:** Team Lead | **Support:** Product, Architect, Engineering Manager
@@ -357,6 +440,9 @@ archive as a required closure step, not optional cleanup.
 | Platform | Constitution / principles | Speckit | Only tool that produces explicit, testable governance rules |
 | Platform | Project config / durable context | OpenSpec | Only tool that separates durable context from change-specific detail in a reusable config structure |
 | Platform | Role and context framing | BMAD | Only tool with a role-based context and routing model |
+| Platform | Component ownership boundary files | Architect (human-authored) | Durable platform truth artifact — not a change-package artifact; makes ownership classification a lookup in every future Assess step |
+| Platform | Dependency map | Architect (human-authored) | Durable platform truth artifact — three impact tiers make JIRA structure decisions deterministic; must exist before Assess runs |
+| Platform | Shared glossary | Architect + team (human-authored) | Durable platform truth artifact — prevents spec ambiguity by defining shared terms with "what it is NOT" clauses; seeded at Platform, grown during Specify |
 | Assess | Classification + path selection | BMAD | Only tool with explicit track-selection rules (size, type, depth) |
 | Assess | Change package scaffold + `platform-ref.yaml` + `jira-traceability.yaml` | OpenSpec | Only tool that produces the canonical execution container with versioned platform alignment and JIRA traceability |
 | Assess | Clarify pass (optional) | Speckit | Only tool with a structured ambiguity-surfacing step |

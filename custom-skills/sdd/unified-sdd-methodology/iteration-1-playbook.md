@@ -120,6 +120,15 @@ Main activities:
 - define the platform versioning and ref model for component repositories
 - define the JIRA hierarchy or issue-link conventions for platform and component work
 - define whether teams will use a local read-only platform MCP gateway
+- write one component ownership boundary file per component
+  (`ownership/component-ownership-<name>.md`) — records what each component
+  owns and what it does NOT own; prevents scope drift and ownership confusion
+  in every future Assess step
+- write the platform dependency map (`ownership/dependency-map.md`) — records
+  which components must change together (tier 1), which need watching (tier 2),
+  and which adapt independently (tier 3); makes impact assessment deterministic
+- seed the shared glossary (`ownership/glossary.md`) — defines shared terms
+  with "what it is NOT" clauses to prevent spec ambiguity before Specify begins
 
 ### 3. Agent roles and responsibilities
 
@@ -164,7 +173,7 @@ Apply these rules:
 
 Expected outputs:
 
-- constitution or principles document
+- constitution or principles document (including rules O-1, O-2, O-3)
 - `openspec/config.yaml` or equivalent reusable config
 - shared role map for the workflow
 - common language for quality and artifact expectations
@@ -172,6 +181,10 @@ Expected outputs:
 - JIRA hierarchy conventions for platform issue, component epic, and stories
 - local platform MCP usage model when teams need local query and validation
 - adoption-ready templates for `platform-ref.yaml` and `jira-traceability.yaml`
+- `ownership/component-ownership-<name>.md` for each component
+- `ownership/dependency-map.md` with all component relationships and their tier
+- `ownership/glossary.md` seeded with terms from the constitution and
+  brownfield review
 
 ### 7. Criteria for moving to the next phase
 
@@ -248,16 +261,29 @@ Core concepts:
 - greenfield vs brownfield
 - platform-only vs component-only vs shared change
 - platform issue -> component epic -> story traceability
+- component ownership boundaries (who owns the change?)
+- dependency map impact tiers (who else is affected and how urgently?)
+- glossary alignment (are all teams using the same terms?)
 
 Main activities:
 
 - review the incoming request and its entry point
 - identify affected scope, teams, and dependencies
+- read `ownership/component-ownership-<name>.md` to confirm which component
+  owns the primary change before opening any JIRA epic
+- read `ownership/dependency-map.md` to determine the impact tier for each
+  affected relationship; record the tiers in `platform-ref.yaml`
+  (`impact.must_change_together`, `impact.watch_for_breakage`,
+  `impact.adapts_independently`)
 - identify affected platform refs and affected component repositories
 - classify size and impact separately
 - classify the change as local-only, shared, or platform rule adoption
-- choose the BMAD path depth
+- choose the BMAD path depth based on the ownership and impact results
 - open the change package and define the next artifact
+- create the initial JIRA issue chain:
+  - tier 1 dependencies → open coordinated component epics immediately
+  - tier 2 dependencies → add watch note in `alignment_notes`
+  - tier 3 dependencies → no additional action
 - create the initial JIRA issue chain and alignment metadata
 
 ### 3. Agent roles and responsibilities
@@ -312,8 +338,10 @@ Expected outputs:
 - size and impact classification
 - selected path and next artifact
 - known unknowns and open questions
-- initial `platform-ref.yaml`
-- initial `jira-traceability.yaml`
+- initial `platform-ref.yaml` with `ownership.primary_component` and `impact`
+  tiers populated from the dependency map
+- initial `jira-traceability.yaml` with JIRA issue chain derived from impact
+  tiers
 
 ### 7. Criteria for moving to the next phase
 
@@ -395,13 +423,20 @@ Core concepts:
 
 Main activities:
 
-- write the problem statement in plain language
+- read `ownership/glossary.md` before writing `proposal.md` — all terms in
+  goals and acceptance criteria must be in the glossary; add missing terms
+  before the proposal is approved (rule O-2)
+- confirm the owning component from `ownership/component-ownership-<name>.md`
+  before writing delta specs — scope must stay within the component's boundary
+- write the problem statement in plain language using only glossary terms
 - define goals, non-goals, and affected behavior
 - confirm the platform version and platform refs that constrain the change
 - draft delta specs using explicit `ADDED`, `MODIFIED`, and `REMOVED` sections
 - decide whether the change needs a linked platform delta or only a component delta
 - run clarify to expose hidden assumptions
 - run a checklist pass before planning
+- record glossary terms used in `platform-ref.yaml` under
+  `alignment_notes.glossary_terms_used`
 
 ### 3. Agent roles and responsibilities
 
@@ -464,6 +499,8 @@ Move to `Plan` when:
 - important ambiguity is resolved or explicitly tracked
 - the team agrees that planning can start without guessing
 - the component spec is aligned to explicit platform refs
+- all terms in the proposal and delta specs are in the shared glossary
+- `platform-ref.yaml` includes `alignment_notes.glossary_terms_used`
 
 ### 8. Potential challenges and mitigation strategies
 

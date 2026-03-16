@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spec-Driven Development — PM Training</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --page-bg:      #F5F0E8;
+      --surface:      #FFFFFF;
+      --surface-alt:  #FDF9F4;
+      --ink:          #1C1309;
+      --ink-mid:      #4B3F30;
+      --ink-soft:     #8C7B68;
+      --border:       #E4DDD2;
+      --border-light: #EDE8E0;
+
+      --gold:         #C8880A;
+      --gold-bg:      #FFF8E6;
+      --gold-border:  #F0D070;
+
+      --coral:        #C0432B;
+      --coral-bg:     #FFF0EE;
+      --coral-border: #F0B8B0;
+
+      --teal:         #0E6E6E;
+      --teal-bg:      #E8F6F6;
+      --teal-border:  #A0D8D8;
+
+      --blue:         #1C55A0;
+      --blue-bg:      #EAF0FC;
+      --blue-border:  #AABFEC;
+
+      --green:        #1E6845;
+      --green-bg:     #E8F4ED;
+      --green-border: #9ECDB4;
+
+      --plum:         #6B3280;
+      --plum-bg:      #F4EDF8;
+      --plum-border:  #C8A0DC;
+
+      --nav-h:        60px;
+      --pager-h:      0px;
+      --shadow-sm:    0 2px 10px rgba(28,19,9,.06);
+      --shadow-md:    0 6px 30px rgba(28,19,9,.10);
+      --shadow-lg:    0 16px 56px rgba(28,19,9,.14);
+      --radius:       18px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--page-bg);
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.7;
+      padding-top: var(--nav-h);
+    }
+
+    /* ─────────────────────────────────────────
+       TOP NAV
+    ───────────────────────────────────────── */
+    #top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      z-index: 200;
+    }
+
+    .nav-brand {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: var(--ink);
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+
+    /* ── nav prev/next buttons ── */
+    .nav-pager-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-mid);
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .nav-pager-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-pager-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+    }
+
+    /* ── slide title area ── */
+    .nav-slide-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .nav-slide-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .nav-slide-sub {
+      font-size: 11px;
+      color: var(--ink-soft);
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    .nav-dot-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .nav-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all .25s;
+      flex-shrink: 0;
+    }
+
+    .nav-dot.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      transform: scale(1.4);
+    }
+
+    .nav-dot:hover { background: var(--ink-soft); border-color: var(--ink-soft); }
+
+    .nav-counter {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────
+       READING PROGRESS
+    ───────────────────────────────────────── */
+    #progress-bar {
+      position: fixed;
+      top: var(--nav-h);
+      left: 0;
+      height: 3px;
+      background: var(--gold);
+      z-index: 199;
+      width: 0%;
+      transition: width .08s linear;
+    }
+
+
+    /* ─────────────────────────────────────────
+       SLIDE SYSTEM
+    ───────────────────────────────────────── */
+    .slide {
+      display: none;
+      min-height: calc(100vh - var(--nav-h) - var(--pager-h));
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide.exit-left {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+
+    /* ─────────────────────────────────────────
+       LAYOUT HELPERS
+    ───────────────────────────────────────── */
+    .slide-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 56px 56px 48px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide-inner.wide {
+      max-width: 1280px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      padding: 5px 13px;
+      border-radius: 100px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 5.5vw, 64px);
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      color: var(--ink);
+      margin-bottom: 22px;
+    }
+
+    h1 em { font-style: italic; color: var(--gold); }
+
+    h2 {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      font-size: clamp(26px, 3.5vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -.01em;
+      color: var(--ink);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .lead {
+      font-size: 19px;
+      color: var(--ink-mid);
+      max-width: 820px;
+      font-weight: 300;
+      margin-bottom: 44px;
+      line-height: 1.65;
+    }
+
+    p { color: var(--ink-mid); line-height: 1.7; }
+
+    code, pre, kbd, samp, .mono {
+      font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+      font-size: .88em;
+    }
+
+    /* ─────────────────────────────────────────
+       CARDS
+    ───────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
+
+    /* ─────────────────────────────────────────
+       CALLOUTS
+    ───────────────────────────────────────── */
+    .callout {
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin: 20px 0;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .callout-body strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+    .callout-body p { font-size: 14px; line-height: 1.65; }
+
+    .callout-gold  { background: var(--gold-bg);  border: 1px solid var(--gold-border);  }
+    .callout-teal  { background: var(--teal-bg);  border: 1px solid var(--teal-border);  }
+    .callout-coral { background: var(--coral-bg); border: 1px solid var(--coral-border); }
+    .callout-blue  { background: var(--blue-bg);  border: 1px solid var(--blue-border);  }
+
+    .callout-gold  .callout-body p { color: #92500A; }
+    .callout-teal  .callout-body p { color: var(--teal); opacity: .8; }
+    .callout-coral .callout-body p { color: var(--coral); opacity: .75; }
+    .callout-blue  .callout-body p { color: var(--blue); opacity: .8; }
+
+    /* ─────────────────────────────────────────
+       BADGES
+    ───────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 11px;
+      border-radius: 100px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .badge-gold  { background: var(--gold-bg);  color: #92500A;      border: 1px solid var(--gold-border);  }
+    .badge-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border);  }
+    .badge-pink  { background: #FDE8F4;         color: #9C2070;      border: 1px solid #F0B0D8;             }
+    .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .badge-teal  { background: var(--teal-bg);  color: var(--teal);  border: 1px solid var(--teal-border);  }
+    .badge-plum  { background: var(--plum-bg);  color: var(--plum);  border: 1px solid var(--plum-border);  }
+
+    /* ─────────────────────────────────────────
+       FLOW DIAGRAM
+    ───────────────────────────────────────── */
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 4px 2px;
+    }
+    .flow-box {
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 2px solid transparent;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .flow-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .flow-arrow { font-size: 18px; color: var(--ink-soft); flex-shrink: 0; }
+    .fbox-1 { background: var(--gold-bg);  color: #92500A;      border-color: var(--gold-border);  }
+    .fbox-2 { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue-border);  }
+    .fbox-3 { background: #FDE8F4;         color: #9C2070;      border-color: #F0B0D8;             }
+    .fbox-4 { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+    .fbox-5 { background: var(--teal-bg);  color: var(--teal);  border-color: var(--teal-border);  }
+
+    /* ─────────────────────────────────────────
+       PHASE ITEMS
+    ───────────────────────────────────────── */
+    .phase-item {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .phase-circle {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .phase-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .phase-owner { font-size: 12px; color: var(--ink-soft); font-weight: 500; margin-bottom: 10px; }
+
+    .phase-analogy {
+      background: var(--surface-alt);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--ink-mid);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 12px;
+    }
+    .phase-analogy-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ─────────────────────────────────────────
+       COMPARE CARDS
+    ───────────────────────────────────────── */
+    .compare-bad  { background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: var(--radius); padding: 26px; }
+    .compare-good { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: var(--radius); padding: 26px; }
+    .compare-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 14px; }
+    .compare-bad  .compare-label { color: var(--coral); }
+    .compare-good .compare-label { color: var(--green); }
+    .compare-list { list-style: none; padding: 0; }
+    .compare-list li { font-size: 15px; color: var(--ink-mid); padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.05); display: flex; gap: 8px; }
+    .compare-list li:last-child { border-bottom: none; }
+
+    /* ─────────────────────────────────────────
+       EXAMPLE STEPS
+    ───────────────────────────────────────── */
+    .ex-step {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all .2s;
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .ex-step:hover { border-color: var(--gold); background: var(--gold-bg); }
+    .ex-step.open  { border-color: var(--gold); background: var(--gold-bg); }
+    .ex-step-num {
+      width: 30px; height: 30px;
+      background: var(--ink);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .ex-step.open .ex-step-num { background: var(--gold); }
+    .ex-step-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .ex-step-sub   { font-size: 12px; color: var(--ink-soft); margin-top: 1px; }
+    .ex-step-chevron { color: var(--ink-soft); font-size: 16px; transition: transform .25s; }
+    .ex-step.open .ex-step-chevron { transform: rotate(180deg); color: var(--gold); }
+    .ex-detail {
+      display: none;
+      background: var(--surface-alt);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--ink-mid);
+      line-height: 1.7;
+    }
+    .ex-detail.open { display: block; }
+    .ex-detail ul { margin: 10px 0 0 18px; line-height: 2; }
+    .ex-detail strong { color: var(--ink); }
+
+    /* ─────────────────────────────────────────
+       ROLE CARDS
+    ───────────────────────────────────────── */
+    .roles-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: all .2s;
+    }
+    .role-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .role-avatar {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .role-owns { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-soft); margin-bottom: 10px; }
+    .role-card p { font-size: 14px; color: var(--ink-mid); line-height: 1.6; }
+
+    /* ─────────────────────────────────────────
+       STATS ROW
+    ───────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 40px;
+      padding-top: 36px;
+      border-top: 1px solid var(--border);
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-weight: 500; }
+
+    /* ─────────────────────────────────────────
+       TOOL CARDS
+    ───────────────────────────────────────── */
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+      transition: all .2s;
+    }
+    .tool-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .tool-icon {
+      width: 48px; height: 48px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .tool-card p { font-size: 15px; color: var(--ink-mid); line-height: 1.65; margin-bottom: 16px; }
+    .tool-where { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-soft); margin-bottom: 10px; }
+    .badge-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ─────────────────────────────────────────
+       RULES / GLOSSARY
+    ───────────────────────────────────────── */
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      transition: all .2s;
+    }
+    .rule-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .rule-icon { font-size: 26px; margin-bottom: 10px; display: block; }
+    .rule-card p { font-size: 13px; color: var(--ink-mid); line-height: 1.65; }
+
+    .gloss-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 18px 22px;
+    }
+    .gloss-term {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .gloss-def { font-size: 15px; color: var(--ink-mid); line-height: 1.65; }
+
+    /* ─────────────────────────────────────────
+       ITER CARDS
+    ───────────────────────────────────────── */
+    .iter-card {
+      border-radius: var(--radius);
+      padding: 32px;
+      border: 1.5px solid transparent;
+    }
+    .iter-1 { background: var(--blue-bg);  border-color: var(--blue-border);  }
+    .iter-2 { background: var(--green-bg); border-color: var(--green-border); }
+    .iter-card h3 { font-size: 22px; margin-bottom: 4px; }
+    .iter-1 h3 { color: var(--blue); }
+    .iter-2 h3 { color: var(--green); }
+    .iter-sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 18px; font-weight: 500; }
+    .iter-phase-item {
+      background: rgba(255,255,255,.7);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 8px;
+    }
+    .iter-phase-item h4 { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .iter-phase-item p  { font-size: 12px; color: var(--ink-mid); }
+    .iter-result { font-size: 13px; font-weight: 500; margin-top: 14px; }
+    .iter-1 .iter-result { color: var(--blue); }
+    .iter-2 .iter-result { color: var(--green); }
+
+    /* ─────────────────────────────────────────
+       QUOTE BOX
+    ───────────────────────────────────────── */
+    .quote-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .quote-box::before {
+      content: '"';
+      position: absolute;
+      top: -16px; right: 24px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 160px;
+      color: var(--gold-border);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .quote-box blockquote {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: clamp(17px, 2.3vw, 22px);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 680px;
+      position: relative;
+      z-index: 1;
+    }
+    .quote-attr { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-top: 18px; position: relative; z-index: 1; }
+
+    /* ─────────────────────────────────────────
+       PROBLEM CARDS
+    ───────────────────────────────────────── */
+    .problem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all .2s;
+    }
+    .problem-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--coral);
+    }
+    .problem-emoji { font-size: 26px; margin-bottom: 10px; }
+    .problem-card h3 { font-size: 17px; margin-bottom: 8px; }
+    .problem-card p  { font-size: 15px; color: var(--ink-mid); line-height: 1.6; }
+
+    /* ─────────────────────────────────────────
+       HERO SECTION SPECIFICS
+    ───────────────────────────────────────── */
+    #slide-hero .slide-inner {
+      background: linear-gradient(145deg, #FFFDF8 0%, var(--page-bg) 100%);
+    }
+
+    .hero-btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn-solid {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--ink); color: white;
+      padding: 13px 26px;
+      border-radius: 100px;
+      font-size: 14px; font-weight: 700;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-solid:hover { background: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,136,10,.3); }
+
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--ink-mid);
+      padding: 13px 26px;
+      border-radius: 100px;
+      font-size: 14px; font-weight: 600;
+      text-decoration: none;
+      border: 1.5px solid var(--border); cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-outline:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-2px); }
+
+    /* ─────────────────────────────────────────
+       CTA SLIDE
+    ───────────────────────────────────────── */
+    #slide-cta .slide-inner {
+      background: linear-gradient(135deg, var(--gold-bg) 0%, #FFFDF9 100%);
+      text-align: center;
+      align-items: center;
+    }
+    .cta-step-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .cta-step {
+      background: var(--surface);
+      border: 1px solid var(--gold-border);
+      border-radius: 100px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-mid);
+    }
+
+    /* ─────────────────────────────────────────
+       BOUNDARY BOX
+    ───────────────────────────────────────── */
+    .boundary-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-top: 32px;
+    }
+    .boundary-box h3 { font-size: 16px; margin-bottom: 16px; }
+    .boundary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .boundary-side { padding: 18px; border-radius: 10px; }
+    .boundary-side-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .b-platform { background: var(--gold-bg); border: 1px solid var(--gold-border); }
+    .b-platform .boundary-side-label { color: #92500A; }
+    .b-component { background: var(--teal-bg); border: 1px solid var(--teal-border); }
+    .b-component .boundary-side-label { color: var(--teal); }
+    .b-component p { color: var(--teal); font-weight: 700; font-size: 15px; }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 1000px) {
+      .roles-grid-5 { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 680px) {
+      .slide-inner { padding: 40px 20px 24px; }
+      .grid-2, .grid-3, .boundary-row { grid-template-columns: 1fr; }
+      .roles-grid-5 { grid-template-columns: 1fr 1fr; }
+      .flow-row { flex-wrap: wrap; }
+      .stats-row { gap: 24px; }
+      .nav-pager-btn { padding: 5px 10px; font-size: 12px; }
+      .nav-brand { display: none; }
+      .nav-dot-row { display: none; }
+      .nav-counter { display: none; }
+    }
+
+    /* ─────────────────────────────────────────
+       PRINT HINT
+    ───────────────────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      /* Force light — no dark mode */
+      html { filter: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── PROGRESS ── -->
+<div id="progress-bar"></div>
+
+<!-- ── TOP NAV ── -->
+<nav id="top-nav">
+  <div class="nav-brand">SDD Training</div>
+  <button class="nav-pager-btn" id="btn-prev" onclick="nav(-1)" disabled>← Prev</button>
+  <div class="nav-slide-info">
+    <div class="nav-slide-title" id="pager-title">Welcome</div>
+    <div class="nav-slide-sub" id="pager-sub">Slide 1 of 16</div>
+  </div>
+  <button class="nav-pager-btn" id="btn-next" onclick="nav(1)">Next →</button>
+  <div class="nav-dot-row" id="dot-row">
+    <!-- dots injected by JS -->
+  </div>
+  <div class="nav-counter" id="nav-counter">1 / 21</div>
+</nav>
+
+<!-- ──────────────────────────────────────────────────────────────
+     SLIDES
+────────────────────────────────────────────────────────────────── -->
+
+<!-- SLIDE 1: HERO -->
+<div class="slide active" id="slide-hero" data-index="0" data-title="Welcome">
+  <div class="slide-inner">
+    <div class="eyebrow">📋 Product Manager Training</div>
+    <h1>Build the right thing,<br><em>the right way,</em><br>every time.</h1>
+    <p class="lead">Spec-Driven Development (SDD) is a simple 5-step process that helps product teams stop building the wrong thing, avoid surprises, and ship software confidently.</p>
+    <div class="hero-btn-row">
+      <button class="btn-solid" onclick="goTo(1)">Start Learning →</button>
+      <button class="btn-outline" onclick="goTo(3)">Jump to the 5 Phases</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Clear Phases</div></div>
+      <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Key Roles</div></div>
+      <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">Safe Iterations</div></div>
+      <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Guesswork</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: THE PROBLEM -->
+<div class="slide" id="slide-problem" data-index="1" data-title="The Problem">
+  <div class="slide-inner wide">
+    <div class="eyebrow">🔥 Why This Matters</div>
+    <h2>Sound familiar?</h2>
+    <p class="lead">These are the patterns that slow teams down. SDD is designed to fix all of them.</p>
+    <div class="grid-3" style="gap: 16px;">
+      <div class="problem-card">
+        <div class="problem-emoji">🤔</div>
+        <h3>"I thought we agreed on this?"</h3>
+        <p>Requirements live in email threads. Without a written spec, every meeting spawns a different memory of what was decided.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-emoji">🚧</div>
+        <h3>Half-built features discovered late</h3>
+        <p>Developers start coding before requirements are clear, then redo work when the real requirements emerge during testing.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-emoji">🔥</div>
+        <h3>One change breaks three things</h3>
+        <p>Nobody mapped which parts of the system depend on each other, so a small change cascades into a production incident.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-emoji">📋</div>
+        <h3>Specs that gather dust</h3>
+        <p>Documents are written, ignored during development, and outdated by the time the feature ships. Nobody trusts them.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-emoji">🏃</div>
+        <h3>Planning skipped to ship faster</h3>
+        <p>Teams rush to code without enough clarity. They end up slower because of rework, bugs, and misaligned expectations.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-emoji">🗣️</div>
+        <h3>Words mean different things</h3>
+        <p>"Customer", "profile", "validation" — Product and Engineering use the same words with completely different meanings.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: ANALOGY -->
+<div class="slide" id="slide-analogy" data-index="2" data-title="The Big Idea">
+  <div class="slide-inner">
+    <div class="eyebrow">🏠 The Big Idea</div>
+    <h2>Building software is like building a house.</h2>
+    <p class="lead">You wouldn't hire builders and just say "build me a house." You'd create a blueprint first. SDD is your software blueprint process.</p>
+
+    <div class="quote-box" style="margin-bottom: 28px;">
+      <blockquote>"Imagine you hire a builder and say: <em>'Build me a kitchen.'</em> Two months later, you walk in and the stove is on the wrong wall, there's no dishwasher, and the countertops are too small. Was the builder wrong? Maybe not — because nobody wrote down what you actually wanted."</blockquote>
+      <div class="quote-attr">— Why written specs matter</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="compare-bad">
+        <div class="compare-label">❌ Without SDD</div>
+        <ul class="compare-list">
+          <li><span>😤</span> Requirements live in email threads</li>
+          <li><span>🤷</span> Unclear who owns what decision</li>
+          <li><span>😱</span> Surprises discovered during testing</li>
+          <li><span>🔁</span> Rework because specs changed silently</li>
+          <li><span>💔</span> Team morale suffers from constant firefighting</li>
+          <li><span>📉</span> Hard to know if the feature actually works</li>
+        </ul>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">✅ With SDD</div>
+        <ul class="compare-list">
+          <li><span>📝</span> Requirements written and agreed before coding</li>
+          <li><span>👤</span> Each phase has a clear, single owner</li>
+          <li><span>🎯</span> Surprises caught in review, not production</li>
+          <li><span>📌</span> Every change traceable back to its spec</li>
+          <li><span>💪</span> Team confidence grows from a clear process</li>
+          <li><span>✔️</span> Done means done — verified and archived</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: THE 5 PHASES OVERVIEW -->
+<div class="slide" id="slide-phases-overview" data-index="3" data-title="5 Phases Overview">
+  <div class="slide-inner">
+    <div class="eyebrow">🗺️ The Methodology</div>
+    <h2>5 phases, one clear path.</h2>
+    <p class="lead">Every piece of work moves through the same five phases — in order. Skipping a phase causes problems in all the later ones.</p>
+
+    <div class="card" style="margin-bottom: 32px;">
+      <div class="flow-row">
+        <div class="flow-box fbox-1" onclick="goTo(4)">🏛️ Platform</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box fbox-2" onclick="goTo(6)">🔍 Assess</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box fbox-3" onclick="goTo(8)">✍️ Specify</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box fbox-4" onclick="goTo(10)">🗺️ Plan</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box fbox-5" onclick="goTo(12)">🚀 Deliver</div>
+      </div>
+      <p style="font-size: 12px; color: var(--ink-soft); margin-top: 12px; text-align: center;">Click any phase to jump directly to it</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="card" style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px 22px;">
+        <div style="width: 36px; height: 36px; background: var(--gold-bg); border: 1.5px solid var(--gold-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 16px; color: #92500A;">1</div>
+        <div><strong style="font-size: 15px;">🏛️ Platform</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">Owner: Architect</span> — Set the shared rules, ownership maps, and glossary <em>once</em>, before any feature starts.</div>
+      </div>
+      <div class="card" style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px 22px;">
+        <div style="width: 36px; height: 36px; background: var(--blue-bg); border: 1.5px solid var(--blue-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 16px; color: var(--blue);">2</div>
+        <div><strong style="font-size: 15px;">🔍 Assess</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">Owner: Team Lead</span> — Turn a request into a scoped change package. How big? Who's affected?</div>
+      </div>
+      <div class="card" style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px 22px;">
+        <div style="width: 36px; height: 36px; background: #FDE8F4; border: 1.5px solid #F0B0D8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 16px; color: #9C2070;">3</div>
+        <div><strong style="font-size: 15px;">✍️ Specify</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">Owner: Product Manager</span> — Write exactly what the feature should do. No planning until this is approved.</div>
+      </div>
+      <div class="card" style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px 22px;">
+        <div style="width: 36px; height: 36px; background: var(--green-bg); border: 1.5px solid var(--green-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 16px; color: var(--green);">4</div>
+        <div><strong style="font-size: 15px;">🗺️ Plan</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">Owner: Architect</span> — Turn the approved spec into a technical blueprint and ordered tasks.</div>
+      </div>
+      <div class="card" style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px 22px;">
+        <div style="width: 36px; height: 36px; background: var(--teal-bg); border: 1.5px solid var(--teal-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 16px; color: var(--teal);">5</div>
+        <div><strong style="font-size: 15px;">🚀 Deliver</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">Owner: Team Lead</span> — Build in slices, review, verify, deploy, and archive. All six sub-steps.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-gold" style="margin-top: 28px;">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>The golden rule</strong>
+        <p>Phases must happen in order. Skipping Specify before Plan means developers build based on assumptions. That's how you end up with the wrong product.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: PLATFORM PHASE -->
+<div class="slide" id="slide-platform" data-index="4" data-title="Phase 1: Platform">
+  <div class="slide-inner">
+    <div class="eyebrow">Phase 1 of 5</div>
+    <div class="phase-item" style="margin-bottom: 32px;">
+      <div class="phase-circle" style="background: var(--gold-bg); color: #92500A; border: 2px solid var(--gold-border);">1</div>
+      <div class="phase-body">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <h2 style="margin: 0;">🏛️ Platform — Set the Foundation</h2>
+        </div>
+        <div class="phase-owner">Owner: Architect · Support: Product, Team Lead</div>
+        <p style="margin-bottom: 12px;">Before any single feature starts, the team writes down the shared rules that <em>everyone must follow</em>. This is done <strong>once</strong> and updated only when the big picture changes.</p>
+        <p>It defines quality standards, who owns what parts of the system, how pieces connect, and a shared vocabulary.</p>
+        <div class="phase-analogy">
+          <span class="phase-analogy-icon">🏠</span>
+          <span><strong>House analogy:</strong> Writing the building codes, creating a map of which rooms belong to which part of the house, and agreeing what words mean ("a bedroom must have a window and a closet, not just four walls").</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom: 16px;">What gets created in Platform:</h3>
+    <div class="grid-3">
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">⚖️</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Constitution</h3>
+        <p style="font-size: 13px;">The explicit, testable rules every team must follow. Not vague values — specific standards like "all endpoints must return errors in this exact format."</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">🗺️</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Ownership Map</h3>
+        <p style="font-size: 13px;">Which team owns which service. What each service explicitly does NOT own. This turns "who's responsible?" from a debate into a simple lookup.</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">🔗</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Dependency Map</h3>
+        <p style="font-size: 13px;">Which services must coordinate when changed. Three tiers: must ship together / watch after deploy / no coordination needed.</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">📖</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Shared Glossary</h3>
+        <p style="font-size: 13px;">Every shared term defined precisely, with "what it is NOT" clauses. Prevents spec ambiguity before it starts.</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">⚙️</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Project Config</h3>
+        <p style="font-size: 13px;">Durable rules encoded in a reusable config that all changes inherit. Separates stable standards from per-feature details.</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 22px; margin-bottom: 8px;">👥</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Role Map</h3>
+        <p style="font-size: 13px;">Who owns which phase. How decisions escalate. What "support" means versus "owner." Agreed before work begins.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: PLATFORM DEEP DIVE -->
+<div class="slide" id="slide-platform-detail" data-index="5" data-title="Phase 1: Artifacts & Flow">
+  <div class="slide-inner wide">
+    <div class="eyebrow">Phase 1 · Artifacts &amp; Rationale</div>
+    <h2>What Platform produces — and why.</h2>
+    <p class="lead" style="margin-bottom: 36px;">Platform is done once. Every artifact created here is a durable truth that all future changes inherit. Nothing here should change per feature.</p>
+
+    <!-- Flow diagram -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 20px;">Phase Flow</div>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="background: var(--gold-bg); border: 2px solid var(--gold-border); border-radius: 12px; padding: 10px 20px; font-size: 13px; font-weight: 700; color: #92500A; white-space: nowrap;">Platform Stakeholders<br><span style="font-weight: 400; font-size: 11px;">Architect + Product + Team Lead</span></div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0;">
+          <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: #92500A; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">① Speckit — first</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">constitution command</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Turns vague values into explicit, testable principles. Only Speckit enforces that every principle is linked to a testable outcome.</div>
+          </div>
+          <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">② OpenSpec — second</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">config.yaml</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Encodes durable context in a reusable config. Survives multiple change cycles unchanged. Machine-readable and agent-readable.</div>
+          </div>
+          <div style="background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">③ BMAD — third</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">Architect agent</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Frames role boundaries and routing model. Prepares the Assess phase so path decisions are consistent across Team Leads.</div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">Architect authors</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">component-ownership-*.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Records what each component owns and explicitly does NOT own. Makes Assess ownership classification a lookup, not a judgment call.</div>
+          </div>
+          <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">Architect authors</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">dependency-map.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Three impact tiers: must change together / watch for breakage / adapts independently. Drives JIRA structure decisions mechanically.</div>
+          </div>
+          <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">Team maintains</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">glossary.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Every term used in any proposal or delta spec must be defined here. Seeded at Platform; grows whenever a spec review surfaces ambiguity.</div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="background: #F0FBF0; border: 1.5px solid var(--green-border); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 700; color: var(--green);">Platform Baseline — Ready for Assess</div>
+      </div>
+    </div>
+
+    <!-- Move to next criteria -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px;">✓ Ready to move to Assess when:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Principles are explicit and testable — not aspirational</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Durable context is separated from change-specific detail</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Role ownership is clear for all three phases</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Ownership files, dependency map, and glossary exist</li>
+        </ul>
+      </div>
+      <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--coral); margin-bottom: 12px;">⚠️ Common challenges:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Principles written as vague values, not testable rules</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Teams try to put every rule into the platform baseline</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Disagreement on standards — start with a minimum viable baseline</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: ASSESS PHASE -->
+<div class="slide" id="slide-assess" data-index="6" data-title="Phase 2: Assess">
+  <div class="slide-inner">
+    <div class="eyebrow">Phase 2 of 5</div>
+    <div class="phase-item" style="margin-bottom: 32px;">
+      <div class="phase-circle" style="background: var(--blue-bg); color: var(--blue); border: 2px solid var(--blue-border);">2</div>
+      <div class="phase-body">
+        <h2 style="margin-bottom: 8px;">🔍 Assess — Understand the Request</h2>
+        <div class="phase-owner">Owner: Team Lead · Support: Product, Architect, Manager</div>
+        <p style="margin-bottom: 12px;">When a new feature request arrives, the Team Lead figures out <strong>what kind of work it is</strong> before diving in. Is it a small fix or a big change? Does it affect one service or many?</p>
+        <p>The output is a <strong>"change package"</strong> — a clearly-scoped container that says: here's what we're changing, how big it is, and who's affected.</p>
+        <div class="phase-analogy">
+          <span class="phase-analogy-icon">📏</span>
+          <span><strong>House analogy:</strong> A client says "I want to change the kitchen." You first figure out: is this just new paint (quick job), or knocking down walls (major project)? Who needs to be involved? Which plumbers and electricians must coordinate?</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">Questions Assess answers:</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>🏗️</span> Is this a new thing (greenfield) or changing something existing (brownfield)?</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>📐</span> Is this small, medium, or large?</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>👤</span> Which team / component is the primary owner?</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>🔗</span> Which other services are affected?</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>📊</span> Does this need a full spec, or is it a quick fix?</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">Outputs of Assess:</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>📦</span> A scoped change package with one clear owner</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>🏷️</span> Size and impact classification (separately)</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>🎯</span> Selected path (quick / standard / architecture-heavy)</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>🎟️</span> Initial JIRA chain created (platform issue → epics)</li>
+          <li style="font-size: 14px; display: flex; gap: 8px;"><span>❓</span> Known unknowns listed explicitly</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-teal">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Important: size ≠ impact</strong>
+        <p>A one-line change can break 10 other services (small size, huge impact). Always classify them separately. The dependency map from Platform makes this a lookup, not a judgment call.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: ASSESS DEEP DIVE -->
+<div class="slide" id="slide-assess-detail" data-index="7" data-title="Phase 2: Artifacts & Flow">
+  <div class="slide-inner wide">
+    <div class="eyebrow">Phase 2 · Artifacts &amp; Rationale</div>
+    <h2>What Assess produces — and why.</h2>
+    <p class="lead" style="margin-bottom: 36px;">Assess is the intake gateway. It does not specify the work — it decides how much workflow the work needs and opens the container that will hold everything downstream.</p>
+
+    <!-- Flow diagram -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 20px;">Phase Flow</div>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="background: var(--blue-bg); border: 2px solid var(--blue-border); border-radius: 12px; padding: 10px 20px; font-size: 13px; font-weight: 700; color: var(--blue); display: inline-block;">Incoming request<br><span style="font-weight: 400; font-size: 11px;">initiative / requirement / team proposal</span></div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0;">
+          <div style="background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">① BMAD — first</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">track-selection-rules.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Only tool that classifies greenfield vs brownfield, size (S/M/L), and planning depth: Quick Flow / PRD-first / architecture-heavy.</div>
+          </div>
+          <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">② OpenSpec — second</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">change package + platform-ref.yaml + jira-traceability.yaml</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Creates the canonical execution container that holds every downstream artifact from proposal through archive. Pins platform version and JIRA chain.</div>
+          </div>
+          <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 10px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: #92500A; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">③ Speckit — optional</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">clarify command</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Used only when the request is too vague to classify safely. Surfaces hidden assumptions and undefined failure behavior. Keep it lightweight here.</div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+
+        <!-- JIRA tier decision box -->
+        <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 0;">
+          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 10px;">Dependency map → JIRA structure (deterministic)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 8px; padding: 10px 12px; font-size: 12px;">
+              <div style="font-weight: 700; color: var(--coral); margin-bottom: 3px;">Tier 1 — must_change_together</div>
+              <div style="color: var(--ink-mid);">Open coordinated component epics immediately</div>
+            </div>
+            <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 8px; padding: 10px 12px; font-size: 12px;">
+              <div style="font-weight: 700; color: #92500A; margin-bottom: 3px;">Tier 2 — watch_for_breakage</div>
+              <div style="color: var(--ink-mid);">Add watch note in alignment_notes</div>
+            </div>
+            <div style="background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 8px; padding: 10px 12px; font-size: 12px;">
+              <div style="font-weight: 700; color: var(--green); margin-bottom: 3px;">Tier 3 — adapts_independently</div>
+              <div style="color: var(--ink-mid);">No additional action required</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="background: #F0FBF0; border: 1.5px solid var(--green-border); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 700; color: var(--green);">Assessed change package — Ready for Specify</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px;">✓ Ready to move to Specify when:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Change package exists with one clear owner</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Size and impact classified separately</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Affected scope is bounded enough to specify</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> platform-ref.yaml and jira-traceability.yaml initialised</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Major unknowns are visible, even if not yet resolved</li>
+        </ul>
+      </div>
+      <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--coral); margin-bottom: 12px;">⚠️ Common challenges:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Team jumps straight to implementation — require the change package first</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Size and impact mixed together — classify them separately every time</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Brownfield constraints missed — identify existing integration points early</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: SPECIFY PHASE -->
+<div class="slide" id="slide-specify" data-index="8" data-title="Phase 3: Specify">
+  <div class="slide-inner">
+    <div class="eyebrow">Phase 3 of 5 — Your Most Important Phase</div>
+    <div class="phase-item" style="margin-bottom: 28px;">
+      <div class="phase-circle" style="background: #FDE8F4; color: #9C2070; border: 2px solid #F0B0D8;">3</div>
+      <div class="phase-body">
+        <h2 style="margin-bottom: 8px;">✍️ Specify — Write Exactly What You Want</h2>
+        <div class="phase-owner">Owner: Product Manager · Support: Team Lead, Architect, Developers</div>
+        <p style="margin-bottom: 12px;">This is where <strong>Product Managers have the most impact</strong>. You write exactly what the feature should do — in plain, testable language. Not "make it better" but "when a user enters an invalid email, show an error message within 2 seconds."</p>
+        <div class="phase-analogy">
+          <span class="phase-analogy-icon">📐</span>
+          <span><strong>House analogy:</strong> The architectural blueprint. It says: the kitchen is 4×5 meters, has an island, faces north, oven here, fridge there. Not the engineering drawings yet — but specific enough to build from.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">✅ What a good spec looks like:</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; align-items: flex-start;"><span>📝</span><span><strong>proposal.md</strong> — problem + goals + <em>non-goals</em></span></li>
+          <li style="font-size: 14px; display: flex; gap: 8px; align-items: flex-start;"><span>➕</span><span><strong>ADDED</strong> sections — new behavior in testable sentences</span></li>
+          <li style="font-size: 14px; display: flex; gap: 8px; align-items: flex-start;"><span>✏️</span><span><strong>MODIFIED</strong> sections — exactly what changes</span></li>
+          <li style="font-size: 14px; display: flex; gap: 8px; align-items: flex-start;"><span>🗑️</span><span><strong>REMOVED</strong> sections — what gets taken away</span></li>
+          <li style="font-size: 14px; display: flex; gap: 8px; align-items: flex-start;"><span>📖</span><span>All terms defined in the shared glossary</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">❌ Signs a spec is too weak:</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; color: var(--ink-mid); display: flex; gap: 8px;"><span>🚩</span> "Improve the user experience"</li>
+          <li style="font-size: 14px; color: var(--ink-mid); display: flex; gap: 8px;"><span>🚩</span> "Make the form faster"</li>
+          <li style="font-size: 14px; color: var(--ink-mid); display: flex; gap: 8px;"><span>🚩</span> "Enhance the email validation"</li>
+          <li style="font-size: 14px; color: var(--ink-mid); display: flex; gap: 8px;"><span>🚩</span> No non-goals listed</li>
+          <li style="font-size: 14px; color: var(--ink-mid); display: flex; gap: 8px;"><span>🚩</span> Can't write a test from this requirement</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-gold">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>The test you should always ask</strong>
+        <p>Can I write a test for this requirement? If you can't answer "yes or no" based on the spec, it's too vague. Rewrite it until you can. Define non-goals — what the feature will NOT do is just as important as what it will.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: SPECIFY DEEP DIVE -->
+<div class="slide" id="slide-specify-detail" data-index="9" data-title="Phase 3: Artifacts & Flow">
+  <div class="slide-inner wide">
+    <div class="eyebrow">Phase 3 · Artifacts &amp; Rationale</div>
+    <h2>What Specify produces — and why.</h2>
+    <p class="lead" style="margin-bottom: 36px;">Specify defines the "what" before anyone touches the "how." Inside a component repo, only OpenSpec is used from this point forward. No BMAD, no Speckit inside the change package.</p>
+
+    <!-- Flow diagram -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 20px;">Phase Flow</div>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="background: #FDE8F4; border: 2px solid #F0B0D8; border-radius: 12px; padding: 10px 20px; font-size: 13px; font-weight: 700; color: #9C2070; display: inline-block;">Assessed change package<br><span style="font-weight: 400; font-size: 11px;">scope + size + impact + path + known unknowns</span></div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0;">
+          <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">OpenSpec (component repo — exclusive)</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px;">proposal.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid); margin-bottom: 10px;">Problem statement, goals, non-goals, acceptance summary in plain language. Separates goals from non-goals to prevent scope expansion during execution. Must be approved before Plan.</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">Delta specs (ADDED / MODIFIED / REMOVED)</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">OpenSpec-native format. Captures behavioral change explicitly — not what the system looks like, but what changes. Explicit enough for acceptance test generation.</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: #92500A; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;">Speckit — platform-side only, optional</div>
+              <div style="font-size: 12px; color: var(--ink-mid);">Last point where Speckit is permitted. Used upstream to expose ambiguity before the component package is approved. Never mixes into the local artifact chain.</div>
+            </div>
+            <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">Glossary check (rule O-2)</div>
+              <div style="font-size: 12px; color: var(--ink-mid);">Every term in the proposal and delta specs must appear in the shared glossary before the proposal is approved. Missing terms are added first.</div>
+            </div>
+            <div style="background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--teal); margin-bottom: 4px;">🔒 Component boundary rule</div>
+              <div style="font-size: 12px; color: var(--ink-mid);">Once work is inside the component repo: OpenSpec only. Mixing BMAD or Speckit creates two competing sources of intent.</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="background: #F0FBF0; border: 1.5px solid var(--green-border); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 700; color: var(--green);">Spec package approved — Ready for Plan</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px;">✓ Ready to move to Plan when:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Goals and non-goals are explicit</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Major behavior changes are testable sentences</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> All terms in glossary; platform-ref.yaml confirmed</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Team agrees planning can start without guessing</li>
+        </ul>
+      </div>
+      <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--coral); margin-bottom: 12px;">⚠️ Common challenges:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Spec becomes a design doc too early — move technical detail to Plan</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Requirements are vague or promotional — rewrite as specific behaviors</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Scope keeps expanding — keep non-goals visible at all times</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: PLAN PHASE -->
+<div class="slide" id="slide-plan" data-index="10" data-title="Phase 4: Plan">
+  <div class="slide-inner">
+    <div class="eyebrow">Phase 4 of 5</div>
+    <div class="phase-item" style="margin-bottom: 28px;">
+      <div class="phase-circle" style="background: var(--green-bg); color: var(--green); border: 2px solid var(--green-border);">4</div>
+      <div class="phase-body">
+        <h2 style="margin-bottom: 8px;">🗺️ Plan — Map Out How to Build It</h2>
+        <div class="phase-owner">Owner: Architect · Support: Team Lead, Developers, Product</div>
+        <p style="margin-bottom: 12px;">The Architect takes the approved spec and figures out <strong>how to technically build it</strong>. This creates a design document and a task list — small, verifiable steps developers can work through without guessing.</p>
+        <div class="phase-analogy">
+          <span class="phase-analogy-icon">🔧</span>
+          <span><strong>House analogy:</strong> The structural engineer, plumber, and electrician look at the blueprint and create detailed engineering drawings. They break it into tasks: "install this pipe on day 1, wire this circuit on day 2."</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">📄 design.md</h3>
+        <p style="font-size: 14px; margin-bottom: 10px;">The technical execution model. Records:</p>
+        <ul style="font-size: 13px; color: var(--ink-mid); list-style: none; display: flex; flex-direction: column; gap: 5px;">
+          <li>• Architecture and data flow decisions</li>
+          <li>• Service boundaries and interfaces</li>
+          <li>• Dependencies and rollout constraints</li>
+          <li>• Testing strategy</li>
+          <li>• ADRs — why this approach over alternatives</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">✅ tasks.md</h3>
+        <p style="font-size: 14px; margin-bottom: 10px;">The implementation work order. Each task:</p>
+        <ul style="font-size: 13px; color: var(--ink-mid); list-style: none; display: flex; flex-direction: column; gap: 5px;">
+          <li>• Maps to a JIRA story</li>
+          <li>• Has a clear action and target</li>
+          <li>• Has explicit validation criteria</li>
+          <li>• Is small enough to review in a single PR</li>
+          <li>• Has ordered dependencies (task A before task B)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Why Plan is separate from Specify</strong>
+        <p>Specify says <em>what</em> to build. Plan says <em>how</em> to build it. Mixing them creates specs that turn into design docs prematurely — where the PM is making technical decisions and the Architect is making product decisions. Keep them clean.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: PLAN DEEP DIVE -->
+<div class="slide" id="slide-plan-detail" data-index="11" data-title="Phase 4: Artifacts & Flow">
+  <div class="slide-inner wide">
+    <div class="eyebrow">Phase 4 · Artifacts &amp; Rationale</div>
+    <h2>What Plan produces — and why.</h2>
+    <p class="lead" style="margin-bottom: 36px;">Plan converts the approved spec into a technical execution model. Every artifact produced here must trace back to the proposal and forward to the tasks developers will implement.</p>
+
+    <!-- Flow diagram -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 20px;">Phase Flow</div>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="background: var(--green-bg); border: 2px solid var(--green-border); border-radius: 12px; padding: 10px 20px; font-size: 13px; font-weight: 700; color: var(--green); display: inline-block;">Approved spec package<br><span style="font-weight: 400; font-size: 11px;">proposal + delta specs + platform refs confirmed</span></div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+
+        <!-- impact tiers feed into design -->
+        <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 0;">
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 8px;">platform-ref.yaml impact tiers → design constraints</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+            <div style="font-size: 12px; color: var(--coral); font-weight: 600;">Tier 1 must_change_together → hard constraint in design.md</div>
+            <div style="font-size: 12px; color: #92500A; font-weight: 600;">Tier 2 watch_for_breakage → rollout risk in design.md</div>
+            <div style="font-size: 12px; color: var(--green); font-weight: 600;">Tier 3 adapts_independently → no coordination needed</div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0;">
+          <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">OpenSpec — component repo only</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">design.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Architecture decisions, service boundaries, data flow, dependencies, rollout constraints, testing strategy. Lives inside the change package — traceable to proposal, forward to tasks. A BMAD architecture doc outside the package would require manual synchronisation.</div>
+          </div>
+          <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">OpenSpec — component repo only</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">tasks.md</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Implementation work order. Each task maps to a JIRA story, carries explicit validation criteria, and feeds directly into Deliver's CLI tracking. Speckit also has a tasks command — but those are standalone, not inside the change package.</div>
+          </div>
+          <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">OpenSpec — when needed</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px;">ADRs</div>
+            <div style="font-size: 12px; color: var(--ink-mid);">Documents significant technical decisions. Component-local decisions live inside the change package. Decisions affecting shared platform truth go to the platform repo. BMAD surfaces the need for an ADR — the ADR itself is always an OpenSpec artifact.</div>
+          </div>
+        </div>
+        <div style="padding-left: 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.2;">↓</div>
+        <div style="background: #F0FBF0; border: 1.5px solid var(--green-border); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 700; color: var(--green);">Implementation-ready plan — Ready for Deliver</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px;">✓ Ready to move to Deliver when:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Every major technical choice maps back to the spec</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Tasks are executable without large hidden gaps</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Dependencies, risks, and validation needs are visible</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Stories or story groups are clear enough for reviewable PRs</li>
+        </ul>
+      </div>
+      <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--coral); margin-bottom: 12px;">⚠️ Common challenges:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Plan drifts from the approved spec — trace every decision to a requirement</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Tasks too large or vague — each needs a target, action, and validation step</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Planning becomes architecture theater — document only what the change size justifies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: DELIVER PHASE -->
+<div class="slide" id="slide-deliver" data-index="12" data-title="Phase 5: Deliver">
+  <div class="slide-inner">
+    <div class="eyebrow">Phase 5 of 5</div>
+    <div class="phase-item" style="margin-bottom: 28px;">
+      <div class="phase-circle" style="background: var(--teal-bg); color: var(--teal); border: 2px solid var(--teal-border);">5</div>
+      <div class="phase-body">
+        <h2 style="margin-bottom: 8px;">🚀 Deliver — Build, Review, Ship, Close</h2>
+        <div class="phase-owner">Owner: Team Lead · Support: Developers, QA, Architect, Product</div>
+        <p style="margin-bottom: 12px;">Delivery happens in small, reviewable <strong>slices</strong> — not one big dump. Each slice has its own review, verification, and sign-off before moving on.</p>
+        <div class="phase-analogy">
+          <span class="phase-analogy-icon">🏗️</span>
+          <span><strong>House analogy:</strong> Construction happens room by room. After the kitchen plumbing is done, an inspector checks it before the walls close. You don't finish the whole house and check everything at the end — that's too risky.</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom: 16px; font-size: 17px;">The 6 sub-steps inside Deliver:</h3>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">1</div>
+        <div><strong style="font-size: 14px;">Build</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 6px;">— Developers implement tasks in the agreed order</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">2</div>
+        <div><strong style="font-size: 14px;">Create PR</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 6px;">— Open a reviewable pull request linked to the change package</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">3</div>
+        <div><strong style="font-size: 14px;">Review PR</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 6px;">— Code review must be resolved before merging. Not optional.</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">4</div>
+        <div><strong style="font-size: 14px;">Verify</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 6px;">— QA collects evidence that behavior matches the spec from Specify</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">5</div>
+        <div><strong style="font-size: 14px;">Deploy</strong> <span style="font-size: 13px; color: var(--ink-soft); margin-left: 6px;">— Team Lead coordinates release timing, dependencies, and rollback readiness</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; background: var(--teal-bg); border: 1.5px solid var(--teal-border); border-radius: 10px; padding: 13px 18px;">
+        <div style="width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;">6</div>
+        <div><strong style="font-size: 14px; color: var(--teal);">Archive</strong> <span style="font-size: 13px; color: var(--teal); margin-left: 6px;">— Close the change package. Promote the new spec as canonical truth. <em>Required.</em></span></div>
+      </div>
+    </div>
+
+    <div class="callout callout-coral">
+      <span class="callout-icon">🔒</span>
+      <div class="callout-body">
+        <strong>Archive is not optional</strong>
+        <p>A feature is not done when the code is merged. It is done when the change package is archived and the spec reflects what was actually built. Skipping archive means the next person working on this feature starts from incorrect documentation.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: DELIVER DEEP DIVE -->
+<div class="slide" id="slide-deliver-detail" data-index="13" data-title="Phase 5: Artifacts & Flow">
+  <div class="slide-inner wide">
+    <div class="eyebrow">Phase 5 · Artifacts &amp; Rationale</div>
+    <h2>What Deliver produces — and why.</h2>
+    <p class="lead" style="margin-bottom: 36px;">Deliver is entirely OpenSpec-driven inside the component repo. The same change package that held the proposal, spec, and design now tracks execution — and is only closed when archive is complete.</p>
+
+    <!-- Flow diagram -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 36px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 20px;">Phase Flow — 6 sequential steps, all OpenSpec</div>
+      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--teal-bg); border: 2px solid var(--teal-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">🔨</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--teal);">Build</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;">Implement tasks in order. Update task status in the change package as you go.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--teal-bg); border: 2px solid var(--teal-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">🔗</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--teal);">Create PR</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;">PR references change package, tasks, and story keys. Not a freeform commit — a traceable delivery artifact.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--teal-bg); border: 2px solid var(--teal-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">👀</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--teal);">Review PR</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;">All review feedback resolved before deploy. Review is a required gate, not a formality.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--teal-bg); border: 2px solid var(--teal-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">✅</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--teal);">Verify</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;">Evidence co-located with the requirements it proves. Collected during delivery, not only at the end.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--teal-bg); border: 2px solid var(--teal-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">🚀</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--teal);">Deploy</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;">Tier 1 dependents confirmed ready before merging. Rollback readiness noted.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: var(--gold-bg); border: 2px solid var(--gold-border); border-radius: 10px; padding: 12px 10px; text-align: center;">
+            <div style="font-size: 18px; margin-bottom: 4px;">📁</div>
+            <div style="font-size: 13px; font-weight: 700; color: #92500A;">Archive</div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-mid); text-align: center; padding: 0 4px;"><strong>Required.</strong> Merges delta specs into main spec dir. Change package closed. New truth promoted.</div>
+        </div>
+      </div>
+
+      <!-- OpenSpec only banner -->
+      <div style="margin-top: 20px; background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--teal); text-align: center;">
+        All 6 steps tracked inside the same OpenSpec change package · No other tool used in the component repo
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px;">✓ Change is closed only when:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Planned slices are complete or intentionally deferred</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> PRs reviewed and all feedback resolved or tracked</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Tier 1 dependency verification recorded in archive</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> Change package archived — spec reflects delivered reality</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>✅</span> JIRA and platform alignment chain updated</li>
+        </ul>
+      </div>
+      <div style="background: var(--coral-bg); border: 1px solid var(--coral-border); border-radius: 14px; padding: 22px 24px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--coral); margin-bottom: 12px;">⚠️ Common challenges:</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 7px;">
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Delivery becomes one big batch — enforce slice-based execution</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> PRs too large to review safely — align to task boundaries</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Archive skipped — treat it as a required closure step, not cleanup</li>
+          <li style="font-size: 14px; display: flex; gap: 8px; color: var(--ink-mid);"><span>🚩</span> Verification happens too late — collect evidence during delivery</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: REAL EXAMPLE -->
+<div class="slide" id="slide-example" data-index="14" data-title="Real Example">
+  <div class="slide-inner">
+    <div class="eyebrow">👟 Walk-Through Example</div>
+    <h2>Real story: updating an email address.</h2>
+    <p class="lead" style="margin-bottom: 24px;">A feature request arrives. Let's follow it through all 5 phases. Click each step to see what happens.</p>
+
+    <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px;">📬 The Request</div>
+      <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 17px; font-style: italic; font-weight: 400; color: var(--ink);">"Customers should be able to update their email address with proper validation and clear error messages if something goes wrong."</p>
+    </div>
+
+    <div class="ex-step" onclick="toggleEx(this)">
+      <div class="ex-step-num">1</div>
+      <div><div class="ex-step-title">🏛️ Platform — What shared rules apply?</div><div class="ex-step-sub">Architect checks the foundation already built</div></div>
+      <div class="ex-step-chevron">▾</div>
+    </div>
+    <div class="ex-detail">
+      <p>The Architect looks at the platform foundation:</p>
+      <ul>
+        <li><strong>Ownership map:</strong> "profile-service" owns email data. "auth-service" also cares — it uses email for login.</li>
+        <li><strong>Dependency map:</strong> profile-service + auth-service must <em>change together</em> (Tier 1 — same release).</li>
+        <li><strong>Glossary:</strong> "Customer" already defined. "Validation" means format check + uniqueness check.</li>
+      </ul>
+      <p style="margin-top: 10px;">No surprises — the foundation was set up once. The team can proceed confidently.</p>
+    </div>
+
+    <div class="ex-step" onclick="toggleEx(this)">
+      <div class="ex-step-num">2</div>
+      <div><div class="ex-step-title">🔍 Assess — How big is this?</div><div class="ex-step-sub">Team Lead scopes and classifies the work</div></div>
+      <div class="ex-step-chevron">▾</div>
+    </div>
+    <div class="ex-detail">
+      <ul>
+        <li><strong>Type:</strong> Brownfield (existing system, adding new behavior)</li>
+        <li><strong>Size:</strong> Medium (two services, multiple stories)</li>
+        <li><strong>Path:</strong> Standard spec-first (not a quick fix)</li>
+        <li><strong>JIRA chain created:</strong> PLAT-123 (platform issue) → PROF-456 (profile epic) → AUTH-234 (auth epic)</li>
+      </ul>
+      <p style="margin-top: 10px;">Now we have a <strong>change package</strong> with a clear scope and owner. No planning or coding starts yet.</p>
+    </div>
+
+    <div class="ex-step" onclick="toggleEx(this)">
+      <div class="ex-step-num">3</div>
+      <div><div class="ex-step-title">✍️ Specify — What exactly should it do?</div><div class="ex-step-sub">PM writes the spec</div></div>
+      <div class="ex-step-chevron">▾</div>
+    </div>
+    <div class="ex-detail">
+      <p>The PM writes delta specs:</p>
+      <ul>
+        <li><strong>ADDED:</strong> Customer can submit a new email via profile settings</li>
+        <li><strong>ADDED:</strong> System sends a verification email before activating the change</li>
+        <li><strong>ADDED:</strong> If email already taken → "This email is associated with another account"</li>
+        <li><strong>ADDED:</strong> If format invalid → "Please enter a valid email address"</li>
+        <li><strong>NOT changing:</strong> Login still works with old email until verified</li>
+      </ul>
+      <p style="margin-top: 10px;">The proposal and spec are reviewed. Planning begins only after everyone approves.</p>
+    </div>
+
+    <div class="ex-step" onclick="toggleEx(this)">
+      <div class="ex-step-num">4</div>
+      <div><div class="ex-step-title">🗺️ Plan — How do we build it safely?</div><div class="ex-step-sub">Architect creates the blueprint</div></div>
+      <div class="ex-step-chevron">▾</div>
+    </div>
+    <div class="ex-detail">
+      <p>The Architect writes <strong>design.md</strong>:</p>
+      <ul>
+        <li>profile-service: new endpoint for email update + token storage</li>
+        <li>auth-service: reads new email only after verification confirmed</li>
+        <li>Both services must ship together (Tier 1 — from dependency map)</li>
+      </ul>
+      <p style="margin-top: 10px;">Then <strong>tasks.md</strong>: PROF-789, PROF-790, PROF-791 — each mapped to a JIRA story with clear acceptance criteria.</p>
+    </div>
+
+    <div class="ex-step" onclick="toggleEx(this)">
+      <div class="ex-step-num">5</div>
+      <div><div class="ex-step-title">🚀 Deliver — Build, review, ship, archive.</div><div class="ex-step-sub">Team Lead coordinates the full delivery</div></div>
+      <div class="ex-step-chevron">▾</div>
+    </div>
+    <div class="ex-detail">
+      <ul>
+        <li>Developers build task by task, updating the change package as they go</li>
+        <li>Each PR references the change package ID, tasks, and JIRA stories</li>
+        <li>Code reviewed before merge. QA verifies against the spec from Step 3.</li>
+        <li>profile-service and auth-service deploy <em>together</em> (Tier 1 constraint)</li>
+        <li><strong>Archive:</strong> Change package closed. New spec becomes canonical truth.</li>
+      </ul>
+      <p style="margin-top: 10px;">The feature is truly done — not "code merged" done. Verified, deployed, and the spec updated.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: ROLES -->
+<div class="slide" id="slide-roles" data-index="15" data-title="Who Does What">
+  <div class="slide-inner">
+    <div class="eyebrow">👥 Roles</div>
+    <h2>Every phase has one owner.</h2>
+    <p class="lead">Clarity about ownership prevents the most common failure mode: "I thought YOU were handling that."</p>
+
+    <div class="roles-grid-5" style="margin-bottom: 24px;">
+      <div class="role-card">
+        <div class="role-avatar" style="background: var(--gold-bg);">🏛️</div>
+        <h3 style="font-size: 17px;">Architect</h3>
+        <div class="role-owns">Owns: Platform + Plan</div>
+        <p>Sets the technical foundation and creates the implementation blueprint. Makes sure technology choices are sound and the plan is realistic.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background: var(--blue-bg);">👩‍💼</div>
+        <h3 style="font-size: 17px;">Team Lead</h3>
+        <div class="role-owns">Owns: Assess + Deliver</div>
+        <p>Evaluates incoming work and coordinates delivery. Sets the right scope at the start and keeps delivery on track through to archive.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background: #FDE8F4;">📋</div>
+        <h3 style="font-size: 17px;">Product Manager</h3>
+        <div class="role-owns">Owns: Specify</div>
+        <p>Defines exactly what to build in plain, testable language. The quality of the spec determines the quality of everything that follows.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background: var(--green-bg);">💻</div>
+        <h3 style="font-size: 17px;">Developers</h3>
+        <div class="role-owns">Supports: Plan + Deliver</div>
+        <p>Build from the plan, raise edge cases during Specify, update task status, write PRs linked to the spec, flag when reality differs from design.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background: var(--teal-bg);">🧪</div>
+        <h3 style="font-size: 17px;">QA / Validation</h3>
+        <div class="role-owns">Supports: Deliver</div>
+        <p>Verifies that what was built matches what was specified. Collects evidence that the feature works as described — against the spec, not memory.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Support vs. Own</strong>
+        <p>Every phase has one primary owner who makes the final call on whether the phase is ready to move on. "Support" means you contribute expertise and raise concerns — but you don't make the final decision.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: TOOLS -->
+<div class="slide" id="slide-tools" data-index="16" data-title="The Tools">
+  <div class="slide-inner">
+    <div class="eyebrow">🔧 The Tools</div>
+    <h2>Three tools, one methodology.</h2>
+    <p class="lead">SDD combines three AI-powered tools. Each has a specific role — they are not interchangeable.</p>
+
+    <div class="grid-3" style="margin-bottom: 28px;">
+      <div class="tool-card">
+        <div class="tool-icon" style="background: var(--gold-bg);">⚖️</div>
+        <h3>Speckit</h3>
+        <p>The <strong>rules and quality guardian</strong>. Helps write the platform constitution — explicit, testable principles every change must follow. Surfaces hidden assumptions and ambiguities before they become expensive.</p>
+        <div class="tool-where">Used in:</div>
+        <div class="badge-row">
+          <span class="badge badge-gold">🏛️ Platform</span>
+          <span class="badge badge-gold">🔍 Assess (opt.)</span>
+          <span class="badge badge-gold">✍️ Specify (platform)</span>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon" style="background: var(--blue-bg);">📦</div>
+        <h3>OpenSpec</h3>
+        <p>The <strong>change package manager</strong> — the backbone of the methodology. Creates and tracks the change package from assessment to archive. Every artifact lives here: proposal, spec, design, tasks, PRs.</p>
+        <div class="tool-where">Used in:</div>
+        <div class="badge-row">
+          <span class="badge badge-blue">🔍 Assess</span>
+          <span class="badge badge-blue">✍️ Specify</span>
+          <span class="badge badge-blue">🗺️ Plan</span>
+          <span class="badge badge-blue">🚀 Deliver</span>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon" style="background: var(--green-bg);">🗂️</div>
+        <h3>BMAD</h3>
+        <p>The <strong>planning navigator</strong>. Classifies incoming work and picks the right depth of planning. Knows whether you're building something new or changing existing systems — and how much planning each needs.</p>
+        <div class="tool-where">Used in:</div>
+        <div class="badge-row">
+          <span class="badge badge-green">🏛️ Platform</span>
+          <span class="badge badge-green">🔍 Assess</span>
+          <span class="badge badge-green">🗺️ Plan (platform)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="boundary-box">
+      <h3>🔑 The most important rule about tools</h3>
+      <div class="boundary-row">
+        <div class="boundary-side b-platform">
+          <div class="boundary-side-label">For shared platform work</div>
+          <p style="font-size: 14px; color: #92500A; line-height: 1.6;">You can use all three tools together — Speckit + OpenSpec + BMAD.</p>
+        </div>
+        <div class="boundary-side b-component">
+          <div class="boundary-side-label">Inside component repos (local work)</div>
+          <p>OpenSpec ONLY. No mixing allowed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: KEY RULES -->
+<div class="slide" id="slide-rules" data-index="17" data-title="Key Rules">
+  <div class="slide-inner wide">
+    <div class="eyebrow">📌 Key Rules</div>
+    <h2>Rules that prevent the most common failures.</h2>
+    <p class="lead">These aren't bureaucracy — each rule exists because someone paid a high price to learn it.</p>
+    <div class="grid-3">
+      <div class="rule-card">
+        <span class="rule-icon">🚫</span>
+        <h3 style="font-size: 16px;">No planning before Specify is approved</h3>
+        <p>If the spec isn't approved, the plan has nothing to map to. Planning from a vague spec creates a plan for the wrong product.</p>
+      </div>
+      <div class="rule-card">
+        <span class="rule-icon">🚫</span>
+        <h3 style="font-size: 16px;">No coding before planning is complete</h3>
+        <p>Starting implementation without a plan creates surprises mid-delivery. Developers end up making architectural decisions they shouldn't be making.</p>
+      </div>
+      <div class="rule-card">
+        <span class="rule-icon">📖</span>
+        <h3 style="font-size: 16px;">All terms must be in the glossary</h3>
+        <p>Every word used in a spec or acceptance criterion must be defined. "Customer" to a PM might not be "customer" to a developer.</p>
+      </div>
+      <div class="rule-card">
+        <span class="rule-icon">📁</span>
+        <h3 style="font-size: 16px;">Archive is not optional</h3>
+        <p>A feature is not done when it's deployed. Done means verified, deployed, and the change package archived so the spec reflects reality.</p>
+      </div>
+      <div class="rule-card">
+        <span class="rule-icon">🎯</span>
+        <h3 style="font-size: 16px;">Size and impact are separate</h3>
+        <p>A small change can have a huge impact — one line that breaks 10 services. Always classify them separately, using the dependency map.</p>
+      </div>
+      <div class="rule-card">
+        <span class="rule-icon">🔒</span>
+        <h3 style="font-size: 16px;">One owner per phase, always</h3>
+        <p>When everyone is responsible, no one is. Each phase has exactly one owner who decides when the phase is ready to move on.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: ITERATIONS -->
+<div class="slide" id="slide-iterations" data-index="18" data-title="Rollout Plan">
+  <div class="slide-inner">
+    <div class="eyebrow">📅 Rolling It Out</div>
+    <h2>Don't adopt everything at once.</h2>
+    <p class="lead">SDD rolls out in two safe iterations. Master the front half first, then add the back half. This prevents methodology overload.</p>
+
+    <div class="grid-2" style="margin-bottom: 28px;">
+      <div class="iter-card iter-1">
+        <h3>Iteration 1</h3>
+        <div class="iter-sub">Master this first — months 1 to 3</div>
+        <div class="iter-phase-item">
+          <h4>🏛️ Platform</h4>
+          <p>Write the shared rules, ownership maps, and glossary once.</p>
+        </div>
+        <div class="iter-phase-item">
+          <h4>🔍 Assess</h4>
+          <p>Turn every new request into a scoped change package.</p>
+        </div>
+        <div class="iter-phase-item">
+          <h4>✍️ Specify</h4>
+          <p>Write clear, testable specs before any technical planning begins.</p>
+        </div>
+        <div class="iter-result">✓ Success = Teams can define shared context once and produce specs clear enough to plan without guesswork.</div>
+      </div>
+      <div class="iter-card iter-2">
+        <h3>Iteration 2</h3>
+        <div class="iter-sub">Add this after Iteration 1 is working — months 4+</div>
+        <div class="iter-phase-item">
+          <h4>🗺️ Plan</h4>
+          <p>Turn approved specs into technical blueprints and ordered tasks.</p>
+        </div>
+        <div class="iter-phase-item">
+          <h4>🚀 Deliver</h4>
+          <p>Build in slices, review each one, verify, deploy, and archive.</p>
+        </div>
+        <div class="iter-result">✓ Success = Teams deliver work in controlled slices and never close a change without archiving it.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-gold">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Why two iterations?</strong>
+        <p>Strong specs (Iteration 1) dramatically improve the quality of plans and delivery (Iteration 2). If you try to change planning and delivery before teams write good specs, you're fighting two problems at once. Sequence matters.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: GLOSSARY -->
+<div class="slide" id="slide-glossary" data-index="19" data-title="Glossary">
+  <div class="slide-inner wide">
+    <div class="eyebrow">📚 Quick Reference</div>
+    <h2>Words you'll hear often.</h2>
+    <p class="lead" style="margin-bottom: 36px;">A short glossary of SDD terms. If you hear a word not in here, ask for it to be added to the shared glossary — that's the SDD way.</p>
+    <div class="grid-auto">
+      <div class="gloss-card"><div class="gloss-term">Change Package</div><div class="gloss-def">The single container for everything related to one piece of work — spec, design, tasks, PRs, archive state. The "project folder" for a feature.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Delta Spec</div><div class="gloss-def">A spec that says exactly what's ADDED, MODIFIED, or REMOVED — compared to how the system works today. Not the final state, the change.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Constitution</div><div class="gloss-def">Platform-level document of principles every team must follow. Not suggestions — explicit and testable standards written before any work starts.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Archive</div><div class="gloss-def">The final step of Deliver. Closing the change package and promoting the new spec as canonical truth. Not done without it.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Dependency Map</div><div class="gloss-def">Platform document showing which services depend on each other and how urgently they coordinate. Three tiers: change together / watch / independent.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Platform vs Component</div><div class="gloss-def">Platform = shared foundation (rules, contracts, ownership). Component = individual service or app. Platform changes affect everyone.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Impact Tier</div><div class="gloss-def">Tier 1 = must ship together. Tier 2 = watch after deploy. Tier 3 = no coordination needed. Drives JIRA structure decisions mechanically.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Proposal</div><div class="gloss-def">First artifact in a change package. Written by the PM. States problem, goals, and non-goals in plain language. Must be approved before planning.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Brownfield vs Greenfield</div><div class="gloss-def">Brownfield = changing an existing system (most work). Greenfield = building something brand new. They need different planning depths.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: CTA -->
+<div class="slide" id="slide-cta" data-index="20" data-title="Your First Step">
+  <div class="slide-inner">
+    <div class="eyebrow">🎯 Your First Step</div>
+    <h2>You own the Specify phase.</h2>
+    <p class="lead" style="text-align: center; margin: 0 auto 36px;">That's where the quality of every feature is decided. A strong spec leads to the right product. A weak spec leads to rework, frustration, and the wrong product.</p>
+
+    <div class="quote-box" style="margin-bottom: 32px; text-align: left;">
+      <blockquote>"Write down clearly what you want to build, agree on it before planning, plan before building, build in small reviewable steps, and never close a feature until the spec reflects what you actually shipped."</blockquote>
+      <div class="quote-attr">— Spec-Driven Development in one sentence</div>
+    </div>
+
+    <h3 style="font-size: 17px; text-align: center; margin-bottom: 16px;">How to write your first spec — 5 steps:</h3>
+    <div class="cta-step-row">
+      <div class="cta-step">1. Write the problem in 2 sentences</div>
+      <div class="cta-step">2. List 3 goals and 2 non-goals</div>
+      <div class="cta-step">3. Write one ADDED behavior as a testable sentence</div>
+      <div class="cta-step">4. Ask: could a developer write a test from this?</div>
+      <div class="cta-step">5. If yes → your spec is ready for review</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <button class="btn-solid" onclick="goTo(0)">← Back to the beginning</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ──────────────────────────────────────────────────────────────
+     JAVASCRIPT
+────────────────────────────────────────────────────────────────── -->
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total  = slides.length;
+  let current  = 0;
+  let animating = false;
+
+  /* ── BUILD NAV DOTS ── */
+  const dotRow = document.getElementById('dot-row');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.title = slides[i].dataset.title || ('Slide ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotRow.appendChild(d);
+  });
+
+  function getDots() { return dotRow.querySelectorAll('.nav-dot'); }
+
+  /* ── SHOW A SLIDE ── */
+  function goTo(index, direction) {
+    if (animating || index === current) return;
+    if (index < 0) index = 0;
+    if (index >= total) index = total - 1;
+
+    animating = true;
+    const prev = current;
+    const next = index;
+    const dir  = direction !== undefined ? direction : (next > prev ? 1 : -1);
+
+    const outSlide = slides[prev];
+    const inSlide  = slides[next];
+
+    /* Prepare the incoming slide off-screen */
+    inSlide.style.display = 'flex';
+    inSlide.style.opacity = '0';
+    inSlide.style.transform = dir > 0 ? 'translateX(48px)' : 'translateX(-48px)';
+
+    requestAnimationFrame(() => {
+      /* Animate out */
+      outSlide.style.transition = 'opacity .28s ease, transform .28s ease';
+      outSlide.style.opacity = '0';
+      outSlide.style.transform = dir > 0 ? 'translateX(-48px)' : 'translateX(48px)';
+
+      /* Animate in */
+      inSlide.style.transition = 'opacity .32s ease .05s, transform .32s ease .05s';
+      inSlide.style.opacity = '1';
+      inSlide.style.transform = 'translateX(0)';
+
+      setTimeout(() => {
+        outSlide.style.display = 'none';
+        outSlide.style.transition = '';
+        outSlide.style.opacity   = '';
+        outSlide.style.transform = '';
+        outSlide.classList.remove('active');
+
+        inSlide.classList.add('active');
+        inSlide.style.transition = '';
+
+        current   = next;
+        animating = false;
+        updateUI();
+        window.scrollTo(0, 0);
+      }, 360);
+    });
+  }
+
+  function nav(dir) { goTo(current + dir, dir); }
+
+  /* ── UPDATE UI ── */
+  function updateUI() {
+    /* dots */
+    getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+    /* counter */
+    document.getElementById('nav-counter').textContent = (current + 1) + ' / ' + total;
+    /* pager */
+    const slide = slides[current];
+    document.getElementById('pager-title').textContent = slide.dataset.title || '';
+    document.getElementById('pager-sub').textContent   = 'Slide ' + (current + 1) + ' of ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    /* progress bar */
+    const pct = total > 1 ? (current / (total - 1)) * 100 : 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+
+  /* ── KEYBOARD NAV ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nav(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   nav(-1);
+  });
+
+  /* ── SWIPE NAV ── */
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 48) nav(dx < 0 ? 1 : -1);
+  });
+
+  /* ── EXAMPLE STEPS TOGGLE ── */
+  function toggleEx(el) {
+    const detail = el.nextElementSibling;
+    const isOpen = el.classList.contains('open');
+    /* close all */
+    document.querySelectorAll('.ex-step').forEach(s => s.classList.remove('open'));
+    document.querySelectorAll('.ex-detail').forEach(d => d.classList.remove('open'));
+    if (!isOpen) {
+      el.classList.add('open');
+      detail.classList.add('open');
+    }
+  }
+
+  /* ── INIT ── */
+  slides[0].style.display = 'flex';
+  slides[0].style.opacity  = '1';
+  slides[0].style.transform = 'translateX(0)';
+  updateUI();
+</script>
+</body>
+</html>

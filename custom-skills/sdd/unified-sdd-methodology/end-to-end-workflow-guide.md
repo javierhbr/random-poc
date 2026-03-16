@@ -83,11 +83,18 @@ Shared IDs used throughout:
   │               │                                          │
   │               ▼                                          │
   │  Step 1.4  OpenSpec  ──► Versioning + JIRA conventions   │
+  │               │                                          │
+  │               ▼                                          │
+  │  Step 1.5  Architect ──► Ownership artifacts             │
+  │                          component-ownership-<name>.md   │
+  │                          dependency-map.md               │
+  │                          glossary.md                     │
   └───────────────────────────────────────────────────────────┘
               │
               ▼
         Platform baseline ready
-        (constitution · config · role map · versioning)
+        (constitution · config · role map · versioning ·
+         ownership boundaries · dependency map · glossary)
 ```
 
 ---
@@ -285,12 +292,66 @@ artifact_rules:
 > platform-ref.yaml, jira-traceability.yaml, and component-level OpenSpec
 > change packages."
 
+---
+
+### Step 1.5 — Write ownership artifacts
+
+**Role:** Architect
+**Tool:** Platform template (`ownership/` directory)
+**Skill:** Reference [platform-ddd-spec.md](platform-ddd-spec.md)
+**When:** After versioning and JIRA conventions are agreed. One-time setup.
+
+```text
+  Constitution + brownfield context + contract inventory
+              │
+              ▼  Architect writes three files
+  ┌──────────────────────────────────────────────────────────────┐
+  │  ownership/component-ownership-profile-service.md            │
+  │    owns:      email update flow, profile update event        │
+  │    does NOT:  authentication, sessions, email delivery       │
+  │                                                              │
+  │  ownership/component-ownership-auth-service.md              │
+  │    owns:      login sessions, duplicate-email enforcement    │
+  │    does NOT:  profile data shape, event publishing           │
+  │                                                              │
+  │  ownership/dependency-map.md                                 │
+  │    profile ◄──tier 1──► auth   (must change together)       │
+  │    profile ──tier 2──► notif   (watch for breakage)         │
+  │    profile ──tier 3──► audit   (adapts independently)       │
+  │                                                              │
+  │  ownership/glossary.md                                       │
+  │    email update  — defined                                   │
+  │    validation    — defined                                   │
+  │    duplicate email — defined                                 │
+  └──────────────────────────────────────────────────────────────┘
+              │
+              ▼
+        Assess phase can now look up ownership and impact
+        instead of deciding them from memory each time
+```
+
+**What happens:**
+
+The Architect writes one `component-ownership-<name>.md` per component,
+records all component relationships in `dependency-map.md` with their impact
+tier, and seeds `glossary.md` from the constitution and brownfield review.
+
+**Sample prompt:**
+
+> "Using the platform-ddd-spec, write the component ownership file for
+> profile-service, add its relationships to the dependency map, and seed
+> the shared glossary with the terms email update, validation, and
+> duplicate email."
+
 **Exit gate for Platform:**
 
 - Constitution is written and approved by the team.
 - Durable project config is encoded in `openspec/config.yaml`.
 - Versioning model, JIRA hierarchy, and role map are agreed.
 - Teams know which service repos are in scope.
+- One `component-ownership-<name>.md` exists for every component in scope.
+- `dependency-map.md` records all cross-component relationships with tiers.
+- `glossary.md` is seeded with terms used in the constitution and contracts.
 
 ---
 
@@ -309,15 +370,23 @@ artifact_rules:
   │                      ASSESS PHASE                         │
   │                                                           │
   │  Step 2.1  BMAD      ──► Classify: size · type · path    │
-  │               │                                          │
+  │               │          + ownership lookup              │
   │               ├─ greenfield / brownfield?                 │
   │               ├─ small / medium / large?                  │
-  │               └─ Quick Flow / Standard / Full?            │
+  │               ├─ Quick Flow / Standard / Full?            │
+  │               └─ read component-ownership-<name>.md      │
+  │                   → which component owns this change?     │
   │               │                                          │
   │               ▼                                          │
   │  Step 2.2  OpenSpec  ──► Open change package             │
+  │               │           + dependency map lookup        │
   │               │           platform-ref.yaml              │
+  │               │             ownership.primary_component  │
+  │               │             impact.must_change_together  │
+  │               │             impact.watch_for_breakage    │
+  │               │             impact.adapts_independently  │
   │               │           jira-traceability.yaml         │
+  │               │             (JIRA chain from tier)       │
   │               │                                          │
   │               ▼                                          │
   │  Step 2.3  BMAD      ──► Architect impact review         │
@@ -326,7 +395,8 @@ artifact_rules:
               │
               ▼
         Assessed change package ready
-        (scope · classification · platform refs · issue chain)
+        (scope · classification · ownership · impact tiers ·
+         platform refs · issue chain)
 ```
 
 ---
@@ -363,15 +433,20 @@ artifact_rules:
 
 **What happens:**
 
-The Team Lead uses BMAD to classify the request. The classification answers:
-is this greenfield or brownfield? How large is it? Does it need Quick Flow,
-a PRD, or a full architecture review? Is it component-only or shared?
+The Team Lead uses BMAD to classify the request. Before opening any JIRA issue,
+they read `ownership/component-ownership-<name>.md` to confirm which component
+owns the primary change. The classification answers: is this greenfield or
+brownfield? How large is it? Does it need Quick Flow, a PRD, or a full
+architecture review? Is it component-only or shared? Which component is the
+primary owner?
 
 **Sample prompt:**
 
 > "Using the BMAD skill, classify this validated-email-update request by size,
 > impact, and architecture depth. Tell me whether it is platform-only,
-> component-only, or shared. Recommend a path."
+> component-only, or shared. Recommend a path. Also check
+> component-ownership-profile-service.md and component-ownership-auth-service.md
+> to confirm which component owns the email update flow."
 
 **Sample output:**
 
@@ -381,6 +456,12 @@ Classification: validated customer email updates
 Type: brownfield
 Size: medium (2–3 components, 2–4 stories per component)
 Impact: high (shared contract, cross-team coordination)
+
+Ownership lookup (component-ownership-profile-service.md):
+  profile-service owns: email update flow ✓
+  auth-service owns: duplicate-email enforcement ✓
+  Primary owner: profile-service
+  Auth-service has a dependency — check dependency-map.md for tier
 
 Path: Standard (PRD-first)
 Reason: the change touches a shared contract and two component teams.
@@ -434,6 +515,13 @@ canonical execution container that all downstream artifacts will live inside.
 > email updates. Identify the affected component repos and create the initial
 > platform-ref.yaml and jira-traceability.yaml."
 
+**Sample prompt:**
+
+> "Using the OpenSpec skill, open the change package for validated customer
+> email updates. Identify the affected component repos and create the initial
+> platform-ref.yaml and jira-traceability.yaml. Also read dependency-map.md
+> and populate the impact fields for profile-service."
+
 **Sample output — `platform-ref.yaml`:**
 
 ```yaml
@@ -445,6 +533,15 @@ platform:
 component:
   name: "profile-service"
   owner_team: "identity-team"
+
+ownership:
+  primary_component: "profile-service"
+  # verified against ownership/component-ownership-profile-service.md
+
+impact:
+  must_change_together: [auth-service]          # tier 1 — from dependency-map.md
+  watch_for_breakage:   [notification-service]  # tier 2 — from dependency-map.md
+  adapts_independently: [audit-service]         # tier 3 — from dependency-map.md
 
 change:
   change_package_id: "chg-profile-email-validation"
@@ -511,9 +608,12 @@ Risks:
 **Exit gate for Assess:**
 
 - Change package exists with one clear owner.
+- Ownership verified against `component-ownership-<name>.md`.
 - Size and impact are classified separately (medium size, high impact).
-- `platform-ref.yaml` pins the platform version and affected refs.
-- `jira-traceability.yaml` records PLAT-123, PROF-456, AUTH-234.
+- `platform-ref.yaml` pins the platform version, affected refs, ownership,
+  and impact tiers (populated from `dependency-map.md`).
+- `jira-traceability.yaml` records PLAT-123, PROF-456, AUTH-234 — the issue
+  chain is derived from the impact tier (tier 1 → AUTH-234 epic opened now).
 - Next artifact and owner are clear: `proposal.md` owned by Product.
 
 ---
@@ -564,14 +664,18 @@ Risks:
 
 **What happens:**
 
-Product uses OpenSpec to write `proposal.md`. This defines the problem
-statement, goals, non-goals, affected platform refs, and acceptance summary.
+Product reads `ownership/glossary.md` before writing `proposal.md`. Every term
+used in goals and acceptance criteria must be in the glossary. Missing terms are
+added before the proposal is approved (rule O-2). Then Product uses OpenSpec to
+write `proposal.md`.
 
 **Sample prompt:**
 
 > "Using the OpenSpec skill, create proposal.md for validated customer email
-> updates. Define the problem statement, goals, non-goals, affected platform
-> refs, and acceptance summary aligned to the customer-identity capability."
+> updates. Before writing, check glossary.md to confirm that 'email update',
+> 'validation', and 'duplicate email' are defined. Define the problem statement,
+> goals, non-goals, affected platform refs, and acceptance summary using only
+> glossary terms."
 
 **Sample output — `proposal.md`:**
 
@@ -718,6 +822,8 @@ Developers review for testability and edge-case coverage.
 **Exit gate for Specify:**
 
 - `proposal.md` is approved with explicit goals and non-goals.
+- All terms in the proposal and delta specs are in `glossary.md`.
+- `platform-ref.yaml` includes `alignment_notes.glossary_terms_used`.
 - Delta specs use concrete behaviors with `ADDED / MODIFIED / REMOVED`.
 - `platform-ref.yaml` confirms the correct contract and capability refs.
 - `jira-traceability.yaml` is up to date with PLAT-123, PROF-456.
@@ -797,14 +903,18 @@ Developers review for testability and edge-case coverage.
 
 **What happens:**
 
-The Architect turns the platform plan handoff (platform version, refs, shared
-decisions, rollout constraints) into a local `design.md` inside the component
-change package.
+The Architect reads `platform-ref.yaml` impact tiers before designing. Tier 1
+entries (`must_change_together`) become hard constraints in `design.md`. Tier 2
+entries (`watch_for_breakage`) become rollout risks. Then the Architect turns
+the platform plan handoff into a local `design.md` inside the change package.
 
 **Sample prompt:**
 
 > "Using the OpenSpec skill, turn the platform plan handoff for validated
-> customer email updates into design.md for profile-service, including shared
+> customer email updates into design.md for profile-service. Read
+> platform-ref.yaml impact fields first: auth-service is tier 1 (must change
+> together) — make that a hard constraint in the design. notification-service
+> is tier 2 (watch for breakage) — make that a rollout risk. Include shared
 > contract implications, service boundaries, and rollout constraints."
 
 **Sample output — `design.md`:**
@@ -834,8 +944,11 @@ update and before emitting the shared profile update event.
 
 ## Dependencies
 
-- AUTH-234 must keep auth-service duplicate-email checks aligned
-- notification-service follow-up may be needed for message consistency
+- AUTH-234 — tier 1 (must change together): auth-service duplicate-email
+  checks must ship in the same release as this change. Hard constraint.
+- notification-service — tier 2 (watch for breakage): monitor after deploy
+  to confirm profile event fields are still consumed correctly. Rollout risk.
+- audit-service — tier 3 (adapts independently): no coordination required.
 
 ## Delivery slices
 
@@ -1088,13 +1201,15 @@ profile-service update-email API endpoint.
 **Sample prompt (Architect):**
 
 > "Using the OpenSpec skill, review this PR for design drift, contract safety,
-> and alignment with the approved platform refs."
+> and alignment with the approved platform refs. Confirm that tier 1 dependency
+> (auth-service) is addressed in this slice or explicitly staged."
 
 **Sample prompt (Team Lead):**
 
 > "Using the OpenSpec skill, confirm that this PR references the change
 > package, affected tasks, story keys, and validation performed, and that it
-> is scoped to one reviewable slice."
+> is scoped to one reviewable slice. Check the PR description for tier 1 and
+> tier 2 dependency verification notes."
 
 ---
 
@@ -1193,7 +1308,12 @@ closes the change package, and records the delivery as history.
 - All planned tasks are complete or intentionally deferred with a logged reason.
 - PRs are reviewed and feedback is resolved.
 - Verification evidence is recorded.
+- Tier 1 dependency verification is recorded in the archive (auth-service aligned).
+- Tier 2 consumer check is noted (notification-service checked after deploy).
 - Deploy decisions and rollback notes are captured.
+- If any ownership boundary or dependency tier changed during delivery, the
+  relevant `component-ownership-<name>.md` or `dependency-map.md` is flagged
+  for update in the platform repo.
 - Change package is archived.
 - `jira-traceability.yaml` reflects the final PLAT-123 → PROF-456 → story → PR chain.
 
@@ -1207,30 +1327,36 @@ closes the change package, and records the delivery as history.
  │  ├─ 1.1  BMAD      sdd-bmad      Review brownfield platform state               │
  │  ├─ 1.2  Speckit   sdd-speckit   Draft platform constitution                    │
  │  ├─ 1.3  OpenSpec  sdd-openspec  Encode durable project config                  │
- │  └─ 1.4  OpenSpec  sdd-openspec  Agree versioning + JIRA conventions            │
+ │  ├─ 1.4  OpenSpec  sdd-openspec  Agree versioning + JIRA conventions            │
+ │  └─ 1.5  Architect ownership/   Write ownership boundaries · dependency         │
+ │                                  map · shared glossary                           │
  │              │                                                                   │
- │              ▼  constitution · config · role map                                 │
+ │              ▼  constitution · config · role map · ownership · dep map · glossary│
  ├──────────────────────────────────────────────────────────────────────────────────┤
  │  PHASE 2: ASSESS            Owner: Team Lead                                     │
  │  ├─ 2.1  BMAD      sdd-bmad      Classify: size · type · path                  │
- │  ├─ 2.2  OpenSpec  sdd-openspec  Open change package + platform-ref + jira      │
+ │  │                               + read component-ownership for primary owner   │
+ │  ├─ 2.2  OpenSpec  sdd-openspec  Open change package + read dependency-map      │
+ │  │                               → populate impact tiers in platform-ref.yaml   │
  │  └─ 2.3  BMAD      sdd-bmad      Architect impact review (shared changes)       │
  │              │                                                                   │
- │              ▼  change package · classification · issue chain                   │
+ │              ▼  change package · ownership · impact tiers · issue chain         │
  ├──────────────────────────────────────────────────────────────────────────────────┤
  │  PHASE 3: SPECIFY           Owner: Product          [OpenSpec ONLY in comp repo] │
- │  ├─ 3.1  OpenSpec  sdd-openspec  Write proposal.md                              │
+ │  ├─ 3.1  OpenSpec  sdd-openspec  Check glossary.md → write proposal.md          │
+ │  │                               (all terms must be in glossary before approval) │
  │  ├─ 3.2  OpenSpec  sdd-openspec  Write delta specs (ADDED / MODIFIED / REMOVED) │
  │  └─ 3.3  OpenSpec  sdd-openspec  Scope + alignment check (Team Lead)            │
  │              │                                                                   │
- │              ▼  approved spec · confirmed platform refs · JIRA updated           │
+ │              ▼  approved spec · glossary aligned · confirmed platform refs       │
  ├──────────────────────────────────────────────────────────────────────────────────┤
  │  PHASE 4: PLAN              Owner: Architect        [OpenSpec ONLY in comp repo] │
- │  ├─ 4.1  OpenSpec  sdd-openspec  Write design.md                                │
+ │  ├─ 4.1  OpenSpec  sdd-openspec  Read impact tiers → write design.md            │
+ │  │                               (tier 1 = hard constraint · tier 2 = risk)     │
  │  ├─ 4.2  OpenSpec  sdd-openspec  Write tasks.md (story-mapped · validation gate) │
  │  └─ 4.3  OpenSpec  sdd-openspec  Developer feasibility review                   │
  │              │                                                                   │
- │              ▼  design · tasks · story mapping · slices                         │
+ │              ▼  design (with tier constraints) · tasks · story mapping · slices  │
  ├──────────────────────────────────────────────────────────────────────────────────┤
  │  PHASE 5: DELIVER           Owner: Team Lead        [OpenSpec ONLY in comp repo] │
  │  ├─ 5.1  OpenSpec  sdd-openspec  Build — claim · implement · validate · complete │
@@ -1349,3 +1475,17 @@ running example.
 
 6. **Never close a change without verification evidence.** Evidence must be
    inside the change package before deploy, not added afterwards.
+
+7. **Ownership before epic.** Before opening any JIRA epic, confirm the
+   primary owner using `component-ownership-<name>.md`. The wrong epic owner
+   is one of the most common sources of misaligned delivery.
+
+8. **Impact tiers drive JIRA structure.** Read `dependency-map.md` at Assess
+   and populate `platform-ref.yaml` impact fields. Tier 1 components must have
+   coordinated epics opened immediately. Never override tiers without a platform
+   change package.
+
+9. **Glossary before proposal.** All terms used in a proposal or delta spec
+   must be in `glossary.md` before the proposal is approved. If a term is
+   missing, add it first. Do not invent synonyms for existing glossary terms
+   inside a spec.

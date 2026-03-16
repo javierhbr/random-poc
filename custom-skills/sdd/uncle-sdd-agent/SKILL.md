@@ -1,5 +1,5 @@
 ---
-name: unified-sdd-orchestrator
+name: uncle-sdd
 summary: Use for platform-scale spec-driven development that combines Sdd-Bmad's progressive planning and roles, Sdd-OpenSpec's change package and artifact flow, and Sdd-Speckit's executable specification discipline.
 triggers:
   - unified sdd
@@ -14,7 +14,7 @@ triggers:
   - iteration 2
 ---
 
-# Unified SDD Orchestrator
+# Uncle SDD
 
 Use this skill when the team wants one practical workflow across multiple
 teams, artifacts, and delivery phases without losing the strengths of Sdd-Bmad,

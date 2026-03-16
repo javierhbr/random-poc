@@ -230,8 +230,12 @@ Detailed reference:
 
 - [canonical-platform-truth-and-component-alignment.md](canonical-platform-truth-and-component-alignment.md)
 - [local-platform-mcp-model.md](local-platform-mcp-model.md)
+- [platform-ddd-spec.md](platform-ddd-spec.md)
 - [templates/platform-ref.yaml](templates/platform-ref.yaml)
 - [templates/jira-traceability.yaml](templates/jira-traceability.yaml)
+- [templates/platform-template/ownership/component-ownership-template.md](templates/platform-template/ownership/component-ownership-template.md)
+- [templates/platform-template/ownership/dependency-map-template.md](templates/platform-template/ownership/dependency-map-template.md)
+- [templates/platform-template/ownership/glossary-template.md](templates/platform-template/ownership/glossary-template.md)
 - [templates/platform-mcp-boilerplate/README.md](templates/platform-mcp-boilerplate/README.md)
 - [example/08-platform-plan-to-component-openspec.md](example/08-platform-plan-to-component-openspec.md)
 
@@ -340,8 +344,17 @@ Typical outputs:
 - durable project config
 - common quality and documentation rules
 - role expectations for later phases
+- component ownership boundaries (`ownership/component-ownership-<name>.md`)
+- dependency map with three impact tiers (`ownership/dependency-map.md`)
+- shared glossary of platform terms (`ownership/glossary.md`)
 
 This phase is where Speckit's constitution mindset is strongest.
+
+The three ownership artifacts make impact assessment in Assess deterministic.
+They are created once and updated only when the platform structure changes.
+See [platform-ddd-spec.md](platform-ddd-spec.md) for the full rationale and
+[ADR-014](decisions/ADR-014-three-concept-ddd-for-platform-ownership-and-impact.md)
+for the decision record.
 
 ### 2. Assess
 
@@ -355,6 +368,20 @@ Assess applies BMAD classification rules:
 - quick flow, PRD-first, or architecture-heavy path
 
 Assess also applies the size and impact split already adopted in ADR-004.
+
+In addition, Assess now uses three platform ownership artifacts:
+
+- read `ownership/component-ownership-<name>.md` to determine which component
+  owns the change before opening any epic
+- read `ownership/dependency-map.md` to determine the impact tier for each
+  affected relationship (must-change-together / watch-for-breakage /
+  adapts-independently)
+- confirm glossary terms are defined before writing the proposal
+
+The impact tier from the dependency map drives the JIRA structure decision.
+Tier 1 → open coordinated component epics immediately.
+Tier 2 → add a watch note in `platform-ref.yaml`.
+Tier 3 → no additional action required.
 
 ### 3. Specify
 
@@ -470,6 +497,7 @@ Speckit strengthens Platform, Specify, and Plan. It gives the methodology:
 - ADR-011 proposes OpenSpec-only local workflows inside component repositories
 - ADR-012 proposes a local read-only platform MCP gateway for developer access to platform truth
 - ADR-013 proposes implementing the first local MCP server as a self-contained Go stdio server
+- ADR-014 proposes adopting three DDD-derived concepts (component ownership boundary, dependency map, shared glossary) to make Assess-phase impact assessment deterministic
 
 ## Evolution path
 
