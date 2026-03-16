@@ -18,9 +18,9 @@ Support phases:
 
 ## Default skill emphasis
 
-1. `bmad-codex-skill`
-2. `openspec-codex-skill`
-3. `speckit-codex-skill`
+1. `sdd-bmad`
+2. `sdd-openspec`
+3. `sdd-speckit`
 4. `explain-code-codex-skill` for flow and PR explanations
 
 ## Responsibilities by phase
@@ -62,7 +62,7 @@ Support phases:
 ## How this role uses the skills
 
 - `BMAD`
-  - primary tool for routing, phase control, and role-based handoffs
+  - primary tool for assessment, phase control, and role-based handoffs
 - `OpenSpec`
   - primary tool for change package management, apply, and archive
 - `Speckit`
@@ -79,7 +79,7 @@ Support phases:
 
 ## Typical outputs
 
-- routed change package
+- assessed change package
 - phase decisions
 - delivery slice plan
 - PR/review coordination

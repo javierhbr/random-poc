@@ -20,9 +20,9 @@ Support phases:
 
 ## Default skill emphasis
 
-1. `speckit-codex-skill`
-2. `openspec-codex-skill`
-3. `bmad-codex-skill`
+1. `sdd-speckit`
+2. `sdd-openspec`
+3. `sdd-bmad`
 4. `explain-code-codex-skill` for code-path and PR explanations
 
 ## Responsibilities by phase

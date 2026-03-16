@@ -33,7 +33,7 @@ role agents.
 | Role | Primary phases | Default skill emphasis | Typical outputs |
 | --- | --- | --- | --- |
 | Architect | Platform, Plan | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | platform baseline, architecture plan, ADRs, design review |
-| Team Lead | Assess, Deliver | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | routed change package, delivery slices, PR/review coordination, archive closure |
+| Team Lead | Assess, Deliver | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | assessed change package, delivery slices, PR/review coordination, archive closure |
 | Product | Specify | platform: OpenSpec -> Speckit -> BMAD; component: OpenSpec (+ Explain Code) | proposal, user stories, acceptance criteria, clarified scope |
 | Developer | Deliver, future Build | component: OpenSpec (+ Explain Code) | executable tasks, code, tests, PRs, review fixes |
 

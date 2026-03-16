@@ -32,7 +32,7 @@ This unified skill is derived from:
 - `../explain-code-codex-skill/SKILL.md`
 - `../platform-contextualizer-codex-skill/SKILL.md`
 - `../platform-truth-mcp-codex-skill/SKILL.md`
-- `../methodology-tools/SKILL.md`
+- `../methodology-tools/SKILLS.md`
 
 ## Source rule files
 

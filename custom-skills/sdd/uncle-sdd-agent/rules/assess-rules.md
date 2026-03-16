@@ -8,9 +8,9 @@ Turn an incoming request into a scoped change package with the right next step.
 
 ## Apply these skills in this order
 
-1. `bmad-codex-skill`
-2. `openspec-codex-skill`
-3. `speckit-codex-skill` only if routing is blocked by ambiguity
+1. `sdd-bmad`
+2. `sdd-openspec`
+3. `sdd-speckit` only if ambiguity blocks safe assessment
 
 ## Must do
 
@@ -43,7 +43,7 @@ Turn an incoming request into a scoped change package with the right next step.
 
 ## Required outputs
 
-- routed change package
+- assessed change package
 - size and impact classification
 - selected path depth
 - next artifact
