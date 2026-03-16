@@ -13,7 +13,7 @@ The feature-addition guide recommends:
 ## Project context
 The project-context docs say to run `bmad-generate-project-context` after architecture, or on existing projects, so the workflow scans the architecture and project files to capture established decisions and conventions. The docs explain that this matters because without project context, agents default to generic patterns and may miss project-specific constraints. citeturn1view5
 
-## Codex-skill implication
+## AI-skill implication
 When working with an existing repo:
 - inspect established patterns first
 - call out integration points

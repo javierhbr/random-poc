@@ -8,9 +8,9 @@ Turn an incoming request into a scoped change package with the right next step.
 
 ## Apply these skills in this order
 
-1. `bmad-codex-skill`
-2. `openspec-codex-skill`
-3. `speckit-codex-skill` only if routing is blocked by ambiguity
+1. `bmad-skill`
+2. `openspec-skill`
+3. `speckit-skill` only if routing is blocked by ambiguity
 
 ## Must do
 

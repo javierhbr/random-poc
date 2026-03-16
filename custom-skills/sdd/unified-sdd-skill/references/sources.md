@@ -12,19 +12,19 @@ This unified skill is derived from:
 
 ## Source skills
 
-- `../bmad-codex-skill/SKILL.md`
-- `../openspec-codex-skill/SKILL.md`
-- `../speckit-codex-skill/SKILL.md`
-- `../explain-code-codex-skill/SKILL.md`
+- `../bmad-skill/SKILL.md`
+- `../openspec-skill/SKILL.md`
+- `../speckit-skill/SKILL.md`
+- `../explain-code-skill/SKILL.md`
 
 ## Source rule files
 
-- `../bmad-codex-skill/rules/track-selection-rules.md`
-- `../bmad-codex-skill/rules/artifact-rules.md`
-- `../openspec-codex-skill/rules/artifact-rules.md`
-- `../openspec-codex-skill/rules/project-config-template.yaml`
-- `../speckit-codex-skill/rules/constitution-rules.md`
-- `../speckit-codex-skill/rules/spec-rules.md`
-- `../speckit-codex-skill/rules/plan-rules.md`
-- `../speckit-codex-skill/rules/task-rules.md`
+- `../bmad-skill/rules/track-selection-rules.md`
+- `../bmad-skill/rules/artifact-rules.md`
+- `../openspec-skill/rules/artifact-rules.md`
+- `../openspec-skill/rules/project-config-template.yaml`
+- `../speckit-skill/rules/constitution-rules.md`
+- `../speckit-skill/rules/spec-rules.md`
+- `../speckit-skill/rules/plan-rules.md`
+- `../speckit-skill/rules/task-rules.md`
 - `rules/alignment-and-traceability-rules.md`

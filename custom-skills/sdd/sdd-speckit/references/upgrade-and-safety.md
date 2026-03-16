@@ -7,7 +7,7 @@ uv tool install specify-cli --force --from git+https://github.com/github/spec-ki
 
 ## Update project files
 ```bash
-specify init --here --force --ai codex
+specify init --here --force --ai claude
 ```
 
 ## What updates

@@ -17,10 +17,10 @@ Support phases:
 
 ## Default skill emphasis
 
-1. `openspec-codex-skill`
-2. `speckit-codex-skill`
-3. `bmad-codex-skill`
-4. `explain-code-codex-skill` for current-vs-target behavior explanations
+1. `openspec-skill`
+2. `speckit-skill`
+3. `bmad-skill`
+4. `explain-code-skill` for current-vs-target behavior explanations
 
 ## Responsibilities by phase
 

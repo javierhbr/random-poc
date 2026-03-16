@@ -4,7 +4,7 @@ title: "Adopt a 5-phase v1 workflow with Team Lead owning Deliver"
 status: "proposed"
 date: "2026-03-08"
 initiative: "unified-sdd-methodology"
-author: "javierbenavides + codex"
+author: "javierbenavides + claude"
 deciders:
   - "platform-methodology-working-group"
 ---

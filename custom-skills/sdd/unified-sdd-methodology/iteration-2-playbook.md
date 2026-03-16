@@ -167,7 +167,7 @@ Agent roles:
 
 ### 4. Skills used and how they are applied
 
-- `openspec-codex-skill`
+- `openspec-skill`
   - use it as the only component-repo skill in Plan
   - use it to create or refine `design.md` and `tasks.md`
   - use it to keep artifacts aligned with the platform handoff and change package
@@ -180,7 +180,7 @@ Agent roles:
 
 Apply these rules:
 
-- `openspec-codex-skill/rules/artifact-rules.md`
+- `openspec-skill/rules/artifact-rules.md`
   - design must explain why the chosen solution is preferred
   - tasks must be narrow, testable, and dependency-aware
 - component rule
@@ -319,7 +319,7 @@ Agent roles:
 
 ### 4. Skills used and how they are applied
 
-- `openspec-codex-skill`
+- `openspec-skill`
   - use it as the only component-repo skill in Deliver
   - use it for task updates, PR traceability, verification notes, and archive
   - use it to keep artifacts and implementation state aligned through delivery
@@ -331,7 +331,7 @@ Agent roles:
 
 Apply these rules:
 
-- `openspec-codex-skill/rules/artifact-rules.md`
+- `openspec-skill/rules/artifact-rules.md`
   - keep artifacts consistent with the current reality
   - prefer incremental, reviewable change sets
 - component rule

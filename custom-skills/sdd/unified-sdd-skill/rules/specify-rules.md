@@ -8,9 +8,9 @@ Define the required behavior before planning starts.
 
 ## Apply these skills in this order
 
-1. `openspec-codex-skill`
-2. `speckit-codex-skill`
-3. `bmad-codex-skill`
+1. `openspec-skill`
+2. `speckit-skill`
+3. `bmad-skill`
 
 ## Must do
 

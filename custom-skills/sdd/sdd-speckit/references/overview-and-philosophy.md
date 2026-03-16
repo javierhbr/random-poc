@@ -17,8 +17,8 @@ Use for 0-to-1 work where the feature or product starts from a blank slate.
 ### Brownfield
 Use for iterative enhancement, modernization, or feature additions in an existing codebase.
 
-## Why this matters for Codex skills
-A good Codex skill should not only explain commands. It should teach the model:
+## Why this matters for AI skills
+A good AI skill should not only explain commands. It should teach the model:
 - when to use each artifact
 - how to separate concerns between artifacts
 - how to preserve intent as work moves from spec to implementation

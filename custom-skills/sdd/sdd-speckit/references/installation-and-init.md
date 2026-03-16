@@ -21,7 +21,7 @@ uvx --from git+https://github.com/github/spec-kit.git specify init --here
 
 ### Specify the agent
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --ai codex
+uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --ai claude
 ```
 
 ### Force script type

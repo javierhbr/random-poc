@@ -1,4 +1,4 @@
-# Example Prompts for Codex
+# Example Prompts for AI agents
 
 ## Generate a query
 Write OPAL that filters HTTP 500 errors, extracts `service` as string, and returns a 5 minute timechart of count by service.

@@ -8,9 +8,9 @@ Turn the approved spec into an execution-ready technical plan.
 
 ## Apply these skills in this order
 
-1. `bmad-codex-skill`
-2. `openspec-codex-skill`
-3. `speckit-codex-skill`
+1. `bmad-skill`
+2. `openspec-skill`
+3. `speckit-skill`
 
 ## Must do
 

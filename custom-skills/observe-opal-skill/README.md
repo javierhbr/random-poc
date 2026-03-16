@@ -1,6 +1,6 @@
-# Observe OPAL Codex Skill Pack
+# Observe OPAL Skill Pack
 
-This pack converts the Observe OPAL documentation into a practical Codex/agent skill using a 3-layer context model:
+This pack converts the Observe OPAL documentation into a practical AI agent skill using a 3-layer context model:
 
 - Layer 1: `SKILL.md` router
 - Layer 2: `references/opal-authoring-playbook.md` skill logic
@@ -26,10 +26,10 @@ Place `observe-opal-skill/` inside your agent skills directory, for example:
 or
 
 ```text
-~/.codex/skills/observe-opal/
+~/.claude/skills/observe-opal/
 ```
 
-depending on your Codex / agent setup.
+depending on your AI agent / agent setup.
 
 ## Source docs used
 

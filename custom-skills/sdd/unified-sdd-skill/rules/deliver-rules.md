@@ -9,9 +9,9 @@ deploy, and archive.
 
 ## Apply these skills throughout delivery
 
-- `bmad-codex-skill` for implementation and review support
-- `openspec-codex-skill` for apply and archive
-- `speckit-codex-skill` for task discipline and phased delivery
+- `bmad-skill` for implementation and review support
+- `openspec-skill` for apply and archive
+- `speckit-skill` for task discipline and phased delivery
 
 ## Default slice flow
 

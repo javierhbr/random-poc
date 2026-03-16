@@ -179,7 +179,7 @@ Read the relevant references before generating output:
 - For small work, bias toward **tech-spec**.
 - For larger work, bias toward **PRD**, then architecture only if impact justifies it.
 - If the user asks to “implement,” but planning context is missing, produce the missing artifact first or include a compact implementation-ready spec.
-- Keep outputs tool-agnostic enough to be used by Codex or other coding agents.
+- Keep outputs tool-agnostic enough to be used by AI agents or other coding agents.
 
 ## What good output looks like
 

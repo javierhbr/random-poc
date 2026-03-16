@@ -1,4 +1,4 @@
-# Observe OPAL Codex Skill
+# Observe OPAL Skill
 
 This skill pack uses a 3-layer context model:
 - Layer 1: `SKILL.md`

@@ -8,9 +8,9 @@ Define durable context that later changes can reuse.
 
 ## Apply these skills in this order
 
-1. `speckit-codex-skill`
-2. `openspec-codex-skill`
-3. `bmad-codex-skill`
+1. `speckit-skill`
+2. `openspec-skill`
+3. `bmad-skill`
 
 ## Must do
 

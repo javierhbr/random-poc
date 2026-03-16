@@ -19,4 +19,4 @@ This skill package was synthesized from these source materials:
   - Layer 1: operating rules in `SKILL.md`
   - Layer 2: targeted guidance in `references/*.md`
   - Layer 3: source references in this file
-- Content was normalized into one cohesive Codex skill package.
+- Content was normalized into one cohesive AI skill package.

@@ -4,7 +4,7 @@ title: "Adopt three DDD-derived concepts for platform ownership, dependency impa
 status: "proposed"
 date: "2026-03-15"
 initiative: "unified-sdd-methodology"
-author: "javierbenavides + codex"
+author: "javierbenavides + claude"
 deciders:
   - "platform-methodology-working-group"
 ---

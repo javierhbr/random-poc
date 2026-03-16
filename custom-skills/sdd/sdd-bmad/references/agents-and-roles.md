@@ -41,4 +41,4 @@ Use for:
 
 ## Skill-design implication
 
-Because BMAD already models agents as skills, a Codex BMAD skill should act like a router and artifact generator rather than pretending to be every role at once. It should choose the role, then produce the correct artifact or next-step output.
+Because BMAD already models agents as skills, an AI agent BMAD skill should act like a router and artifact generator rather than pretending to be every role at once. It should choose the role, then produce the correct artifact or next-step output.

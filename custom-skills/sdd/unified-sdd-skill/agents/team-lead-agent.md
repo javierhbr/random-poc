@@ -18,10 +18,10 @@ Support phases:
 
 ## Default skill emphasis
 
-1. `bmad-codex-skill`
-2. `openspec-codex-skill`
-3. `speckit-codex-skill`
-4. `explain-code-codex-skill` for flow and PR explanations
+1. `bmad-skill`
+2. `openspec-skill`
+3. `speckit-skill`
+4. `explain-code-skill` for flow and PR explanations
 
 ## Responsibilities by phase
 

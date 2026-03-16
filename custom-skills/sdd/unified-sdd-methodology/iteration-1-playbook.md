@@ -148,13 +148,13 @@ Agent roles:
 
 ### 4. Skills used and how they are applied
 
-- `speckit-codex-skill`
+- `speckit-skill`
   - use first to draft the constitution and quality bar
   - use it to make principles explicit, testable, and durable
-- `openspec-codex-skill`
+- `openspec-skill`
   - use second to encode stable project context and reusable rules
   - use it to create or refine `openspec/config.yaml`
-- `bmad-codex-skill`
+- `bmad-skill`
   - use third to align role boundaries, planning expectations, and progressive context
   - use it to prepare later routing and architecture work
 
@@ -162,13 +162,13 @@ Agent roles:
 
 Apply these rules:
 
-- `speckit-codex-skill/rules/constitution-rules.md`
+- `speckit-skill/rules/constitution-rules.md`
   - principles must be explicit and testable
   - quality, testing, security, and UX expectations must be visible
-- `openspec-codex-skill/rules/project-config-template.yaml`
+- `openspec-skill/rules/project-config-template.yaml`
   - keep stable context in config
   - keep artifact rules concise and reusable
-- `bmad-codex-skill/rules/artifact-rules.md`
+- `bmad-skill/rules/artifact-rules.md`
   - every durable artifact should state purpose, constraints, risks, and success criteria
 
 ### 6. Expected artifacts and deliverables
@@ -305,14 +305,14 @@ Agent roles:
 
 ### 4. Skills used and how they are applied
 
-- `bmad-codex-skill`
+- `bmad-skill`
   - use first to classify greenfield or brownfield, size, and path depth
   - use it to decide quick flow, PRD-first, or architecture-heavy work
-- `openspec-codex-skill`
+- `openspec-skill`
   - use second to frame the change package and prepare the next artifact
   - use `/opsx:explore` when the request is still fuzzy
   - use `/opsx:propose` when the team is ready to open the change
-- `speckit-codex-skill`
+- `speckit-skill`
   - use only when ambiguity blocks safe assessment
   - keep it lightweight at this phase
 
@@ -320,15 +320,15 @@ Agent roles:
 
 Apply these rules:
 
-- `bmad-codex-skill/rules/track-selection-rules.md`
+- `bmad-skill/rules/track-selection-rules.md`
   - classify project type
   - classify size
   - pick the correct planning track
   - escalate to architecture when required
-- `openspec-codex-skill/rules/artifact-rules.md`
+- `openspec-skill/rules/artifact-rules.md`
   - keep the change small, clear, and reviewable
   - call out unknowns instead of hiding them
-- `bmad-codex-skill/rules/artifact-rules.md`
+- `bmad-skill/rules/artifact-rules.md`
   - the assessed output must include scope, assumptions, risks, and success criteria
 
 ### 6. Expected artifacts and deliverables
@@ -457,7 +457,7 @@ Agent roles:
 
 ### 4. Skills used and how they are applied
 
-- `openspec-codex-skill`
+- `openspec-skill`
   - use first and use it as the only component-repo skill
   - use it to create `proposal.md`, delta specs, `platform-ref.yaml`, and
     `jira-traceability.yaml`
@@ -471,7 +471,7 @@ Agent roles:
 
 Apply these rules:
 
-- `openspec-codex-skill/rules/artifact-rules.md`
+- `openspec-skill/rules/artifact-rules.md`
   - proposal must separate goals from non-goals
   - specs must use concrete behavior and scenarios
 - component rule

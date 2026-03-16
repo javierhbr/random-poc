@@ -4,7 +4,7 @@ title: "Roll out the 5-phase workflow in two iterations"
 status: "proposed"
 date: "2026-03-08"
 initiative: "unified-sdd-methodology"
-author: "javierbenavides + codex"
+author: "javierbenavides + claude"
 deciders:
   - "platform-methodology-working-group"
 ---
