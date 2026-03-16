@@ -1,6 +1,6 @@
 ---
 name: sdd-openspec
-summary: Use this skill for spec-driven development with OpenSpec. It merges the artifact-first design philosophy with strict CLI-first task execution at the component level. Use for proposing changes, generating delta specs, and executing tasks.
+description: Use this skill for spec-driven development with OpenSpec. It merges the artifact-first design philosophy with strict CLI-first task execution at the component level. Use for proposing changes, generating delta specs, and executing tasks.
 triggers:
   - openspec
   - opsx

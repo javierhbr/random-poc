@@ -1,6 +1,6 @@
 ---
 name: explain-code
-description: Explains code with visual diagrams and analogies. Use when explaining how code works, teaching about a codebase, or when the user asks "how does this work?"
+description: Explains code with visual ASCII diagrams, everyday analogies, step-by-step walkthroughs, and gotchas. Use this skill whenever explaining how code works, teaching about a codebase, onboarding someone to a module, reviewing a pull request, or when anyone asks "how does this work?", "what does this do?", or "explain this code". Also use during SDD phases when teams need to understand existing behavior before specifying changes.
 ---
 
 # Explain Code

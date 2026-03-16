@@ -1,6 +1,6 @@
 ---
 name: uncle-sdd
-summary: Use for platform-scale spec-driven development that combines Sdd-Bmad's progressive planning and roles, Sdd-OpenSpec's change package and artifact flow, and Sdd-Speckit's executable specification discipline.
+description: Use for platform-scale spec-driven development that combines Sdd-Bmad's progressive planning and roles, Sdd-OpenSpec's change package and artifact flow, and Sdd-Speckit's executable specification discipline. Trigger when working with unified SDD, platform SDD, change packages, platform assess/specify/plan/deliver phases, pull request reviews, or iteration 1/2 planning.
 triggers:
   - unified sdd
   - platform sdd
@@ -33,127 +33,31 @@ It uses a 3-layer context model:
 
 ### 1. Use one 5-phase workflow
 
-The default workflow is:
+Platform → Assess → Specify → Plan → Deliver
 
-1. Platform
-2. Assess
-3. Specify
-4. Plan
-5. Deliver
-
-Deliver includes:
-
-- Build
-- Create PR
-- Review PR
-- Verify
-- Deploy
-- Archive
+Deliver includes: Build, Create PR, Review PR, Verify, Deploy, Archive.
 
 ### 2. Roll out in two iterations
-
-Use the methodology in this order:
 
 - Iteration 1: Platform, Assess, Specify
 - Iteration 2: Plan, Deliver
 
 ### 3. Use one change package per approved change
 
-Every approved request should normalize into one change package.
+Every approved request normalizes into one change package containing:
+proposal, delta specs, design, tasks, delivery state, verification evidence, archive history.
 
-The change package is the canonical execution unit for:
+### 4–9. Operating model principles
 
-- proposal
-- delta specs
-- design
-- tasks
-- delivery state
-- verification evidence
-- archive history
-
-### 4. Use canonical platform truth + versioned component alignment
-
-When the platform uses one master repository plus many component repositories:
-
-- keep shared platform truth upstream in the platform repo
-- keep local Sdd-OpenSpec artifacts in the component repo
-- pin platform version and platform refs in each affected component repo
-- use JIRA for issue hierarchy and delivery status, not as the full spec store
-
-Use:
-
-- `platform-ref.yaml` for platform version and platform refs
-- `jira-traceability.yaml` for platform issue, component epic, and stories
-- a local read-only platform MCP gateway when teams need fast local access to
-  platform truth without hosted infrastructure
-
-### 4a. Keep three durable ownership artifacts in the platform repo
-
-Write once during Platform. Read at every Assess step.
-
-- `ownership/component-ownership-<name>.md` — one file per component; records
-  what the component owns, what it does NOT own, and its published and consumed
-  contracts; makes ownership a lookup, not a judgment
-- `ownership/dependency-map.md` — one platform file; records which components
-  must change together (tier 1), which need monitoring (tier 2), and which
-  adapt independently (tier 3); drives JIRA structure decisions
-- `ownership/glossary.md` — one platform file; defines shared terms with
-  "what it is NOT" clauses; prevents spec ambiguity before Specify begins
-
-Impact tier rules:
-
-- tier 1 `must_change_together` → open coordinated component epics immediately
-  at Assess; treat as hard constraints in design.md at Plan; verify in PR and
-  archive at Deliver
-- tier 2 `watch_for_breakage` → add watch note in `alignment_notes` at Assess;
-  note as rollout risks in design.md at Plan; check after deploy at Deliver
-- tier 3 `adapts_independently` → no additional coordination required
-
-Constitution rules that enforce these artifacts:
-
-- O-1: confirm component ownership before opening any JIRA epic
-- O-2: all terms in proposal and acceptance criteria must be in the glossary
-- O-3: impact tiers from the dependency map drive JIRA structure
-
-### 5. Keep humans accountable and agents supportive
-
-Humans own:
-
-- intent
-- tradeoffs
-- approvals
-- release decisions
-
-Agents support:
-
-- drafting
-- routing
-- artifact generation
-- ambiguity checks
-- review guidance
-
-### 6. Route by size and impact
-
-Use size to choose planning depth.
-Use impact to choose validation and control depth.
-
-Do not mix them.
-
-### 7. Prefer the smallest sufficient workflow
-
-- small work -> compact planning artifacts
-- medium work -> standard path
-- large or architecture-heavy work -> deeper planning and phased delivery
-
-### 8. Keep delivery reviewable
-
-Deliver in slices.
-Each slice should normally produce one reviewable pull request.
-
-### 9. Update artifacts as reality changes
-
-Do not let specs, design, tasks, PR state, or archive drift from what was
-actually implemented.
+See `resources/operating-model.md` for full detail on:
+- canonical platform truth + versioned component alignment (4)
+- durable ownership artifacts and impact tier rules (4a)
+- human accountability and agent support boundaries (5)
+- size vs impact routing (6)
+- smallest sufficient workflow (7)
+- reviewable delivery slices (8)
+- artifact drift prevention (9)
+- default skill mix by phase
 
 ## Layer 2 - Phase router
 
@@ -161,45 +65,31 @@ actually implemented.
 
 - Owner: Architect
 - Goal: define durable context, constitution, config, and role expectations
-- Also define the platform truth location, versioning, and alignment conventions
-- Also write `ownership/component-ownership-<name>.md`, `ownership/dependency-map.md`,
-  and `ownership/glossary.md` — the three durable artifacts that make ownership
-  classification and impact assessment deterministic for all future Assess steps
+- Write ownership artifacts: `component-ownership-<name>.md`, `dependency-map.md`, `glossary.md`
 - Use first in Iteration 1
 - Primary rules: `rules/platform-rules.md`
 
 ### Assess
 
 - Owner: Team Lead
-- Goal: classify the request, open the change package, and select the next artifact
-- Also classify whether the change is component-only or shared with platform truth
-- Read `ownership/component-ownership-<name>.md` to confirm owner before any JIRA epic
-- Read `ownership/dependency-map.md` to populate `platform-ref.yaml` impact tiers;
-  tier 1 → open coordinated epics; tier 2 → watch note; tier 3 → no action
+- Goal: classify the request, open the change package, select the next artifact
+- Read ownership artifacts to confirm owner and populate impact tiers
 - Use for every new change
 - Primary rules: `rules/assess-rules.md`
 
 ### Specify
 
 - Owner: Product
-- Goal: define behavior, remove ambiguity, and produce a ready-for-plan spec package
-- Also confirm platform refs and whether a linked platform delta is needed
-- Read `ownership/glossary.md` before writing `proposal.md`; all terms in goals
-  and acceptance criteria must be in the glossary (rule O-2)
-- Record `alignment_notes.glossary_terms_used` in `platform-ref.yaml`
+- Goal: define behavior, remove ambiguity, produce a ready-for-plan spec package
+- Confirm platform refs; verify glossary terms (rule O-2)
 - Finish Iteration 1 here
 - Primary rules: `rules/specify-rules.md`
 
 ### Plan
 
 - Owner: Architect
-- Goal: convert the approved spec into design, tasks, and delivery slices
-- Also map tasks to stories and keep platform alignment visible in planning
-- Read `platform-ref.yaml` impact tiers before designing:
-  - tier 1 `must_change_together` → hard constraints in `design.md` with named
-    coordination requirements
-  - tier 2 `watch_for_breakage` → rollout risks in `design.md`
-  - tier 3 → no coordination required
+- Goal: convert approved spec into design, tasks, and delivery slices
+- Read impact tiers before designing (tier 1 = hard constraints, tier 2 = rollout risks)
 - Start Iteration 2 here
 - Primary rules: `rules/plan-rules.md`
 
@@ -207,60 +97,14 @@ actually implemented.
 
 - Owner: Team Lead
 - Goal: execute slices through PR, review, verification, deploy, and archive
-- Also keep PR, story, epic, and platform alignment traceability current
-- PR description must note which tier 1 dependencies were verified and which
-  tier 2 consumers were checked
-- At archive, flag `component-ownership-<name>.md` or `dependency-map.md` for
-  update if any ownership boundary or dependency tier changed during delivery
-- Final phase in v1
+- PR must note tier 1 dependencies verified and tier 2 consumers checked
 - Primary rules: `rules/deliver-rules.md`
 - PR-specific rules: `rules/pr-review-rules.md`
 
-## Default skill mix by phase
-
-### Platform
-
-- Sdd-Speckit first
-- Sdd-OpenSpec second
-- Sdd-Bmad third
-
-### Assess
-
-- Sdd-Bmad first
-- Sdd-OpenSpec second
-- Sdd-Speckit only when ambiguity blocks routing
-
-### Specify
-
-- Sdd-OpenSpec first
-- Sdd-Speckit second
-- Sdd-Bmad third
-
-### Plan
-
-- Sdd-Bmad first
-- Sdd-OpenSpec second
-- Sdd-Speckit third
-
-### Deliver
-
-- Sdd-Bmad for implementation and review support
-- Sdd-OpenSpec for apply and archive
-- Sdd-Speckit for task discipline and phased execution
-
 ## Output structure when applying this skill
 
-When using this skill in a response, structure the output as:
-
-1. Current phase
-2. Goal
-3. Owner and support roles
-4. Skills to use
-5. Rules to apply
-6. Artifact or deliverable to produce
-7. Exit gate
-8. Risks
-9. Next step
+1. Current phase → 2. Goal → 3. Owner and support roles → 4. Skills to use →
+5. Rules to apply → 6. Artifact to produce → 7. Exit gate → 8. Risks → 9. Next step
 
 ## Layer 3 - Reference map
 
@@ -294,6 +138,7 @@ When using this skill in a response, structure the output as:
 - `references/platform-component-alignment.md`
 - `references/agent-interaction-model.md`
 - `references/sources.md`
+- `resources/operating-model.md`
 - `../local-doc/SKILL.md`
 - `../platform-contextualizer-skill/SKILL.md`
 - `../explain-code-skill/SKILL.md`

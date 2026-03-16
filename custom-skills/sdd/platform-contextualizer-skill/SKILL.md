@@ -1,6 +1,6 @@
 ---
 name: platform-contextualizer
-summary: Use for starting the Platform phase of the unified SDD methodology on an existing platform with active teams by documenting current state, identifying gaps, and drafting durable shared context.
+description: Use for starting the Platform phase of the unified SDD methodology on an existing platform with active teams by documenting current state, identifying gaps, and drafting durable shared context. Trigger when beginning Iteration 1, doing a brownfield platform review, creating a platform baseline, or documenting existing platform conventions and constraints.
 triggers:
   - platform contextualizer
   - platform phase
@@ -150,5 +150,4 @@ When using this skill, structure the output as:
 - `../sdd-bmad/SKILL.md`
 - `../sdd-openspec/SKILL.md`
 - `../sdd-speckit/SKILL.md`
-- `../platform-truth-mcp-skill/SKILL.md`
 - `../uncle-sdd-agent/SKILL.md`

@@ -1,6 +1,6 @@
 ---
 name: platform-constitution
-description: "Guide for Platform Architects to author and maintain the Constitution — the governance policy document for the entire platform."
+description: "Guide for Platform Architects to author and maintain the Constitution — the governance policy document for the entire platform. Trigger when starting a new platform and defining governance, when platform policies need updating, when a gate check fails due to missing policy, when onboarding new teams to platform non-negotiables, or when anyone asks about platform rules, security policies, observability standards, or contract versioning."
 ---
 
 # skill:platform-constitution
