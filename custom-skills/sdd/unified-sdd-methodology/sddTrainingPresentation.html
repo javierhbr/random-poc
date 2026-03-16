@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spec-Driven Development (SDD) for Product Managers</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ── DESIGN TOKENS (from sdd-training.html) ── */
+        :root {
+            --page-bg:      #F5F0E8;
+            --surface:      #FFFFFF;
+            --surface-alt:  #FDF9F4;
+            --ink:          #1C1309;
+            --ink-mid:      #4B3F30;
+            --ink-soft:     #8C7B68;
+            --border:       #E4DDD2;
+            --border-light: #EDE8E0;
+
+            --gold:         #C8880A;
+            --gold-bg:      #FFF8E6;
+            --gold-border:  #F0D070;
+
+            --coral:        #C0432B;
+            --coral-bg:     #FFF0EE;
+            --coral-border: #F0B8B0;
+
+            --teal:         #0E6E6E;
+            --teal-bg:      #E8F6F6;
+            --teal-border:  #A0D8D8;
+
+            --blue:         #1C55A0;
+            --blue-bg:      #EAF0FC;
+            --blue-border:  #AABFEC;
+
+            --green:        #1E6845;
+            --green-bg:     #E8F4ED;
+            --green-border: #9ECDB4;
+
+            --plum:         #6B3280;
+            --plum-bg:      #F4EDF8;
+            --plum-border:  #C8A0DC;
+
+            --shadow-sm: 0 2px 10px rgba(28,19,9,.06);
+            --shadow-md: 0 6px 30px rgba(28,19,9,.10);
+            --radius: 18px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--page-bg);
+            color: var(--ink);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            color: var(--ink);
+        }
+        .font-mono, code, pre {
+            font-family: 'Roboto Mono', monospace !important;
+        }
+
+        /* ── SLIDE SYSTEM ── */
+        .slide { display: none; }
+        .slide.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── SCROLLBAR ── */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* ── FLOW ARROWS ── */
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-soft);
+        }
+
+        /* ── CONTAINER / CARD ── */
+        .bg-white          { background-color: var(--surface) !important; }
+        .bg-slate-50       { background-color: var(--surface-alt) !important; }
+        .bg-slate-100      { background-color: var(--page-bg) !important; }
+        .bg-slate-200      { background-color: var(--border-light) !important; }
+
+        /* Text colors */
+        .text-slate-800    { color: var(--ink) !important; }
+        .text-slate-700    { color: var(--ink) !important; }
+        .text-slate-600    { color: var(--ink-mid) !important; }
+        .text-slate-500    { color: var(--ink-soft) !important; }
+        .text-slate-400    { color: var(--ink-soft) !important; }
+        .text-slate-700    { color: var(--ink-mid) !important; }
+
+        /* Border colors */
+        .border-slate-200  { border-color: var(--border) !important; }
+        .border-t          { border-color: var(--border) !important; }
+
+        /* ════════════════════════════════════════
+           TAILWIND COLOR OVERRIDES
+           — all atomic classes mapped to tokens
+        ════════════════════════════════════════ */
+
+        /* ── BLUE ── */
+        .bg-blue-600  { background-color: var(--blue) !important; }
+        .bg-blue-700  { background-color: #174890 !important; }
+        .bg-blue-500  { background-color: var(--blue) !important; }
+        .bg-blue-100  { background-color: var(--blue-bg) !important; }
+        .bg-blue-50   { background-color: var(--blue-bg) !important; }
+        .text-blue-600{ color: var(--blue) !important; }
+        .text-blue-100{ color: #c8d9f5 !important; }
+        .text-blue-700{ color: var(--blue) !important; }
+        .text-blue-800{ color: var(--blue) !important; }
+        .text-blue-900{ color: #0D2F60 !important; }
+        .border-blue-500 { border-color: var(--blue) !important; }
+        .border-blue-400 { border-color: var(--blue) !important; }
+        .border-blue-300 { border-color: var(--blue-border) !important; }
+        .border-blue-200 { border-color: var(--blue-border) !important; }
+        .border-blue-100 { border-color: var(--blue-bg) !important; }
+        .ring-2.ring-blue-500 { outline: 2px solid var(--blue) !important; }
+        .hover\:bg-blue-700:hover { background-color: #174890 !important; }
+        .hover\:border-blue-300:hover { border-color: var(--blue-border) !important; }
+
+        /* ── AMBER / GOLD ── */
+        .bg-amber-400 { background-color: var(--gold) !important; }
+        .bg-amber-50  { background-color: var(--gold-bg) !important; }
+        .border-amber-200 { border-color: var(--gold-border) !important; }
+        .text-amber-800   { color: #92500A !important; }
+        .text-amber-900   { color: #7A5200 !important; }
+
+        /* ── EMERALD / GREEN ── */
+        .bg-emerald-600   { background-color: var(--green) !important; }
+        .bg-emerald-100   { background-color: var(--green-bg) !important; }
+        .bg-emerald-50    { background-color: var(--green-bg) !important; }
+        .text-emerald-600 { color: var(--green) !important; }
+        .text-emerald-700 { color: var(--green) !important; }
+        .text-emerald-800 { color: var(--green) !important; }
+        .text-emerald-900 { color: #103C27 !important; }
+        .border-emerald-500 { border-color: var(--green) !important; }
+        .border-emerald-300 { border-color: var(--green-border) !important; }
+        .border-emerald-200 { border-color: var(--green-border) !important; }
+        .hover\:bg-emerald-700:hover { background-color: #144F33 !important; }
+
+        /* ── INDIGO / PLUM ── */
+        .bg-indigo-50   { background-color: var(--plum-bg) !important; }
+        .text-indigo-500{ color: var(--plum) !important; }
+        .text-indigo-600{ color: var(--plum) !important; }
+        .text-indigo-700{ color: var(--plum) !important; }
+        .text-indigo-800{ color: var(--plum) !important; }
+        .border-indigo-300 { border-color: var(--plum-border) !important; }
+
+        /* ── PURPLE / PLUM ── */
+        .bg-purple-100  { background-color: var(--plum-bg) !important; }
+        .text-purple-700{ color: var(--plum) !important; }
+
+        /* ── SLATE / NEUTRAL ── */
+        .bg-slate-50  { background-color: var(--surface-alt) !important; }
+        .bg-slate-100 { background-color: var(--page-bg) !important; }
+        .bg-slate-200 { background-color: var(--border-light) !important; }
+        .bg-slate-300 { background-color: var(--border) !important; }
+        .text-slate-800 { color: var(--ink) !important; }
+        .text-slate-700 { color: var(--ink-mid) !important; }
+        .text-slate-600 { color: var(--ink-mid) !important; }
+        .text-slate-500 { color: var(--ink-soft) !important; }
+        .text-slate-400 { color: var(--ink-soft) !important; }
+        .border-slate-200 { border-color: var(--border) !important; }
+
+        /* ════════════════════════════════════════
+           STRUCTURAL OVERRIDES
+        ════════════════════════════════════════ */
+
+        /* ── PHASE CARDS ── */
+        .phase-card { border-radius: 14px; transition: all .2s; }
+        .phase-card:hover { box-shadow: var(--shadow-sm); }
+
+        /* ── HEADER ── */
+        header.bg-blue-600 {
+            background-color: #7A6550 !important;
+            border-bottom: 3px solid var(--gold);
+        }
+        header.bg-blue-600 h1 { color: #ffffff !important; }
+        header.bg-blue-600 p  { color: #EDE0D0 !important; }
+        #slide-counter {
+            background-color: rgba(255,255,255,.15) !important;
+            color: #EDE0D0 !important;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        /* ── PROGRESS BAR TRACK ── */
+        .w-full.bg-blue-100.h-1\.5 { background-color: var(--border-light) !important; }
+        #progress-bar { background-color: var(--gold) !important; }
+
+        /* ── FOOTER ── */
+        footer {
+            background-color: var(--surface-alt) !important;
+            border-top: 1px solid var(--border) !important;
+        }
+
+        /* ── PREV BUTTON ── */
+        #btn-prev {
+            background: var(--surface) !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: 100px !important;
+            color: var(--ink-mid) !important;
+            font-weight: 600;
+            transition: all .18s;
+        }
+        #btn-prev:hover:not(:disabled) {
+            border-color: var(--gold) !important;
+            color: var(--gold) !important;
+        }
+
+        /* ── NEXT BUTTON (always gold) ── */
+        #btn-next {
+            background-color: var(--gold) !important;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 100px !important;
+            font-weight: 600;
+        }
+        #btn-next:hover { background-color: #A06C08 !important; }
+
+        /* ── NAV DOTS ── */
+        #dot-indicators > div { transition: all .25s; }
+
+        /* ── OUTER CONTAINER ── */
+        .bg-white.rounded-2xl {
+            background-color: var(--surface) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        /* ── SLIDE ICON CIRCLES ── */
+        /* Welcome map icon — use gold tint instead of blue */
+        #slide-1 .bg-blue-100.rounded-full {
+            background-color: var(--gold-bg) !important;
+            color: var(--gold) !important;
+        }
+        /* Phase detail icon circle */
+        #phase-detail-icon {
+            background-color: var(--gold-bg) !important;
+            color: var(--gold) !important;
+        }
+        /* Iteration 1 number circle */
+        .border-blue-500 ~ div .bg-blue-100,
+        .bg-blue-100.text-blue-600.rounded-full {
+            background-color: var(--blue-bg) !important;
+            color: var(--blue) !important;
+        }
+        /* Summary check icon */
+        #slide-10 .bg-emerald-100.rounded-full {
+            background-color: var(--green-bg) !important;
+            color: var(--green) !important;
+        }
+        .text-emerald-500 { color: var(--green) !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+
+    <!-- Main Presentation Container -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden flex flex-col" style="height: 85vh;">
+        
+        <!-- Header / Progress Area -->
+        <header class="bg-blue-600 text-white p-6 flex justify-between items-center shrink-0">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">Spec-Driven Development</h1>
+                <p class="text-blue-100 text-sm mt-1">A Guide for Product Managers & Teams</p>
+            </div>
+            <div class="text-right">
+                <span id="slide-counter" class="text-sm font-medium bg-blue-700 px-3 py-1 rounded-full">Slide 1 of X</span>
+            </div>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-blue-100 h-1.5 shrink-0">
+            <div id="progress-bar" class="bg-amber-400 h-1.5 transition-all duration-300" style="width: 10%;"></div>
+        </div>
+
+        <!-- Slides Container -->
+        <main class="flex-grow overflow-y-auto custom-scroll p-6 sm:p-10 relative">
+            
+            <!-- Slide 1: Welcome -->
+            <section class="slide active" id="slide-1">
+                <div class="text-center max-w-3xl mx-auto mt-8">
+                    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="map" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-4 text-slate-800">Welcome to SDD</h2>
+                    <p class="text-xl text-slate-600 mb-8 leading-relaxed">
+                        Have you ever asked a team to build a "user profile page," only to get something completely different weeks later?<br><br>
+                        <strong>Spec-Driven Development (SDD)</strong> fixes this. It's a simple, step-by-step way to ensure everyone agrees on exactly <em>what</em> we are building before anyone figures out <em>how</em> to build it.
+                    </p>
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 text-left">
+                        <h3 class="font-bold text-amber-800 flex items-center gap-2 mb-2">
+                            <i data-lucide="lightbulb" class="w-5 h-5"></i> The Core Idea
+                        </h3>
+                        <p class="text-amber-900">
+                            Think of SDD like building a house. You don't just hand a builder some bricks and say "build a house." You start with a blueprint, agree on the rooms, and define the rules. SDD is our blueprint process for software.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: The 5 Phases Overview -->
+            <section class="slide" id="slide-2">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800">The 5 Steps of Building</h2>
+                <p class="text-lg text-slate-600 mb-8">Building software follows a predictable path. In SDD, we break this down into 5 phases. <br><strong>Click on any phase below to see a quick summary.</strong></p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div onclick="showPhaseDetails(1)" class="phase-card cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="landmark" class="w-6 h-6 text-slate-700"></i></div>
+                        <h3 class="font-bold text-slate-800">1. Platform</h3>
+                    </div>
+                    <div onclick="showPhaseDetails(2)" class="phase-card cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="search" class="w-6 h-6 text-slate-700"></i></div>
+                        <h3 class="font-bold text-slate-800">2. Assess</h3>
+                    </div>
+                    <div onclick="showPhaseDetails(3)" class="phase-card cursor-pointer ring-2 ring-blue-500 shadow-md transition-all bg-blue-50 border border-blue-200 rounded-xl p-4 text-center transform scale-105">
+                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="pen-tool" class="w-6 h-6 text-white"></i></div>
+                        <h3 class="font-bold text-blue-900">3. Specify</h3>
+                    </div>
+                    <div onclick="showPhaseDetails(4)" class="phase-card cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="layout-template" class="w-6 h-6 text-slate-700"></i></div>
+                        <h3 class="font-bold text-slate-800">4. Plan</h3>
+                    </div>
+                    <div onclick="showPhaseDetails(5)" class="phase-card cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="hammer" class="w-6 h-6 text-slate-700"></i></div>
+                        <h3 class="font-bold text-slate-800">5. Deliver</h3>
+                    </div>
+                </div>
+
+                <!-- Interactive Details Box -->
+                <div id="phase-details-box" class="mt-8 bg-white border-2 border-blue-100 rounded-xl p-6 shadow-inner text-left transition-all">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div id="phase-detail-icon" class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="pen-tool" class="w-5 h-5"></i>
+                        </div>
+                        <h3 id="phase-detail-title" class="text-xl font-bold text-slate-800">Phase 3: Specify (Your Superpower)</h3>
+                    </div>
+                    <p id="phase-detail-desc" class="text-slate-600 mb-4">The "Blueprint". As the Product Manager, you define the exact required behavior and remove any ambiguity before planning starts.</p>
+                </div>
+                <p class="text-center text-slate-400 mt-4 text-sm font-medium">Click "Next Step" to dive into exactly how each phase flows.</p>
+            </section>
+
+            <!-- Slide 3: 2 Iterations Rollout -->
+            <section class="slide" id="slide-3">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Adoption Strategy</span>
+                    <h2 class="text-3xl font-bold text-slate-800">How We Adopt SDD</h2>
+                </div>
+                
+                <p class="text-lg text-slate-600 mb-8">We don't expect teams to perfectly execute all 5 phases on Day 1. Instead, we roll out this methodology in <strong>Two Iterations</strong> to make adoption safe and steady.</p>
+                
+                <div class="flex flex-col gap-6">
+                    <!-- Iteration 1 -->
+                    <div class="bg-white border-l-4 border-blue-500 rounded-r-xl p-6 shadow-sm flex items-start gap-4">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0">
+                            <span class="font-bold text-xl">1</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Iteration 1: Learn to Define Work</h3>
+                            <p class="text-slate-600 mt-1">Focus only on the first three phases: <strong class="text-blue-700">Platform ➔ Assess ➔ Specify</strong>.</p>
+                            <p class="text-sm text-slate-500 mt-2"><strong>Goal:</strong> Stop guessing what to build. We don't change how engineering works yet; we simply ensure specs are crystal clear, boundaries are known, and glossaries are used before anyone starts planning.</p>
+                        </div>
+                    </div>
+
+                    <!-- Iteration 2 -->
+                    <div class="bg-white border-l-4 border-emerald-500 rounded-r-xl p-6 shadow-sm flex items-start gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                            <span class="font-bold text-xl">2</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Iteration 2: Learn to Deliver Work</h3>
+                            <p class="text-slate-600 mt-1">Add the final two phases: <strong class="text-emerald-700">Plan ➔ Deliver</strong>.</p>
+                            <p class="text-sm text-slate-500 mt-2"><strong>Goal:</strong> Once Specification is strong, we apply that rigor to engineering execution. We implement phased tasks, strict PRs, verification evidence, and formal archiving.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: Phase 1 Deep Dive -->
+            <section class="slide" id="slide-4">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 1</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Platform (Setting the Stage)</h2>
+                </div>
+                <p class="text-slate-600 mb-6">Owned by the <strong>Architect</strong> (with PM support). We establish the permanent rules and durable context so teams don't reinvent the wheel.</p>
+                
+                <!-- Flow Diagram -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-2 shadow-sm">
+                    <div class="bg-white p-3 rounded shadow text-center w-full md:w-1/3">
+                        <strong class="text-slate-800 text-sm">Team Collaboration</strong>
+                        <p class="text-xs text-slate-500 mt-1">Architect + Product + Leads review context.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-white border-2 border-blue-200 p-3 rounded shadow text-center w-full md:w-1/3">
+                        <strong class="text-blue-800 text-sm">Define Rules (AI Agents)</strong>
+                        <p class="text-xs text-slate-500 mt-1">Draft Constitution & encode project config.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded shadow text-center w-full md:w-1/3">
+                        <strong class="text-emerald-800 text-sm">Platform Baseline Ready</strong>
+                        <p class="text-xs text-emerald-600 mt-1">Rules, Map, and Glossary are locked in.</p>
+                    </div>
+                </div>
+
+                <!-- Artifact Details -->
+                <h3 class="font-bold text-slate-800 mb-3">Key Artifacts Generated:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg flex gap-3">
+                        <i data-lucide="scroll" class="text-indigo-500 shrink-0"></i>
+                        <div>
+                            <strong class="text-slate-800 text-sm">Constitution (via Speckit)</strong>
+                            <p class="text-xs text-slate-600 mt-1">Turns vague values ("be secure") into specific, testable behaviors. It must be produced first so all later changes trace back to it.</p>
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg flex gap-3">
+                        <i data-lucide="settings" class="text-blue-500 shrink-0"></i>
+                        <div>
+                            <strong class="text-slate-800 text-sm">Project Config (via OpenSpec)</strong>
+                            <p class="text-xs text-slate-600 mt-1">Separates stable, durable context (like JIRA conventions) from temporary change details.</p>
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg flex gap-3 md:col-span-2 bg-indigo-50">
+                        <i data-lucide="layers" class="text-indigo-600 shrink-0"></i>
+                        <div>
+                            <strong class="text-indigo-800 text-sm">The 3 "Shared Truths" (Human-authored)</strong>
+                            <p class="text-xs text-indigo-700 mt-1"><strong>1. Component Ownership:</strong> Exactly what each team owns.<br><strong>2. Dependency Map:</strong> 3 Tiers of Impact (Must change together vs. Watch vs. Adapt).<br><strong>3. Shared Glossary:</strong> Exact definitions for shared words.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: Phase 2 Deep Dive -->
+            <section class="slide" id="slide-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 2</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Assess (The Intake Desk)</h2>
+                </div>
+                <p class="text-slate-600 mb-6">Owned by the <strong>Team Lead</strong>. We evaluate incoming requests to figure out the size, impact, and exactly where the work should happen.</p>
+
+                <!-- Flow Diagram -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-2 shadow-sm">
+                    <div class="bg-white p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-slate-800 text-sm">Incoming Request</strong>
+                        <p class="text-xs text-slate-500 mt-1">Idea or requirement arrives.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-white border-2 border-blue-200 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-blue-800 text-sm">Classify (BMAD)</strong>
+                        <p class="text-xs text-slate-500 mt-1">Size, type, and path depth.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-white border-2 border-blue-200 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-blue-800 text-sm">Open Package (OpenSpec)</strong>
+                        <p class="text-xs text-slate-500 mt-1">Create the execution container.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-emerald-800 text-sm">Ready for Specify</strong>
+                        <p class="text-xs text-emerald-600 mt-1">Next steps are clear.</p>
+                    </div>
+                </div>
+
+                <!-- Artifact Details -->
+                <h3 class="font-bold text-slate-800 mb-3">Key Actions & Artifacts:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="git-merge" class="w-4 h-4 text-blue-500"></i> Track Selection (via BMAD)</strong>
+                        <p class="text-xs text-slate-600 mt-2">Classifies work (greenfield/brownfield, small/large) to decide if we need a quick-flow, a PRD, or heavy architecture review. <em>Prevents spending architecture effort on tiny changes.</em></p>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4 text-blue-500"></i> The Change Package (via OpenSpec)</strong>
+                        <p class="text-xs text-slate-600 mt-2">Creates the <code>platform-ref.yaml</code> (pins what version we are on) and <code>jira-traceability.yaml</code> (links JIRA tickets). This container will hold everything until the feature is finished.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: Phase 3 Deep Dive -->
+            <section class="slide" id="slide-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 3</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Specify (The Blueprint)</h2>
+                </div>
+                <p class="text-slate-600 mb-6">Owned by the <strong>Product Manager</strong>. Define the "What" and the "Why" so clearly that engineers don't have to guess the "How".</p>
+
+                <!-- Flow Diagram -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-2 shadow-sm">
+                    <div class="bg-white p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-slate-800 text-sm">Assessed Package</strong>
+                        <p class="text-xs text-slate-500 mt-1">From Phase 2.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow text-blue-300 hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow text-blue-300 block md:hidden"></i>
+                    <div class="bg-white border-2 border-blue-400 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-blue-800 text-sm">Write Proposal</strong>
+                        <p class="text-xs text-slate-500 mt-1">Goals vs. Non-Goals.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow text-blue-300 hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow text-blue-300 block md:hidden"></i>
+                    <div class="bg-white border-2 border-blue-400 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-blue-800 text-sm">Delta Specs</strong>
+                        <p class="text-xs text-slate-500 mt-1">What exact behavior changes?</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow text-blue-300 hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow text-blue-300 block md:hidden"></i>
+                    <div class="bg-emerald-50 border border-emerald-300 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-emerald-800 text-sm">Ready for Plan</strong>
+                        <p class="text-xs text-emerald-600 mt-1">Approved & clarified.</p>
+                    </div>
+                </div>
+
+                <!-- Artifact Details -->
+                <h3 class="font-bold text-slate-800 mb-3">Key Artifacts Generated (Using OpenSpec):</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4 text-emerald-600"></i> proposal.md</strong>
+                        <p class="text-xs text-slate-600 mt-2">Defines the problem, goals, and strictly separates <strong>Non-Goals</strong> to prevent the project from expanding later. <em>Must only use terms found in the Shared Glossary.</em></p>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="diff" class="w-4 h-4 text-emerald-600"></i> Delta Specs</strong>
+                        <p class="text-xs text-slate-600 mt-2">Captures behavioral changes using <strong>ADDED</strong>, <strong>MODIFIED</strong>, and <strong>REMOVED</strong> sections. It shows exactly what is changing compared to reality today, making it testable.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: Phase 4 Deep Dive -->
+            <section class="slide" id="slide-7">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 4</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Plan (Engineering Execution)</h2>
+                </div>
+                <p class="text-slate-600 mb-6">Owned by the <strong>Architect</strong>. Once your Spec is approved, we convert the behavior into a technical map and break it into safe, bite-sized tasks.</p>
+
+                <!-- Flow Diagram -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-2 shadow-sm">
+                    <div class="bg-white p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-slate-800 text-sm">Approved Spec</strong>
+                        <p class="text-xs text-slate-500 mt-1">Handed off from PM.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-white border-2 border-indigo-300 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-indigo-800 text-sm">Design & ADRs</strong>
+                        <p class="text-xs text-slate-500 mt-1">Map dependencies.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-white border-2 border-indigo-300 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-indigo-800 text-sm">Create Tasks</strong>
+                        <p class="text-xs text-slate-500 mt-1">Break into delivery slices.</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <i data-lucide="arrow-down" class="flow-arrow block md:hidden"></i>
+                    <div class="bg-emerald-50 border border-emerald-300 p-3 rounded shadow text-center w-full md:w-1/4">
+                        <strong class="text-emerald-800 text-sm">Ready to Build</strong>
+                        <p class="text-xs text-emerald-600 mt-1">Feasibility confirmed.</p>
+                    </div>
+                </div>
+
+                <!-- Artifact Details -->
+                <h3 class="font-bold text-slate-800 mb-3">Key Artifacts Generated (Using OpenSpec):</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-indigo-500"></i> design.md & ADRs</strong>
+                        <p class="text-xs text-slate-600 mt-2">Records architecture decisions and constraints. For example, if the Dependency Map says another system is "Tier 1", it becomes a hard constraint in the design.</p>
+                    </div>
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4 text-indigo-500"></i> tasks.md</strong>
+                        <p class="text-xs text-slate-600 mt-2">The implementation work order. Each task is mapped to a JIRA story and carries an explicit validation criteria. We don't build in one big lump.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: Phase 5 Deep Dive -->
+            <section class="slide" id="slide-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 5</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Deliver (Construction & Closure)</h2>
+                </div>
+                <p class="text-slate-600 mb-6">Owned by the <strong>Team Lead</strong>. We track progress through a strict loop for each task slice. Archiving is the final, crucial step.</p>
+
+                <!-- Flow Diagram -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 flex flex-wrap md:flex-nowrap items-center justify-between gap-2 shadow-sm">
+                    <div class="text-center w-[30%] md:w-auto"><div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="code" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Build</p></div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <div class="text-center w-[30%] md:w-auto"><div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="git-pull-request" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Create PR</p></div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <div class="text-center w-[30%] md:w-auto"><div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="eye" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Review PR</p></div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block mt-4 md:mt-0"></i>
+                    <div class="text-center w-[30%] md:w-auto mt-4 md:mt-0"><div class="w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="shield-check" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Verify</p></div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <div class="text-center w-[30%] md:w-auto mt-4 md:mt-0"><div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="rocket" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Deploy</p></div>
+                    <i data-lucide="arrow-right" class="flow-arrow hidden md:block"></i>
+                    <div class="text-center w-[30%] md:w-auto mt-4 md:mt-0"><div class="w-8 h-8 bg-slate-200 text-slate-700 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="archive" class="w-4 h-4"></i></div><p class="text-xs font-bold text-slate-800">Archive</p></div>
+                </div>
+
+                <!-- Artifact Details -->
+                <h3 class="font-bold text-slate-800 mb-3">Key Artifacts Managed (Using OpenSpec):</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg">
+                        <strong class="text-slate-800 text-sm flex items-center gap-2"><i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i> Evidence & Traceability</strong>
+                        <p class="text-xs text-slate-600 mt-2">Every Pull Request (PR) must link back to the change package. Verification evidence (like test results) is co-located right next to the requirements.</p>
+                    </div>
+                    <div class="border border-emerald-300 bg-emerald-50 p-4 rounded-lg">
+                        <strong class="text-emerald-900 text-sm flex items-center gap-2"><i data-lucide="archive" class="w-4 h-4 text-emerald-600"></i> The Archive Step</strong>
+                        <p class="text-xs text-emerald-800 mt-2">Archive is not just cleanup. It takes the Delta Specs you wrote in Phase 3 and officially promotes them to become the "New Component Truth".</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: FAQ -->
+            <section class="slide" id="slide-9">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Common Questions</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Frequently Asked Questions</h2>
+                </div>
+                
+                <div class="space-y-4 overflow-y-auto pr-2" style="max-height: 55vh;">
+                    
+                    <!-- FAQ 1 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            What is the "Hard Boundary" Rule for tools?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            Think of it like <strong>City Hall</strong> vs. <strong>Your House</strong>. 
+                            <br><br>
+                            At <em>City Hall</em> (Phase 1 & 2 Platform work), we use multiple AI tools (BMAD, Speckit) to brainstorm and set big shared rules. But when you go to <em>Your House</em> to actually build your specific feature (Phase 3+ Component work), you are <strong>only allowed to use OpenSpec</strong>. This keeps your workspace clean, focused, and free from conflicting AI advice.
+                        </p>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            What if I don't know if my feature will break another team's system?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            You don't have to guess! In Phase 1, the Architect creates a <strong>Dependency Map</strong>. It tells you exactly how systems are connected using "Impact Tiers" (e.g., Tier 1 means systems <em>must</em> change together). The Team Lead will check this map during Phase 2 before you even start writing your spec.
+                        </p>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            Why can't I just use my own words in the Proposal?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            Because words are dangerous! If you ask for "Validation," you might mean a spellcheck, but the engineer might build a database verification tool. You must use the <strong>Shared Glossary</strong> so everyone builds exactly what is intended. If your word isn't in the glossary, add it there first!
+                        </p>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            Do we have to do all 5 phases perfectly on day one?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            No. We use a <strong>Two Iteration Rollout</strong>. In Iteration 1, we only focus on getting the first three phases right (Platform ➔ Assess ➔ Specify). We just want to stop guessing what to build. Only after we master that do we move to Iteration 2 to change how the engineers Plan and Deliver.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Slide 10: Summary -->
+            <section class="slide" id="slide-10">
+                <div class="text-center max-w-3xl mx-auto mt-6">
+                    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="check-circle" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-4 text-slate-800">You're Ready to Go!</h2>
+                    <p class="text-xl text-slate-600 mb-8">
+                        SDD helps us move faster by avoiding misunderstandings. Let's recap your role:
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                        <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
+                            <p class="text-slate-700"><strong class="text-slate-900">Wait for the green light.</strong> Don't start writing specs until the Team Lead finishes Phase 2 (Assess) and confirms who owns the change.</p>
+                        </div>
+                        <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
+                            <p class="text-slate-700"><strong class="text-slate-900">Check the Glossary.</strong> Ensure every term in your proposal is defined. If it's not, define it with the team.</p>
+                        </div>
+                        <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
+                            <p class="text-slate-700"><strong class="text-slate-900">Write Delta Specs.</strong> Be clear about what is ADDED, MODIFIED, and REMOVED. Don't worry about the "how."</p>
+                        </div>
+                        <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
+                            <p class="text-slate-700"><strong class="text-slate-900">Trust the Process.</strong> Once you hand off to Phase 4 & 5, trust the Architect to plan safely and the Team Lead to deliver the slices.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer / Navigation -->
+        <footer class="bg-slate-100 border-t border-slate-200 p-4 flex justify-between items-center shrink-0">
+            <button id="btn-prev" class="px-6 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+            </button>
+            <div class="flex gap-2" id="dot-indicators">
+                <!-- Dots generated by JS -->
+            </div>
+            <button id="btn-next" class="px-6 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm">
+                Next Step
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- JavaScript for Presentation Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Presentation Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const progressBar = document.getElementById('progress-bar');
+            const slideCounter = document.getElementById('slide-counter');
+            const dotContainer = document.getElementById('dot-indicators');
+
+            // Create dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'w-2 h-2 rounded-full cursor-pointer';
+                dot.style.cssText = `width:8px;height:8px;border-radius:50%;transition:all .25s;background-color:${i === 0 ? '#C8880A' : '#E4DDD2'};${i === 0 ? 'transform:scale(1.4)' : ''}`;
+                dot.id = `dot-${i}`;
+
+                dot.addEventListener('click', () => {
+                    currentSlide = i;
+                    updateUI();
+                });
+
+                dotContainer.appendChild(dot);
+            }
+
+            function updateUI() {
+                // Hide all slides, show current
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update buttons
+                btnPrev.disabled = currentSlide === 0;
+                
+                if (currentSlide === totalSlides - 1) {
+                    btnNext.textContent = "Finish";
+                    btnNext.style.backgroundColor = '#1E6845';
+                } else {
+                    btnNext.textContent = "Next Step";
+                    btnNext.style.backgroundColor = '#C8880A';
+                }
+
+                // Update progress bar
+                const progress = ((currentSlide + 1) / totalSlides) * 100;
+                progressBar.style.width = `${progress}%`;
+
+                // Update counter text
+                slideCounter.textContent = `Slide ${currentSlide + 1} of ${totalSlides}`;
+
+                // Update dots
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.getElementById(`dot-${i}`);
+                    if (i === currentSlide) {
+                        dot.style.backgroundColor = '#C8880A';
+                        dot.style.transform = 'scale(1.4)';
+                    } else {
+                        dot.style.backgroundColor = '#E4DDD2';
+                        dot.style.transform = 'scale(1)';
+                        // legacy class cleanup (no-op but safe)
+                        dot.classList.replace('bg-blue-600', 'bg-slate-300');
+                    }
+                }
+            }
+
+            btnPrev.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateUI();
+                }
+            });
+
+            btnNext.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateUI();
+                } else {
+                    // Reset to beginning on finish (optional behavior)
+                    currentSlide = 0;
+                    updateUI();
+                }
+            });
+
+            // Initial UI setup
+            updateUI();
+        });
+
+        // Interactive Phase Details Logic for Slide 2
+        const phaseDetails = {
+            1: {
+                title: "Phase 1: Platform",
+                icon: "landmark",
+                desc: "This is where the 'City Zoning Laws' are set. The Architect defines the durable context, guardrails, shared roles, and project rules for everyone to follow. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+            },
+            2: {
+                title: "Phase 2: Assess",
+                icon: "search",
+                desc: "The 'Intake Desk'. The Team Lead opens the change package, assesses the size and impact of the request, and selects the right track. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+            },
+            3: {
+                title: "Phase 3: Specify (Your Superpower)",
+                icon: "pen-tool",
+                desc: "The 'Blueprint'. As the Product Manager, you define the exact required behavior and remove any ambiguity before planning starts. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+            },
+            4: {
+                title: "Phase 4: Plan",
+                icon: "layout-template",
+                desc: "The 'Engineering Plan'. The Architect converts the approved spec into a technical plan and delivery slices. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+            },
+            5: {
+                title: "Phase 5: Deliver",
+                icon: "hammer",
+                desc: "The 'Construction'. The Team Lead oversees the actual building, reviewing, and releasing of the feature. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+            }
+        };
+
+        window.showPhaseDetails = function(phase) {
+            // Update styling on cards
+            document.querySelectorAll('.phase-card').forEach((card, index) => {
+                if(index + 1 === phase) {
+                    card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'transform', 'scale-105', 'shadow-md');
+                    card.classList.remove('bg-slate-50', 'hover:border-blue-300');
+                } else {
+                    card.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'transform', 'scale-105', 'shadow-md');
+                    card.classList.add('bg-slate-50', 'hover:border-blue-300');
+                }
+            });
+
+            // Update panel content
+            const data = phaseDetails[phase];
+            document.getElementById('phase-detail-title').textContent = data.title;
+            document.getElementById('phase-detail-desc').innerHTML = data.desc;
+            
+            // Re-render icon
+            const iconContainer = document.getElementById('phase-detail-icon');
+            iconContainer.innerHTML = `<i data-lucide="${data.icon}" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
