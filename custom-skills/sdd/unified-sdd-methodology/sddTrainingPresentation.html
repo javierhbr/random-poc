@@ -256,7 +256,7 @@
             color: var(--blue) !important;
         }
         /* Summary check icon */
-        #slide-10 .bg-emerald-100.rounded-full {
+        #slide-13 .bg-emerald-100.rounded-full {
             background-color: var(--green-bg) !important;
             color: var(--green) !important;
         }
@@ -306,6 +306,7 @@
                             Think of SDD like building a house. You don't just hand a builder some bricks and say "build a house." You start with a blueprint, agree on the rooms, and define the rules. SDD is our blueprint process for software.
                         </p>
                     </div>
+                    <p class="text-sm text-slate-500 mt-4 font-medium">Backed by 27 AI skills and a structured file system across 5 phases.</p>
                 </div>
             </section>
 
@@ -383,11 +384,84 @@
                             <p class="text-sm text-slate-500 mt-2"><strong>Goal:</strong> Once Specification is strong, we apply that rigor to engineering execution. We implement phased tasks, strict PRs, verification evidence, and formal archiving.</p>
                         </div>
                     </div>
+                    <!-- Evolution Note -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mt-2">
+                        <p class="text-sm text-slate-600"><strong class="text-slate-800">Evolution path:</strong> v1 = 5 phases (current). v2 = Deliver splits into Build + Deploy when release complexity grows.</p>
+                    </div>
                 </div>
             </section>
 
-            <!-- Slide 4: Phase 1 Deep Dive -->
+            <!-- Slide 4: Three-Layer Architecture -->
             <section class="slide" id="slide-4">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-amber-50 text-amber-800 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Architecture</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Three Layers, Three Sources of Truth</h2>
+                </div>
+                <p class="text-lg text-slate-600 mb-6">Every artifact in SDD lives in one of three layers. Each layer has a clear role — mixing them creates confusion about what's authoritative.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white border-l-4 border-amber-400 rounded-r-xl p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center mb-3"><i data-lucide="scroll" class="w-5 h-5 text-amber-700"></i></div>
+                        <h3 class="font-bold text-slate-800 mb-2">Truth Layer</h3>
+                        <p class="text-sm text-slate-600">Platform repo = shared truth (rules, contracts, ownership). Component repo = local truth (specs, design, tasks).</p>
+                    </div>
+                    <div class="bg-white border-l-4 border-blue-500 rounded-r-xl p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mb-3"><i data-lucide="target" class="w-5 h-5 text-blue-600"></i></div>
+                        <h3 class="font-bold text-slate-800 mb-2">Tracking Layer</h3>
+                        <p class="text-sm text-slate-600">JIRA holds the issue chain: Platform issue → Component epic → Stories. Workflow status lives here.</p>
+                    </div>
+                    <div class="bg-white border-l-4 border-emerald-500 rounded-r-xl p-5 shadow-sm">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center mb-3"><i data-lucide="git-branch" class="w-5 h-5 text-emerald-600"></i></div>
+                        <h3 class="font-bold text-slate-800 mb-2">Execution Layer</h3>
+                        <p class="text-sm text-slate-600">Git branches, PRs, CI/CD pipelines, deployments. Evidence collected here and traced back to the truth layer.</p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p class="text-sm text-amber-900"><strong>Warning:</strong> JIRA tickets are not specs. PRs are not design documents. Code comments are not architecture decisions. Each layer has its own source of truth — keep them separate.</p>
+                </div>
+            </section>
+
+            <!-- Slide 5: Configuration Files -->
+            <section class="slide" id="slide-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">File Reference</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Where Files Live</h2>
+                </div>
+                <p class="text-slate-600 mb-6">SDD uses a small set of well-defined files. Platform files are shared truth; component files are local truth pinned to a platform version.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="border border-slate-200 p-5 rounded-xl">
+                        <h3 class="font-bold text-amber-800 flex items-center gap-2 mb-3"><i data-lucide="landmark" class="w-5 h-5"></i> Platform Repository</h3>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">platform-baseline.md</code> — foundational durable truth</li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">ownership/component-ownership-*.md</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">ownership/dependency-map.md</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">ownership/glossary.md</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">jira-conventions.md</code> · <code class="text-xs bg-slate-100 px-1 rounded">refs-index.md</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">adrs/ADR-NNN.md</code> · <code class="text-xs bg-slate-100 px-1 rounded">contracts/*.md</code></li>
+                        </ul>
+                    </div>
+                    <div class="border border-slate-200 p-5 rounded-xl">
+                        <h3 class="font-bold text-emerald-800 flex items-center gap-2 mb-3"><i data-lucide="folder-open" class="w-5 h-5"></i> Component Repository</h3>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">platform-ref.yaml</code> — pins platform version + impact tiers</li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">jira-traceability.yaml</code> — JIRA chain mapping</li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">openspec/config.yaml</code> — project configuration</li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">.sdd-spec/changes/&lt;slug&gt;/proposal.md</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">.sdd-spec/changes/&lt;slug&gt;/specs/</code></li>
+                            <li><code class="text-xs bg-slate-100 px-1 rounded">.sdd-spec/changes/&lt;slug&gt;/design.md</code> · <code class="text-xs bg-slate-100 px-1 rounded">tasks.md</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                    <strong>Lifecycle:</strong> <code>platform-ref.yaml</code> and <code>jira-traceability.yaml</code> are created in Assess, updated in Plan/Deliver, finalized at Archive.
+                </div>
+            </section>
+
+            <!-- Slide 6: Phase 1 Deep Dive -->
+            <section class="slide" id="slide-6">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 1</span>
                     <h2 class="text-3xl font-bold text-slate-800">Platform (Setting the Stage)</h2>
@@ -434,15 +508,22 @@
                     <div class="border border-slate-200 p-4 rounded-lg flex gap-3 md:col-span-2 bg-indigo-50">
                         <i data-lucide="layers" class="text-indigo-600 shrink-0"></i>
                         <div>
-                            <strong class="text-indigo-800 text-sm">The 3 "Shared Truths" (Human-authored)</strong>
+                            <strong class="text-indigo-800 text-sm">The 3 "Shared Truths" (DDD-derived, Human-authored)</strong>
                             <p class="text-xs text-indigo-700 mt-1"><strong>1. Component Ownership:</strong> Exactly what each team owns.<br><strong>2. Dependency Map:</strong> 3 Tiers of Impact (Must change together vs. Watch vs. Adapt).<br><strong>3. Shared Glossary:</strong> Exact definitions for shared words.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-200 bg-amber-50 p-4 rounded-lg flex gap-3 md:col-span-2">
+                        <i data-lucide="shield" class="text-amber-700 shrink-0"></i>
+                        <div>
+                            <strong class="text-amber-800 text-sm">Constitution Rules (O-1, O-2, O-3)</strong>
+                            <p class="text-xs text-amber-700 mt-1"><strong>O-1:</strong> Ownership before scope — identify the component owner at Assess.<br><strong>O-2:</strong> Glossary terms only — all spec terms must be defined.<br><strong>O-3:</strong> Impact tiers drive JIRA — tier classification determines structure mechanically.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Slide 5: Phase 2 Deep Dive -->
-            <section class="slide" id="slide-5">
+            <!-- Slide 7: Phase 2 Deep Dive -->
+            <section class="slide" id="slide-7">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 2</span>
                     <h2 class="text-3xl font-bold text-slate-800">Assess (The Intake Desk)</h2>
@@ -487,10 +568,25 @@
                         <p class="text-xs text-slate-600 mt-2">Creates the <code>platform-ref.yaml</code> (pins what version we are on) and <code>jira-traceability.yaml</code> (links JIRA tickets). This container will hold everything until the feature is finished.</p>
                     </div>
                 </div>
+
+                <div class="border border-blue-200 bg-blue-50 p-4 rounded-lg mt-4">
+                    <strong class="text-blue-800 text-sm flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-blue-600"></i> Extended platform-ref.yaml Fields</strong>
+                    <div class="bg-white rounded mt-2 p-3 font-mono text-xs text-slate-700 leading-relaxed">
+                        <div>ownership:</div>
+                        <div>&nbsp;&nbsp;primary_component: "profile-service"</div>
+                        <div>impact:</div>
+                        <div>&nbsp;&nbsp;must_change_together: [auth-service]</div>
+                        <div>&nbsp;&nbsp;watch_for_breakage: [notification-service]</div>
+                        <div>&nbsp;&nbsp;adapts_independently: [audit-service]</div>
+                        <div>alignment_notes:</div>
+                        <div>&nbsp;&nbsp;glossary_terms_used: [email update, validation]</div>
+                    </div>
+                    <p class="text-xs text-blue-700 mt-2">These fields make JIRA structure decisions mechanical — no judgment calls needed.</p>
+                </div>
             </section>
 
-            <!-- Slide 6: Phase 3 Deep Dive -->
-            <section class="slide" id="slide-6">
+            <!-- Slide 8: Phase 3 Deep Dive -->
+            <section class="slide" id="slide-8">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 3</span>
                     <h2 class="text-3xl font-bold text-slate-800">Specify (The Blueprint)</h2>
@@ -537,8 +633,8 @@
                 </div>
             </section>
 
-            <!-- Slide 7: Phase 4 Deep Dive -->
-            <section class="slide" id="slide-7">
+            <!-- Slide 9: Phase 4 Deep Dive -->
+            <section class="slide" id="slide-9">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 4</span>
                     <h2 class="text-3xl font-bold text-slate-800">Plan (Engineering Execution)</h2>
@@ -585,8 +681,8 @@
                 </div>
             </section>
 
-            <!-- Slide 8: Phase 5 Deep Dive -->
-            <section class="slide" id="slide-8">
+            <!-- Slide 10: Phase 5 Deep Dive -->
+            <section class="slide" id="slide-10">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Phase 5</span>
                     <h2 class="text-3xl font-bold text-slate-800">Deliver (Construction & Closure)</h2>
@@ -620,10 +716,71 @@
                         <p class="text-xs text-emerald-800 mt-2">Archive is not just cleanup. It takes the Delta Specs you wrote in Phase 3 and officially promotes them to become the "New Component Truth".</p>
                     </div>
                 </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                    <p class="text-sm text-amber-900"><strong>Archive is required closure:</strong> Archive promotes delta specs to canonical truth. Without it, the feature is not done — the next person starts from incorrect documentation.</p>
+                </div>
             </section>
 
-            <!-- Slide 9: FAQ -->
-            <section class="slide" id="slide-9">
+            <!-- Slide 11: Skills & Tools Overview -->
+            <section class="slide" id="slide-11">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Tooling</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Skills & Tools</h2>
+                </div>
+                <p class="text-slate-600 mb-5">27 AI skills organized by phase, plus a CLI tool for querying platform truth locally.</p>
+
+                <div class="space-y-2 mb-5">
+                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500 w-16">Phase 0</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded text-xs font-medium">initiative-definition</span>
+                            <span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded text-xs font-medium">risk-assessment</span>
+                            <span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded text-xs font-medium">workflow-router</span>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500 w-16">Phase 1-2</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-medium">architect</span>
+                            <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-medium">component-spec</span>
+                            <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-medium">platform-constitution</span>
+                            <span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-medium">adr</span>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500 w-16">Phase 3</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">developer</span>
+                            <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">tdd</span>
+                            <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">sdd-openspec</span>
+                            <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">sdd-bmad</span>
+                            <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">sdd-speckit</span>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500 w-16">Phase 4</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">verifier</span>
+                            <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">gate-check</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border-2 border-blue-200 bg-blue-50 rounded-xl p-4">
+                        <h3 class="font-bold text-blue-800 text-sm mb-2">Tool Boundary Rule</h3>
+                        <p class="text-xs text-blue-700"><strong>Platform work:</strong> BMAD + OpenSpec + Speckit (combined)<br><strong>Component repos:</strong> OpenSpec ONLY — no mixing allowed</p>
+                    </div>
+                    <div class="border border-slate-200 bg-white rounded-xl p-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2"><i data-lucide="terminal" class="w-4 h-4"></i> platform-spec CLI</h3>
+                        <p class="text-xs text-slate-600">Local read-only search tool using SQLite FTS5. Query ownership, glossary, contracts — no server, no hosted infrastructure needed.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: FAQ -->
+            <section class="slide" id="slide-12">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">Common Questions</span>
                     <h2 class="text-3xl font-bold text-slate-800">Frequently Asked Questions</h2>
@@ -677,11 +834,44 @@
                         </p>
                     </div>
 
+                    <!-- FAQ 5 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            What are the three layers of the architecture?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            <strong>Truth Layer</strong> = Platform repo (shared truth) + Component repo (local truth). <strong>Tracking Layer</strong> = JIRA (workflow and coordination). <strong>Execution Layer</strong> = Git, PRs, CI/CD (code and delivery). Each layer has its own source of truth — never let one silently replace another.
+                        </p>
+                    </div>
+
+                    <!-- FAQ 6 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            What AI skills are available?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            There are <strong>27 skills</strong> organized by phase. Start with <strong>sdd-methodology-tools</strong> if you're unsure which to use — it routes you to the right skill based on your current phase and role. Skills include initiative-definition, architect, developer, tdd, verifier, gate-check, and several orchestrators.
+                        </p>
+                    </div>
+
+                    <!-- FAQ 7 -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-start gap-2">
+                            <i data-lucide="help-circle" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                            How do I query platform truth locally?
+                        </h3>
+                        <p class="text-slate-600 mt-2 text-sm ml-7">
+                            Use the <strong>platform-spec</strong> CLI tool. It provides read-only SQLite FTS5 full-text search across all platform artifacts — ownership, glossary, contracts, dependency maps. No server, no hosted infrastructure. Just clone the platform repo as a sibling directory and run <code class="bg-slate-100 px-1 rounded text-xs">platform-spec search "your query"</code>.
+                        </p>
+                    </div>
+
                 </div>
             </section>
 
-            <!-- Slide 10: Summary -->
-            <section class="slide" id="slide-10">
+            <!-- Slide 13: Summary -->
+            <section class="slide" id="slide-13">
                 <div class="text-center max-w-3xl mx-auto mt-6">
                     <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i data-lucide="check-circle" class="w-10 h-10"></i>
@@ -707,6 +897,10 @@
                         <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3">
                             <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
                             <p class="text-slate-700"><strong class="text-slate-900">Trust the Process.</strong> Once you hand off to Phase 4 & 5, trust the Architect to plan safely and the Team Lead to deliver the slices.</p>
+                        </div>
+                        <div class="bg-white p-4 border border-slate-200 rounded-lg flex items-start gap-3 md:col-span-2">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 mt-0.5"></i>
+                            <p class="text-slate-700"><strong class="text-slate-900">Use platform-spec locally.</strong> Search glossary, ownership, contracts, and dependency maps before writing specs or making scope decisions.</p>
                         </div>
                     </div>
                 </div>
@@ -831,12 +1025,12 @@
             1: {
                 title: "Phase 1: Platform",
                 icon: "landmark",
-                desc: "This is where the 'City Zoning Laws' are set. The Architect defines the durable context, guardrails, shared roles, and project rules for everyone to follow. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+                desc: "This is where the 'City Zoning Laws' are set. The Architect defines ownership boundaries, dependency maps (3 impact tiers), and the shared glossary. Creates the durable context all future work inherits. <br><br><em>Click 'Next Step' to dive deeper!</em>"
             },
             2: {
                 title: "Phase 2: Assess",
                 icon: "search",
-                desc: "The 'Intake Desk'. The Team Lead opens the change package, assesses the size and impact of the request, and selects the right track. <br><br><em>Click 'Next Step' to dive deeper!</em>"
+                desc: "The 'Intake Desk'. The Team Lead opens the change package, reads the dependency map to determine impact tiers, classifies size and path, and creates the JIRA chain (platform issue → component epic → stories). <br><br><em>Click 'Next Step' to dive deeper!</em>"
             },
             3: {
                 title: "Phase 3: Specify (Your Superpower)",

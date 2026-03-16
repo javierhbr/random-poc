@@ -831,9 +831,10 @@
     </div>
     <div class="stats-row">
       <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Clear Phases</div></div>
-      <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Key Roles</div></div>
+      <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Key Roles</div></div>
       <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">Safe Iterations</div></div>
       <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Guesswork</div></div>
+      <div class="stat-item"><div class="stat-num">27</div><div class="stat-label">AI Skills</div></div>
     </div>
   </div>
 </div>
@@ -927,15 +928,15 @@
 
     <div class="card" style="margin-bottom: 32px;">
       <div class="flow-row">
-        <div class="flow-box fbox-1" onclick="goTo(4)">🏛️ Platform</div>
+        <div class="flow-box fbox-1" onclick="goTo(6)">🏛️ Platform</div>
         <div class="flow-arrow">→</div>
-        <div class="flow-box fbox-2" onclick="goTo(6)">🔍 Assess</div>
+        <div class="flow-box fbox-2" onclick="goTo(9)">🔍 Assess</div>
         <div class="flow-arrow">→</div>
-        <div class="flow-box fbox-3" onclick="goTo(8)">✍️ Specify</div>
+        <div class="flow-box fbox-3" onclick="goTo(11)">✍️ Specify</div>
         <div class="flow-arrow">→</div>
-        <div class="flow-box fbox-4" onclick="goTo(10)">🗺️ Plan</div>
+        <div class="flow-box fbox-4" onclick="goTo(13)">🗺️ Plan</div>
         <div class="flow-arrow">→</div>
-        <div class="flow-box fbox-5" onclick="goTo(12)">🚀 Deliver</div>
+        <div class="flow-box fbox-5" onclick="goTo(15)">🚀 Deliver</div>
       </div>
       <p style="font-size: 12px; color: var(--ink-soft); margin-top: 12px; text-align: center;">Click any phase to jump directly to it</p>
     </div>
@@ -973,8 +974,100 @@
   </div>
 </div>
 
+<!-- SLIDE: THREE-LAYER ARCHITECTURE -->
+<div class="slide" id="slide-three-layers" data-index="4" data-title="Three-Layer Architecture">
+  <div class="slide-inner wide">
+    <div class="eyebrow">🏗️ Architecture Model</div>
+    <h2>Three layers, three sources of truth.</h2>
+    <p class="lead">Every artifact in SDD lives in one of three layers. Each layer has a clear role — mixing them creates confusion about what's authoritative.</p>
+
+    <div class="grid-3" style="margin-bottom: 28px;">
+      <div class="card" style="border-left: 4px solid var(--gold);">
+        <div style="font-size: 22px; margin-bottom: 8px;">📜</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Truth Layer</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Where the authoritative definitions live. Platform repo = shared truth (rules, contracts, ownership). Component repo = local truth (specs, design, tasks).</p>
+        <div class="badge-row">
+          <span class="badge badge-gold">Platform Repo</span>
+          <span class="badge badge-gold">Component Repo</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--blue);">
+        <div style="font-size: 22px; margin-bottom: 8px;">🎯</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Tracking Layer</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Where workflow coordination happens. JIRA holds the issue chain: Platform issue → Component epic → Stories. Status lives here, not in the truth layer.</p>
+        <div class="badge-row">
+          <span class="badge badge-blue">JIRA</span>
+          <span class="badge badge-blue">Traceability</span>
+        </div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--teal);">
+        <div style="font-size: 22px; margin-bottom: 8px;">⚙️</div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Execution Layer</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Where code and delivery happen. Git branches, pull requests, CI/CD pipelines, and deployments. Evidence is collected here and traced back to the truth layer.</p>
+        <div class="badge-row">
+          <span class="badge badge-teal">Git + PRs</span>
+          <span class="badge badge-teal">CI/CD</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-coral">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Do not let one layer silently replace another</strong>
+        <p>JIRA tickets are not specs. PRs are not design documents. Code comments are not architecture decisions. Each layer has its own source of truth — keep them separate.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE: CONFIGURATION FILES MAP -->
+<div class="slide" id="slide-config-files" data-index="5" data-title="Configuration Files">
+  <div class="slide-inner wide">
+    <div class="eyebrow">📂 File Reference</div>
+    <h2>Every file, where it lives, when it's created.</h2>
+    <p class="lead">SDD uses a small set of well-defined files. Platform files are shared truth; component files are local truth pinned to a platform version.</p>
+
+    <div class="grid-2" style="margin-bottom: 28px;">
+      <div class="card" style="border-top: 3px solid var(--gold);">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">🏛️ Platform Repository</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">core</span> <code>platform-baseline.md</code> — foundational durable truth</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">own</span> <code>ownership/component-ownership-*.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">own</span> <code>ownership/dependency-map.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">own</span> <code>ownership/glossary.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">ref</span> <code>jira-conventions.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">ref</span> <code>refs-index.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">arch</span> <code>adrs/ADR-NNN.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-gold" style="font-size: 10px;">api</span> <code>contracts/*.md</code> · <code>capabilities/*.md</code></li>
+        </ul>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--teal);">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">📦 Component Repository</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">align</span> <code>platform-ref.yaml</code> — pins platform version + impact tiers</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">track</span> <code>jira-traceability.yaml</code> — JIRA chain mapping</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">config</span> <code>openspec/config.yaml</code> — project configuration</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">change</span> <code>.sdd-spec/changes/&lt;slug&gt;/proposal.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">change</span> <code>.sdd-spec/changes/&lt;slug&gt;/specs/</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">change</span> <code>.sdd-spec/changes/&lt;slug&gt;/design.md</code></li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">change</span> <code>.sdd-spec/changes/&lt;slug&gt;/tasks.md</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-teal">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">
+        <strong>Lifecycle rule</strong>
+        <p><code>platform-ref.yaml</code> and <code>jira-traceability.yaml</code> are created in Assess, updated in Plan and Deliver, and finalized at Archive. The change package directory (<code>.sdd-spec/changes/&lt;slug&gt;/</code>) is the single container for all change-specific artifacts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SLIDE 5: PLATFORM PHASE -->
-<div class="slide" id="slide-platform" data-index="4" data-title="Phase 1: Platform">
+<div class="slide" id="slide-platform" data-index="6" data-title="Phase 1: Platform">
   <div class="slide-inner">
     <div class="eyebrow">Phase 1 of 5</div>
     <div class="phase-item" style="margin-bottom: 32px;">
@@ -1030,7 +1123,7 @@
 </div>
 
 <!-- SLIDE 6: PLATFORM DEEP DIVE -->
-<div class="slide" id="slide-platform-detail" data-index="5" data-title="Phase 1: Artifacts & Flow">
+<div class="slide" id="slide-platform-detail" data-index="7" data-title="Phase 1: Artifacts & Flow">
   <div class="slide-inner wide">
     <div class="eyebrow">Phase 1 · Artifacts &amp; Rationale</div>
     <h2>What Platform produces — and why.</h2>
@@ -1107,8 +1200,60 @@
   </div>
 </div>
 
+<!-- SLIDE: DDD AT THE PLATFORM LEVEL -->
+<div class="slide" id="slide-ddd" data-index="8" data-title="Platform DDD Concepts">
+  <div class="slide-inner wide">
+    <div class="eyebrow">🧩 Platform DDD</div>
+    <h2>Three DDD concepts, zero DDD jargon.</h2>
+    <p class="lead">The platform artifacts are derived from Domain-Driven Design patterns — but you don't need to know DDD to use them. Here's what matters.</p>
+
+    <div class="grid-3" style="margin-bottom: 24px;">
+      <div class="card" style="border-left: 4px solid var(--gold);">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 8px;">DDD: Bounded Context</div>
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Component Ownership Boundaries</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Every component has a clear list of what it <strong>owns</strong> and what it explicitly <strong>does NOT own</strong>. This turns "who's responsible?" from a debate into a lookup.</p>
+        <div style="background: var(--surface-alt); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--ink-mid);"><strong>File:</strong> <code>ownership/component-ownership-*.md</code></div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--coral);">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 8px;">DDD: Context Map</div>
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Dependency Map — 3 Tiers</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">How components relate to each other, classified by impact urgency.</p>
+        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+          <div style="background: var(--coral-bg); border-radius: 6px; padding: 6px 10px;"><strong style="color: var(--coral);">Tier 1:</strong> Must change together</div>
+          <div style="background: var(--gold-bg); border-radius: 6px; padding: 6px 10px;"><strong style="color: #92500A;">Tier 2:</strong> Watch for breakage</div>
+          <div style="background: var(--green-bg); border-radius: 6px; padding: 6px 10px;"><strong style="color: var(--green);">Tier 3:</strong> Adapts independently</div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--teal);">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 8px;">DDD: Ubiquitous Language</div>
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Shared Glossary</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Every term used in any spec must be defined here — with a "what it is" and "what it is NOT" clause. Prevents ambiguity before it starts.</p>
+        <div style="background: var(--surface-alt); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--ink-mid);"><strong>File:</strong> <code>ownership/glossary.md</code></div>
+      </div>
+    </div>
+
+    <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 14px; padding: 20px 24px;">
+      <h3 style="font-size: 15px; color: #92500A; margin-bottom: 12px;">⚖️ Constitution Rules Enforcing These Concepts</h3>
+      <div class="grid-3" style="gap: 12px;">
+        <div style="background: rgba(255,255,255,.7); border-radius: 8px; padding: 10px 14px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">Rule O-1: Ownership before scope</div>
+          <div style="font-size: 12px; color: var(--ink-mid);">Identify the component owner at Assess before defining scope.</div>
+        </div>
+        <div style="background: rgba(255,255,255,.7); border-radius: 8px; padding: 10px 14px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">Rule O-2: Glossary terms only</div>
+          <div style="font-size: 12px; color: var(--ink-mid);">All spec terms must be defined in the shared glossary. No exceptions.</div>
+        </div>
+        <div style="background: rgba(255,255,255,.7); border-radius: 8px; padding: 10px 14px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">Rule O-3: Impact tiers drive JIRA</div>
+          <div style="font-size: 12px; color: var(--ink-mid);">Tier classification determines JIRA structure mechanically — not by judgment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SLIDE 6: ASSESS PHASE -->
-<div class="slide" id="slide-assess" data-index="6" data-title="Phase 2: Assess">
+<div class="slide" id="slide-assess" data-index="9" data-title="Phase 2: Assess">
   <div class="slide-inner">
     <div class="eyebrow">Phase 2 of 5</div>
     <div class="phase-item" style="margin-bottom: 32px;">
@@ -1159,7 +1304,7 @@
 </div>
 
 <!-- SLIDE 8: ASSESS DEEP DIVE -->
-<div class="slide" id="slide-assess-detail" data-index="7" data-title="Phase 2: Artifacts & Flow">
+<div class="slide" id="slide-assess-detail" data-index="10" data-title="Phase 2: Artifacts & Flow">
   <div class="slide-inner wide">
     <div class="eyebrow">Phase 2 · Artifacts &amp; Rationale</div>
     <h2>What Assess produces — and why.</h2>
@@ -1237,7 +1382,7 @@
 </div>
 
 <!-- SLIDE 7: SPECIFY PHASE -->
-<div class="slide" id="slide-specify" data-index="8" data-title="Phase 3: Specify">
+<div class="slide" id="slide-specify" data-index="11" data-title="Phase 3: Specify">
   <div class="slide-inner">
     <div class="eyebrow">Phase 3 of 5 — Your Most Important Phase</div>
     <div class="phase-item" style="margin-bottom: 28px;">
@@ -1287,7 +1432,7 @@
 </div>
 
 <!-- SLIDE 10: SPECIFY DEEP DIVE -->
-<div class="slide" id="slide-specify-detail" data-index="9" data-title="Phase 3: Artifacts & Flow">
+<div class="slide" id="slide-specify-detail" data-index="12" data-title="Phase 3: Artifacts & Flow">
   <div class="slide-inner wide">
     <div class="eyebrow">Phase 3 · Artifacts &amp; Rationale</div>
     <h2>What Specify produces — and why.</h2>
@@ -1350,7 +1495,7 @@
 </div>
 
 <!-- SLIDE 8: PLAN PHASE -->
-<div class="slide" id="slide-plan" data-index="10" data-title="Phase 4: Plan">
+<div class="slide" id="slide-plan" data-index="13" data-title="Phase 4: Plan">
   <div class="slide-inner">
     <div class="eyebrow">Phase 4 of 5</div>
     <div class="phase-item" style="margin-bottom: 28px;">
@@ -1402,7 +1547,7 @@
 </div>
 
 <!-- SLIDE 12: PLAN DEEP DIVE -->
-<div class="slide" id="slide-plan-detail" data-index="11" data-title="Phase 4: Artifacts & Flow">
+<div class="slide" id="slide-plan-detail" data-index="14" data-title="Phase 4: Artifacts & Flow">
   <div class="slide-inner wide">
     <div class="eyebrow">Phase 4 · Artifacts &amp; Rationale</div>
     <h2>What Plan produces — and why.</h2>
@@ -1471,7 +1616,7 @@
 </div>
 
 <!-- SLIDE 9: DELIVER PHASE -->
-<div class="slide" id="slide-deliver" data-index="12" data-title="Phase 5: Deliver">
+<div class="slide" id="slide-deliver" data-index="15" data-title="Phase 5: Deliver">
   <div class="slide-inner">
     <div class="eyebrow">Phase 5 of 5</div>
     <div class="phase-item" style="margin-bottom: 28px;">
@@ -1526,7 +1671,7 @@
 </div>
 
 <!-- SLIDE 14: DELIVER DEEP DIVE -->
-<div class="slide" id="slide-deliver-detail" data-index="13" data-title="Phase 5: Artifacts & Flow">
+<div class="slide" id="slide-deliver-detail" data-index="16" data-title="Phase 5: Artifacts & Flow">
   <div class="slide-inner wide">
     <div class="eyebrow">Phase 5 · Artifacts &amp; Rationale</div>
     <h2>What Deliver produces — and why.</h2>
@@ -1611,7 +1756,7 @@
 </div>
 
 <!-- SLIDE 10: REAL EXAMPLE -->
-<div class="slide" id="slide-example" data-index="14" data-title="Real Example">
+<div class="slide" id="slide-example" data-index="17" data-title="Real Example">
   <div class="slide-inner">
     <div class="eyebrow">👟 Walk-Through Example</div>
     <h2>Real story: updating an email address.</h2>
@@ -1703,7 +1848,7 @@
 </div>
 
 <!-- SLIDE 11: ROLES -->
-<div class="slide" id="slide-roles" data-index="15" data-title="Who Does What">
+<div class="slide" id="slide-roles" data-index="18" data-title="Who Does What">
   <div class="slide-inner">
     <div class="eyebrow">👥 Roles</div>
     <h2>Every phase has one owner.</h2>
@@ -1753,7 +1898,7 @@
 </div>
 
 <!-- SLIDE 12: TOOLS -->
-<div class="slide" id="slide-tools" data-index="16" data-title="The Tools">
+<div class="slide" id="slide-tools" data-index="19" data-title="The Tools">
   <div class="slide-inner">
     <div class="eyebrow">🔧 The Tools</div>
     <h2>Three tools, one methodology.</h2>
@@ -1812,8 +1957,140 @@
   </div>
 </div>
 
+<!-- SLIDE: AI SKILLS CATALOG -->
+<div class="slide" id="slide-skills-catalog" data-index="20" data-title="AI Skills Catalog">
+  <div class="slide-inner wide">
+    <div class="eyebrow">🤖 27 AI Skills</div>
+    <h2>A skill for every phase and role.</h2>
+    <p class="lead">SDD is powered by specialized AI skills organized by phase. Each skill knows its boundaries and when to hand off.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; min-width: 90px;">Phase 0</div>
+        <div class="badge-row" style="flex-wrap: wrap;">
+          <span class="badge badge-gold">initiative-definition</span>
+          <span class="badge badge-gold">risk-assessment</span>
+          <span class="badge badge-gold">workflow-router</span>
+        </div>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; min-width: 90px;">Phase 1</div>
+        <div class="badge-row" style="flex-wrap: wrap;">
+          <span class="badge badge-blue">analyst</span>
+        </div>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; min-width: 90px;">Phase 2</div>
+        <div class="badge-row" style="flex-wrap: wrap;">
+          <span class="badge badge-pink">architect</span>
+          <span class="badge badge-pink">component-spec</span>
+          <span class="badge badge-pink">platform-constitution</span>
+          <span class="badge badge-pink">platform-contextualizer</span>
+          <span class="badge badge-pink">adr</span>
+        </div>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; min-width: 90px;">Phase 3</div>
+        <div class="badge-row" style="flex-wrap: wrap;">
+          <span class="badge badge-green">developer</span>
+          <span class="badge badge-green">tdd</span>
+          <span class="badge badge-green">sdd-openspec</span>
+          <span class="badge badge-green">sdd-bmad</span>
+          <span class="badge badge-green">sdd-speckit</span>
+        </div>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; min-width: 90px;">Phase 4</div>
+        <div class="badge-row" style="flex-wrap: wrap;">
+          <span class="badge badge-teal">verifier</span>
+          <span class="badge badge-teal">gate-check</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="gap: 12px;">
+      <div style="background: var(--plum-bg); border: 1px solid var(--plum-border); border-radius: 12px; padding: 14px 18px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--plum); margin-bottom: 8px;">Off-Path</div>
+        <span class="badge badge-plum">hotfix</span>
+      </div>
+      <div style="background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: 12px; padding: 14px 18px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--teal); margin-bottom: 8px;">Cross-Cutting</div>
+        <div class="badge-row" style="flex-wrap: wrap; gap: 4px;">
+          <span class="badge badge-teal">explain-code</span>
+          <span class="badge badge-teal">local-doc</span>
+          <span class="badge badge-teal">stakeholder-comms</span>
+        </div>
+      </div>
+      <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 12px; padding: 14px 18px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #92500A; margin-bottom: 8px;">Orchestrators</div>
+        <div class="badge-row" style="flex-wrap: wrap; gap: 4px;">
+          <span class="badge badge-gold">process-guide</span>
+          <span class="badge badge-gold">uncle-sdd-agent</span>
+          <span class="badge badge-gold">unified-sdd-skill</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue" style="margin-top: 20px;">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Start here</strong>
+        <p>If you're not sure which skill to use, start with <code>sdd-methodology-tools</code> — it routes you to the right skill based on your current phase and role.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE: PLATFORM-SPEC CLI -->
+<div class="slide" id="slide-platform-spec" data-index="21" data-title="platform-spec CLI">
+  <div class="slide-inner">
+    <div class="eyebrow">🔍 Local Tooling</div>
+    <h2>Query platform truth without hosted infrastructure.</h2>
+    <p class="lead">The <code>platform-spec</code> CLI tool gives developers read-only access to all platform artifacts via SQLite FTS5 full-text search — no server, no external dependencies.</p>
+
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+      <h3 style="font-size: 15px; margin-bottom: 14px;">Key Commands</h3>
+      <div style="background: #1C1309; border-radius: 10px; padding: 18px 22px; font-family: 'Roboto Mono', monospace; font-size: 13px; color: #E8DCC8; line-height: 2.2;">
+        <div><span style="color: var(--gold);">$</span> platform-spec search <span style="color: #A0D8D8;">"component ownership"</span></div>
+        <div><span style="color: var(--gold);">$</span> platform-spec read <span style="color: #A0D8D8;">ownership/dependency-map</span></div>
+        <div><span style="color: var(--gold);">$</span> platform-spec json search <span style="color: #A0D8D8;">"impact tier"</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="card">
+        <h3 style="font-size: 15px; margin-bottom: 10px;">By Phase:</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-blue" style="font-size: 10px;">Assess</span> Confirm component ownership before opening JIRA epic</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-pink" style="font-size: 10px;">Specify</span> Verify glossary terms before writing proposal</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-green" style="font-size: 10px;">Plan</span> Validate alignment to platform refs</li>
+          <li style="font-size: 13px; display: flex; gap: 8px;"><span class="badge badge-teal" style="font-size: 10px;">Deliver</span> Detect drift before merge</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size: 15px; margin-bottom: 10px;">Workspace Model:</h3>
+        <p style="font-size: 13px; margin-bottom: 10px;">Side-by-side workspaces (not nested clones):</p>
+        <div style="background: #1C1309; border-radius: 8px; padding: 12px 16px; font-family: 'Roboto Mono', monospace; font-size: 12px; color: #E8DCC8; line-height: 1.8;">
+          <div>~/work/</div>
+          <div>&nbsp;&nbsp;├── platform-repo/&nbsp;&nbsp;<span style="color: var(--gold);"># shared truth</span></div>
+          <div>&nbsp;&nbsp;├── profile-service/<span style="color: var(--teal);"># component</span></div>
+          <div>&nbsp;&nbsp;└── auth-service/&nbsp;&nbsp;&nbsp;<span style="color: var(--teal);"># component</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-teal">
+      <span class="callout-icon">🔒</span>
+      <div class="callout-body">
+        <strong>Read-only only</strong>
+        <p>platform-spec never writes to the platform repo. Zero external dependencies beyond sqlite3. No server process. Validates against the pinned version in <code>platform-ref.yaml</code>, not the latest local clone.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SLIDE 13: KEY RULES -->
-<div class="slide" id="slide-rules" data-index="17" data-title="Key Rules">
+<div class="slide" id="slide-rules" data-index="22" data-title="Key Rules">
   <div class="slide-inner wide">
     <div class="eyebrow">📌 Key Rules</div>
     <h2>Rules that prevent the most common failures.</h2>
@@ -1849,12 +2126,77 @@
         <h3 style="font-size: 16px;">One owner per phase, always</h3>
         <p>When everyone is responsible, no one is. Each phase has exactly one owner who decides when the phase is ready to move on.</p>
       </div>
+      <div class="rule-card" style="border-left-color: var(--coral);">
+        <span class="rule-icon">👤</span>
+        <h3 style="font-size: 16px;">O-1: Ownership before scope</h3>
+        <p>Identify the component owner at Assess before anyone defines scope. You cannot scope what you cannot own.</p>
+      </div>
+      <div class="rule-card" style="border-left-color: var(--teal);">
+        <span class="rule-icon">📖</span>
+        <h3 style="font-size: 16px;">O-2: Glossary terms only in specs</h3>
+        <p>Every term in a proposal or delta spec must be defined in the shared glossary. Missing terms are added before the spec is approved.</p>
+      </div>
+      <div class="rule-card" style="border-left-color: var(--blue);">
+        <span class="rule-icon">🔗</span>
+        <h3 style="font-size: 16px;">O-3: Impact tiers drive JIRA structure</h3>
+        <p>Tier classification from the dependency map determines JIRA epic/story structure mechanically — not by individual judgment.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE: OPERATING MODEL -->
+<div class="slide" id="slide-operating-model" data-index="23" data-title="Operating Model">
+  <div class="slide-inner wide">
+    <div class="eyebrow">📊 Operating Model</div>
+    <h2>Who does what, with which tools, in every phase.</h2>
+    <p class="lead">A complete reference showing the goal, owner, and key outputs for each phase.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+      <div style="background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 100px 1fr 90px 1fr; gap: 12px; align-items: center;">
+        <div style="font-size: 14px; font-weight: 700; color: #92500A;">🏛️ Platform</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">Define durable context and guardrails</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft);">Architect</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">→ Constitution, ownership, dependency map, glossary</div>
+      </div>
+      <div style="background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 100px 1fr 90px 1fr; gap: 12px; align-items: center;">
+        <div style="font-size: 14px; font-weight: 700; color: var(--blue);">🔍 Assess</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">Turn request into scoped change package</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft);">Team Lead</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">→ Change package, platform-ref.yaml, JIRA chain</div>
+      </div>
+      <div style="background: #FDE8F4; border: 1px solid #F0B0D8; border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 100px 1fr 90px 1fr; gap: 12px; align-items: center;">
+        <div style="font-size: 14px; font-weight: 700; color: #9C2070;">✍️ Specify</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">Define required behavior, remove ambiguity</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft);">Product</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">→ proposal.md, delta specs (ADDED/MODIFIED/REMOVED)</div>
+      </div>
+      <div style="background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 100px 1fr 90px 1fr; gap: 12px; align-items: center;">
+        <div style="font-size: 14px; font-weight: 700; color: var(--green);">🗺️ Plan</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">Convert approved spec to execution plan</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft);">Architect</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">→ design.md, tasks.md, ADRs</div>
+      </div>
+      <div style="background: var(--teal-bg); border: 1px solid var(--teal-border); border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 100px 1fr 90px 1fr; gap: 12px; align-items: center;">
+        <div style="font-size: 14px; font-weight: 700; color: var(--teal);">🚀 Deliver</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">Execute in controlled slices through archive</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--ink-soft);">Team Lead</div>
+        <div style="font-size: 12px; color: var(--ink-mid);">→ PRs, verification evidence, archived package</div>
+      </div>
+    </div>
+
+    <div class="callout callout-gold">
+      <span class="callout-icon">🔮</span>
+      <div class="callout-body">
+        <strong>Evolution path</strong>
+        <p>v1 = 5 phases (current). v2 = Deliver splits into Build + Deploy when release complexity grows. The methodology is designed to evolve with your team's maturity.</p>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- SLIDE 14: ITERATIONS -->
-<div class="slide" id="slide-iterations" data-index="18" data-title="Rollout Plan">
+<div class="slide" id="slide-iterations" data-index="24" data-title="Rollout Plan">
   <div class="slide-inner">
     <div class="eyebrow">📅 Rolling It Out</div>
     <h2>Don't adopt everything at once.</h2>
@@ -1904,7 +2246,7 @@
 </div>
 
 <!-- SLIDE 15: GLOSSARY -->
-<div class="slide" id="slide-glossary" data-index="19" data-title="Glossary">
+<div class="slide" id="slide-glossary" data-index="25" data-title="Glossary">
   <div class="slide-inner wide">
     <div class="eyebrow">📚 Quick Reference</div>
     <h2>Words you'll hear often.</h2>
@@ -1919,12 +2261,18 @@
       <div class="gloss-card"><div class="gloss-term">Impact Tier</div><div class="gloss-def">Tier 1 = must ship together. Tier 2 = watch after deploy. Tier 3 = no coordination needed. Drives JIRA structure decisions mechanically.</div></div>
       <div class="gloss-card"><div class="gloss-term">Proposal</div><div class="gloss-def">First artifact in a change package. Written by the PM. States problem, goals, and non-goals in plain language. Must be approved before planning.</div></div>
       <div class="gloss-card"><div class="gloss-term">Brownfield vs Greenfield</div><div class="gloss-def">Brownfield = changing an existing system (most work). Greenfield = building something brand new. They need different planning depths.</div></div>
+      <div class="gloss-card"><div class="gloss-term">platform-ref.yaml</div><div class="gloss-def">Component-level file that pins which platform version the component is aligned to, plus impact tiers and ownership metadata.</div></div>
+      <div class="gloss-card"><div class="gloss-term">jira-traceability.yaml</div><div class="gloss-def">Records the full JIRA chain from platform issue to component epic to stories. Created in Assess, updated through archive.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Truth / Tracking / Execution Layers</div><div class="gloss-def">Three-layer architecture: Truth (repos with specs), Tracking (JIRA for workflow), Execution (Git/PRs/CI for delivery). Don't mix them.</div></div>
+      <div class="gloss-card"><div class="gloss-term">platform-spec</div><div class="gloss-def">CLI tool for querying platform truth locally using SQLite FTS5 search. Read-only, no server, validates against pinned platform version.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Constitution Rules (O-1, O-2, O-3)</div><div class="gloss-def">Three enforcement rules: O-1 = ownership before scope, O-2 = glossary terms only, O-3 = impact tiers drive JIRA structure.</div></div>
+      <div class="gloss-card"><div class="gloss-term">Change Package Directory</div><div class="gloss-def"><code>.sdd-spec/changes/&lt;slug&gt;/</code> — the single container for all artifacts of one change: proposal, specs, design, tasks, and archive state.</div></div>
     </div>
   </div>
 </div>
 
 <!-- SLIDE 16: CTA -->
-<div class="slide" id="slide-cta" data-index="20" data-title="Your First Step">
+<div class="slide" id="slide-cta" data-index="26" data-title="Your First Step">
   <div class="slide-inner">
     <div class="eyebrow">🎯 Your First Step</div>
     <h2>You own the Specify phase.</h2>
