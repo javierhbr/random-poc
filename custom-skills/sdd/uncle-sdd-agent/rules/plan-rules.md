@@ -14,6 +14,11 @@ Turn the approved spec into an execution-ready technical plan.
 
 ## Must do
 
+- read `platform-ref.yaml` impact tiers before writing `design.md`:
+  - `impact.must_change_together` entries → hard constraints in `design.md`
+    with named coordination requirements (which component, which contract)
+  - `impact.watch_for_breakage` entries → rollout risks in `design.md`
+  - `impact.adapts_independently` entries → no coordination required
 - map major technical choices back to the approved spec
 - define architecture, data flow, interfaces, and testing strategy
 - keep platform refs visible in the design when they constrain the solution
@@ -29,6 +34,7 @@ Turn the approved spec into an execution-ready technical plan.
 - giant vague tasks
 - architecture detail that adds no delivery value
 - slice boundaries that are too large to review safely
+- skipping impact tier review before writing the design
 
 ## Required outputs
 

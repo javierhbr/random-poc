@@ -27,6 +27,8 @@ Make review a standard part of delivery instead of a local optional habit.
 - change package reference
 - tasks included
 - summary of behavior changed
+- tier 1 (`must_change_together`) dependencies verified in this slice
+- tier 2 (`watch_for_breakage`) consumers checked or flagged for post-deploy monitoring
 - validation performed
 - known risks or deferred items
 

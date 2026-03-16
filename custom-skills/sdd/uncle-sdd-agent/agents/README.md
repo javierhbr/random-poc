@@ -33,7 +33,7 @@ role agents.
 | Role | Primary phases | Default skill emphasis | Typical outputs |
 | --- | --- | --- | --- |
 | Architect | Platform, Plan | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | platform baseline, architecture plan, ADRs, design review |
-| Team Lead | Route, Deliver | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | routed change package, delivery slices, PR/review coordination, archive closure |
+| Team Lead | Assess, Deliver | platform: BMAD -> OpenSpec -> Speckit; component: OpenSpec (+ Explain Code) | routed change package, delivery slices, PR/review coordination, archive closure |
 | Product | Specify | platform: OpenSpec -> Speckit -> BMAD; component: OpenSpec (+ Explain Code) | proposal, user stories, acceptance criteria, clarified scope |
 | Developer | Deliver, future Build | component: OpenSpec (+ Explain Code) | executable tasks, code, tests, PRs, review fixes |
 
@@ -75,7 +75,7 @@ For local platform query and alignment validation, use
 | Phase | Primary owner | Core support | Main outcome |
 | --- | --- | --- | --- |
 | Platform | Architect | Team Lead, Product | shared context and durable rules |
-| Route | Team Lead | Product, Architect | routed change package and next artifact |
+| Assess | Team Lead | Product, Architect | routed change package and next artifact |
 | Specify | Product | Team Lead, Architect, Developer | clear and testable spec package |
 | Plan | Architect | Team Lead, Product, Developer | implementation-ready design and tasks |
 | Deliver | Team Lead | Developer, Architect, Product | reviewable PRs, verified change, deploy, archive |
@@ -99,7 +99,7 @@ For local platform query and alignment validation, use
 Use `Explain Code` when a role needs to explain:
 
 - current platform structure during `Platform`
-- existing code paths or blast radius during `Route`
+- existing code paths or blast radius during `Assess`
 - current vs expected behavior during `Specify`
 - architecture and interfaces during `Plan`
 - PR changes and implementation details during `Deliver`
@@ -126,11 +126,16 @@ Primary owner: `Architect`
 
 Goal:
 - create shared context and durable rules for the platform
+- write the three ownership artifacts that make all future Assess steps deterministic
 
 Use this phase to:
 - document current constraints and conventions
-- define platform principles and guardrails
+- define platform principles and guardrails (including rules O-1, O-2, O-3)
 - establish role boundaries for later phases
+- write `ownership/component-ownership-<name>.md` for each component
+- write `ownership/dependency-map.md` with all cross-component relationships
+  classified as tier 1 / tier 2 / tier 3
+- seed `ownership/glossary.md` with shared terms and "what it is NOT" clauses
 
 #### Role instructions and prompt examples:
 
@@ -138,11 +143,15 @@ Use this phase to:
 - use `BMAD` first for brownfield context and role framing
 - use `OpenSpec` to encode durable context
 - use `Speckit` to turn principles into explicit rules
+- write the three ownership artifacts as the final Platform output
 - use `Explain Code` to explain existing architecture and constraints to teams
 
 ###### Prompt examples:
-- prompt: "Using the BMAD skill, review the current platform, identify its architectural constraints, and draft a shared platform baseline that teams can use during Platform, Route, and Specify."
+- prompt: "Using the BMAD skill, review the current platform, identify its architectural constraints, and draft a shared platform baseline that teams can use during Platform, Assess, and Specify."
 - prompt: "Using the BMAD skill, create a high-level architecture plan for the platform baseline, ensuring it aligns with our platform's principles and constraints."
+- prompt: "Write the ownership boundary file for [component name]. List what it owns, what it does NOT own, which contracts it publishes, and which contracts it consumes."
+- prompt: "Write the platform dependency map. For each cross-component relationship, classify it as tier 1 (must_change_together), tier 2 (watch_for_breakage), or tier 3 (adapts_independently)."
+- prompt: "Seed the shared glossary with terms from the platform baseline and brownfield review. For each term, add a plain definition and a 'what it is NOT' clause."
 - prompt: "Using the explain-code skill, explain the current platform architecture with an analogy, an ASCII diagram, a step-by-step walkthrough, and one constraint teams often miss."
 
 ##### `Team Lead`
@@ -178,8 +187,11 @@ Exit output:
 - current-state snapshot
 - gap register
 - draft platform baseline
+- `ownership/component-ownership-<name>.md` for each component
+- `ownership/dependency-map.md` with tier classification
+- `ownership/glossary.md` seeded with shared terms
 
-### Route
+### Assess
 
 Primary owner: `Team Lead`
 
@@ -189,19 +201,24 @@ Goal:
 Use this phase to:
 - assess size and impact
 - choose the smallest safe path
+- confirm component ownership from `ownership/component-ownership-<name>.md`
+  before opening any JIRA epic (rule O-1)
+- read `ownership/dependency-map.md` and record impact tiers in `platform-ref.yaml`
 - identify the next artifact and owner
 
 #### Role instructions and prompt examples:
 
 ##### `Team Lead`
 - use `BMAD` first for routing and handoff discipline
-- use `OpenSpec` to open and frame the change package
+- read `ownership/component-ownership-<name>.md` to confirm the correct owner
+- read `ownership/dependency-map.md` to classify impact tiers before opening JIRA epics
+- use `OpenSpec` to open and frame the change package with ownership and impact fields
 - use `Speckit` only when ambiguity blocks safe routing
 - use `Explain Code` to show the current flow when routing depends on code impact
 
 ###### Prompt examples:
 - prompt: "Using the BMAD and OpenSpec skills, route this request by size and impact, open the change package, and identify the next artifact and owner."
-- prompt: "Using the OpenSpec skill, break down the feature into specific tasks and create a roadmap for the development team, ensuring that all tasks are clearly defined and traceable to the specifications."
+- prompt: "Read ownership/component-ownership-<name>.md and confirm which component owns this request. Then read ownership/dependency-map.md and populate the impact tier fields in platform-ref.yaml."
 - prompt: "Using the explain-code skill, explain the current code path and blast radius with an analogy, an ASCII diagram, a walkthrough, and one routing risk."
 
 ##### `Product`
@@ -244,20 +261,23 @@ Goal:
 - produce a clear, testable, and reviewable spec package
 
 Use this phase to:
-- define behavior, scope, and acceptance outcomes
+- read `ownership/glossary.md` before writing `proposal.md` (rule O-2)
+- define behavior, scope, and acceptance outcomes using only glossary terms
 - clarify ambiguity before planning
 - confirm readiness for architecture and task planning
+- record `alignment_notes.glossary_terms_used` in `platform-ref.yaml`
 
 #### Role instructions and prompt examples:
 
 ##### `Product`
-- use `OpenSpec` first for proposal and delta specs
+- read `ownership/glossary.md` first; add any missing terms before writing
+- use `OpenSpec` for proposal and delta specs
 - use `OpenSpec` only inside the component repo
 - use `Explain Code` to compare current behavior vs proposed behavior
 
 ###### Prompt examples:
+- prompt: "Read ownership/glossary.md and confirm all terms in the proposal goals and acceptance criteria are defined. Add any missing terms before writing."
 - prompt: "Using the OpenSpec skill, define the user stories and acceptance criteria for the new feature, ensuring that they are aligned with the business goals and user needs."
-- prompt: "Using the OpenSpec skill, review the user stories and acceptance criteria with the development team, providing feedback and ensuring that they are being met throughout the development process."
 - prompt: "Using the explain-code skill, explain the current behavior with an analogy, an ASCII diagram, a walkthrough, and one mismatch the new specification must correct."
 
 ##### `Team Lead`
@@ -302,6 +322,9 @@ Goal:
 - turn the approved spec into an implementation-ready design and task plan
 
 Use this phase to:
+- read `platform-ref.yaml` impact tiers before designing
+- tier 1 `must_change_together` → hard constraints in `design.md`
+- tier 2 `watch_for_breakage` → rollout risks in `design.md`
 - define architecture and technical decisions
 - create ordered tasks and delivery slices
 - prepare verification and PR strategy
@@ -309,11 +332,14 @@ Use this phase to:
 #### Role instructions and prompt examples:
 
 ##### `Architect`
+- read `platform-ref.yaml` impact tiers first; tier 1 entries become named
+  coordination requirements in `design.md`; tier 2 entries become rollout risks
 - use `OpenSpec` for `design.md` and `tasks.md`
 - use `OpenSpec` only inside the component repo
 - use `Explain Code` to teach the planned architecture and affected code paths
 
 ###### Prompt examples:
+- prompt: "Read platform-ref.yaml impact tiers. For each tier 1 entry, add a named coordination requirement to design.md. For each tier 2 entry, add a rollout risk note."
 - prompt: "Using the OpenSpec skill, create the component `design.md` for the new feature, ensuring it aligns with the approved platform refs, shared contracts, and local repository boundaries."
 - prompt: "Using the OpenSpec skill, review the component plan and confirm that the design and tasks stay aligned with the approved platform handoff."
 - prompt: "Using the explain-code skill, explain the planned architecture path with an analogy, an ASCII diagram, a walkthrough, and one implementation gotcha."
@@ -359,17 +385,18 @@ Goal:
 
 Use this phase to:
 - implement slices
-- create PRs
+- create PRs that note tier 1/2 dependency verification
 - run review and verification
-- deploy and archive the change
+- coordinate deploy timing for tier 1 dependent components
+- archive and flag any ownership or tier changes for platform repo update
 
 Internal flow:
 - Build
-- Create PR
+- Create PR (with tier 1/2 verification notes)
 - Review PR
 - Verify
-- Deploy
-- Archive
+- Deploy (all tier 1 components ready)
+- Archive (flag ownership/tier changes if any)
 
 #### Role instructions and prompt examples:
 
@@ -413,11 +440,12 @@ Internal flow:
 
 Exit output:
 - implemented slices
-- reviewable PRs
+- reviewable PRs with tier 1/2 verification notes
 - resolved review feedback
 - verification evidence
-- deploy decision
+- deploy decision with tier 1 coordination confirmed
 - archive-ready change package
+- archive note if ownership boundaries or dependency tiers changed
 
 ## Agent files
 

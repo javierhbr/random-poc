@@ -19,7 +19,7 @@ The unified skill treats agents as helpers to phase owners.
 Default phase ownership:
 
 - Platform -> Architect
-- Route -> Team Lead
+- Assess -> Team Lead
 - Specify -> Product
 - Plan -> Architect
 - Deliver -> Team Lead

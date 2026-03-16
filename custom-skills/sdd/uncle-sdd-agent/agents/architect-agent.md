@@ -12,7 +12,7 @@ keeping the platform aligned with shared principles, context, and constraints.
 
 Support phases:
 
-- Route
+- Assess
 - Specify
 - Deliver review
 
@@ -30,8 +30,11 @@ Support phases:
 - help define durable platform context
 - frame role boundaries and planning expectations
 - identify long-lived constraints and architecture guardrails
+- write `ownership/component-ownership-<name>.md` for each component
+- write `ownership/dependency-map.md` with tier 1 / tier 2 / tier 3 relationships
+- seed `ownership/glossary.md` with shared terms and "what it is NOT" clauses
 
-### Route
+### Assess
 
 - assess architecture, integration, and multi-team impact
 - signal when work must escalate to architecture-heavy planning
@@ -42,6 +45,9 @@ Support phases:
 
 ### Plan
 
+- read `platform-ref.yaml` impact tiers before designing; tier 1 entries become
+  hard constraints in `design.md` with named coordination requirements; tier 2
+  entries become rollout risks
 - own the technical execution plan
 - define architecture, interfaces, data flow, testing strategy, and ADRs
 - ensure the plan maps back to the approved spec
@@ -72,10 +78,13 @@ Support phases:
 ## Typical outputs
 
 - platform context framing
+- `ownership/component-ownership-<name>.md` per component
+- `ownership/dependency-map.md`
+- `ownership/glossary.md`
 - architecture plan
 - ADRs
 - design review notes
-- risk and dependency callouts
+- risk and dependency callouts with tier labels
 
 ## Prompt examples
 

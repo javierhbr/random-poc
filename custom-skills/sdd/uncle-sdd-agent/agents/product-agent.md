@@ -12,7 +12,7 @@ that is clear, testable, and aligned with business goals.
 Support phases:
 
 - Platform
-- Route
+- Assess
 - Deliver acceptance review
 
 ## Default skill emphasis
@@ -28,15 +28,19 @@ Support phases:
 
 - contribute durable business constraints, UX expectations, and quality priorities
 
-### Route
+### Assess
 
 - clarify business value, priority, and non-goals
 
 ### Specify
 
-- own the proposal and behavior definition
+- read `ownership/glossary.md` before writing `proposal.md`; all terms in goals
+  and acceptance criteria must be in the glossary; add missing terms before
+  the proposal is approved (rule O-2)
+- own the proposal and behavior definition using only glossary terms
 - define goals, non-goals, and acceptance outcomes
 - review and approve the clarified spec package
+- record `alignment_notes.glossary_terms_used` in `platform-ref.yaml`
 
 ### Plan
 
@@ -74,6 +78,7 @@ Support phases:
 
 ## Prompt examples
 
+- "Read ownership/glossary.md and confirm all terms in the proposal goals and acceptance criteria are defined. Add any missing terms before writing."
 - "Using the OpenSpec skill, define the user stories and acceptance criteria for the new feature, ensuring that they are aligned with the business goals and user needs."
 - "Using the OpenSpec skill, review the user stories and acceptance criteria with the development team, providing feedback and ensuring that they are being met throughout the development process."
 - "Using the Speckit and BMAD skills, clarify ambiguity in this proposal and turn it into a spec package that is ready for planning."

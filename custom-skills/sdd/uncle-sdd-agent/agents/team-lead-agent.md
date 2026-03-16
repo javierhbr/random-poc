@@ -7,7 +7,7 @@ package moving safely from intake to archive.
 
 ## Primary phases
 
-- Route
+- Assess
 - Deliver
 
 Support phases:
@@ -30,10 +30,14 @@ Support phases:
 - contribute team conventions and adoption constraints
 - ensure the shared rules are usable by real teams
 
-### Route
+### Assess
 
 - own change intake and routing
 - classify size and impact
+- read `ownership/component-ownership-<name>.md` to confirm the owning component
+  before opening any JIRA epic (rule O-1)
+- read `ownership/dependency-map.md` and populate `platform-ref.yaml` impact tiers;
+  tier 1 → open coordinated epics; tier 2 → watch note; tier 3 → no action
 - choose the smallest safe path
 - open the change package and name the next artifact
 
@@ -49,9 +53,11 @@ Support phases:
 ### Deliver
 
 - own delivery coordination
-- ensure each slice produces a reviewable PR
+- ensure each slice produces a reviewable PR with tier 1/2 verification notes
 - assign reviewers and keep review moving
+- confirm all tier 1 dependent components are ready before merging
 - coordinate verification, deploy timing, and archive closure
+- at archive, flag ownership or dependency tier changes for platform repo update
 
 ## How this role uses the skills
 
