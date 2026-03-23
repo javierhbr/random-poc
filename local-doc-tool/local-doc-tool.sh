@@ -475,7 +475,7 @@ cmd_search() {
   [[ -n "$repo_filter" ]] && where_clause="${where_clause} AND s.repo = '${repo_filter//\'/\'\'}'"
 
   local results
-  results="$(sql "SELECT s.repo, s.project || '/' || s.name, s.title, COALESCE(NULLIF(s.tags, ''), '-'), s.ext FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE ${where_clause} ORDER BY f.rank LIMIT 20;" 2>/dev/null)" || true
+  results="$(sql "SELECT s.repo, s.project || '/' || s.name, s.title, COALESCE(NULLIF(s.tags, ''), '-'), s.ext, s.fullpath FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE ${where_clause} ORDER BY f.rank LIMIT 20;" 2>/dev/null)" || true
 
   if [[ -z "$results" ]]; then
     echo "No specs found for: ${query}"
@@ -492,10 +492,11 @@ cmd_search() {
   echo ""
 
   local i=1
-  while IFS='|' read -r repo path title tags ext; do
+  while IFS='|' read -r repo path title tags ext fullpath; do
     printf "  %d. [%s] %s  (.%s)\n" "$i" "$repo" "$path" "$ext"
     printf "     %s\n" "$title"
     [[ "$tags" != "-" ]] && printf "     tags: %s\n" "$tags"
+    printf "     %s\n" "$fullpath"
     echo ""
     i=$((i + 1))
   done <<< "$results"

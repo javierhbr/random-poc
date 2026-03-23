@@ -154,3 +154,30 @@ How the components teams will interact with the platform specification to ensure
 
 
 Example of the 3 diffrent entry points for changes from platform initiative, product requirement, or component/team proposal. and bug fix, and how the agents and skills will help to identify the right entry point, gather the necessary context, and create the appropriate specifications and plans for each type of change. For example, show how a Product requirement would trigger the Product role to use the OpenSpec skill to define user stories and acceptance criteria, while a component proposal might trigger the Team Lead to use the BMAD skill to assess architectural impact and then use the OpenSpec skill to create a component spec. Provide specific prompts for each type of change and role interaction.
+
+
+---
+
+imclide images and pdf in the scanning load with the followin rules:
+- if an image or pdf are identified, to process it must be an identical .md file with the same name, and the content of the .md file should be a description of the image or pdf. The .md file should also include any relevant information that can help the agents understand the content of the image or pdf and how to use it in their tasks. If the .md file is not present or does not provide sufficient information, the image or pdf will be ignored in the processing. and show a warning message to the user indicating that the image or pdf was not processed due to missing or insufficient metadata. This approach ensures that all visual and document-based information is properly contextualized and can be effectively utilized by the agents in their workflows.
+- for those images and pdfs that are processed, the response must include a reference to the image or pdf in the path result so the AI agent can process the non .md files if needed.
+
+
+Files  scanned:
+- custom-skills/sdd/unified-sdd-methodology/team-proposal.md
+- custom-skills/sdd/unified-sdd-methodology/team-proposal.pdf
+- custom-skills/sdd/unified-sdd-methodology/iteration-1-playbook.md
+- custom-skills/sdd/unified-sdd-methodology/iteration-1-playbook.jpg
+- custom-skills/sdd/bmad-codex-skill/README.md
+- custom-skills/sdd/bmad-codex-skill/README.png
+- custom-skills/sdd/openspec-codex-skill/no_md_file.png
+
+
+Results of the loading and scanning process:
+- custom-skills/sdd/unified-sdd-methodology/team-proposal.pdf is detected as a PDF file,  the .md custom-skills/sdd/unified-sdd-methodology/team-proposal.pdf file is present, so the .md file it's proccessed but the path loaded will be the .pdf  files. 
+
+- custom-skills/sdd/unified-sdd-methodology/iteration-1-playbook.jpg is detected as an image file, the .md custom-skills/sdd/unified-sdd-methodology/iteration-1-playbook.md file is present, so the .md file it's proccessed but the path loaded will be the .jpg  files.
+
+- custom-skills/sdd/bmad-codex-skill/README.png is detected as an image file, the .md custom-skills/sdd/bmad-codex-skill/README.md file is present, so the .md file it's proccessed but the path loaded will be the .png  files.
+
+- custom-skills/sdd/openspec-codex-skill/no_md_file.png is detected as an image file, but the corresponding .md file is not present, so the image file is ignored in the processing. A warning message is generated indicating that the image was not processed due to missing metadata.

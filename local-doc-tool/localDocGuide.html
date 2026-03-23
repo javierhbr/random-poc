@@ -150,12 +150,14 @@
                     <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold flex items-center justify-center shrink-0">1</div>
                     <h3 class="text-xl font-semibold">Install the tool</h3>
                 </div>
-                <div class="bg-slate-900 p-4 relative group">
-                    <button onclick="copyCode(this)" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded transition" title="Copy code">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                    </button>
-                    <pre class="text-slate-300 overflow-x-auto text-sm"><code>cp local-doc-tool.sh /usr/local/bin/local-doc
+                <div class="p-6">
+                    <div class="bg-slate-800 p-4 rounded-xl relative group mb-4">
+                        <button onclick="copyCode(this)" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 p-2 rounded transition" title="Copy code">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <pre class="text-blue-300 overflow-x-auto text-sm"><code>cp local-doc-tool.sh /usr/local/bin/local-doc
 chmod +x /usr/local/bin/local-doc</code></pre>
+                    </div>
                 </div>
                 <div class="p-4 bg-slate-50 text-sm text-slate-600 border-t border-slate-100">
                     <i data-lucide="info" class="w-4 h-4 inline text-blue-500 mr-1"></i> Works on Mac and Linux automatically. No extra downloads needed!
@@ -170,11 +172,11 @@ chmod +x /usr/local/bin/local-doc</code></pre>
                 </div>
                 <div class="p-6">
                     <p class="mb-4 text-slate-600">Add the folders on your computer that contain your specs or documents. Give each one a nickname (like "product" or "platform").</p>
-                    <div class="bg-slate-900 p-4 rounded-xl relative group mb-4">
-                        <button onclick="copyCode(this)" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded transition">
+                    <div class="bg-slate-800 p-4 rounded-xl relative group mb-4">
+                        <button onclick="copyCode(this)" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 p-2 rounded transition">
                             <i data-lucide="copy" class="w-4 h-4"></i>
                         </button>
-                        <pre class="text-slate-300 overflow-x-auto text-sm"><code># Example: local-doc repo add [folder-path] [nickname]
+                        <pre class="text-blue-300 overflow-x-auto text-sm"><code># Example: local-doc repo add [folder-path] [nickname]
 local-doc repo add ./product-specs product
 local-doc repo add ./platform-docs platform</code></pre>
                     </div>
@@ -205,13 +207,13 @@ local-doc repo add ./platform-docs platform</code></pre>
                     <!-- Basic Search -->
                     <div id="tab-search" class="tab-content active">
                         <p class="text-slate-600 mb-4">Find documents containing a specific word, even if it's buried deep inside the file text.</p>
-                        <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
+                        <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
                             <div class="text-blue-400 mb-2">$ local-doc search refund</div>
-                            <div class="text-slate-300 mb-2">Results for "refund":</div>
-                            <div class="text-slate-300">
-                                &nbsp;&nbsp;1. <span class="text-emerald-400">[product]</span> payments/refund <span class="text-slate-500">(.md)</span><br>
+                            <div class="text-slate-200 mb-2">Results for "refund":</div>
+                            <div class="text-slate-200">
+                                &nbsp;&nbsp;1. <span class="text-emerald-400">[product]</span> payments/refund <span class="text-slate-400">(.md)</span><br>
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refund flow<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">tags: billing, refund, customer, payments</span>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-400">tags: billing, refund, customer, payments</span>
                             </div>
                         </div>
                     </div>
@@ -220,16 +222,16 @@ local-doc repo add ./platform-docs platform</code></pre>
                     <div id="tab-multi" class="tab-content">
                         <p class="text-slate-600 mb-4">Use OR to find either word, NOT to exclude words, or filter by a specific project nickname.</p>
                         <div class="space-y-4">
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># Search for A or B</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># Search for A or B</div>
                                 <div class="text-blue-400 mb-2">$ local-doc search "refund OR authentication"</div>
                             </div>
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># Exclude words</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># Exclude words</div>
                                 <div class="text-blue-400 mb-2">$ local-doc search "billing NOT fraud"</div>
                             </div>
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># Only look inside the 'product' folder</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># Only look inside the 'product' folder</div>
                                 <div class="text-blue-400 mb-2">$ local-doc search "billing" product</div>
                             </div>
                         </div>
@@ -239,20 +241,20 @@ local-doc repo add ./platform-docs platform</code></pre>
                     <div id="tab-browse" class="tab-content">
                         <p class="text-slate-600 mb-4">Not sure what you're looking for? You can easily list out everything you have.</p>
                         <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># See all documents</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># See all documents</div>
                                 <div class="text-blue-400 mb-2">$ local-doc list</div>
                             </div>
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># See project groups</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># See project groups</div>
                                 <div class="text-blue-400 mb-2">$ local-doc projects</div>
                             </div>
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># See all tags</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># See all tags</div>
                                 <div class="text-blue-400 mb-2">$ local-doc tags</div>
                             </div>
-                            <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                                <div class="text-slate-500 mb-1"># See stats (how many files)</div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-1"># See stats (how many files)</div>
                                 <div class="text-blue-400 mb-2">$ local-doc stats</div>
                             </div>
                         </div>
@@ -261,10 +263,10 @@ local-doc repo add ./platform-docs platform</code></pre>
                     <!-- Reading Docs -->
                     <div id="tab-read" class="tab-content">
                         <p class="text-slate-600 mb-4">Read the full content of a document right inside your terminal.</p>
-                        <div class="bg-slate-900 rounded-xl p-5 font-mono text-sm shadow-inner">
-                            <div class="text-slate-500 mb-1"># Print the full document named 'refund'</div>
+                        <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                            <div class="text-slate-400 mb-1"># Print the full document named 'refund'</div>
                             <div class="text-blue-400 mb-4">$ local-doc read refund</div>
-                            <div class="text-slate-300 opacity-80 border-l-2 border-slate-600 pl-4">
+                            <div class="text-slate-200 opacity-90 border-l-2 border-slate-600 pl-4">
                                 # Refund flow<br><br>
                                 Process for managing customer refunds...<br>
                                 Step 1: Verify eligibility...
@@ -283,7 +285,7 @@ local-doc repo add ./platform-docs platform</code></pre>
             <div class="grid lg:grid-cols-2">
                 <!-- Left Column: The Workflow -->
                 <div class="p-8 md:p-12 text-slate-200 border-b lg:border-b-0 lg:border-r border-slate-700 bg-slate-800">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-indigo-900/50 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-700/50">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-indigo-900/40 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-700/50">
                         <i data-lucide="bot" class="w-4 h-4"></i> Claude Code Skill
                     </div>
                     <h2 class="text-3xl font-bold mb-4 text-white">Turn Claude into a domain expert</h2>
@@ -297,34 +299,34 @@ local-doc repo add ./platform-docs platform</code></pre>
                         <!-- Step 1 -->
                         <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-800 bg-indigo-500 text-white font-bold shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">1</div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-900/40 border border-slate-700/50 shadow-sm p-4 rounded-xl">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-700/50 border border-slate-600 shadow-sm p-4 rounded-xl">
                                 <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-indigo-400"></i> Search</h4>
-                                <p class="text-sm text-slate-400">Claude extracts domain nouns from your question and searches your index (e.g., <code class="text-xs text-indigo-300 bg-slate-900 border border-slate-700 px-1 rounded">local-doc search "payment eligibility"</code>).</p>
+                                <p class="text-sm text-slate-300">Claude extracts domain nouns from your question and searches your index (e.g., <code class="text-xs text-indigo-200 bg-slate-800 border border-slate-600 px-1 rounded">local-doc search "payment eligibility"</code>).</p>
                             </div>
                         </div>
 
                         <!-- Step 2 -->
                         <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-800 bg-purple-500 text-white font-bold shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">2</div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-900/40 border border-slate-700/50 shadow-sm p-4 rounded-xl">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-700/50 border border-slate-600 shadow-sm p-4 rounded-xl">
                                 <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4 text-purple-400"></i> Read</h4>
-                                <p class="text-sm text-slate-400">Claude automatically reads the top 2-4 matching specs to gather exact context, avoiding hallucination.</p>
+                                <p class="text-sm text-slate-300">Claude automatically reads the top 2-4 matching specs to gather exact context, avoiding hallucination.</p>
                             </div>
                         </div>
 
                         <!-- Step 3 -->
                         <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                             <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-800 bg-emerald-500 text-white font-bold shadow-md shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">3</div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-900/40 border border-slate-700/50 shadow-sm p-4 rounded-xl">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-slate-700/50 border border-slate-600 shadow-sm p-4 rounded-xl">
                                 <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-2"><i data-lucide="brain-circuit" class="w-4 h-4 text-emerald-400"></i> Reason</h4>
-                                <p class="text-sm text-slate-400">Claude synthesizes an answer that <strong>cites sources</strong>, connects dots across multiple specs, and explicitly <strong>flags gaps</strong> in your documentation.</p>
+                                <p class="text-sm text-slate-300">Claude synthesizes an answer that <strong>cites sources</strong>, connects dots across multiple specs, and explicitly <strong>flags gaps</strong> in your documentation.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-slate-700">
                         <h4 class="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wider">Install the skill:</h4>
-                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-400 shadow-inner border border-slate-700">
+                        <div class="bg-slate-700 rounded-lg p-4 font-mono text-sm text-slate-300 shadow-inner border border-slate-600">
                             <div>mkdir -p .claude/skills</div>
                             <div>cp -r /path/to/local-doc/skills/local-doc .claude/skills/</div>
                         </div>
@@ -339,7 +341,7 @@ local-doc repo add ./platform-docs platform</code></pre>
                     
                     <div class="flex-1 space-y-6 font-mono text-sm relative z-10">
                         <!-- User Prompt -->
-                        <div class="bg-indigo-900/30 p-5 rounded-xl border border-indigo-700/50 text-indigo-100 shadow-sm">
+                        <div class="bg-indigo-800/40 p-5 rounded-xl border border-indigo-600/40 text-indigo-100 shadow-sm">
                             <div class="flex items-center gap-2 mb-3 text-indigo-300 text-xs font-bold uppercase tracking-widest">
                                 <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white"><i data-lucide="user" class="w-3 h-3"></i></div>
                                 You
@@ -354,46 +356,46 @@ local-doc repo add ./platform-docs platform</code></pre>
                             </div>
                             
                             <div>
-                                <div class="text-indigo-300 text-xs bg-slate-900 px-3 py-2 rounded-md inline-block border border-slate-700 shadow-sm mb-2">
+                                <div class="text-indigo-200 text-xs bg-slate-700 px-3 py-2 rounded-md inline-block border border-slate-600 shadow-sm mb-2">
                                     > local-doc search "payment eligibility" product
                                 </div>
-                                <div class="text-[10px] sm:text-[11px] text-slate-400 bg-slate-900/60 p-3 rounded-lg border border-slate-700/50 shadow-inner whitespace-pre font-mono leading-relaxed ml-2 border-l-2 border-l-indigo-500/50 overflow-x-auto">Results for "payment eligibility":
+                                <div class="text-[10px] sm:text-[11px] text-slate-300 bg-slate-800/80 p-3 rounded-lg border border-slate-600 shadow-inner whitespace-pre font-mono leading-relaxed ml-2 border-l-2 border-l-indigo-400/70 overflow-x-auto">Results for "payment eligibility":
 (filtered to repo: product)
 
-  1. <span class="text-emerald-400">[product]</span> payments/refund  <span class="text-slate-500">(.md)</span>
+  1. <span class="text-emerald-400">[product]</span> payments/refund  <span class="text-slate-400">(.md)</span>
      Refund flow
-     <span class="text-slate-500">tags: billing, refund, customer, payments</span>
+     <span class="text-slate-400">tags: billing, refund, customer, payments</span>
 
-  2. <span class="text-emerald-400">[product]</span> payments/chargeback  <span class="text-slate-500">(.md)</span>
+  2. <span class="text-emerald-400">[product]</span> payments/chargeback  <span class="text-slate-400">(.md)</span>
      Chargeback handling
-     <span class="text-slate-500">tags: disputes, chargeback, fraud</span></div>
+     <span class="text-slate-400">tags: disputes, chargeback, fraud</span></div>
                             </div>
                             
-                            <div class="text-purple-300 text-xs bg-slate-900 px-3 py-2 rounded-md inline-block border border-slate-700 shadow-sm">
+                            <div class="text-purple-200 text-xs bg-slate-700 px-3 py-2 rounded-md inline-block border border-slate-600 shadow-sm">
                                 > local-doc read refund
                             </div>
                             <br>
-                            <div class="text-purple-300 text-xs bg-slate-900 px-3 py-2 rounded-md inline-block border border-slate-700 shadow-sm">
+                            <div class="text-purple-200 text-xs bg-slate-700 px-3 py-2 rounded-md inline-block border border-slate-600 shadow-sm">
                                 > local-doc read chargeback
                             </div>
                         </div>
 
                         <!-- Claude's Answer -->
-                        <div class="bg-slate-700/30 p-5 rounded-xl border border-slate-600 text-slate-300 leading-relaxed text-sm shadow-sm">
+                        <div class="bg-slate-700/60 p-5 rounded-xl border border-slate-500/50 text-slate-200 leading-relaxed text-sm shadow-sm">
                             <div class="flex items-center gap-2 mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest">
                                 <div class="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-white"><i data-lucide="bot" class="w-3 h-3"></i></div>
                                 Claude
                             </div>
                             <p class="mb-3">Based on the refund flow spec (<span class="text-indigo-300">payments/refund.md</span>), the current eligibility rules are: within 30 days, item not used, original payment method available.</p>
                             
-                            <p class="mb-2 text-slate-200 font-semibold">Adding a new rule would impact:</p>
-                            <ul class="list-disc pl-5 mb-4 space-y-1 text-slate-400 marker:text-slate-500">
+                            <p class="mb-2 text-white font-semibold">Adding a new rule would impact:</p>
+                            <ul class="list-disc pl-5 mb-4 space-y-1 text-slate-300 marker:text-slate-400">
                                 <li>The support team's review process (step 2 in the refund flow).</li>
                                 <li>The <span class="text-indigo-300">payments/chargeback.md</span> spec — chargebacks failing the new rule need updated evidence packages.</li>
                             </ul>
 
-                            <div class="bg-amber-900/30 text-amber-200/90 p-3 rounded-lg border border-amber-700/50 text-xs flex gap-3 items-start">
-                                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"></i>
+                            <div class="bg-amber-900/40 text-amber-100 p-3 rounded-lg border border-amber-700/60 text-xs flex gap-3 items-start">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5 text-amber-400"></i>
                                 <span class="leading-relaxed"><strong>Gap identified:</strong> The specs don't currently cover how eligibility changes are rolled out or communicated to customers. This may need a new spec.</span>
                             </div>
                         </div>
@@ -504,7 +506,7 @@ local-doc repo add ./platform-docs platform</code></pre>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
+    <footer class="bg-slate-800 text-slate-400 py-12 text-center border-t border-slate-700">
         <div class="max-w-4xl mx-auto px-4 flex flex-col items-center">
             <div class="flex items-center gap-2 mb-4 text-slate-300">
                 <i data-lucide="book-open-check" class="w-5 h-5 text-brand-500"></i>
