@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -7,692 +7,765 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "outline": "#6d758c",
-          "surface-dim": "#060e20",
-          "surface-container-highest": "#192540",
-          "tertiary": "#c4ffcd",
-          "on-tertiary-fixed-variant": "#006a34",
-          "on-secondary-fixed-variant": "#46556b",
-          "surface-container-high": "#141f38",
-          "secondary-fixed-dim": "#bacae4",
-          "inverse-on-surface": "#4d556b",
-          "tertiary-dim": "#5def8f",
-          "on-error": "#490006",
-          "primary-fixed-dim": "#05a9e3",
-          "on-tertiary": "#006833",
-          "on-primary-container": "#002b3d",
-          "error-container": "#9f0519",
-          "secondary": "#c8d8f3",
-          "on-primary-fixed": "#00121d",
-          "on-secondary": "#3c4c61",
-          "secondary-fixed": "#c8d8f3",
-          "on-secondary-container": "#c1d1eb",
-          "on-surface": "#dee5ff",
-          "background": "#060e20",
-          "on-tertiary-fixed": "#004a22",
-          "inverse-primary": "#00668b",
-          "on-primary": "#00374d",
-          "surface-container": "#0f1930",
-          "primary-dim": "#05a9e3",
-          "surface-container-lowest": "#000000",
-          "inverse-surface": "#faf8ff",
-          "tertiary-fixed": "#6dfe9c",
-          "secondary-container": "#38485d",
-          "secondary-dim": "#bacae4",
-          "primary": "#3bbffa",
-          "error": "#ff716c",
-          "on-background": "#dee5ff",
-          "surface-tint": "#3bbffa",
-          "surface-bright": "#1f2b49",
-          "primary-container": "#22b1ec",
-          "primary-fixed": "#2db7f2",
-          "on-primary-fixed-variant": "#003a50",
-          "surface": "#060e20",
-          "on-error-container": "#ffa8a3",
-          "tertiary-fixed-dim": "#5def8f",
-          "on-surface-variant": "#a3aac4",
-          "error-dim": "#d7383b",
-          "surface-variant": "#192540",
-          "outline-variant": "#40485d",
-          "surface-container-low": "#091328",
-          "on-tertiary-container": "#005f2e",
-          "on-secondary-fixed": "#29394e",
-          "tertiary-container": "#6dfe9c"
-        },
-        fontFamily: {
-          "headline": ["Space Grotesk"],
-          "body": ["Inter"],
-          "label": ["Space Grotesk"],
-          "mono": ["JetBrains Mono"]
-        },
-        borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
-      },
-    },
-  }
-</script>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #060e20; color: #dee5ff; }
-  html { scroll-behavior: smooth; }
-  .font-headline { font-family: 'Space Grotesk', sans-serif; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; }
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #40485d; border-radius: 10px; }
+  /* ── Palette ── */
+  :root {
+    --bg:        #f2ede6;   /* warm parchment */
+    --bg-alt:    #ebe5dc;   /* slightly deeper, for alternating sections */
+    --card:      #ede8e0;   /* card / panel background */
+    --card-deep: #e4ddd3;   /* deeper card, table header */
+    --border:    #ccc3b5;   /* borders */
+    --ink:       #1a1410;   /* main text */
+    --ink-muted: #6b5e50;   /* secondary text */
+    --blue:      #1565c0;   /* primary accent */
+    --blue-bg:   #e3edf8;   /* light blue fill */
+    --green:     #2e7d32;   /* success / secondary accent */
+    --green-bg:  #e8f5e9;   /* light green fill */
+    --code-bg:   #f8f4ef;   /* inline code / terminal bg */
+  }
+
+  html  { scroll-behavior: smooth; }
+  body  { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); margin: 0; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* material icons */
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .code-well { background-color: #000000; border-left: 2px solid #6dfe9c; }
-  /* Sidebar nav active state */
-  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: rgba(222,229,255,0.5); text-decoration: none; transition: all 0.15s ease; border-radius: 0.375rem; }
-  .nav-item:hover { color: #dee5ff; background: #0f1930; transform: translateX(4px); }
-  .nav-item.active { color: #3bbffa; background: #141f38; transform: none; }
+
+  /* nav items */
+  .nav-item {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.45rem 0.7rem; font-size: 0.85rem; font-weight: 500;
+    color: var(--ink-muted); text-decoration: none;
+    border-radius: 6px; transition: all 0.13s ease;
+  }
+  .nav-item:hover  { color: var(--ink); background: var(--card-deep); transform: translateX(3px); }
+  .nav-item.active { color: var(--blue); background: var(--blue-bg); }
+
+  /* code blocks */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--ink);
+    overflow-x: auto;
+  }
+  .code-block .cm  { color: var(--green); }   /* comment */
+  .code-block .kw  { color: var(--blue); }    /* keyword / command */
+  .code-block .str { color: var(--green); }   /* string value */
+  .code-block .key { color: var(--blue); }    /* JSON key */
+
+  /* terminal window */
+  .terminal {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .terminal-bar {
+    background: var(--card-deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-body { padding: 1.25rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.7; }
+
+  /* bento card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+  }
+
+  /* badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.25rem 0.75rem; border-radius: 99px;
+    font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  }
+  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #b3cef0; }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid #a5d6a7; }
+
+  /* section stripe */
+  .section-alt { background: var(--bg-alt); }
+
+  /* details / faq */
+  details summary { list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
 </style>
 </head>
-<body class="selection:bg-primary/30 selection:text-primary">
+<body>
 
-<!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
-<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 bg-[#0f1930]/60 backdrop-blur-md shadow-2xl shadow-black/50">
-  <div class="flex items-center gap-8">
-    <a href="#intro" class="text-xl font-bold text-[#dee5ff] tracking-tighter font-headline no-underline">local-doc</a>
-    <div class="hidden md:flex gap-6 items-center">
-      <a class="text-[#3bbffa] border-b-2 border-[#3bbffa] pb-1 font-headline font-bold tracking-tight" href="#intro">Docs</a>
-      <a class="text-[#dee5ff]/70 hover:text-[#dee5ff] transition-colors font-headline font-bold tracking-tight" href="#features">Features</a>
-      <a class="text-[#dee5ff]/70 hover:text-[#dee5ff] transition-colors font-headline font-bold tracking-tight" href="#claude-skill">Claude Skill</a>
+<!-- ══════════════ TOP NAV ══════════════ -->
+<nav style="position:fixed;top:0;width:100%;z-index:50;background:rgba(242,237,230,0.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);">
+<div style="margin-left:240px;max-width:1100px;display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1.5rem;">
+  <div style="display:flex;align-items:center;gap:2rem;">
+    <a href="#intro" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:-0.02em;">local-doc</a>
+    <div style="display:flex;gap:1.5rem;align-items:center;" class="hidden md:flex">
+      <a href="#intro"       style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:var(--blue);border-bottom:2px solid var(--blue);padding-bottom:2px;text-decoration:none;">Docs</a>
+      <a href="#features"    style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:var(--ink-muted);text-decoration:none;" onmouseover="this.style.color=`var(--ink)`" onmouseout="this.style.color=`var(--ink-muted)`">Features</a>
+      <a href="#claude-skill" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:var(--ink-muted);text-decoration:none;" onmouseover="this.style.color=`var(--ink)`" onmouseout="this.style.color=`var(--ink-muted)`">Claude Skill</a>
     </div>
   </div>
-  <div class="flex items-center gap-4">
-    <div class="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded text-sm text-on-surface-variant cursor-text">
-      <span class="material-symbols-outlined text-sm mr-2">search</span>
-      <span class="mr-4">Search specs...</span>
-      <span class="text-xs opacity-40 font-mono">⌘K</span>
-    </div>
-    <a href="#quick-start" class="material-symbols-outlined text-[#dee5ff]/70 hover:text-[#3bbffa] transition-colors" title="Quick Start">terminal</a>
-    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-headline font-bold px-4 py-1.5 rounded-sm scale-95 active:scale-90 transition-transform inline-block">GitHub</a>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <a href="#quick-start" class="material-symbols-outlined" style="color:var(--ink-muted);text-decoration:none;font-size:1.4rem;" title="Quick Start">terminal</a>
+    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" style="background:var(--blue);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.82rem;padding:0.4rem 1rem;border-radius:4px;text-decoration:none;">GitHub</a>
   </div>
+</div>
 </nav>
 
-<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
-<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 bg-[#091328] flex-col gap-1 px-4 z-40">
-  <div class="mb-6 px-2">
-    <h3 class="text-[#dee5ff] font-bold font-headline uppercase text-xs tracking-widest opacity-40">Documentation</h3>
-    <p class="text-[#3bbffa] text-[10px] font-mono mt-0.5">v1.2.0-stable</p>
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside id="sidebar" style="position:fixed;left:0;top:0;height:100vh;width:240px;padding-top:4.5rem;background:var(--bg-alt);border-right:1px solid var(--border);flex-direction:column;gap:0.25rem;padding-left:1rem;padding-right:1rem;z-index:40;display:none;" class="flex-col">
+  <div style="margin-bottom:1.25rem;padding:0 0.25rem;">
+    <p style="font-family:'Space Grotesk',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--ink-muted);opacity:0.6;margin:0 0 0.2rem;">Documentation</p>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--blue);margin:0;">v1.2.0-stable</p>
   </div>
-  <nav id="sidebar-nav" class="space-y-1">
-    <a href="#intro" data-section="intro" class="nav-item active">
-      <span class="material-symbols-outlined text-sm">info</span>Intro
-    </a>
-    <a href="#why" data-section="why" class="nav-item">
-      <span class="material-symbols-outlined text-sm">question_mark</span>Why
-    </a>
-    <a href="#install" data-section="install" class="nav-item">
-      <span class="material-symbols-outlined text-sm">download</span>Install
-    </a>
-    <a href="#quick-start" data-section="quick-start" class="nav-item">
-      <span class="material-symbols-outlined text-sm">bolt</span>Quick Start
-    </a>
-    <a href="#features" data-section="features" class="nav-item">
-      <span class="material-symbols-outlined text-sm">featured_play_list</span>Features
-    </a>
-    <a href="#claude-skill" data-section="claude-skill" class="nav-item">
-      <span class="material-symbols-outlined text-sm">auto_awesome</span>Claude Skill
-    </a>
-    <a href="#faq" data-section="faq" class="nav-item">
-      <span class="material-symbols-outlined text-sm">help_outline</span>FAQ
-    </a>
+  <nav id="sidebar-nav" style="display:flex;flex-direction:column;gap:2px;">
+    <a href="#intro"       data-section="intro"       class="nav-item active"><span class="material-symbols-outlined" style="font-size:1rem;">info</span>Intro</a>
+    <a href="#why"         data-section="why"         class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">question_mark</span>Why</a>
+    <a href="#install"     data-section="install"     class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">download</span>Install</a>
+    <a href="#quick-start" data-section="quick-start" class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">bolt</span>Quick Start</a>
+    <a href="#features"    data-section="features"    class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">featured_play_list</span>Features</a>
+    <a href="#usage"        data-section="usage"        class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">terminal</span>Usage</a>
+    <a href="#claude-skill" data-section="claude-skill" class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">auto_awesome</span>Claude Skill</a>
+    <a href="#faq"         data-section="faq"         class="nav-item"><span class="material-symbols-outlined" style="font-size:1rem;">help_outline</span>FAQ</a>
   </nav>
-  <div class="mt-auto px-2 pb-4">
-    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" class="block w-full text-center text-xs text-primary font-headline uppercase tracking-widest border border-primary/20 py-2 hover:bg-primary/5 transition-colors rounded-sm">View Source</a>
+  <div style="margin-top:auto;padding-bottom:1.5rem;">
+    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);border:1px solid var(--border);padding:0.5rem;border-radius:4px;text-decoration:none;background:transparent;" onmouseover="this.style.background=`var(--blue-bg)`" onmouseout="this.style.background=`transparent`">View Source</a>
   </div>
 </aside>
 
-<!-- ═══════════════════════ MAIN ═══════════════════════ -->
-<main class="lg:ml-64 pt-20 pb-12">
+<!-- ══════════════ MAIN ══════════════ -->
+<main style="padding-top:4rem;max-width:1100px;">
 
-  <!-- ─── HERO ─── -->
-  <section id="intro" class="px-6 md:px-12 py-16 md:py-24 max-w-6xl mx-auto">
-    <div class="flex flex-col gap-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1 bg-tertiary-container/10 border border-tertiary/20 rounded-full w-fit">
-        <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
-        <span class="text-tertiary text-xs font-mono font-medium">New Release: v1.2.0 stable is out</span>
-      </div>
-      <h1 class="text-5xl md:text-7xl font-headline font-bold tracking-tighter leading-[0.9] max-w-3xl">
-        Documentation for the <span class="text-primary italic">Offline-First</span> Engineer.
-      </h1>
-      <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
-        Fast, dependency-free spec registry built on Bash and SQLite. Instant access to your team's technical knowledge, even when the Wi-Fi isn't.
-      </p>
-      <!-- Install Command -->
-      <div class="mt-8 max-w-2xl group" id="install">
-        <div class="bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/20 shadow-2xl relative">
-          <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-t-md mb-1 border-b border-outline-variant/10">
-            <div class="flex gap-1.5">
-              <div class="w-3 h-3 rounded-full bg-red-500/30"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/30"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/30"></div>
-            </div>
-            <span class="text-[10px] font-mono opacity-40 ml-4">install-script.sh</span>
-          </div>
-          <div class="p-6 font-mono text-sm md:text-base flex justify-between items-center overflow-x-auto whitespace-nowrap">
-            <span class="text-[#dee5ff]"><span class="text-tertiary mr-2">$</span>cp local-doc-tool.sh /usr/local/bin/local-doc</span>
-            <button id="copy-btn" onclick="navigator.clipboard.writeText('cp local-doc-tool.sh /usr/local/bin/local-doc').then(()=>{const i=document.getElementById('copy-btn');i.textContent='check';setTimeout(()=>i.textContent='content_copy',1500)})" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">content_copy</button>
-          </div>
-          <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-primary/10 blur-3xl -z-10 group-hover:bg-primary/20 transition-colors"></div>
+  <!-- ── HERO ── -->
+  <section id="intro" style="padding:4rem 3rem 3rem;">
+    <span class="badge badge-green" style="margin-bottom:1.5rem;display:inline-flex;">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;"></span>
+      New Release: v1.2.0 stable is out
+    </span>
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2.4rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1;margin:0 0 1.25rem;max-width:700px;">
+      Documentation for the <span style="color:var(--blue);font-style:italic;">Offline-First</span> Engineer.
+    </h1>
+    <p style="font-size:1.1rem;color:var(--ink-muted);max-width:560px;line-height:1.7;margin:0 0 2.5rem;">
+      Fast, dependency-free spec registry built on Bash and SQLite. Instant access to your team's technical knowledge, even when the Wi-Fi isn't.
+    </p>
+    <!-- Install terminal -->
+    <div id="install" style="max-width:580px;position:relative;">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot" style="background:#f87171;"></span>
+          <span class="terminal-dot" style="background:#fbbf24;"></span>
+          <span class="terminal-dot" style="background:#4ade80;"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);opacity:0.6;margin-left:0.75rem;">install-script.sh</span>
+        </div>
+        <div class="terminal-body" style="display:flex;justify-content:space-between;align-items:center;">
+          <span><span style="color:var(--green);">$</span> cp local-doc-tool.sh /usr/local/bin/local-doc</span>
+          <button id="copy-btn" onclick="navigator.clipboard.writeText('cp local-doc-tool.sh /usr/local/bin/local-doc').then(()=>{const i=document.getElementById('copy-btn');i.textContent='check';setTimeout(()=>i.textContent='content_copy',1500)})" class="material-symbols-outlined" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:1.1rem;padding:0;">content_copy</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── WHY ─── -->
-  <section id="why" class="px-6 md:px-12 py-20 bg-primary/5">
-    <div class="max-w-6xl mx-auto">
-      <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full w-fit mb-8">
-        <span class="material-symbols-outlined text-primary text-sm">question_mark</span>
-        <span class="text-primary text-xs font-mono font-medium">Why local-doc?</span>
+  <!-- ── WHY ── -->
+  <section id="why" class="section-alt" style="padding:3.5rem 3rem;">
+    <span class="badge badge-blue" style="margin-bottom:1.5rem;">
+      <span class="material-symbols-outlined" style="font-size:0.85rem;">question_mark</span>
+      Why local-doc?
+    </span>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;max-width:900px;">
+      <div>
+        <span class="material-symbols-outlined" style="color:var(--blue);font-size:2rem;">wifi_off</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Works Offline</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Your team's knowledge lives locally. No cloud dependency, no outages, no latency spikes.</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="flex flex-col gap-4">
-          <span class="material-symbols-outlined text-primary text-3xl">wifi_off</span>
-          <h3 class="text-xl font-headline font-bold">Works Offline</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">Your team's knowledge lives locally. No cloud dependency, no outages, no latency spikes. Your docs are always there when you need them.</p>
-        </div>
-        <div class="flex flex-col gap-4">
-          <span class="material-symbols-outlined text-tertiary text-3xl">speed</span>
-          <h3 class="text-xl font-headline font-bold">Sub-30ms Search</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">SQLite FTS5 with optimized indexing delivers benchmark-crushing response times across 50,000+ entries. Search feels instant.</p>
-        </div>
-        <div class="flex flex-col gap-4">
-          <span class="material-symbols-outlined text-secondary text-3xl">settings_input_component</span>
-          <h3 class="text-xl font-headline font-bold">Zero Dependencies</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">Pure Bash and SQLite. No Node, no Python, no container. A single script that works on any Unix machine out of the box.</p>
-        </div>
+      <div>
+        <span class="material-symbols-outlined" style="color:var(--green);font-size:2rem;">speed</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Sub-30ms Search</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">SQLite FTS5 with optimized indexing delivers benchmark-crushing response times across 50,000+ entries.</p>
+      </div>
+      <div>
+        <span class="material-symbols-outlined" style="color:var(--ink-muted);font-size:2rem;">settings_input_component</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Zero Dependencies</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Pure Bash and SQLite. No Node, no Python, no container. One script, any Unix machine.</p>
       </div>
     </div>
   </section>
 
-  <!-- ─── FEATURES BENTO ─── -->
-  <section id="features" class="px-6 md:px-12 py-20 bg-surface-container-low">
-    <div class="max-w-6xl mx-auto">
-      <div class="mb-12">
-        <div class="inline-flex items-center gap-2 px-3 py-1 bg-tertiary-container/10 rounded-full mb-4">
-          <span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span>
-          <span class="text-[10px] font-mono font-bold text-tertiary-fixed uppercase tracking-wider">Core capabilities</span>
-        </div>
-        <h2 class="text-4xl font-headline font-bold tracking-tight text-on-surface mb-4">
-          Architectural <span class="text-primary italic">Intelligence</span>.
-        </h2>
-        <p class="text-lg text-on-surface-variant max-w-2xl font-light leading-relaxed">
-          local-doc isn't just a documentation generator; it's a technical ecosystem built to understand how engineers actually store knowledge.
-        </p>
-      </div>
+  <!-- ── FEATURES ── -->
+  <section id="features" style="padding:3.5rem 3rem;">
+    <span class="badge badge-green" style="margin-bottom:1rem;">Core capabilities</span>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;letter-spacing:-0.02em;margin:0 0 0.5rem;">Architectural <span style="color:var(--blue);font-style:italic;">Intelligence</span>.</h2>
+    <p style="color:var(--ink-muted);max-width:560px;line-height:1.65;margin:0 0 2.5rem;">local-doc isn't just a documentation generator; it's a technical ecosystem built to understand how engineers actually store knowledge.</p>
 
-      <!-- Bento grid row 1 -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
-        <div class="md:col-span-8 bg-surface-container p-8 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
+    <!-- Bento row 1 -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1rem;" class="grid-cols-1 md:grid-cols-[2fr_1fr]">
+      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <span class="material-symbols-outlined" style="color:var(--green);font-size:2.2rem;font-variation-settings:'FILL' 1;">speed</span>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;margin:0.5rem 0;">Fast Offline Search</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Benchmark-crushing 30ms response times across 50,000+ entries via optimized SQLite FTS5 indexing.</p>
+        </div>
+        <div style="display:flex;gap:1.5rem;padding-top:1.5rem;margin-top:1.5rem;border-top:1px solid var(--border);">
           <div>
-            <span class="material-symbols-outlined text-tertiary text-4xl mb-4" style="font-variation-settings: 'FILL' 1;">speed</span>
-            <h3 class="text-2xl font-headline font-bold mb-2">Fast Offline Search</h3>
-            <p class="text-on-surface-variant text-base">Benchmark-crushing 30ms response times across 50,000+ entries. Local-doc uses optimized SQLite FTS5 indexing for semantic-aware matching.</p>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--blue);">30ms</div>
+            <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Search Latency</div>
           </div>
-          <div class="mt-8 pt-8 border-t border-outline-variant/10 flex gap-4">
-            <div class="flex flex-col">
-              <span class="text-3xl font-bold font-mono text-primary">30ms</span>
-              <span class="text-[10px] uppercase tracking-widest opacity-40">Search Latency</span>
-            </div>
-            <div class="flex flex-col pl-6 border-l border-outline-variant/10">
-              <span class="text-3xl font-bold font-mono text-primary">0%</span>
-              <span class="text-[10px] uppercase tracking-widest opacity-40">Cloud Dependency</span>
-            </div>
-          </div>
-        </div>
-        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10 relative overflow-hidden group">
-          <span class="material-symbols-outlined text-primary text-4xl mb-4">settings_input_component</span>
-          <h3 class="text-2xl font-headline font-bold mb-2">Zero Deps</h3>
-          <p class="text-on-surface-variant text-sm">Runs on pure Bash and SQLite. No Node, no Python, no bloat. Just portable, high-performance binary tooling.</p>
-          <div class="absolute -right-8 -bottom-8 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span class="material-symbols-outlined text-[120px]">terminal</span>
+          <div style="border-left:1px solid var(--border);padding-left:1.5rem;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--blue);">0%</div>
+            <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Cloud Dependency</div>
           </div>
         </div>
       </div>
-
-      <!-- Bento grid row 2 -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
-        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
-          <span class="material-symbols-outlined text-primary text-4xl mb-4">sync</span>
-          <h3 class="text-2xl font-headline font-bold mb-2">Git Smart</h3>
-          <p class="text-on-surface-variant text-sm">Incremental updates that only pull what changed. Git-based diffing ensures your local cache is always in sync with minimal data transfer.</p>
-        </div>
-        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
-          <span class="material-symbols-outlined text-primary text-4xl mb-4">account_tree</span>
-          <h3 class="text-2xl font-headline font-bold mb-2">Multi-Repo</h3>
-          <p class="text-on-surface-variant text-sm">Aggregate documentation from unlimited repositories into a single searchable index. Support for monorepos and microservices.</p>
-        </div>
-        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
-          <span class="material-symbols-outlined text-tertiary text-4xl mb-4">picture_as_pdf</span>
-          <h3 class="text-2xl font-headline font-bold mb-2">Visual Indexing</h3>
-          <p class="text-on-surface-variant text-sm">Index companion PDFs and images. Search through metadata and OCR-enhanced snippets of visual documentation.</p>
-        </div>
+      <div class="card" style="position:relative;overflow:hidden;">
+        <span class="material-symbols-outlined" style="color:var(--blue);font-size:2.2rem;">settings_input_component</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;margin:0.5rem 0;">Zero Deps</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Runs on pure Bash and SQLite. No Node, no Python, no bloat.</p>
+        <span class="material-symbols-outlined" style="position:absolute;right:-1.5rem;bottom:-1.5rem;font-size:7rem;opacity:0.06;">terminal</span>
       </div>
+    </div>
 
-      <!-- Change Detection deep-dive -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
-        <div class="md:col-span-8 bg-surface-container rounded-lg p-8 relative overflow-hidden group">
-          <h2 class="text-3xl font-headline font-bold mb-4">Change Detection</h2>
-          <p class="text-on-surface-variant mb-8 max-w-xl">Our intelligent sync engine determines the delta between your local disk and the registry. We optimize for speed by leveraging existing metadata providers.</p>
-          <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-surface-container-low p-6 rounded-md border-l-2 border-primary">
-              <div class="flex items-center gap-3 mb-4">
-                <span class="material-symbols-outlined text-primary">commit</span>
-                <h3 class="font-headline font-bold uppercase text-xs tracking-widest">Git Integration</h3>
-              </div>
-              <p class="text-sm text-on-surface-variant leading-relaxed mb-4">Uses <code>git-diff-index</code> to compare your working tree against the last indexed hash. Lightning fast, zero configuration required.</p>
-              <div class="bg-surface-container-lowest p-3 rounded-sm font-mono text-[11px] text-tertiary-dim">$ local-doc sync --git-only</div>
-            </div>
-            <div class="bg-surface-container-low p-6 rounded-md border-l-2 border-tertiary-fixed">
-              <div class="flex items-center gap-3 mb-4">
-                <span class="material-symbols-outlined text-tertiary-fixed">update</span>
-                <h3 class="font-headline font-bold uppercase text-xs tracking-widest">MTime Hashing</h3>
-              </div>
-              <p class="text-sm text-on-surface-variant leading-relaxed mb-4">For non-git environments, we fall back to a robust recursive file-hash and modification timestamp check across your workspace.</p>
-              <div class="bg-surface-container-lowest p-3 rounded-sm font-mono text-[11px] text-primary">$ local-doc sync --full-scan</div>
-            </div>
-          </div>
-        </div>
-        <div class="md:col-span-4 bg-surface-container rounded-lg p-8 flex flex-col justify-between border-t border-white/5">
-          <div>
-            <h2 class="text-3xl font-headline font-bold mb-4">File Types</h2>
-            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">local-doc categorizes your data into two distinct streams to maximize both discoverability and visual richness.</p>
-          </div>
-          <ul class="space-y-4">
-            <li class="flex gap-4">
-              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-2"></span>
-              <div>
-                <span class="font-mono text-sm text-primary-fixed">Indexed Data</span>
-                <p class="text-[12px] text-on-surface-variant">YAML, JSON, and TOML structures. Fully searchable fields.</p>
-              </div>
-            </li>
-            <li class="flex gap-4">
-              <span class="w-1.5 h-1.5 rounded-full bg-tertiary mt-2"></span>
-              <div>
-                <span class="font-mono text-sm text-tertiary-fixed">Visual Patterns</span>
-                <p class="text-[12px] text-on-surface-variant">Companion <code>.md</code> patterns for rich media, diagrams, and formatting.</p>
-              </div>
-            </li>
-          </ul>
-        </div>
+    <!-- Bento row 2 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.5rem;">
+      <div class="card">
+        <span class="material-symbols-outlined" style="color:var(--blue);font-size:2rem;">sync</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Git Smart</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Incremental updates that only pull what changed. Git-based diffing, minimal data transfer.</p>
       </div>
+      <div class="card">
+        <span class="material-symbols-outlined" style="color:var(--blue);font-size:2rem;">account_tree</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Multi-Repo</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Aggregate docs from unlimited repositories into a single searchable index.</p>
+      </div>
+      <div class="card">
+        <span class="material-symbols-outlined" style="color:var(--green);font-size:2rem;">picture_as_pdf</span>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0.5rem 0;">Visual Indexing</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Index companion PDFs and images via OCR-enhanced metadata snippets.</p>
+      </div>
+    </div>
 
-      <!-- Search Strategy Table -->
-      <div class="mb-12">
-        <div class="mb-10 text-center max-w-3xl mx-auto">
-          <h2 class="text-4xl font-headline font-bold mb-4 tracking-tight">Search Strategy Comparison</h2>
-          <p class="text-on-surface-variant">We support multiple search layers depending on your deployment scale and hardware constraints.</p>
-        </div>
-        <div class="bg-surface-container rounded-lg overflow-hidden border-b border-primary/20">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-surface-container-high">
-                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Strategy</th>
-                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Latency</th>
-                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Precision</th>
-                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Requirements</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-white/5">
-                <tr class="hover:bg-surface-bright/30 transition-colors">
-                  <td class="py-5 px-8">
-                    <div class="font-headline font-bold">Local SQLite FTS5</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Default Engine</div>
-                  </td>
-                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-tertiary-container/10 text-tertiary-fixed border border-tertiary-fixed/20">&lt;10ms</span></td>
-                  <td class="py-5 px-8 text-sm text-on-surface-variant">High (Exact Match)</td>
-                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Standard binary</td>
-                </tr>
-                <tr class="hover:bg-surface-bright/30 transition-colors">
-                  <td class="py-5 px-8">
-                    <div class="font-headline font-bold">Elasticsearch Sync</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Cloud/Registry Tier</div>
-                  </td>
-                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary-fixed border border-secondary-fixed/20">~50ms</span></td>
-                  <td class="py-5 px-8 text-sm text-on-surface-variant">Ultra (Semantic/Fuzzy)</td>
-                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Remote Instance</td>
-                </tr>
-                <tr class="hover:bg-surface-bright/30 transition-colors">
-                  <td class="py-5 px-8">
-                    <div class="font-headline font-bold">In-Memory JSON</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Lightweight/WASM</div>
-                  </td>
-                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-error-container/10 text-on-error-container border border-error/20">~150ms</span></td>
-                  <td class="py-5 px-8 text-sm text-on-surface-variant">Medium (Basic Grep)</td>
-                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Zero Dependencies</td>
-                </tr>
-              </tbody>
-            </table>
+    <!-- Change Detection -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2.5rem;">
+      <div class="card">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 0.5rem;">Change Detection</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.5rem;">Our intelligent sync engine determines the delta between your local disk and the registry.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:6px;padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+              <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.1rem;">commit</span>
+              <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Git Integration</span>
+            </div>
+            <p style="color:var(--ink-muted);font-size:0.82rem;line-height:1.6;margin:0 0 0.75rem;">Uses <code>git-diff-index</code> to compare your working tree against the last indexed hash.</p>
+            <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.75rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--green);">$ local-doc sync --git-only</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:6px;padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+              <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;">update</span>
+              <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">MTime Hashing</span>
+            </div>
+            <p style="color:var(--ink-muted);font-size:0.82rem;line-height:1.6;margin:0 0 0.75rem;">For non-git environments, recursive file-hash and modification timestamp check.</p>
+            <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.75rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--blue);">$ local-doc sync --full-scan</div>
           </div>
         </div>
       </div>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 0.5rem;">File Types</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Two distinct streams for discoverability and visual richness.</p>
+        </div>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem;">
+          <li style="display:flex;gap:0.75rem;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:6px;flex-shrink:0;"></span>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--blue);font-weight:600;">Indexed Data</div>
+              <p style="color:var(--ink-muted);font-size:0.78rem;margin:0.15rem 0 0;">YAML, JSON, TOML — fully searchable fields.</p>
+            </div>
+          </li>
+          <li style="display:flex;gap:0.75rem;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:6px;flex-shrink:0;"></span>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--green);font-weight:600;">Visual Patterns</div>
+              <p style="color:var(--ink-muted);font-size:0.78rem;margin:0.15rem 0 0;">Companion <code>.md</code> files for rich media and diagrams.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-      <!-- Companion .md Pattern -->
-      <div class="bg-surface-container-lowest rounded-lg p-1 border-l-2 border-tertiary-fixed">
-        <div class="grid lg:grid-cols-2 gap-8 p-8">
-          <div>
-            <h3 class="text-2xl font-headline font-bold mb-4">The Companion .md Pattern</h3>
-            <p class="text-on-surface-variant mb-6 leading-relaxed">
-              Most documentation tools force you to choose between structured data and freeform markdown.
-              local-doc enables a "Ghost Doc" system where <code>config.yaml</code> stores the attributes,
-              and <code>config.md</code> provides the visual story.
-            </p>
-            <div class="flex items-start gap-4 p-4 bg-surface-container rounded-sm">
-              <span class="material-symbols-outlined text-tertiary-fixed">auto_awesome</span>
-              <div>
-                <h4 class="text-sm font-bold">Automatic Pairing</h4>
-                <p class="text-xs text-on-surface-variant mt-1">Files with matching names are automatically merged into a single UI view.</p>
-              </div>
+    <!-- Search Strategy Table -->
+    <div style="margin-bottom:2.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 0.4rem;">Search Strategy Comparison</h3>
+      <p style="color:var(--ink-muted);font-size:0.87rem;margin:0 0 1.5rem;">Multiple search layers depending on deployment scale and hardware constraints.</p>
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.87rem;">
+          <thead>
+            <tr style="background:var(--card-deep);">
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Strategy</th>
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Latency</th>
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Precision</th>
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Requirements</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:1rem 1.25rem;"><div style="font-weight:700;">Local SQLite FTS5</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);margin-top:2px;">Default Engine</div></td>
+              <td style="padding:1rem 1.25rem;"><span class="badge badge-green">&lt;10ms</span></td>
+              <td style="padding:1rem 1.25rem;color:var(--ink-muted);">High (Exact Match)</td>
+              <td style="padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink-muted);">Standard binary</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:var(--bg-alt);">
+              <td style="padding:1rem 1.25rem;"><div style="font-weight:700;">Elasticsearch Sync</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);margin-top:2px;">Cloud/Registry Tier</div></td>
+              <td style="padding:1rem 1.25rem;"><span class="badge badge-blue">~50ms</span></td>
+              <td style="padding:1rem 1.25rem;color:var(--ink-muted);">Ultra (Semantic/Fuzzy)</td>
+              <td style="padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink-muted);">Remote Instance</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:1rem 1.25rem;"><div style="font-weight:700;">In-Memory JSON</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);margin-top:2px;">Lightweight/WASM</div></td>
+              <td style="padding:1rem 1.25rem;"><span style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:99px;padding:2px 10px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;font-weight:600;">~150ms</span></td>
+              <td style="padding:1rem 1.25rem;color:var(--ink-muted);">Medium (Basic Grep)</td>
+              <td style="padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink-muted);">Zero Dependencies</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Companion .md Pattern -->
+    <div style="border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        <div style="padding:2rem;">
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;margin:0 0 0.75rem;">The Companion .md Pattern</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Most tools force you to choose between structured data and freeform markdown. local-doc enables a "Ghost Doc" system where <code>config.yaml</code> stores attributes and <code>config.md</code> provides the visual story.</p>
+          <div style="display:flex;gap:0.75rem;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;">
+            <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;margin-top:1px;">auto_awesome</span>
+            <div>
+              <div style="font-weight:700;font-size:0.85rem;">Automatic Pairing</div>
+              <p style="color:var(--ink-muted);font-size:0.78rem;margin:0.2rem 0 0;">Files with matching names are merged into a single UI view.</p>
             </div>
           </div>
-          <div class="bg-surface-container rounded-sm p-4 font-mono text-xs overflow-hidden">
-            <div class="flex gap-4 border-b border-white/5 pb-2 mb-4">
-              <span class="text-tertiary-fixed border-b border-tertiary-fixed pb-1">api_v1.yaml</span>
-              <span class="text-on-surface-variant">api_v1.md</span>
-            </div>
-            <pre class="text-slate-400"><span class="text-primary">name:</span> <span class="text-tertiary">"Auth Service"</span>
-<span class="text-primary">endpoint:</span> <span class="text-tertiary">"/api/v1/auth"</span>
-<span class="text-primary">status:</span> <span class="text-tertiary">"stable"</span>
-<span class="text-primary">tags:</span>
-  - <span class="text-tertiary">"security"</span>
-  - <span class="text-tertiary">"core"</span></pre>
-            <div class="mt-8 pt-4 border-t border-white/5">
-              <div class="w-full h-24 bg-surface-container-high rounded flex items-center justify-center italic text-on-surface-variant">
-                Preview of api_v1.md rendering here...
-              </div>
-            </div>
+        </div>
+        <div style="background:var(--code-bg);border-left:1px solid var(--border);padding:1.5rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">
+          <div style="display:flex;gap:1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.6rem;margin-bottom:1rem;">
+            <span style="color:var(--green);border-bottom:2px solid var(--green);padding-bottom:2px;">api_v1.yaml</span>
+            <span style="color:var(--ink-muted);">api_v1.md</span>
+          </div>
+          <pre style="margin:0;color:var(--ink-muted);"><span style="color:var(--blue);">name:</span> <span style="color:var(--green);">"Auth Service"</span>
+<span style="color:var(--blue);">endpoint:</span> <span style="color:var(--green);">"/api/v1/auth"</span>
+<span style="color:var(--blue);">status:</span> <span style="color:var(--green);">"stable"</span>
+<span style="color:var(--blue);">tags:</span>
+  - <span style="color:var(--green);">"security"</span>
+  - <span style="color:var(--green);">"core"</span></pre>
+          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;height:5rem;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-style:italic;font-size:0.78rem;">Preview of api_v1.md rendering here…</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── COMMAND INTERFACE ─── -->
-  <section id="commands" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
-    <h2 class="text-4xl font-headline font-bold mb-16 border-l-4 border-primary pl-6">Command Interface</h2>
-    <div class="space-y-16">
+  <!-- ── COMMAND INTERFACE ── -->
+  <section id="commands" class="section-alt" style="padding:3.5rem 3rem;">
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;border-left:4px solid var(--blue);padding-left:1rem;margin:0 0 3rem;">Command Interface</h2>
+    <div style="display:flex;flex-direction:column;gap:3.5rem;">
+
       <!-- Search -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;">
         <div>
-          <h3 class="text-2xl font-bold mb-4 font-headline">Search with Precision</h3>
-          <p class="text-on-surface-variant mb-6">Locate any specification across your entire org using full-text search. Filters allow for scoping by tag, repo, or date.</p>
-          <ul class="space-y-3">
-            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Fuzzy matching enabled by default</li>
-            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Highlighting of matching context</li>
-            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Keyboard-first navigation</li>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.5rem;">Search with Precision</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1rem;">Locate any specification across your entire org using full-text search. Filters allow for scoping by tag, repo, or date.</p>
+          <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.4rem;">
+            <li style="display:flex;gap:0.5rem;font-size:0.87rem;"><span style="color:var(--green);">✔</span> Fuzzy matching enabled by default</li>
+            <li style="display:flex;gap:0.5rem;font-size:0.87rem;"><span style="color:var(--green);">✔</span> Highlighting of matching context</li>
+            <li style="display:flex;gap:0.5rem;font-size:0.87rem;"><span style="color:var(--green);">✔</span> Keyboard-first navigation</li>
           </ul>
         </div>
-        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-tertiary shadow-xl">
-          <div class="text-[#dee5ff]/40 mb-2"># Search for auth flows</div>
-          <div class="mb-4 text-primary">$ local-doc search "auth-flow" --repo internal-core</div>
-          <div class="text-[#dee5ff]/80">
-            [1] INTERNAL-CORE: <span class="bg-tertiary/20 text-tertiary">auth-flow</span>.md (Score: 0.98)<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;"...redirecting users to the <span class="bg-tertiary/20 text-tertiary">auth-flow</span> logic..."<br/>
-            [2] API-SPEC: oauth2-<span class="bg-tertiary/20 text-tertiary">auth-flow</span>.json (Score: 0.85)<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;"...implements standard OAuth2..."
+        <div class="code-block" style="border-left-color:var(--green);">
+          <div style="color:var(--ink-muted);opacity:0.6;margin-bottom:0.4rem;"># Search for auth flows</div>
+          <div style="color:var(--blue);margin-bottom:0.75rem;">$ local-doc search "auth-flow" --repo internal-core</div>
+          <div style="color:var(--ink);">
+            [1] INTERNAL-CORE: <mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark>.md (Score: 0.98)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"...redirecting users to the <mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark> logic..."<br>
+            [2] API-SPEC: oauth2-<mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark>.json (Score: 0.85)
           </div>
         </div>
       </div>
+
       <!-- Stats -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="lg:order-last">
-          <h3 class="text-2xl font-bold mb-4 font-headline">Registry Stats</h3>
-          <p class="text-on-surface-variant mb-6">Get a bird's-eye view of your documentation health. Track coverage, staleness, and repository contributions.</p>
-        </div>
-        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-primary shadow-xl">
-          <div class="mb-2 text-primary">$ local-doc stats --summary</div>
-          <div class="grid grid-cols-2 gap-4 mt-4">
-            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Total Docs</div><div class="text-lg font-bold">12,482</div></div>
-            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Index Size</div><div class="text-lg font-bold">142MB</div></div>
-            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Freshness</div><div class="text-lg font-bold text-tertiary">98.2%</div></div>
-            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Contributors</div><div class="text-lg font-bold">42</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;">
+        <div class="code-block">
+          <div style="color:var(--blue);margin-bottom:0.75rem;">$ local-doc stats --summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.5rem;">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
+              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Total Docs</div>
+              <div style="font-size:1.2rem;font-weight:700;">12,482</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
+              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Index Size</div>
+              <div style="font-size:1.2rem;font-weight:700;">142MB</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
+              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Freshness</div>
+              <div style="font-size:1.2rem;font-weight:700;color:var(--green);">98.2%</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
+              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Contributors</div>
+              <div style="font-size:1.2rem;font-weight:700;">42</div>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- JSON -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div>
-          <h3 class="text-2xl font-bold mb-4 font-headline">Machine Readable</h3>
-          <p class="text-on-surface-variant mb-6">Integrate local-doc with your CI/CD pipelines or custom dashboards using standard JSON output. Piping docs into JQ has never been easier.</p>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.5rem;">Registry Stats</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Get a bird's-eye view of your documentation health. Track coverage, staleness, and repository contributions.</p>
         </div>
-        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-secondary shadow-xl max-h-64 overflow-y-auto custom-scrollbar">
-          <div class="mb-2 text-primary">$ local-doc get spec/v1 --json</div>
-          <div class="text-[#c4ffcd]">
-            {<br/>
-            &nbsp;&nbsp;"id": "spec-v1",<br/>
-            &nbsp;&nbsp;"meta": {<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;"version": "1.0.2",<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;"author": "infra-team",<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;"tags": ["api", "stable"]<br/>
-            &nbsp;&nbsp;},<br/>
-            &nbsp;&nbsp;"content": "...",<br/>
-            &nbsp;&nbsp;"last_sync": "2024-05-20T12:00:00Z"<br/>
-            }
-          </div>
+      </div>
+
+      <!-- JSON -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;">
+        <div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.5rem;">Machine Readable</h3>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Integrate local-doc with your CI/CD pipelines using standard JSON output. Piping docs into JQ has never been easier.</p>
+        </div>
+        <div class="code-block" style="max-height:200px;overflow-y:auto;">
+          <div style="color:var(--blue);margin-bottom:0.5rem;">$ local-doc get spec/v1 --json</div>
+          <span style="color:var(--ink-muted);">{</span><br>
+          &nbsp;&nbsp;<span style="color:var(--blue);">"id"</span>: <span style="color:var(--green);">"spec-v1"</span>,<br>
+          &nbsp;&nbsp;<span style="color:var(--blue);">"meta"</span>: {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"version"</span>: <span style="color:var(--green);">"1.0.2"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"author"</span>: <span style="color:var(--green);">"infra-team"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"tags"</span>: [<span style="color:var(--green);">"api"</span>, <span style="color:var(--green);">"stable"</span>]<br>
+          &nbsp;&nbsp;},<br>
+          &nbsp;&nbsp;<span style="color:var(--blue);">"last_sync"</span>: <span style="color:var(--green);">"2024-05-20T12:00:00Z"</span><br>
+          <span style="color:var(--ink-muted);">}</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── CLAUDE CODE SKILL ─── -->
-  <section id="claude-skill" class="px-6 md:px-12 py-20 bg-surface-container-low">
-    <div class="max-w-6xl mx-auto">
-      <!-- Hero -->
-      <div class="mb-16">
-        <div class="flex items-center gap-3 mb-6">
-          <span class="bg-tertiary-container text-on-tertiary-container text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">New Integration</span>
-          <div class="h-px flex-grow bg-outline-variant/20"></div>
-        </div>
-        <h2 class="text-5xl md:text-6xl font-headline font-bold mb-6 tracking-tighter">
-          Claude <span class="text-primary italic">Code Skill</span>
-        </h2>
-        <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
-          Supercharge your documentation workflow by enabling Claude to directly interact with your local-doc indices. No more manual context pasting.
-        </p>
+  <!-- ── EVERYDAY USAGE ── -->
+  <section id="usage" class="section-alt" style="padding:3.5rem 3rem;">
+    <span class="badge badge-blue" style="margin-bottom:1rem;"><span class="material-symbols-outlined" style="font-size:0.85rem;">terminal</span>Everyday Usage</span>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;letter-spacing:-0.02em;margin:0 0 0.5rem;">Just type <span style="color:var(--blue);font-style:italic;">local-doc search</span>.</h2>
+    <p style="color:var(--ink-muted);max-width:560px;line-height:1.65;margin:0 0 2.5rem;">Followed by what you're looking for. Here are the most common patterns.</p>
+
+    <!-- Tab bar -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div id="usage-tabs" style="display:flex;border-bottom:1px solid var(--border);overflow-x:auto;">
+        <button class="utab active" data-tab="tab-search"  onclick="uTab(this,'tab-search')"  style="padding:0.75rem 1.25rem;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:var(--blue);border-bottom:2px solid var(--blue);">Basic Search</button>
+        <button class="utab"        data-tab="tab-multi"   onclick="uTab(this,'tab-multi')"   style="padding:0.75rem 1.25rem;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-muted);border-bottom:2px solid transparent;">Smart Search</button>
+        <button class="utab"        data-tab="tab-browse"  onclick="uTab(this,'tab-browse')"  style="padding:0.75rem 1.25rem;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-muted);border-bottom:2px solid transparent;">Browsing</button>
+        <button class="utab"        data-tab="tab-read"    onclick="uTab(this,'tab-read')"    style="padding:0.75rem 1.25rem;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-muted);border-bottom:2px solid transparent;">Reading Docs</button>
+        <button class="utab"        data-tab="tab-media"   onclick="uTab(this,'tab-media')"   style="padding:0.75rem 1.25rem;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-muted);border-bottom:2px solid transparent;">Images &amp; PDFs</button>
       </div>
 
-      <!-- Capabilities bento -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
-          <div class="bg-primary/10 w-12 h-12 flex items-center justify-center rounded-sm">
-            <span class="material-symbols-outlined text-primary">data_exploration</span>
-          </div>
-          <h3 class="text-2xl font-headline font-bold">Extract</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">Automatically pulls semantic metadata and structural anchors from your codebase and documentation clusters.</p>
-        </div>
-        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
-          <div class="bg-tertiary-container/10 w-12 h-12 flex items-center justify-center rounded-sm">
-            <span class="material-symbols-outlined text-tertiary-dim">menu_book</span>
-          </div>
-          <h3 class="text-2xl font-headline font-bold">Read</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">High-speed access to indexed documents, allowing Claude to ingest thousands of pages of context in milliseconds.</p>
-        </div>
-        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
-          <div class="bg-primary-container/10 w-12 h-12 flex items-center justify-center rounded-sm">
-            <span class="material-symbols-outlined text-primary-fixed">psychology</span>
-          </div>
-          <h3 class="text-2xl font-headline font-bold">Reason</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed">Leverages local-doc's relationship mapping to build complex search strategies and connect disparate technical concepts.</p>
-        </div>
-      </div>
+      <div style="padding:2rem;">
 
-      <!-- Installation -->
-      <div class="mb-16">
-        <h3 class="text-3xl font-headline font-bold mb-8">Installation</h3>
-        <div class="code-well p-6 rounded-md">
-          <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/10 pb-2">
-            <span class="w-3 h-3 rounded-full bg-error-dim"></span>
-            <span class="w-3 h-3 rounded-full bg-primary"></span>
-            <span class="w-3 h-3 rounded-full bg-tertiary-dim"></span>
-            <span class="ml-4 text-xs font-mono text-outline-variant">Terminal — zsh</span>
+        <!-- Basic Search -->
+        <div id="tab-search" class="utab-panel">
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Find documents containing a specific word, even if it's buried deep inside the file text.</p>
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="terminal-dot" style="background:#f87171;"></span>
+              <span class="terminal-dot" style="background:#fbbf24;"></span>
+              <span class="terminal-dot" style="background:#4ade80;"></span>
+            </div>
+            <div class="terminal-body">
+              <span style="color:var(--blue);">$</span> local-doc search refund<br>
+              <br>
+              Results for <span style="color:var(--ink);">"refund"</span>:<br>
+              <br>
+              &nbsp;&nbsp;1. <span style="color:var(--green);font-weight:600;">[product]</span> payments/refund <span style="color:var(--ink-muted);font-size:0.75rem;">(.md)</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refund flow<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);">tags: billing, refund, customer, payments</span>
+            </div>
           </div>
-          <pre class="font-mono text-sm leading-relaxed text-on-surface"><span class="text-tertiary"># Install the local-doc claude-bridge extension</span>
-<span class="text-primary">npm</span> install -g @local-doc/claude-skill
-
-<span class="text-tertiary"># Connect your index</span>
-<span class="text-primary">local-doc</span> link-claude --index=./docs/v2 --key=$CLAUDE_API_KEY</pre>
         </div>
-      </div>
 
-      <!-- Search Strategy Steps -->
-      <div class="mb-16">
-        <div class="bg-surface-container p-10 rounded-xl">
-          <h3 class="text-3xl font-headline font-bold mb-4">Claude's Search Strategy</h3>
-          <p class="text-on-surface-variant mb-10 max-w-xl">Watch how the Code Skill translates high-level prompts into granular documentation lookups.</p>
-          <div class="space-y-8">
-            <div class="flex gap-6 items-start">
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border border-primary flex items-center justify-center text-primary font-bold">1</div>
-                <div class="w-px h-full bg-outline-variant/30 mt-2"></div>
-              </div>
-              <div class="flex-1 pb-8">
-                <p class="text-xs text-primary font-mono uppercase tracking-widest mb-1">User Intent</p>
-                <div class="bg-surface-container-low p-4 rounded-sm border-l-4 border-primary">
-                  <p class="text-on-surface font-medium italic">"How does the middleware handle auth headers in the new API?"</p>
-                </div>
+        <!-- Smart Search -->
+        <div id="tab-multi" class="utab-panel" style="display:none;">
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Use <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">OR</code> to find either word, <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">NOT</code> to exclude words, or filter by a specific project nickname.</p>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># Search for A or B</span><br><span style="color:var(--blue);">$</span> local-doc search "refund OR authentication"</div></div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># Exclude words</span><br><span style="color:var(--blue);">$</span> local-doc search "billing NOT fraud"</div></div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># Only look inside the 'product' folder</span><br><span style="color:var(--blue);">$</span> local-doc search "billing" product</div></div>
+          </div>
+        </div>
+
+        <!-- Browsing -->
+        <div id="tab-browse" class="utab-panel" style="display:none;">
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Not sure what you're looking for? List out everything you have.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;">
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># See all documents</span><br><span style="color:var(--blue);">$</span> local-doc list</div></div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># See project groups</span><br><span style="color:var(--blue);">$</span> local-doc projects</div></div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># See all tags</span><br><span style="color:var(--blue);">$</span> local-doc tags</div></div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body"><span style="color:var(--ink-muted);"># See stats</span><br><span style="color:var(--blue);">$</span> local-doc stats</div></div>
+          </div>
+        </div>
+
+        <!-- Reading Docs -->
+        <div id="tab-read" class="utab-panel" style="display:none;">
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Read the full content of a document right inside your terminal.</p>
+          <div class="terminal">
+            <div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+            <div class="terminal-body">
+              <span style="color:var(--ink-muted);"># Print the full document named 'refund'</span><br>
+              <span style="color:var(--blue);">$</span> local-doc read refund<br>
+              <br>
+              <span style="border-left:2px solid var(--border);padding-left:1rem;display:inline-block;">
+                # Refund flow<br><br>
+                Process for managing customer refunds...<br>
+                Step 1: Verify eligibility...
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images & PDFs -->
+        <div id="tab-media" class="utab-panel" style="display:none;">
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Images and PDFs are indexed via a <strong>companion <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">.md</code> sidecar</strong> with the same base name. Only one result appears per asset — the path points directly to the image or PDF.</p>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body">
+                <span style="color:var(--ink-muted);"># File layout — sidecar must share the same name</span><br>
+                diagrams/<br>
+                &nbsp;&nbsp;<span style="color:var(--green);">architecture.png</span>  ← the image<br>
+                &nbsp;&nbsp;<span style="color:var(--blue);">architecture.md</span>   ← companion (title, tags, description)
               </div>
             </div>
-            <div class="flex gap-6 items-start">
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border border-tertiary-dim flex items-center justify-center text-tertiary-dim font-bold">2</div>
-                <div class="w-px h-full bg-outline-variant/30 mt-2"></div>
-              </div>
-              <div class="flex-1 pb-8">
-                <p class="text-xs text-tertiary-dim font-mono uppercase tracking-widest mb-1">Claude's Strategic Plan</p>
-                <div class="bg-surface-container-lowest p-6 rounded-md border border-outline-variant/10">
-                  <ul class="space-y-3 text-sm text-on-surface-variant">
-                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-tertiary-dim text-lg">check_circle</span><span>Search for <code>middleware/auth</code> definition.</span></li>
-                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-tertiary-dim text-lg">check_circle</span><span>Extract header key constants from <code>registry/headers.json</code>.</span></li>
-                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-lg">sync</span><span class="text-on-surface">Reasoning: Checking for cross-references in security audits.</span></li>
-                  </ul>
-                </div>
+            <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+              <div class="terminal-body">
+                <span style="color:var(--ink-muted);"># Search finds it — result path points to the .png</span><br>
+                <span style="color:var(--blue);">$</span> local-doc search architecture<br><br>
+                &nbsp;&nbsp;1. <span style="color:var(--green);font-weight:600;">[platform]</span> diagrams/architecture <span style="color:var(--ink-muted);font-size:0.75rem;">(.png)</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System Architecture Diagram<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);">/path/to/diagrams/architecture.png</span>
               </div>
             </div>
-            <div class="flex gap-6 items-start">
-              <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full border border-primary-dim flex items-center justify-center text-primary font-bold">3</div>
+            <div style="background:var(--green-bg);border:1px solid #a5d6a7;border-radius:8px;padding:1rem 1.25rem;font-size:0.83rem;color:var(--ink);display:flex;gap:0.75rem;align-items:flex-start;">
+              <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;flex-shrink:0;margin-top:1px;">info</span>
+              <span>If no companion <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">.md</code> exists, the image or PDF is <strong>skipped</strong> and a warning is shown. The sidecar is never shown as a separate result — it only provides metadata for its asset.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLAUDE CODE SKILL ── -->
+  <section id="claude-skill" style="padding:3.5rem 3rem;">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+      <span class="badge badge-blue"><span class="material-symbols-outlined" style="font-size:0.85rem;">auto_awesome</span>New Integration</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;letter-spacing:-0.03em;margin:0 0 0.75rem;">Claude <span style="color:var(--blue);font-style:italic;">Code Skill</span></h2>
+    <p style="color:var(--ink-muted);font-size:1rem;max-width:560px;line-height:1.65;margin:0 0 2.5rem;">Supercharge your workflow by enabling Claude to directly interact with your local-doc indices. No more manual context pasting.</p>
+
+    <!-- Capabilities -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.5rem;">
+      <div class="card">
+        <div style="background:var(--blue-bg);width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-bottom:0.75rem;">
+          <span class="material-symbols-outlined" style="color:var(--blue);">data_exploration</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.4rem;">Extract</h3>
+        <p style="color:var(--ink-muted);font-size:0.85rem;line-height:1.6;margin:0;">Automatically pulls semantic metadata and structural anchors from your codebase and documentation clusters.</p>
+      </div>
+      <div class="card">
+        <div style="background:var(--green-bg);width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-bottom:0.75rem;">
+          <span class="material-symbols-outlined" style="color:var(--green);">menu_book</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.4rem;">Read</h3>
+        <p style="color:var(--ink-muted);font-size:0.85rem;line-height:1.6;margin:0;">High-speed access to indexed documents, allowing Claude to ingest thousands of pages of context in milliseconds.</p>
+      </div>
+      <div class="card">
+        <div style="background:var(--card-deep);width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-bottom:0.75rem;">
+          <span class="material-symbols-outlined" style="color:var(--ink-muted);">psychology</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.4rem;">Reason</h3>
+        <p style="color:var(--ink-muted);font-size:0.85rem;line-height:1.6;margin:0;">Leverages local-doc's relationship mapping to build complex search strategies and connect disparate technical concepts.</p>
+      </div>
+    </div>
+
+    <!-- Installation -->
+    <div style="margin-bottom:2.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 1rem;">Installation</h3>
+      <div class="terminal" style="max-width:640px;">
+        <div class="terminal-bar">
+          <span class="terminal-dot" style="background:#f87171;"></span>
+          <span class="terminal-dot" style="background:#fbbf24;"></span>
+          <span class="terminal-dot" style="background:#4ade80;"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);opacity:0.6;margin-left:0.75rem;">Terminal — zsh</span>
+        </div>
+        <div class="terminal-body">
+          <span style="color:var(--green);"># Install the local-doc claude-bridge extension</span><br>
+          <span style="color:var(--blue);">npm</span> install -g @local-doc/claude-skill<br><br>
+          <span style="color:var(--green);"># Connect your index</span><br>
+          <span style="color:var(--blue);">local-doc</span> link-claude --index=./docs/v2 --key=$CLAUDE_API_KEY
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategy steps -->
+    <div style="margin-bottom:2.5rem;">
+      <div class="card">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 0.4rem;">Claude's Search Strategy</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;margin:0 0 2rem;">Watch how the Code Skill translates high-level prompts into granular documentation lookups.</p>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <!-- Step 1 -->
+          <div style="display:flex;gap:1.5rem;align-items:flex-start;padding-bottom:1.5rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+              <div style="width:2.25rem;height:2.25rem;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:700;font-size:0.9rem;">1</div>
+              <div style="width:1px;flex:1;background:var(--border);margin-top:0.5rem;min-height:1.5rem;"></div>
+            </div>
+            <div style="flex:1;padding-bottom:0.5rem;">
+              <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--blue);text-transform:uppercase;letter-spacing:0.1em;margin:0 0 0.5rem;">User Intent</p>
+              <div style="background:var(--bg);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:4px;padding:0.85rem 1rem;">
+                <p style="font-style:italic;margin:0;font-size:0.9rem;">"How does the middleware handle auth headers in the new API?"</p>
               </div>
-              <div class="flex-1">
-                <p class="text-xs text-primary font-mono uppercase tracking-widest mb-1">Response</p>
-                <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6 shadow-2xl">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+            </div>
+          </div>
+          <!-- Step 2 -->
+          <div style="display:flex;gap:1.5rem;align-items:flex-start;padding-bottom:1.5rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+              <div style="width:2.25rem;height:2.25rem;border-radius:50%;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;color:var(--green);font-weight:700;font-size:0.9rem;">2</div>
+              <div style="width:1px;flex:1;background:var(--border);margin-top:0.5rem;min-height:1.5rem;"></div>
+            </div>
+            <div style="flex:1;">
+              <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--green);text-transform:uppercase;letter-spacing:0.1em;margin:0 0 0.5rem;">Claude's Plan</p>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;">
+                <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.6rem;font-size:0.85rem;color:var(--ink-muted);">
+                  <li style="display:flex;gap:0.5rem;align-items:center;"><span class="material-symbols-outlined" style="color:var(--green);font-size:1rem;">check_circle</span>Search for <code>middleware/auth</code> definition.</li>
+                  <li style="display:flex;gap:0.5rem;align-items:center;"><span class="material-symbols-outlined" style="color:var(--green);font-size:1rem;">check_circle</span>Extract header key constants from <code>registry/headers.json</code>.</li>
+                  <li style="display:flex;gap:0.5rem;align-items:center;"><span class="material-symbols-outlined" style="color:var(--ink-muted);font-size:1rem;">sync</span><span style="color:var(--ink);">Checking cross-references in security audits.</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Step 3 -->
+          <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+            <div style="flex-shrink:0;">
+              <div style="width:2.25rem;height:2.25rem;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:700;font-size:0.9rem;">3</div>
+            </div>
+            <div style="flex:1;">
+              <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--blue);text-transform:uppercase;letter-spacing:0.1em;margin:0 0 0.5rem;">Response</p>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1.25rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+                  <div style="background:var(--blue-bg);border-radius:6px;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;">
+                    <span class="material-symbols-outlined" style="color:var(--blue);font-size:1rem;">smart_toy</span>
+                  </div>
+                  <span style="font-size:0.82rem;font-weight:600;color:var(--ink-muted);">Claude — local-doc skill</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                  <div style="display:flex;gap:0.5rem;"><span style="color:var(--blue);font-weight:700;">User:</span><span>"Claude, what's the retry policy for our payment gateway?"</span></div>
+                  <div style="display:flex;gap:0.5rem;"><span style="color:var(--green);font-weight:700;">Claude:</span><span style="color:var(--ink-muted);font-style:italic;"># Querying local-doc registry...</span></div>
+                </div>
+                <!-- search results -->
+                <div style="margin:0.9rem 0;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.8;">
+                  <div style="color:var(--ink-muted);margin-bottom:0.5rem;">Results for <span style="color:var(--ink);">"payment eligibility"</span>:<br>
+                  (filtered to repo: <span style="color:var(--blue);">product</span>)</div>
+                  <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                    <div>
+                      <span style="color:var(--ink-muted);">1.</span>
+                      <span style="color:var(--blue);font-weight:600;"> [product]</span>
+                      <span> payments/refund </span>
+                      <span style="color:var(--ink-muted);font-size:0.72rem;">(.md)</span><br>
+                      <span style="padding-left:1.5rem;color:var(--ink-muted);">Refund flow</span><br>
+                      <span style="padding-left:1.5rem;color:var(--ink-muted);font-size:0.72rem;">tags: billing, refund, customer, payments</span>
                     </div>
-                    <span class="text-sm font-bold opacity-60">Claude — local-doc skill</span>
+                    <div>
+                      <span style="color:var(--ink-muted);">2.</span>
+                      <span style="color:var(--blue);font-weight:600;"> [product]</span>
+                      <span> payments/chargeback </span>
+                      <span style="color:var(--ink-muted);font-size:0.72rem;">(.md)</span><br>
+                      <span style="padding-left:1.5rem;color:var(--ink-muted);">Chargeback handling</span><br>
+                      <span style="padding-left:1.5rem;color:var(--ink-muted);font-size:0.72rem;">tags: disputes, chargeback, fraud</span>
+                    </div>
                   </div>
-                  <div class="space-y-4 font-mono text-sm">
-                    <div class="flex gap-3"><span class="text-primary-container">User:</span><span>"Claude, what's the retry policy for our payment gateway?"</span></div>
-                    <div class="flex gap-3"><span class="text-tertiary">Claude:</span><span class="text-on-surface-variant italic"># Querying local-doc registry...</span></div>
-                    <div class="flex gap-3 text-[#dee5ff]"><span class="opacity-0">Claude:</span><span>"According to 'payments-v2.md' in the internal-specs repo, the retry policy is 3 attempts with exponential backoff (2s, 4s, 8s)."</span></div>
-                  </div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;display:flex;gap:0.5rem;">
+                  <span style="color:var(--green);font-weight:700;">Claude:</span>
+                  <span>"According to 'payments-v2.md', the retry policy is 3 attempts with exponential backoff (2s, 4s, 8s)."</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- JSON Mode -->
-      <div class="flex flex-col md:flex-row gap-12 items-center">
-        <div class="md:w-1/2">
-          <h3 class="text-4xl font-headline font-bold mb-4">Precision JSON Mode</h3>
-          <p class="text-on-surface-variant leading-relaxed mb-6">
-            Need results for another tool? The Claude Code Skill supports a strict <code>--json</code> mode that returns structured objects instead of natural language, perfect for CI/CD pipelines and custom automation.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--json</span>
-            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--pretty</span>
-            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--filter=schema</span>
-          </div>
-        </div>
-        <div class="md:w-1/2 w-full">
-          <div class="bg-black p-6 rounded-lg shadow-2xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-              <span class="material-symbols-outlined text-primary text-6xl">code_blocks</span>
-            </div>
-            <pre class="font-mono text-xs leading-relaxed"><span class="text-outline-variant">{</span>
-  <span class="text-primary">"status"</span>: <span class="text-tertiary">"success"</span>,
-  <span class="text-primary">"results"</span>: [
-    {
-      <span class="text-primary">"id"</span>: <span class="text-tertiary">"auth_v2_1"</span>,
-      <span class="text-primary">"confidence"</span>: <span class="text-tertiary">0.98</span>,
-      <span class="text-primary">"path"</span>: <span class="text-tertiary">"lib/middleware/auth.ts"</span>,
-      <span class="text-primary">"tags"</span>: [<span class="text-tertiary">"security"</span>, <span class="text-tertiary">"api"</span>]
-    }
-  ]
-<span class="text-outline-variant">}</span></pre>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
-  <!-- ─── QUICK START + COMMAND REFERENCE ─── -->
-  <section id="quick-start" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+  <!-- ── QUICK START + COMMAND REF ── -->
+  <section id="quick-start" class="section-alt" style="padding:3.5rem 3rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;">
       <div>
-        <h3 class="text-3xl font-headline font-bold mb-8">Quick Start</h3>
-        <div class="space-y-6">
-          <div class="flex gap-6">
-            <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">1</div>
-              <div class="flex-1 w-px bg-outline-variant/20 my-2"></div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 2rem;">Quick Start</h3>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:1.25rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">1</div>
+              <div style="width:1px;flex:1;background:var(--border);min-height:2rem;"></div>
             </div>
-            <div>
-              <h4 class="font-bold mb-2">Initialize Repository</h4>
-              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc init</div>
-              <p class="text-sm text-on-surface-variant">Creates a local SQLite index in ~/.local-doc/index.db</p>
-            </div>
-          </div>
-          <div class="flex gap-6">
-            <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">2</div>
-              <div class="flex-1 w-px bg-outline-variant/20 my-2"></div>
-            </div>
-            <div>
-              <h4 class="font-bold mb-2">Sync Your Specs</h4>
-              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc sync git@github.com:org/specs.git</div>
-              <p class="text-sm text-on-surface-variant">Clones and indexes the repository incrementally.</p>
+            <div style="padding-bottom:1.5rem;">
+              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Initialize Repository</h4>
+              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc init</div>
+              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Creates a local SQLite index in ~/.local-doc/index.db</p>
             </div>
           </div>
-          <div class="flex gap-6">
-            <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">3</div>
+          <div style="display:flex;gap:1.25rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">2</div>
+              <div style="width:1px;flex:1;background:var(--border);min-height:2rem;"></div>
+            </div>
+            <div style="padding-bottom:1.5rem;">
+              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Sync Your Specs</h4>
+              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc sync git@github.com:org/specs.git</div>
+              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Clones and indexes the repository incrementally.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:1.25rem;">
+            <div style="flex-shrink:0;">
+              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">3</div>
             </div>
             <div>
-              <h4 class="font-bold mb-2">Start Querying</h4>
-              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc find "api-version"</div>
-              <p class="text-sm text-on-surface-variant">Instant, lightning-fast results from your local cache.</p>
+              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Start Querying</h4>
+              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc find "api-version"</div>
+              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Instant, lightning-fast results from your local cache.</p>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <h3 class="text-3xl font-headline font-bold mb-8">Command Reference</h3>
-        <div class="bg-surface-container rounded-lg overflow-hidden border border-outline-variant/10">
-          <table class="w-full text-left text-sm border-collapse">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 2rem;">Command Reference</h3>
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.87rem;">
             <thead>
-              <tr class="bg-surface-container-high">
-                <th class="px-4 py-3 font-headline font-bold uppercase tracking-wider text-[10px] opacity-40">Command</th>
-                <th class="px-4 py-3 font-headline font-bold uppercase tracking-wider text-[10px] opacity-40">Description</th>
+              <tr style="background:var(--card-deep);">
+                <th style="padding:0.7rem 1rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Command</th>
+                <th style="padding:0.7rem 1rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Description</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant/10">
-              <tr><td class="px-4 py-4 font-mono text-primary">search [term]</td><td class="px-4 py-4 text-on-surface-variant">Full-text search through all indexed docs.</td></tr>
-              <tr><td class="px-4 py-4 font-mono text-primary">add [url]</td><td class="px-4 py-4 text-on-surface-variant">Add a new Git repository to the registry.</td></tr>
-              <tr><td class="px-4 py-4 font-mono text-primary">refresh</td><td class="px-4 py-4 text-on-surface-variant">Force a pull and re-index of all sources.</td></tr>
-              <tr><td class="px-4 py-4 font-mono text-primary">export --format pdf</td><td class="px-4 py-4 text-on-surface-variant">Bundle and export specific docs as PDF.</td></tr>
-              <tr><td class="px-4 py-4 font-mono text-primary">serve --port 8080</td><td class="px-4 py-4 text-on-surface-variant">Spawn a local web interface for browsing.</td></tr>
+            <tbody>
+              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">search [term]</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Full-text search through all indexed docs.</td></tr>
+              <tr style="border-top:1px solid var(--border);background:var(--bg-alt);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">add [url]</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Add a new Git repository to the registry.</td></tr>
+              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">refresh</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Force a pull and re-index of all sources.</td></tr>
+              <tr style="border-top:1px solid var(--border);background:var(--bg-alt);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">export --format pdf</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Bundle and export specific docs as PDF.</td></tr>
+              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">serve --port 8080</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Spawn a local web interface for browsing.</td></tr>
             </tbody>
           </table>
         </div>
@@ -700,85 +773,110 @@
     </div>
   </section>
 
-  <!-- ─── FAQ ─── -->
-  <section id="faq" class="px-6 md:px-12 py-20 bg-surface-container-low">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-4xl font-headline font-bold mb-12">Frequently Asked Questions</h2>
-      <div class="space-y-6">
-        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
-          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
-            Does local-doc require an internet connection?
-            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
-          </summary>
-          <p class="mt-4 text-on-surface-variant leading-relaxed">No. Once your index is synced, all search and retrieval operations run entirely offline against your local SQLite database.</p>
-        </details>
-        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
-          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
-            Which file formats are supported?
-            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
-          </summary>
-          <p class="mt-4 text-on-surface-variant leading-relaxed">Markdown (.md), YAML, JSON, TOML for indexed data. PDFs and images can be indexed via companion .md metadata files. Plain text is also supported.</p>
-        </details>
-        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
-          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
-            Can I use multiple repositories?
-            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
-          </summary>
-          <p class="mt-4 text-on-surface-variant leading-relaxed">Yes. Run <code>local-doc sync</code> for each repository — all sources are merged into a single unified index and are searchable together.</p>
-        </details>
-        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
-          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
-            How does the Claude Code Skill work?
-            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
-          </summary>
-          <p class="mt-4 text-on-surface-variant leading-relaxed">The skill registers a local-doc query tool with Claude. When you ask a question, Claude calls the tool to search your local index and incorporates the results directly into its response.</p>
-        </details>
-      </div>
+  <!-- ── FAQ ── -->
+  <section id="faq" style="padding:3.5rem 3rem;">
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;margin:0 0 2rem;">Frequently Asked Questions</h2>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;max-width:720px;">
+      <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;">
+        <summary style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          Does local-doc require an internet connection?
+          <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.2rem;flex-shrink:0;">expand_more</span>
+        </summary>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0.75rem 0 0;">No. Once your index is synced, all search and retrieval operations run entirely offline against your local SQLite database.</p>
+      </details>
+      <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;">
+        <summary style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          Which file formats are supported?
+          <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.2rem;flex-shrink:0;">expand_more</span>
+        </summary>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0.75rem 0 0;">Markdown, YAML, JSON, TOML for indexed data. PDFs and images can be indexed via companion .md metadata files.</p>
+      </details>
+      <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;">
+        <summary style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          Can I use multiple repositories?
+          <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.2rem;flex-shrink:0;">expand_more</span>
+        </summary>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0.75rem 0 0;">Yes. Run <code>local-doc sync</code> for each repository — all sources are merged into a single unified index and are searchable together.</p>
+      </details>
+      <details style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;">
+        <summary style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          How does the Claude Code Skill work?
+          <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.2rem;flex-shrink:0;">expand_more</span>
+        </summary>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0.75rem 0 0;">The skill registers a local-doc query tool with Claude. When you ask a question, Claude calls the tool to search your local index and incorporates the results directly into its response.</p>
+      </details>
     </div>
   </section>
 
 </main>
 
-<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
-<footer class="w-full py-12 mt-4 bg-[#091328] border-t border-[#40485d]/20 flex flex-col items-center justify-center gap-4">
-  <div class="flex gap-8">
-    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Privacy</a>
-    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Terms</a>
-    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Security</a>
-    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Status</a>
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer style="background:var(--bg-alt);border-top:1px solid var(--border);padding:2.5rem 3rem;display:flex;flex-direction:column;align-items:flex-start;gap:1rem;">
+  <div style="display:flex;gap:2rem;">
+    <a href="#" style="color:var(--ink-muted);font-size:0.8rem;text-decoration:none;" onmouseover="this.style.color=`var(--blue)`" onmouseout="this.style.color=`var(--ink-muted)`">Privacy</a>
+    <a href="#" style="color:var(--ink-muted);font-size:0.8rem;text-decoration:none;" onmouseover="this.style.color=`var(--blue)`" onmouseout="this.style.color=`var(--ink-muted)`">Terms</a>
+    <a href="#" style="color:var(--ink-muted);font-size:0.8rem;text-decoration:none;" onmouseover="this.style.color=`var(--blue)`" onmouseout="this.style.color=`var(--ink-muted)`">Security</a>
+    <a href="#" style="color:var(--ink-muted);font-size:0.8rem;text-decoration:none;" onmouseover="this.style.color=`var(--blue)`" onmouseout="this.style.color=`var(--ink-muted)`">Status</a>
   </div>
-  <p class="text-xs text-[#dee5ff]/40">© 2024 local-doc. Built for the offline-first engineer.</p>
-  <div class="flex gap-4 mt-2">
-    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">terminal</span>
-    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">database</span>
-    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">cloud_off</span>
+  <p style="color:var(--ink-muted);font-size:0.78rem;margin:0;">© 2024 local-doc. Built for the offline-first engineer.</p>
+  <div style="display:flex;gap:1rem;">
+    <span class="material-symbols-outlined" style="color:var(--border);font-size:1.2rem;">terminal</span>
+    <span class="material-symbols-outlined" style="color:var(--border);font-size:1.2rem;">database</span>
+    <span class="material-symbols-outlined" style="color:var(--border);font-size:1.2rem;">cloud_off</span>
   </div>
 </footer>
 
-<!-- ═══════════════════════ ACTIVE NAV JS ═══════════════════════ -->
+<!-- Usage tabs JS -->
+<script>
+  function uTab(btn, id) {
+    document.querySelectorAll('.utab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.utab').forEach(b => {
+      b.style.color = 'var(--ink-muted)';
+      b.style.borderBottom = '2px solid transparent';
+    });
+    document.getElementById(id).style.display = 'block';
+    btn.style.color = 'var(--blue)';
+    btn.style.borderBottom = '2px solid var(--blue)';
+  }
+</script>
+
+<!-- Active nav JS -->
 <script>
   const sections = document.querySelectorAll('section[id], div[id="install"]');
   const navItems = document.querySelectorAll('#sidebar-nav a[data-section]');
-
   function setActive(id) {
     navItems.forEach(a => {
-      const isActive = a.dataset.section === id;
-      a.classList.toggle('active', isActive);
-      if (!isActive) {
-        a.style.color = '';
-        a.style.background = '';
-        a.style.transform = '';
-      }
+      const on = a.dataset.section === id;
+      a.classList.toggle('active', on);
     });
   }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) setActive(entry.target.id);
-    });
-  }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
-
-  sections.forEach(s => observer.observe(s));
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
 </script>
+
+<style>
+  @keyframes pulse {
+    0%,100% { opacity:1; }
+    50%      { opacity:0.4; }
+  }
+
+  /* sidebar visibility */
+  @media (min-width: 1024px) {
+    #sidebar        { display:flex !important; }
+    main, footer    { margin-left:240px; }
+  }
+
+  /* responsive two-col grids */
+  @media (max-width: 768px) {
+    [style*="grid-template-columns:2fr 1fr"],
+    [style*="grid-template-columns:1fr 1fr"],
+    [style*="grid-template-columns:repeat(3,1fr)"],
+    [style*="grid-template-columns:repeat(auto-fit"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
 </body>
 </html>
