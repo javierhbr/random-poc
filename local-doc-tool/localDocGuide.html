@@ -180,7 +180,7 @@ chmod +x /usr/local/bin/local-doc</code></pre>
 local-doc repo add ./product-specs product
 local-doc repo add ./platform-docs platform</code></pre>
                     </div>
-                    <p class="text-sm text-slate-500">It immediately reads `.md`, `.mdx`, and `.txt` files in these folders. You don't need to organize them—it finds them automatically.</p>
+                    <p class="text-sm text-slate-500">It immediately indexes <code>.md</code>, <code>.mdx</code>, and <code>.txt</code> files. Images (<code>.jpg</code>, <code>.png</code>, etc.) and PDFs are also indexed when a companion <code>.md</code> sidecar with the same name exists alongside them.</p>
                 </div>
             </div>
         </div>
@@ -201,6 +201,7 @@ local-doc repo add ./platform-docs platform</code></pre>
                     <button class="tab-btn px-6 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap" onclick="switchTab(event, 'tab-multi')">Smart Search</button>
                     <button class="tab-btn px-6 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap" onclick="switchTab(event, 'tab-browse')">Browsing</button>
                     <button class="tab-btn px-6 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap" onclick="switchTab(event, 'tab-read')">Reading Docs</button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap" onclick="switchTab(event, 'tab-media')">Images &amp; PDFs</button>
                 </div>
 
                 <div class="p-6">
@@ -270,6 +271,32 @@ local-doc repo add ./platform-docs platform</code></pre>
                                 # Refund flow<br><br>
                                 Process for managing customer refunds...<br>
                                 Step 1: Verify eligibility...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Images & PDFs -->
+                    <div id="tab-media" class="tab-content">
+                        <p class="text-slate-600 mb-4">Images and PDFs are indexed via a <strong>companion <code>.md</code> sidecar</strong> with the same base name. Only one result appears per asset — the path points directly to the image or PDF.</p>
+                        <div class="space-y-4">
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-2"># File layout — sidecar must share the same name</div>
+                                <div class="text-slate-200">diagrams/<br>
+&nbsp;&nbsp;<span class="text-emerald-400">architecture.png</span>  &larr; the image<br>
+&nbsp;&nbsp;<span class="text-yellow-400">architecture.md</span>   &larr; companion (title, tags, description)</div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-5 font-mono text-sm shadow-inner">
+                                <div class="text-slate-400 mb-2"># Search finds it — result path points to the .png</div>
+                                <div class="text-blue-400 mb-2">$ local-doc search architecture</div>
+                                <div class="text-slate-200">
+                                    &nbsp;&nbsp;1. <span class="text-emerald-400">[platform]</span> diagrams/architecture <span class="text-slate-400">(.png)</span><br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System Architecture Diagram<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-300">/path/to/diagrams/architecture.png</span>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-300 rounded-xl p-4 text-sm text-amber-900 flex gap-3 items-start">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"></i>
+                                <span>If no companion <code class="bg-amber-100 px-1 rounded text-amber-800">.md</code> exists, the image or PDF is <strong>skipped</strong> and a warning is shown. The sidecar is never shown as a separate result — it only provides metadata for its asset.</span>
                             </div>
                         </div>
                     </div>
@@ -415,7 +442,7 @@ local-doc repo add ./platform-docs platform</code></pre>
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="p-6 border border-slate-200 rounded-2xl">
                     <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="file-text" class="text-brand-500"></i> Your files are the boss</h4>
-                    <p class="text-slate-600 text-sm">Your actual Markdown (.md) or Text (.txt) files are the source of truth. You don't need to change how you format or organize them.</p>
+                    <p class="text-slate-600 text-sm">Your <code>.md</code>, <code>.txt</code>, images, and PDFs are always the source of truth. The database is a disposable cache — delete it any time.</p>
                 </div>
                 <div class="p-6 border border-slate-200 rounded-2xl">
                     <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><i data-lucide="database" class="text-brand-500"></i> Disposable Cache</h4>
@@ -461,7 +488,20 @@ local-doc repo add ./platform-docs platform</code></pre>
                         <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
                     </button>
                     <div class="faq-content hidden px-6 py-4 text-slate-600 border-t border-slate-100">
-                        No! Flat, nested, messy—it doesn't matter. The tool searches through every sub-folder to find `.md`, `.mdx`, and `.txt` files and ignores code files like `.js` or `.html`.
+                        No! Flat, nested, messy—it doesn't matter. The tool searches through every sub-folder to find <code>.md</code>, <code>.mdx</code>, <code>.txt</code>, images, and PDFs. Code files like <code>.js</code> or <code>.html</code> are ignored.
+                    </div>
+                </div>
+
+                <!-- FAQ Item: Images & PDFs -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                    <button class="faq-btn w-full px-6 py-4 text-left font-semibold flex justify-between items-center hover:bg-slate-50 transition" onclick="toggleFaq(this)">
+                        <span>How do I index an image or PDF?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 py-4 text-slate-600 border-t border-slate-100">
+                        Place a companion <code>.md</code> file with the <strong>same base name</strong> in the same folder. For example, <code>report.pdf</code> needs a <code>report.md</code> next to it containing a description, tags, and any context. The tool indexes the <code>.md</code> content and stores the path to the actual asset so AI agents can open it.
+                        <br><br>
+                        If no companion <code>.md</code> exists, the asset is skipped and a warning is printed.
                     </div>
                 </div>
 

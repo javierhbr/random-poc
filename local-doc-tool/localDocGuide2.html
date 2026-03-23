@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>local-doc — Documentation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline": "#6d758c",
+          "surface-dim": "#060e20",
+          "surface-container-highest": "#192540",
+          "tertiary": "#c4ffcd",
+          "on-tertiary-fixed-variant": "#006a34",
+          "on-secondary-fixed-variant": "#46556b",
+          "surface-container-high": "#141f38",
+          "secondary-fixed-dim": "#bacae4",
+          "inverse-on-surface": "#4d556b",
+          "tertiary-dim": "#5def8f",
+          "on-error": "#490006",
+          "primary-fixed-dim": "#05a9e3",
+          "on-tertiary": "#006833",
+          "on-primary-container": "#002b3d",
+          "error-container": "#9f0519",
+          "secondary": "#c8d8f3",
+          "on-primary-fixed": "#00121d",
+          "on-secondary": "#3c4c61",
+          "secondary-fixed": "#c8d8f3",
+          "on-secondary-container": "#c1d1eb",
+          "on-surface": "#dee5ff",
+          "background": "#060e20",
+          "on-tertiary-fixed": "#004a22",
+          "inverse-primary": "#00668b",
+          "on-primary": "#00374d",
+          "surface-container": "#0f1930",
+          "primary-dim": "#05a9e3",
+          "surface-container-lowest": "#000000",
+          "inverse-surface": "#faf8ff",
+          "tertiary-fixed": "#6dfe9c",
+          "secondary-container": "#38485d",
+          "secondary-dim": "#bacae4",
+          "primary": "#3bbffa",
+          "error": "#ff716c",
+          "on-background": "#dee5ff",
+          "surface-tint": "#3bbffa",
+          "surface-bright": "#1f2b49",
+          "primary-container": "#22b1ec",
+          "primary-fixed": "#2db7f2",
+          "on-primary-fixed-variant": "#003a50",
+          "surface": "#060e20",
+          "on-error-container": "#ffa8a3",
+          "tertiary-fixed-dim": "#5def8f",
+          "on-surface-variant": "#a3aac4",
+          "error-dim": "#d7383b",
+          "surface-variant": "#192540",
+          "outline-variant": "#40485d",
+          "surface-container-low": "#091328",
+          "on-tertiary-container": "#005f2e",
+          "on-secondary-fixed": "#29394e",
+          "tertiary-container": "#6dfe9c"
+        },
+        fontFamily: {
+          "headline": ["Space Grotesk"],
+          "body": ["Inter"],
+          "label": ["Space Grotesk"],
+          "mono": ["JetBrains Mono"]
+        },
+        borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #060e20; color: #dee5ff; }
+  html { scroll-behavior: smooth; }
+  .font-headline { font-family: 'Space Grotesk', sans-serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #40485d; border-radius: 10px; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .code-well { background-color: #000000; border-left: 2px solid #6dfe9c; }
+  /* Sidebar nav active state */
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: rgba(222,229,255,0.5); text-decoration: none; transition: all 0.15s ease; border-radius: 0.375rem; }
+  .nav-item:hover { color: #dee5ff; background: #0f1930; transform: translateX(4px); }
+  .nav-item.active { color: #3bbffa; background: #141f38; transform: none; }
+</style>
+</head>
+<body class="selection:bg-primary/30 selection:text-primary">
+
+<!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 bg-[#0f1930]/60 backdrop-blur-md shadow-2xl shadow-black/50">
+  <div class="flex items-center gap-8">
+    <a href="#intro" class="text-xl font-bold text-[#dee5ff] tracking-tighter font-headline no-underline">local-doc</a>
+    <div class="hidden md:flex gap-6 items-center">
+      <a class="text-[#3bbffa] border-b-2 border-[#3bbffa] pb-1 font-headline font-bold tracking-tight" href="#intro">Docs</a>
+      <a class="text-[#dee5ff]/70 hover:text-[#dee5ff] transition-colors font-headline font-bold tracking-tight" href="#features">Features</a>
+      <a class="text-[#dee5ff]/70 hover:text-[#dee5ff] transition-colors font-headline font-bold tracking-tight" href="#claude-skill">Claude Skill</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded text-sm text-on-surface-variant cursor-text">
+      <span class="material-symbols-outlined text-sm mr-2">search</span>
+      <span class="mr-4">Search specs...</span>
+      <span class="text-xs opacity-40 font-mono">⌘K</span>
+    </div>
+    <a href="#quick-start" class="material-symbols-outlined text-[#dee5ff]/70 hover:text-[#3bbffa] transition-colors" title="Quick Start">terminal</a>
+    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-headline font-bold px-4 py-1.5 rounded-sm scale-95 active:scale-90 transition-transform inline-block">GitHub</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 bg-[#091328] flex-col gap-1 px-4 z-40">
+  <div class="mb-6 px-2">
+    <h3 class="text-[#dee5ff] font-bold font-headline uppercase text-xs tracking-widest opacity-40">Documentation</h3>
+    <p class="text-[#3bbffa] text-[10px] font-mono mt-0.5">v1.2.0-stable</p>
+  </div>
+  <nav id="sidebar-nav" class="space-y-1">
+    <a href="#intro" data-section="intro" class="nav-item active">
+      <span class="material-symbols-outlined text-sm">info</span>Intro
+    </a>
+    <a href="#why" data-section="why" class="nav-item">
+      <span class="material-symbols-outlined text-sm">question_mark</span>Why
+    </a>
+    <a href="#install" data-section="install" class="nav-item">
+      <span class="material-symbols-outlined text-sm">download</span>Install
+    </a>
+    <a href="#quick-start" data-section="quick-start" class="nav-item">
+      <span class="material-symbols-outlined text-sm">bolt</span>Quick Start
+    </a>
+    <a href="#features" data-section="features" class="nav-item">
+      <span class="material-symbols-outlined text-sm">featured_play_list</span>Features
+    </a>
+    <a href="#claude-skill" data-section="claude-skill" class="nav-item">
+      <span class="material-symbols-outlined text-sm">auto_awesome</span>Claude Skill
+    </a>
+    <a href="#faq" data-section="faq" class="nav-item">
+      <span class="material-symbols-outlined text-sm">help_outline</span>FAQ
+    </a>
+  </nav>
+  <div class="mt-auto px-2 pb-4">
+    <a href="https://github.com/local-doc" target="_blank" rel="noopener noreferrer" class="block w-full text-center text-xs text-primary font-headline uppercase tracking-widest border border-primary/20 py-2 hover:bg-primary/5 transition-colors rounded-sm">View Source</a>
+  </div>
+</aside>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main class="lg:ml-64 pt-20 pb-12">
+
+  <!-- ─── HERO ─── -->
+  <section id="intro" class="px-6 md:px-12 py-16 md:py-24 max-w-6xl mx-auto">
+    <div class="flex flex-col gap-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-tertiary-container/10 border border-tertiary/20 rounded-full w-fit">
+        <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+        <span class="text-tertiary text-xs font-mono font-medium">New Release: v1.2.0 stable is out</span>
+      </div>
+      <h1 class="text-5xl md:text-7xl font-headline font-bold tracking-tighter leading-[0.9] max-w-3xl">
+        Documentation for the <span class="text-primary italic">Offline-First</span> Engineer.
+      </h1>
+      <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
+        Fast, dependency-free spec registry built on Bash and SQLite. Instant access to your team's technical knowledge, even when the Wi-Fi isn't.
+      </p>
+      <!-- Install Command -->
+      <div class="mt-8 max-w-2xl group" id="install">
+        <div class="bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/20 shadow-2xl relative">
+          <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-t-md mb-1 border-b border-outline-variant/10">
+            <div class="flex gap-1.5">
+              <div class="w-3 h-3 rounded-full bg-red-500/30"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/30"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/30"></div>
+            </div>
+            <span class="text-[10px] font-mono opacity-40 ml-4">install-script.sh</span>
+          </div>
+          <div class="p-6 font-mono text-sm md:text-base flex justify-between items-center overflow-x-auto whitespace-nowrap">
+            <span class="text-[#dee5ff]"><span class="text-tertiary mr-2">$</span>cp local-doc-tool.sh /usr/local/bin/local-doc</span>
+            <button id="copy-btn" onclick="navigator.clipboard.writeText('cp local-doc-tool.sh /usr/local/bin/local-doc').then(()=>{const i=document.getElementById('copy-btn');i.textContent='check';setTimeout(()=>i.textContent='content_copy',1500)})" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">content_copy</button>
+          </div>
+          <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-primary/10 blur-3xl -z-10 group-hover:bg-primary/20 transition-colors"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── WHY ─── -->
+  <section id="why" class="px-6 md:px-12 py-20 bg-primary/5">
+    <div class="max-w-6xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full w-fit mb-8">
+        <span class="material-symbols-outlined text-primary text-sm">question_mark</span>
+        <span class="text-primary text-xs font-mono font-medium">Why local-doc?</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex flex-col gap-4">
+          <span class="material-symbols-outlined text-primary text-3xl">wifi_off</span>
+          <h3 class="text-xl font-headline font-bold">Works Offline</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">Your team's knowledge lives locally. No cloud dependency, no outages, no latency spikes. Your docs are always there when you need them.</p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <span class="material-symbols-outlined text-tertiary text-3xl">speed</span>
+          <h3 class="text-xl font-headline font-bold">Sub-30ms Search</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">SQLite FTS5 with optimized indexing delivers benchmark-crushing response times across 50,000+ entries. Search feels instant.</p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <span class="material-symbols-outlined text-secondary text-3xl">settings_input_component</span>
+          <h3 class="text-xl font-headline font-bold">Zero Dependencies</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">Pure Bash and SQLite. No Node, no Python, no container. A single script that works on any Unix machine out of the box.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES BENTO ─── -->
+  <section id="features" class="px-6 md:px-12 py-20 bg-surface-container-low">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-tertiary-container/10 rounded-full mb-4">
+          <span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span>
+          <span class="text-[10px] font-mono font-bold text-tertiary-fixed uppercase tracking-wider">Core capabilities</span>
+        </div>
+        <h2 class="text-4xl font-headline font-bold tracking-tight text-on-surface mb-4">
+          Architectural <span class="text-primary italic">Intelligence</span>.
+        </h2>
+        <p class="text-lg text-on-surface-variant max-w-2xl font-light leading-relaxed">
+          local-doc isn't just a documentation generator; it's a technical ecosystem built to understand how engineers actually store knowledge.
+        </p>
+      </div>
+
+      <!-- Bento grid row 1 -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+        <div class="md:col-span-8 bg-surface-container p-8 rounded-xl border border-outline-variant/10 flex flex-col justify-between">
+          <div>
+            <span class="material-symbols-outlined text-tertiary text-4xl mb-4" style="font-variation-settings: 'FILL' 1;">speed</span>
+            <h3 class="text-2xl font-headline font-bold mb-2">Fast Offline Search</h3>
+            <p class="text-on-surface-variant text-base">Benchmark-crushing 30ms response times across 50,000+ entries. Local-doc uses optimized SQLite FTS5 indexing for semantic-aware matching.</p>
+          </div>
+          <div class="mt-8 pt-8 border-t border-outline-variant/10 flex gap-4">
+            <div class="flex flex-col">
+              <span class="text-3xl font-bold font-mono text-primary">30ms</span>
+              <span class="text-[10px] uppercase tracking-widest opacity-40">Search Latency</span>
+            </div>
+            <div class="flex flex-col pl-6 border-l border-outline-variant/10">
+              <span class="text-3xl font-bold font-mono text-primary">0%</span>
+              <span class="text-[10px] uppercase tracking-widest opacity-40">Cloud Dependency</span>
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10 relative overflow-hidden group">
+          <span class="material-symbols-outlined text-primary text-4xl mb-4">settings_input_component</span>
+          <h3 class="text-2xl font-headline font-bold mb-2">Zero Deps</h3>
+          <p class="text-on-surface-variant text-sm">Runs on pure Bash and SQLite. No Node, no Python, no bloat. Just portable, high-performance binary tooling.</p>
+          <div class="absolute -right-8 -bottom-8 opacity-10 group-hover:opacity-20 transition-opacity">
+            <span class="material-symbols-outlined text-[120px]">terminal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bento grid row 2 -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
+          <span class="material-symbols-outlined text-primary text-4xl mb-4">sync</span>
+          <h3 class="text-2xl font-headline font-bold mb-2">Git Smart</h3>
+          <p class="text-on-surface-variant text-sm">Incremental updates that only pull what changed. Git-based diffing ensures your local cache is always in sync with minimal data transfer.</p>
+        </div>
+        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
+          <span class="material-symbols-outlined text-primary text-4xl mb-4">account_tree</span>
+          <h3 class="text-2xl font-headline font-bold mb-2">Multi-Repo</h3>
+          <p class="text-on-surface-variant text-sm">Aggregate documentation from unlimited repositories into a single searchable index. Support for monorepos and microservices.</p>
+        </div>
+        <div class="md:col-span-4 bg-surface-container p-8 rounded-xl border border-outline-variant/10">
+          <span class="material-symbols-outlined text-tertiary text-4xl mb-4">picture_as_pdf</span>
+          <h3 class="text-2xl font-headline font-bold mb-2">Visual Indexing</h3>
+          <p class="text-on-surface-variant text-sm">Index companion PDFs and images. Search through metadata and OCR-enhanced snippets of visual documentation.</p>
+        </div>
+      </div>
+
+      <!-- Change Detection deep-dive -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+        <div class="md:col-span-8 bg-surface-container rounded-lg p-8 relative overflow-hidden group">
+          <h2 class="text-3xl font-headline font-bold mb-4">Change Detection</h2>
+          <p class="text-on-surface-variant mb-8 max-w-xl">Our intelligent sync engine determines the delta between your local disk and the registry. We optimize for speed by leveraging existing metadata providers.</p>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-surface-container-low p-6 rounded-md border-l-2 border-primary">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-primary">commit</span>
+                <h3 class="font-headline font-bold uppercase text-xs tracking-widest">Git Integration</h3>
+              </div>
+              <p class="text-sm text-on-surface-variant leading-relaxed mb-4">Uses <code>git-diff-index</code> to compare your working tree against the last indexed hash. Lightning fast, zero configuration required.</p>
+              <div class="bg-surface-container-lowest p-3 rounded-sm font-mono text-[11px] text-tertiary-dim">$ local-doc sync --git-only</div>
+            </div>
+            <div class="bg-surface-container-low p-6 rounded-md border-l-2 border-tertiary-fixed">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-tertiary-fixed">update</span>
+                <h3 class="font-headline font-bold uppercase text-xs tracking-widest">MTime Hashing</h3>
+              </div>
+              <p class="text-sm text-on-surface-variant leading-relaxed mb-4">For non-git environments, we fall back to a robust recursive file-hash and modification timestamp check across your workspace.</p>
+              <div class="bg-surface-container-lowest p-3 rounded-sm font-mono text-[11px] text-primary">$ local-doc sync --full-scan</div>
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-4 bg-surface-container rounded-lg p-8 flex flex-col justify-between border-t border-white/5">
+          <div>
+            <h2 class="text-3xl font-headline font-bold mb-4">File Types</h2>
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">local-doc categorizes your data into two distinct streams to maximize both discoverability and visual richness.</p>
+          </div>
+          <ul class="space-y-4">
+            <li class="flex gap-4">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-2"></span>
+              <div>
+                <span class="font-mono text-sm text-primary-fixed">Indexed Data</span>
+                <p class="text-[12px] text-on-surface-variant">YAML, JSON, and TOML structures. Fully searchable fields.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <span class="w-1.5 h-1.5 rounded-full bg-tertiary mt-2"></span>
+              <div>
+                <span class="font-mono text-sm text-tertiary-fixed">Visual Patterns</span>
+                <p class="text-[12px] text-on-surface-variant">Companion <code>.md</code> patterns for rich media, diagrams, and formatting.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Search Strategy Table -->
+      <div class="mb-12">
+        <div class="mb-10 text-center max-w-3xl mx-auto">
+          <h2 class="text-4xl font-headline font-bold mb-4 tracking-tight">Search Strategy Comparison</h2>
+          <p class="text-on-surface-variant">We support multiple search layers depending on your deployment scale and hardware constraints.</p>
+        </div>
+        <div class="bg-surface-container rounded-lg overflow-hidden border-b border-primary/20">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-high">
+                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Strategy</th>
+                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Latency</th>
+                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Precision</th>
+                  <th class="py-5 px-8 font-headline font-bold uppercase text-xs tracking-widest text-primary">Requirements</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                <tr class="hover:bg-surface-bright/30 transition-colors">
+                  <td class="py-5 px-8">
+                    <div class="font-headline font-bold">Local SQLite FTS5</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Default Engine</div>
+                  </td>
+                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-tertiary-container/10 text-tertiary-fixed border border-tertiary-fixed/20">&lt;10ms</span></td>
+                  <td class="py-5 px-8 text-sm text-on-surface-variant">High (Exact Match)</td>
+                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Standard binary</td>
+                </tr>
+                <tr class="hover:bg-surface-bright/30 transition-colors">
+                  <td class="py-5 px-8">
+                    <div class="font-headline font-bold">Elasticsearch Sync</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Cloud/Registry Tier</div>
+                  </td>
+                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary-fixed border border-secondary-fixed/20">~50ms</span></td>
+                  <td class="py-5 px-8 text-sm text-on-surface-variant">Ultra (Semantic/Fuzzy)</td>
+                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Remote Instance</td>
+                </tr>
+                <tr class="hover:bg-surface-bright/30 transition-colors">
+                  <td class="py-5 px-8">
+                    <div class="font-headline font-bold">In-Memory JSON</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono mt-1">Lightweight/WASM</div>
+                  </td>
+                  <td class="py-5 px-8"><span class="text-xs px-2 py-0.5 rounded-full bg-error-container/10 text-on-error-container border border-error/20">~150ms</span></td>
+                  <td class="py-5 px-8 text-sm text-on-surface-variant">Medium (Basic Grep)</td>
+                  <td class="py-5 px-8 text-xs font-mono text-slate-400">Zero Dependencies</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Companion .md Pattern -->
+      <div class="bg-surface-container-lowest rounded-lg p-1 border-l-2 border-tertiary-fixed">
+        <div class="grid lg:grid-cols-2 gap-8 p-8">
+          <div>
+            <h3 class="text-2xl font-headline font-bold mb-4">The Companion .md Pattern</h3>
+            <p class="text-on-surface-variant mb-6 leading-relaxed">
+              Most documentation tools force you to choose between structured data and freeform markdown.
+              local-doc enables a "Ghost Doc" system where <code>config.yaml</code> stores the attributes,
+              and <code>config.md</code> provides the visual story.
+            </p>
+            <div class="flex items-start gap-4 p-4 bg-surface-container rounded-sm">
+              <span class="material-symbols-outlined text-tertiary-fixed">auto_awesome</span>
+              <div>
+                <h4 class="text-sm font-bold">Automatic Pairing</h4>
+                <p class="text-xs text-on-surface-variant mt-1">Files with matching names are automatically merged into a single UI view.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-surface-container rounded-sm p-4 font-mono text-xs overflow-hidden">
+            <div class="flex gap-4 border-b border-white/5 pb-2 mb-4">
+              <span class="text-tertiary-fixed border-b border-tertiary-fixed pb-1">api_v1.yaml</span>
+              <span class="text-on-surface-variant">api_v1.md</span>
+            </div>
+            <pre class="text-slate-400"><span class="text-primary">name:</span> <span class="text-tertiary">"Auth Service"</span>
+<span class="text-primary">endpoint:</span> <span class="text-tertiary">"/api/v1/auth"</span>
+<span class="text-primary">status:</span> <span class="text-tertiary">"stable"</span>
+<span class="text-primary">tags:</span>
+  - <span class="text-tertiary">"security"</span>
+  - <span class="text-tertiary">"core"</span></pre>
+            <div class="mt-8 pt-4 border-t border-white/5">
+              <div class="w-full h-24 bg-surface-container-high rounded flex items-center justify-center italic text-on-surface-variant">
+                Preview of api_v1.md rendering here...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMMAND INTERFACE ─── -->
+  <section id="commands" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
+    <h2 class="text-4xl font-headline font-bold mb-16 border-l-4 border-primary pl-6">Command Interface</h2>
+    <div class="space-y-16">
+      <!-- Search -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h3 class="text-2xl font-bold mb-4 font-headline">Search with Precision</h3>
+          <p class="text-on-surface-variant mb-6">Locate any specification across your entire org using full-text search. Filters allow for scoping by tag, repo, or date.</p>
+          <ul class="space-y-3">
+            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Fuzzy matching enabled by default</li>
+            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Highlighting of matching context</li>
+            <li class="flex gap-3 text-sm font-medium"><span class="text-tertiary">✔</span> Keyboard-first navigation</li>
+          </ul>
+        </div>
+        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-tertiary shadow-xl">
+          <div class="text-[#dee5ff]/40 mb-2"># Search for auth flows</div>
+          <div class="mb-4 text-primary">$ local-doc search "auth-flow" --repo internal-core</div>
+          <div class="text-[#dee5ff]/80">
+            [1] INTERNAL-CORE: <span class="bg-tertiary/20 text-tertiary">auth-flow</span>.md (Score: 0.98)<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;"...redirecting users to the <span class="bg-tertiary/20 text-tertiary">auth-flow</span> logic..."<br/>
+            [2] API-SPEC: oauth2-<span class="bg-tertiary/20 text-tertiary">auth-flow</span>.json (Score: 0.85)<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;"...implements standard OAuth2..."
+          </div>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="lg:order-last">
+          <h3 class="text-2xl font-bold mb-4 font-headline">Registry Stats</h3>
+          <p class="text-on-surface-variant mb-6">Get a bird's-eye view of your documentation health. Track coverage, staleness, and repository contributions.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-primary shadow-xl">
+          <div class="mb-2 text-primary">$ local-doc stats --summary</div>
+          <div class="grid grid-cols-2 gap-4 mt-4">
+            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Total Docs</div><div class="text-lg font-bold">12,482</div></div>
+            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Index Size</div><div class="text-lg font-bold">142MB</div></div>
+            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Freshness</div><div class="text-lg font-bold text-tertiary">98.2%</div></div>
+            <div class="bg-surface-container p-3 rounded border border-outline-variant/10"><div class="opacity-40 mb-1">Contributors</div><div class="text-lg font-bold">42</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- JSON -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h3 class="text-2xl font-bold mb-4 font-headline">Machine Readable</h3>
+          <p class="text-on-surface-variant mb-6">Integrate local-doc with your CI/CD pipelines or custom dashboards using standard JSON output. Piping docs into JQ has never been easier.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-md p-4 font-mono text-xs border-l-2 border-secondary shadow-xl max-h-64 overflow-y-auto custom-scrollbar">
+          <div class="mb-2 text-primary">$ local-doc get spec/v1 --json</div>
+          <div class="text-[#c4ffcd]">
+            {<br/>
+            &nbsp;&nbsp;"id": "spec-v1",<br/>
+            &nbsp;&nbsp;"meta": {<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;"version": "1.0.2",<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;"author": "infra-team",<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;"tags": ["api", "stable"]<br/>
+            &nbsp;&nbsp;},<br/>
+            &nbsp;&nbsp;"content": "...",<br/>
+            &nbsp;&nbsp;"last_sync": "2024-05-20T12:00:00Z"<br/>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CLAUDE CODE SKILL ─── -->
+  <section id="claude-skill" class="px-6 md:px-12 py-20 bg-surface-container-low">
+    <div class="max-w-6xl mx-auto">
+      <!-- Hero -->
+      <div class="mb-16">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="bg-tertiary-container text-on-tertiary-container text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">New Integration</span>
+          <div class="h-px flex-grow bg-outline-variant/20"></div>
+        </div>
+        <h2 class="text-5xl md:text-6xl font-headline font-bold mb-6 tracking-tighter">
+          Claude <span class="text-primary italic">Code Skill</span>
+        </h2>
+        <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
+          Supercharge your documentation workflow by enabling Claude to directly interact with your local-doc indices. No more manual context pasting.
+        </p>
+      </div>
+
+      <!-- Capabilities bento -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
+          <div class="bg-primary/10 w-12 h-12 flex items-center justify-center rounded-sm">
+            <span class="material-symbols-outlined text-primary">data_exploration</span>
+          </div>
+          <h3 class="text-2xl font-headline font-bold">Extract</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">Automatically pulls semantic metadata and structural anchors from your codebase and documentation clusters.</p>
+        </div>
+        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
+          <div class="bg-tertiary-container/10 w-12 h-12 flex items-center justify-center rounded-sm">
+            <span class="material-symbols-outlined text-tertiary-dim">menu_book</span>
+          </div>
+          <h3 class="text-2xl font-headline font-bold">Read</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">High-speed access to indexed documents, allowing Claude to ingest thousands of pages of context in milliseconds.</p>
+        </div>
+        <div class="bg-surface-container p-8 rounded-lg flex flex-col gap-4 hover:bg-surface-container-high transition-colors">
+          <div class="bg-primary-container/10 w-12 h-12 flex items-center justify-center rounded-sm">
+            <span class="material-symbols-outlined text-primary-fixed">psychology</span>
+          </div>
+          <h3 class="text-2xl font-headline font-bold">Reason</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed">Leverages local-doc's relationship mapping to build complex search strategies and connect disparate technical concepts.</p>
+        </div>
+      </div>
+
+      <!-- Installation -->
+      <div class="mb-16">
+        <h3 class="text-3xl font-headline font-bold mb-8">Installation</h3>
+        <div class="code-well p-6 rounded-md">
+          <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/10 pb-2">
+            <span class="w-3 h-3 rounded-full bg-error-dim"></span>
+            <span class="w-3 h-3 rounded-full bg-primary"></span>
+            <span class="w-3 h-3 rounded-full bg-tertiary-dim"></span>
+            <span class="ml-4 text-xs font-mono text-outline-variant">Terminal — zsh</span>
+          </div>
+          <pre class="font-mono text-sm leading-relaxed text-on-surface"><span class="text-tertiary"># Install the local-doc claude-bridge extension</span>
+<span class="text-primary">npm</span> install -g @local-doc/claude-skill
+
+<span class="text-tertiary"># Connect your index</span>
+<span class="text-primary">local-doc</span> link-claude --index=./docs/v2 --key=$CLAUDE_API_KEY</pre>
+        </div>
+      </div>
+
+      <!-- Search Strategy Steps -->
+      <div class="mb-16">
+        <div class="bg-surface-container p-10 rounded-xl">
+          <h3 class="text-3xl font-headline font-bold mb-4">Claude's Search Strategy</h3>
+          <p class="text-on-surface-variant mb-10 max-w-xl">Watch how the Code Skill translates high-level prompts into granular documentation lookups.</p>
+          <div class="space-y-8">
+            <div class="flex gap-6 items-start">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full border border-primary flex items-center justify-center text-primary font-bold">1</div>
+                <div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+              </div>
+              <div class="flex-1 pb-8">
+                <p class="text-xs text-primary font-mono uppercase tracking-widest mb-1">User Intent</p>
+                <div class="bg-surface-container-low p-4 rounded-sm border-l-4 border-primary">
+                  <p class="text-on-surface font-medium italic">"How does the middleware handle auth headers in the new API?"</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-6 items-start">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full border border-tertiary-dim flex items-center justify-center text-tertiary-dim font-bold">2</div>
+                <div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+              </div>
+              <div class="flex-1 pb-8">
+                <p class="text-xs text-tertiary-dim font-mono uppercase tracking-widest mb-1">Claude's Strategic Plan</p>
+                <div class="bg-surface-container-lowest p-6 rounded-md border border-outline-variant/10">
+                  <ul class="space-y-3 text-sm text-on-surface-variant">
+                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-tertiary-dim text-lg">check_circle</span><span>Search for <code>middleware/auth</code> definition.</span></li>
+                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-tertiary-dim text-lg">check_circle</span><span>Extract header key constants from <code>registry/headers.json</code>.</span></li>
+                    <li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-lg">sync</span><span class="text-on-surface">Reasoning: Checking for cross-references in security audits.</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-6 items-start">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full border border-primary-dim flex items-center justify-center text-primary font-bold">3</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-xs text-primary font-mono uppercase tracking-widest mb-1">Response</p>
+                <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6 shadow-2xl">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+                    </div>
+                    <span class="text-sm font-bold opacity-60">Claude — local-doc skill</span>
+                  </div>
+                  <div class="space-y-4 font-mono text-sm">
+                    <div class="flex gap-3"><span class="text-primary-container">User:</span><span>"Claude, what's the retry policy for our payment gateway?"</span></div>
+                    <div class="flex gap-3"><span class="text-tertiary">Claude:</span><span class="text-on-surface-variant italic"># Querying local-doc registry...</span></div>
+                    <div class="flex gap-3 text-[#dee5ff]"><span class="opacity-0">Claude:</span><span>"According to 'payments-v2.md' in the internal-specs repo, the retry policy is 3 attempts with exponential backoff (2s, 4s, 8s)."</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JSON Mode -->
+      <div class="flex flex-col md:flex-row gap-12 items-center">
+        <div class="md:w-1/2">
+          <h3 class="text-4xl font-headline font-bold mb-4">Precision JSON Mode</h3>
+          <p class="text-on-surface-variant leading-relaxed mb-6">
+            Need results for another tool? The Claude Code Skill supports a strict <code>--json</code> mode that returns structured objects instead of natural language, perfect for CI/CD pipelines and custom automation.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--json</span>
+            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--pretty</span>
+            <span class="bg-surface-container-high px-3 py-1 text-xs text-primary font-mono rounded">--filter=schema</span>
+          </div>
+        </div>
+        <div class="md:w-1/2 w-full">
+          <div class="bg-black p-6 rounded-lg shadow-2xl relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+              <span class="material-symbols-outlined text-primary text-6xl">code_blocks</span>
+            </div>
+            <pre class="font-mono text-xs leading-relaxed"><span class="text-outline-variant">{</span>
+  <span class="text-primary">"status"</span>: <span class="text-tertiary">"success"</span>,
+  <span class="text-primary">"results"</span>: [
+    {
+      <span class="text-primary">"id"</span>: <span class="text-tertiary">"auth_v2_1"</span>,
+      <span class="text-primary">"confidence"</span>: <span class="text-tertiary">0.98</span>,
+      <span class="text-primary">"path"</span>: <span class="text-tertiary">"lib/middleware/auth.ts"</span>,
+      <span class="text-primary">"tags"</span>: [<span class="text-tertiary">"security"</span>, <span class="text-tertiary">"api"</span>]
+    }
+  ]
+<span class="text-outline-variant">}</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── QUICK START + COMMAND REFERENCE ─── -->
+  <section id="quick-start" class="px-6 md:px-12 py-24 max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+      <div>
+        <h3 class="text-3xl font-headline font-bold mb-8">Quick Start</h3>
+        <div class="space-y-6">
+          <div class="flex gap-6">
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">1</div>
+              <div class="flex-1 w-px bg-outline-variant/20 my-2"></div>
+            </div>
+            <div>
+              <h4 class="font-bold mb-2">Initialize Repository</h4>
+              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc init</div>
+              <p class="text-sm text-on-surface-variant">Creates a local SQLite index in ~/.local-doc/index.db</p>
+            </div>
+          </div>
+          <div class="flex gap-6">
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">2</div>
+              <div class="flex-1 w-px bg-outline-variant/20 my-2"></div>
+            </div>
+            <div>
+              <h4 class="font-bold mb-2">Sync Your Specs</h4>
+              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc sync git@github.com:org/specs.git</div>
+              <p class="text-sm text-on-surface-variant">Clones and indexes the repository incrementally.</p>
+            </div>
+          </div>
+          <div class="flex gap-6">
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary border border-primary/20">3</div>
+            </div>
+            <div>
+              <h4 class="font-bold mb-2">Start Querying</h4>
+              <div class="bg-surface-container-lowest p-3 rounded font-mono text-xs text-primary mb-2">$ local-doc find "api-version"</div>
+              <p class="text-sm text-on-surface-variant">Instant, lightning-fast results from your local cache.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-3xl font-headline font-bold mb-8">Command Reference</h3>
+        <div class="bg-surface-container rounded-lg overflow-hidden border border-outline-variant/10">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="bg-surface-container-high">
+                <th class="px-4 py-3 font-headline font-bold uppercase tracking-wider text-[10px] opacity-40">Command</th>
+                <th class="px-4 py-3 font-headline font-bold uppercase tracking-wider text-[10px] opacity-40">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+              <tr><td class="px-4 py-4 font-mono text-primary">search [term]</td><td class="px-4 py-4 text-on-surface-variant">Full-text search through all indexed docs.</td></tr>
+              <tr><td class="px-4 py-4 font-mono text-primary">add [url]</td><td class="px-4 py-4 text-on-surface-variant">Add a new Git repository to the registry.</td></tr>
+              <tr><td class="px-4 py-4 font-mono text-primary">refresh</td><td class="px-4 py-4 text-on-surface-variant">Force a pull and re-index of all sources.</td></tr>
+              <tr><td class="px-4 py-4 font-mono text-primary">export --format pdf</td><td class="px-4 py-4 text-on-surface-variant">Bundle and export specific docs as PDF.</td></tr>
+              <tr><td class="px-4 py-4 font-mono text-primary">serve --port 8080</td><td class="px-4 py-4 text-on-surface-variant">Spawn a local web interface for browsing.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ ─── -->
+  <section id="faq" class="px-6 md:px-12 py-20 bg-surface-container-low">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-4xl font-headline font-bold mb-12">Frequently Asked Questions</h2>
+      <div class="space-y-6">
+        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
+          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
+            Does local-doc require an internet connection?
+            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <p class="mt-4 text-on-surface-variant leading-relaxed">No. Once your index is synced, all search and retrieval operations run entirely offline against your local SQLite database.</p>
+        </details>
+        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
+          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
+            Which file formats are supported?
+            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <p class="mt-4 text-on-surface-variant leading-relaxed">Markdown (.md), YAML, JSON, TOML for indexed data. PDFs and images can be indexed via companion .md metadata files. Plain text is also supported.</p>
+        </details>
+        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
+          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
+            Can I use multiple repositories?
+            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <p class="mt-4 text-on-surface-variant leading-relaxed">Yes. Run <code>local-doc sync</code> for each repository — all sources are merged into a single unified index and are searchable together.</p>
+        </details>
+        <details class="bg-surface-container rounded-lg p-6 group cursor-pointer">
+          <summary class="font-headline font-bold text-lg list-none flex justify-between items-center">
+            How does the Claude Code Skill work?
+            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <p class="mt-4 text-on-surface-variant leading-relaxed">The skill registers a local-doc query tool with Claude. When you ask a question, Claude calls the tool to search your local index and incorporates the results directly into its response.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer class="w-full py-12 mt-4 bg-[#091328] border-t border-[#40485d]/20 flex flex-col items-center justify-center gap-4">
+  <div class="flex gap-8">
+    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Privacy</a>
+    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Terms</a>
+    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Security</a>
+    <a class="text-[#dee5ff]/40 hover:text-[#3bbffa] transition-colors text-xs" href="#">Status</a>
+  </div>
+  <p class="text-xs text-[#dee5ff]/40">© 2024 local-doc. Built for the offline-first engineer.</p>
+  <div class="flex gap-4 mt-2">
+    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">terminal</span>
+    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">database</span>
+    <span class="material-symbols-outlined text-[#dee5ff]/20 text-xl">cloud_off</span>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ ACTIVE NAV JS ═══════════════════════ -->
+<script>
+  const sections = document.querySelectorAll('section[id], div[id="install"]');
+  const navItems = document.querySelectorAll('#sidebar-nav a[data-section]');
+
+  function setActive(id) {
+    navItems.forEach(a => {
+      const isActive = a.dataset.section === id;
+      a.classList.toggle('active', isActive);
+      if (!isActive) {
+        a.style.color = '';
+        a.style.background = '';
+        a.style.transform = '';
+      }
+    });
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) setActive(entry.target.id);
+    });
+  }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

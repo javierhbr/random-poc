@@ -189,7 +189,7 @@ Local Doc Stats
   Projects:       5
   Unique tags:    16
   Total size:     2384 bytes
-  File types:     md,mdx,txt
+  File types:     md,mdx,txt,jpg,pdf
   Database:       56K
   Last scan:      2026-03-15 00:48:12
 
@@ -262,22 +262,31 @@ local-doc list frontend      # Browse one repo
 
 ## Supported file types
 
+### Text files (indexed directly)
+
 - `.md` — Markdown
 - `.mdx` — MDX (Markdown + JSX)
 - `.txt` — Plain text
 
+### Visual / document files (require a companion `.md`)
+
+- `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg` — Images
+- `.pdf` — PDF documents
+
 ## Spec format
 
-Any repo structure works. The tool recursively scans for `.md`, `.mdx`, and `.txt` files — everything else is ignored. You don't need to reorganize anything.
+Any repo structure works. The tool recursively scans for `.md`, `.mdx`, `.txt`, and visual/document files. You don't need to reorganize anything.
 
 ```
 # All of these work — flat, nested, monorepo, whatever
 my-project/
-  src/docs/api.md             ← found
-  README.md                   ← found
-  payments/refund.md          ← found
-  deep/nested/folder/spec.txt ← found
-  app.ts                      ← ignored (not .md/.mdx/.txt)
+  src/docs/api.md             ← indexed
+  README.md                   ← indexed
+  payments/refund.md          ← indexed
+  deep/nested/folder/spec.txt ← indexed
+  diagrams/architecture.png   ← indexed via companion .md (see below)
+  reports/q1.pdf              ← indexed via companion .md (see below)
+  app.ts                      ← ignored (not a supported type)
 ```
 
 Optional YAML frontmatter adds tags:
@@ -290,6 +299,57 @@ tags: billing, refund, customer
 # Refund flow
 ...
 ```
+
+## Images and PDFs — companion `.md` pattern
+
+Images and PDF files are supported via a **companion `.md` sidecar file**. The sidecar must have the exact same base name in the same directory:
+
+```
+diagrams/
+  architecture.png        ← the visual asset
+  architecture.md         ← companion sidecar (required)
+
+reports/
+  q1-summary.pdf          ← the document
+  q1-summary.md           ← companion sidecar (required)
+```
+
+The sidecar `.md` provides the **content that gets indexed** (title, tags, description, context). The search result's path points to the actual image or PDF so AI agents can open it directly.
+
+**If no companion `.md` exists**, the image/PDF is skipped and a warning is printed:
+
+```text
+Warning: /path/to/diagram.png — skipped (no companion .md with metadata)
+```
+
+**Example sidecar** (`architecture.md`):
+
+```markdown
+---
+tags: architecture, database, infrastructure
+---
+
+# System Architecture Diagram
+
+Overview of the platform's three-tier architecture. Shows the relationship
+between the web layer, API layer, and database cluster. Use this diagram
+when explaining deployment topology or onboarding new engineers.
+```
+
+**Search result** — only one entry per image/PDF, path points to the asset:
+
+```text
+$ local-doc search architecture
+
+Results for "architecture":
+
+  1. [platform] diagrams/architecture  (.png)
+     System Architecture Diagram
+     tags: architecture, database, infrastructure
+     /path/to/diagrams/architecture.png
+```
+
+The `.md` sidecar is not indexed as a separate record — it only serves as metadata for its companion asset.
 
 ## Full command reference
 
@@ -374,8 +434,8 @@ When a registered repo has git initialized, `local-doc` uses git to detect chang
 
 1. On the first full scan (`local-doc scan` or `repo add`), the current `HEAD` commit hash is stored in the database
 2. On every subsequent query, the tool compares the stored commit against the current `HEAD`
-3. If commits differ, it asks git for the exact list of changed `.md`/`.mdx`/`.txt` files
-4. It also checks for uncommitted changes (staged, unstaged, and untracked spec files)
+3. If commits differ, it asks git for the exact list of changed spec and media files
+4. It also checks for uncommitted changes (staged, unstaged, and untracked files)
 5. Only the changed files are re-indexed — no full rebuild needed
 
 **What gets detected:**
@@ -385,7 +445,7 @@ When a registered repo has git initialized, `local-doc` uses git to detect chang
 | New commits (pushed or local) | Yes | `git diff --name-only <old>..<new>` |
 | Edited but uncommitted files | Yes | `git diff --name-only` |
 | Staged files | Yes | `git diff --cached --name-only` |
-| New untracked spec files | Yes | `git ls-files --others --exclude-standard` |
+| New untracked spec/media files | Yes | `git ls-files --others --exclude-standard` |
 | Deleted files | Yes | Removed from the index automatically |
 | Files in `.gitignore` | No | Ignored, same as git |
 
@@ -424,12 +484,13 @@ You never have to think about the index.
 
 ## How it works
 
-1. Your files (.md, .mdx, .txt) are always the **source of truth**
+1. Your files (`.md`, `.mdx`, `.txt`, images, PDFs) are always the **source of truth**
 2. `local-doc` reads them and builds a SQLite FTS5 index
-3. The `.db` file is a **disposable cache** at `~/.local-doc/specs.db`
-4. Searches use Porter stemming + BM25 ranking
-5. Delete the `.db` anytime — it auto-rebuilds on next use
-6. For git repos, commit hashes are stored in the database to enable incremental updates
+3. For images and PDFs, the companion `.md` sidecar is what gets indexed; the asset path is stored so agents can open it
+4. The `.db` file is a **disposable cache** at `~/.local-doc/specs.db`
+5. Searches use Porter stemming + BM25 ranking
+6. Delete the `.db` anytime — it auto-rebuilds on next use
+7. For git repos, commit hashes are stored in the database to enable incremental updates
 
 ## Performance
 
@@ -511,7 +572,7 @@ A full scan (`local-doc scan`) drops the entire database and re-indexes everythi
 Yes. Each repo is evaluated independently. You can have three git repos and two plain folders registered at the same time. Each uses the appropriate change detection strategy.
 
 **Q: Does it respect `.gitignore`?**
-For git repos, yes. Untracked file detection uses `git ls-files --others --exclude-standard`, which honors `.gitignore`. For non-git repos, all `.md`/`.mdx`/`.txt` files are indexed regardless.
+For git repos, yes. Untracked file detection uses `git ls-files --others --exclude-standard`, which honors `.gitignore`. For non-git repos, all supported file types are indexed regardless.
 
 **Q: What if I rebase, amend, or force-push?**
 The tool stores the last scanned commit hash. If `HEAD` changes for any reason (rebase, amend, reset, force-push), it detects the difference and incrementally updates. If the old commit hash no longer exists in history, git's `diff` may fail gracefully and the tool falls back to treating all spec files as changed.
