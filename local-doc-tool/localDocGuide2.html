@@ -10,18 +10,18 @@
 <style>
   /* ── Palette ── */
   :root {
-    --bg:        #f2ede6;   /* warm parchment */
-    --bg-alt:    #ebe5dc;   /* slightly deeper, for alternating sections */
-    --card:      #ede8e0;   /* card / panel background */
-    --card-deep: #e4ddd3;   /* deeper card, table header */
-    --border:    #ccc3b5;   /* borders */
-    --ink:       #1a1410;   /* main text */
-    --ink-muted: #6b5e50;   /* secondary text */
-    --blue:      #1565c0;   /* primary accent */
-    --blue-bg:   #e3edf8;   /* light blue fill */
-    --green:     #2e7d32;   /* success / secondary accent */
-    --green-bg:  #e8f5e9;   /* light green fill */
-    --code-bg:   #f8f4ef;   /* inline code / terminal bg */
+    --bg:        #f8fafc;   /* cool near-white */
+    --bg-alt:    #f1f5f9;   /* slate-100 */
+    --card:      #ffffff;   /* white card */
+    --card-deep: #e2e8f0;   /* slate-200 */
+    --border:    #cbd5e1;   /* slate-300 */
+    --ink:       #0f172a;   /* slate-900 */
+    --ink-muted: #64748b;   /* slate-500 */
+    --blue:      #2563eb;   /* brand-600 */
+    --blue-bg:   #dbeafe;   /* brand-100 */
+    --green:     #8b5cf6;   /* violet-500 */
+    --green-bg:  #ede9fe;   /* violet-100 */
+    --code-bg:   #1e293b;   /* slate-800 — dark terminal */
   }
 
   html  { scroll-behavior: smooth; }
@@ -55,13 +55,13 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.8rem;
     line-height: 1.7;
-    color: var(--ink);
+    color: #e2e8f0;
     overflow-x: auto;
   }
-  .code-block .cm  { color: var(--green); }   /* comment */
-  .code-block .kw  { color: var(--blue); }    /* keyword / command */
-  .code-block .str { color: var(--green); }   /* string value */
-  .code-block .key { color: var(--blue); }    /* JSON key */
+  .code-block .cm  { color: #86efac; }   /* comment — green-300 */
+  .code-block .kw  { color: #93c5fd; }   /* keyword — blue-300 */
+  .code-block .str { color: #86efac; }   /* string — green-300 */
+  .code-block .key { color: #93c5fd; }   /* JSON key — blue-300 */
 
   /* terminal window */
   .terminal {
@@ -77,7 +77,7 @@
     display: flex; align-items: center; gap: 0.5rem;
   }
   .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .terminal-body { padding: 1.25rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.7; }
+  .terminal-body { padding: 1.25rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.7; color: #e2e8f0; }
 
   /* bento card */
   .card {
@@ -93,8 +93,8 @@
     padding: 0.25rem 0.75rem; border-radius: 99px;
     font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;
   }
-  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #b3cef0; }
-  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid #a5d6a7; }
+  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #93c5fd; }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid #c4b5fd; }
 
   /* section stripe */
   .section-alt { background: var(--bg-alt); }
@@ -107,7 +107,7 @@
 <body>
 
 <!-- ══════════════ TOP NAV ══════════════ -->
-<nav style="position:fixed;top:0;width:100%;z-index:50;background:rgba(242,237,230,0.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);">
+<nav style="position:fixed;top:0;width:100%;z-index:50;background:rgba(248,250,252,0.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);">
 <div style="margin-left:240px;max-width:1100px;display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1.5rem;">
   <div style="display:flex;align-items:center;gap:2rem;">
     <a href="#intro" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:-0.02em;">local-doc</a>
@@ -257,26 +257,41 @@
     <!-- Change Detection -->
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2.5rem;">
       <div class="card">
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 0.5rem;">Change Detection</h3>
-        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.5rem;">Our intelligent sync engine determines the delta between your local disk and the registry.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:6px;padding:1.25rem;">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
-              <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.1rem;">commit</span>
-              <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Git Integration</span>
-            </div>
-            <p style="color:var(--ink-muted);font-size:0.82rem;line-height:1.6;margin:0 0 0.75rem;">Uses <code>git-diff-index</code> to compare your working tree against the last indexed hash.</p>
-            <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.75rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--green);">$ local-doc sync --git-only</div>
-          </div>
-          <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:6px;padding:1.25rem;">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
-              <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;">update</span>
-              <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">MTime Hashing</span>
-            </div>
-            <p style="color:var(--ink-muted);font-size:0.82rem;line-height:1.6;margin:0 0 0.75rem;">For non-git environments, recursive file-hash and modification timestamp check.</p>
-            <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.75rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--blue);">$ local-doc sync --full-scan</div>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin:0 0 0.4rem;">Change Detection</h3>
+        <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.5rem;"><code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;font-size:0.8rem;">local-doc</code> automatically detects file changes before every query. It uses two strategies depending on whether your repo is a git repository.</p>
+
+        <!-- Git repos -->
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+          <span class="material-symbols-outlined" style="color:var(--blue);font-size:1.1rem;">commit</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.82rem;">Git repos <span style="color:var(--ink-muted);font-weight:400;">(default)</span></span>
+        </div>
+        <p style="color:var(--ink-muted);font-size:0.83rem;line-height:1.65;margin:0 0 0.75rem;">When a registered repo has git initialized, <code style="background:var(--blue-bg);color:var(--blue);padding:1px 4px;border-radius:3px;font-size:0.78rem;">local-doc</code> uses git to detect changes. This is faster and smarter than filesystem scanning — git already knows exactly what changed.</p>
+        <div style="display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem;padding-left:0.25rem;">
+          <div style="display:flex;gap:0.6rem;font-size:0.82rem;"><span style="color:var(--blue);font-weight:700;flex-shrink:0;">1.</span><span>On the first full scan, the current <code style="background:var(--blue-bg);color:var(--blue);padding:0 4px;border-radius:3px;font-size:0.78rem;">HEAD</code> commit hash is stored in the database</span></div>
+          <div style="display:flex;gap:0.6rem;font-size:0.82rem;"><span style="color:var(--blue);font-weight:700;flex-shrink:0;">2.</span><span>On every subsequent query, the stored commit is compared against the current <code style="background:var(--blue-bg);color:var(--blue);padding:0 4px;border-radius:3px;font-size:0.78rem;">HEAD</code></span></div>
+          <div style="display:flex;gap:0.6rem;font-size:0.82rem;"><span style="color:var(--blue);font-weight:700;flex-shrink:0;">3.</span><span>If commits differ, git provides the exact list of changed spec and media files</span></div>
+          <div style="display:flex;gap:0.6rem;font-size:0.82rem;"><span style="color:var(--blue);font-weight:700;flex-shrink:0;">4.</span><span>Uncommitted changes (staged, unstaged, untracked) are also checked</span></div>
+          <div style="display:flex;gap:0.6rem;font-size:0.82rem;"><span style="color:var(--blue);font-weight:700;flex-shrink:0;">5.</span><span>Only the changed files are re-indexed — no full rebuild needed</span></div>
+        </div>
+
+        <!-- terminal -->
+        <div class="terminal" style="margin-bottom:1.25rem;">
+          <div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+          <div class="terminal-body">
+            <span style="color:#94a3b8;">$</span> local-doc search refund<br>
+            <span style="color:#64748b;">(product: git changes detected — incremental update...)</span><br><br>
+            &nbsp;&nbsp;product: <span style="color:#4ade80;">2 files updated</span> <span style="color:#64748b;">(incremental)</span><br><br>
+            Results for <span style="color:#e2e8f0;">"refund"</span>:<br>
+            &nbsp;&nbsp;...
           </div>
         </div>
+
+        <!-- Non-git -->
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+          <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;">update</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.82rem;">Non-git repos <span style="color:var(--ink-muted);font-weight:400;">(fallback)</span></span>
+        </div>
+        <p style="color:var(--ink-muted);font-size:0.83rem;line-height:1.65;margin:0;">Falls back to filesystem timestamp comparison using <code style="background:var(--green-bg);color:var(--green);padding:1px 4px;border-radius:3px;font-size:0.78rem;">find -newer</code>. If any spec file is newer than the database, a full rebuild is triggered. Works reliably but can't do incremental updates.</p>
       </div>
       <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
         <div>
@@ -317,11 +332,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr style="border-top:1px solid var(--border);">
-              <td style="padding:1rem 1.25rem;"><div style="font-weight:700;">Local SQLite FTS5</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);margin-top:2px;">Default Engine</div></td>
-              <td style="padding:1rem 1.25rem;"><span class="badge badge-green">&lt;10ms</span></td>
-              <td style="padding:1rem 1.25rem;color:var(--ink-muted);">High (Exact Match)</td>
-              <td style="padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink-muted);">Standard binary</td>
+            <tr style="border-top:1px solid var(--border);background:var(--blue-bg);outline:2px solid var(--blue);outline-offset:-1px;">
+              <td style="padding:1rem 1.25rem;"><div style="font-weight:700;color:var(--blue);">Local SQLite FTS5</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--blue);opacity:0.7;margin-top:2px;">Default Engine</div></td>
+              <td style="padding:1rem 1.25rem;"><span class="badge badge-blue">&lt;10ms</span></td>
+              <td style="padding:1rem 1.25rem;color:var(--ink);">High (Exact Match)</td>
+              <td style="padding:1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink);">Standard binary</td>
             </tr>
             <tr style="border-top:1px solid var(--border);background:var(--bg-alt);">
               <td style="padding:1rem 1.25rem;"><div style="font-weight:700;">Elasticsearch Sync</div><div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ink-muted);margin-top:2px;">Cloud/Registry Tier</div></td>
@@ -340,37 +355,59 @@
       </div>
     </div>
 
-    <!-- Companion .md Pattern -->
-    <div style="border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;overflow:hidden;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-        <div style="padding:2rem;">
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;margin:0 0 0.75rem;">The Companion .md Pattern</h3>
-          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Most tools force you to choose between structured data and freeform markdown. local-doc enables a "Ghost Doc" system where <code>config.yaml</code> stores attributes and <code>config.md</code> provides the visual story.</p>
-          <div style="display:flex;gap:0.75rem;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;">
-            <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;margin-top:1px;">auto_awesome</span>
-            <div>
-              <div style="font-weight:700;font-size:0.85rem;">Automatic Pairing</div>
-              <p style="color:var(--ink-muted);font-size:0.78rem;margin:0.2rem 0 0;">Files with matching names are merged into a single UI view.</p>
-            </div>
-          </div>
-        </div>
-        <div style="background:var(--code-bg);border-left:1px solid var(--border);padding:1.5rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">
-          <div style="display:flex;gap:1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.6rem;margin-bottom:1rem;">
-            <span style="color:var(--green);border-bottom:2px solid var(--green);padding-bottom:2px;">api_v1.yaml</span>
-            <span style="color:var(--ink-muted);">api_v1.md</span>
-          </div>
-          <pre style="margin:0;color:var(--ink-muted);"><span style="color:var(--blue);">name:</span> <span style="color:var(--green);">"Auth Service"</span>
-<span style="color:var(--blue);">endpoint:</span> <span style="color:var(--green);">"/api/v1/auth"</span>
-<span style="color:var(--blue);">status:</span> <span style="color:var(--green);">"stable"</span>
-<span style="color:var(--blue);">tags:</span>
-  - <span style="color:var(--green);">"security"</span>
-  - <span style="color:var(--green);">"core"</span></pre>
-          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;height:5rem;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-style:italic;font-size:0.78rem;">Preview of api_v1.md rendering here…</div>
-          </div>
-        </div>
+    <!-- Auto-rebuild triggers table -->
+    <div>
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 0.4rem;">Auto-rebuild Triggers</h3>
+      <p style="color:var(--ink-muted);font-size:0.87rem;margin:0 0 1.5rem;">You never have to think about the index.</p>
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.84rem;">
+          <thead>
+            <tr style="background:var(--card-deep);">
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Event</th>
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Git repo</th>
+              <th style="padding:0.9rem 1.25rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);">Non-git repo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">repo add</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full scan + store commit hash</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full scan</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:var(--bg-alt);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">New commits since last query</td>
+              <td style="padding:0.85rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><span class="badge badge-blue" style="font-size:0.7rem;">Incremental</span></td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">N/A</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">Uncommitted / staged edits</td>
+              <td style="padding:0.85rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><span class="badge badge-blue" style="font-size:0.7rem;">Incremental</span></td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full rebuild</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:var(--bg-alt);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">New untracked spec files</td>
+              <td style="padding:0.85rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><span class="badge badge-blue" style="font-size:0.7rem;">Incremental</span></td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full rebuild</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">Deleted spec files</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Removed from index</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full rebuild</td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);background:var(--bg-alt);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">No changes at all</td>
+              <td colspan="2" style="padding:0.85rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><span class="badge badge-green" style="font-size:0.7rem;">Skipped — zero cost</span></td>
+            </tr>
+            <tr style="border-top:1px solid var(--border);">
+              <td style="padding:0.85rem 1.25rem;font-weight:600;">local-doc scan</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full rebuild + store commit hash</td>
+              <td style="padding:0.85rem 1.25rem;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Full rebuild</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
   </section>
 
   <!-- ── COMMAND INTERFACE ── -->
@@ -389,13 +426,13 @@
             <li style="display:flex;gap:0.5rem;font-size:0.87rem;"><span style="color:var(--green);">✔</span> Keyboard-first navigation</li>
           </ul>
         </div>
-        <div class="code-block" style="border-left-color:var(--green);">
-          <div style="color:var(--ink-muted);opacity:0.6;margin-bottom:0.4rem;"># Search for auth flows</div>
-          <div style="color:var(--blue);margin-bottom:0.75rem;">$ local-doc search "auth-flow" --repo internal-core</div>
-          <div style="color:var(--ink);">
-            [1] INTERNAL-CORE: <mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark>.md (Score: 0.98)<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;"...redirecting users to the <mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark> logic..."<br>
-            [2] API-SPEC: oauth2-<mark style="background:var(--green-bg);color:var(--green);border-radius:2px;padding:0 2px;">auth-flow</mark>.json (Score: 0.85)
+        <div class="code-block" style="border-left-color:#7c3aed;">
+          <div style="color:#94a3b8;margin-bottom:0.4rem;"># Search for auth flows</div>
+          <div style="color:#93c5fd;margin-bottom:0.75rem;">$ local-doc search "auth-flow" --repo internal-core</div>
+          <div style="color:#e2e8f0;">
+            [1] INTERNAL-CORE: <mark style="background:#4c1d95;color:#c4b5fd;border-radius:2px;padding:0 3px;">auth-flow</mark>.md (Score: 0.98)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"...redirecting users to the <mark style="background:#4c1d95;color:#c4b5fd;border-radius:2px;padding:0 3px;">auth-flow</mark> logic..."<br>
+            [2] API-SPEC: oauth2-<mark style="background:#4c1d95;color:#c4b5fd;border-radius:2px;padding:0 3px;">auth-flow</mark>.json (Score: 0.85)
           </div>
         </div>
       </div>
@@ -403,23 +440,23 @@
       <!-- Stats -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;">
         <div class="code-block">
-          <div style="color:var(--blue);margin-bottom:0.75rem;">$ local-doc stats --summary</div>
+          <div style="color:#93c5fd;margin-bottom:0.75rem;">$ local-doc stats --summary</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.5rem;">
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
-              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Total Docs</div>
-              <div style="font-size:1.2rem;font-weight:700;">12,482</div>
+            <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0.75rem;">
+              <div style="color:#64748b;font-size:0.7rem;margin-bottom:0.25rem;font-family:'JetBrains Mono',monospace;">Total Docs</div>
+              <div style="font-size:1.2rem;font-weight:700;color:#e2e8f0;">12,482</div>
             </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
-              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Index Size</div>
-              <div style="font-size:1.2rem;font-weight:700;">142MB</div>
+            <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0.75rem;">
+              <div style="color:#64748b;font-size:0.7rem;margin-bottom:0.25rem;font-family:'JetBrains Mono',monospace;">Index Size</div>
+              <div style="font-size:1.2rem;font-weight:700;color:#e2e8f0;">142MB</div>
             </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
-              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Freshness</div>
-              <div style="font-size:1.2rem;font-weight:700;color:var(--green);">98.2%</div>
+            <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0.75rem;">
+              <div style="color:#64748b;font-size:0.7rem;margin-bottom:0.25rem;font-family:'JetBrains Mono',monospace;">Freshness</div>
+              <div style="font-size:1.2rem;font-weight:700;color:#4ade80;">98.2%</div>
             </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">
-              <div style="color:var(--ink-muted);font-size:0.7rem;margin-bottom:0.25rem;">Contributors</div>
-              <div style="font-size:1.2rem;font-weight:700;">42</div>
+            <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0.75rem;">
+              <div style="color:#64748b;font-size:0.7rem;margin-bottom:0.25rem;font-family:'JetBrains Mono',monospace;">Contributors</div>
+              <div style="font-size:1.2rem;font-weight:700;color:#e2e8f0;">42</div>
             </div>
           </div>
         </div>
@@ -429,25 +466,6 @@
         </div>
       </div>
 
-      <!-- JSON -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;">
-        <div>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.5rem;">Machine Readable</h3>
-          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0;">Integrate local-doc with your CI/CD pipelines using standard JSON output. Piping docs into JQ has never been easier.</p>
-        </div>
-        <div class="code-block" style="max-height:200px;overflow-y:auto;">
-          <div style="color:var(--blue);margin-bottom:0.5rem;">$ local-doc get spec/v1 --json</div>
-          <span style="color:var(--ink-muted);">{</span><br>
-          &nbsp;&nbsp;<span style="color:var(--blue);">"id"</span>: <span style="color:var(--green);">"spec-v1"</span>,<br>
-          &nbsp;&nbsp;<span style="color:var(--blue);">"meta"</span>: {<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"version"</span>: <span style="color:var(--green);">"1.0.2"</span>,<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"author"</span>: <span style="color:var(--green);">"infra-team"</span>,<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"tags"</span>: [<span style="color:var(--green);">"api"</span>, <span style="color:var(--green);">"stable"</span>]<br>
-          &nbsp;&nbsp;},<br>
-          &nbsp;&nbsp;<span style="color:var(--blue);">"last_sync"</span>: <span style="color:var(--green);">"2024-05-20T12:00:00Z"</span><br>
-          <span style="color:var(--ink-muted);">}</span>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -492,7 +510,7 @@
 
         <!-- Smart Search -->
         <div id="tab-multi" class="utab-panel" style="display:none;">
-          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Use <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">OR</code> to find either word, <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">NOT</code> to exclude words, or filter by a specific project nickname.</p>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Use <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;">OR</code> to find either word, <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;">NOT</code> to exclude words, or filter by a specific project nickname.</p>
           <div style="display:flex;flex-direction:column;gap:0.75rem;">
             <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
               <div class="terminal-body"><span style="color:var(--ink-muted);"># Search for A or B</span><br><span style="color:var(--blue);">$</span> local-doc search "refund OR authentication"</div></div>
@@ -538,7 +556,7 @@
 
         <!-- Images & PDFs -->
         <div id="tab-media" class="utab-panel" style="display:none;">
-          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Images and PDFs are indexed via a <strong>companion <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">.md</code> sidecar</strong> with the same base name. Only one result appears per asset — the path points directly to the image or PDF.</p>
+          <p style="color:var(--ink-muted);font-size:0.87rem;line-height:1.65;margin:0 0 1.25rem;">Images and PDFs are indexed via a <strong>companion <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;">.md</code> sidecar</strong> with the same base name. Only one result appears per asset — the path points directly to the image or PDF.</p>
           <div style="display:flex;flex-direction:column;gap:0.75rem;">
             <div class="terminal"><div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
               <div class="terminal-body">
@@ -557,9 +575,9 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);">/path/to/diagrams/architecture.png</span>
               </div>
             </div>
-            <div style="background:var(--green-bg);border:1px solid #a5d6a7;border-radius:8px;padding:1rem 1.25rem;font-size:0.83rem;color:var(--ink);display:flex;gap:0.75rem;align-items:flex-start;">
+            <div style="background:var(--green-bg);border:1px solid #c4b5fd;border-radius:8px;padding:1rem 1.25rem;font-size:0.83rem;color:var(--ink);display:flex;gap:0.75rem;align-items:flex-start;">
               <span class="material-symbols-outlined" style="color:var(--green);font-size:1.1rem;flex-shrink:0;margin-top:1px;">info</span>
-              <span>If no companion <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;">.md</code> exists, the image or PDF is <strong>skipped</strong> and a warning is shown. The sidecar is never shown as a separate result — it only provides metadata for its asset.</span>
+              <span>If no companion <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;">.md</code> exists, the image or PDF is <strong>skipped</strong> and a warning is shown. The sidecar is never shown as a separate result — it only provides metadata for its asset.</span>
             </div>
           </div>
         </div>
@@ -714,60 +732,155 @@
   <section id="quick-start" class="section-alt" style="padding:3.5rem 3rem;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;">
       <div>
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 2rem;">Quick Start</h3>
-        <div style="display:flex;flex-direction:column;gap:0;">
-          <div style="display:flex;gap:1.25rem;">
-            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">1</div>
-              <div style="width:1px;flex:1;background:var(--border);min-height:2rem;"></div>
-            </div>
-            <div style="padding-bottom:1.5rem;">
-              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Initialize Repository</h4>
-              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc init</div>
-              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Creates a local SQLite index in ~/.local-doc/index.db</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:1.25rem;">
-            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
-              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">2</div>
-              <div style="width:1px;flex:1;background:var(--border);min-height:2rem;"></div>
-            </div>
-            <div style="padding-bottom:1.5rem;">
-              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Sync Your Specs</h4>
-              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc sync git@github.com:org/specs.git</div>
-              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Clones and indexes the repository incrementally.</p>
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 0.5rem;">Quick Start</h3>
+
+        <!-- Install -->
+        <div style="margin-bottom:1.5rem;">
+          <p style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);margin:0 0 0.5rem;">Install</p>
+          <div class="terminal">
+            <div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+            <div class="terminal-body">
+              <span style="color:#4ade80;"># copy to your PATH</span><br>
+              <span style="color:#93c5fd;">cp</span> local-doc-tool.sh /usr/local/bin/local-doc<br>
+              <span style="color:#93c5fd;">chmod</span> +x /usr/local/bin/local-doc
             </div>
           </div>
-          <div style="display:flex;gap:1.25rem;">
-            <div style="flex-shrink:0;">
-              <div style="width:2rem;height:2rem;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);font-size:0.85rem;">3</div>
-            </div>
-            <div>
-              <h4 style="font-weight:700;margin:0.3rem 0 0.5rem;">Start Querying</h4>
-              <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);margin-bottom:0.4rem;">$ local-doc find "api-version"</div>
-              <p style="color:var(--ink-muted);font-size:0.83rem;margin:0;">Instant, lightning-fast results from your local cache.</p>
+          <p style="color:var(--ink-muted);font-size:0.82rem;line-height:1.6;margin:0.75rem 0 0;">Requirements: <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;font-size:0.78rem;">bash</code> + <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;font-size:0.78rem;">sqlite3</code> — both pre-installed on macOS and most Linux. Optional: <code style="background:var(--blue-bg);color:var(--blue);padding:1px 5px;border-radius:3px;font-size:0.78rem;">git</code> for smart incremental updates.</p>
+        </div>
+
+        <!-- Quick start commands -->
+        <div style="margin-bottom:1.5rem;">
+          <p style="font-family:'Space Grotesk',sans-serif;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);margin:0 0 0.5rem;">Quick start</p>
+          <div class="terminal">
+            <div class="terminal-bar"><span class="terminal-dot" style="background:#f87171;"></span><span class="terminal-dot" style="background:#fbbf24;"></span><span class="terminal-dot" style="background:#4ade80;"></span></div>
+            <div class="terminal-body">
+              <span style="color:#4ade80;"># 1. Register your spec folders (auto-scans immediately)</span><br>
+              <span style="color:#93c5fd;">local-doc</span> repo add ./product-specs product<br>
+              <span style="color:#93c5fd;">local-doc</span> repo add ./platform-docs platform<br>
+              <br>
+              <span style="color:#4ade80;"># 2. Search — no manual scan needed, it just works</span><br>
+              <span style="color:#93c5fd;">local-doc</span> search refund
             </div>
           </div>
         </div>
+
+        <p style="color:var(--ink-muted);font-size:0.83rem;line-height:1.65;margin:0;">The index auto-rebuilds when you add/remove repos, and auto-detects when files change on your next search.</p>
       </div>
-      <div>
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 2rem;">Command Reference</h3>
-        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.87rem;">
-            <thead>
-              <tr style="background:var(--card-deep);">
-                <th style="padding:0.7rem 1rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Command</th>
-                <th style="padding:0.7rem 1rem;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);opacity:0.7;">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">search [term]</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Full-text search through all indexed docs.</td></tr>
-              <tr style="border-top:1px solid var(--border);background:var(--bg-alt);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">add [url]</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Add a new Git repository to the registry.</td></tr>
-              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">refresh</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Force a pull and re-index of all sources.</td></tr>
-              <tr style="border-top:1px solid var(--border);background:var(--bg-alt);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">export --format pdf</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Bundle and export specific docs as PDF.</td></tr>
-              <tr style="border-top:1px solid var(--border);"><td style="padding:0.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--blue);">serve --port 8080</td><td style="padding:0.75rem 1rem;color:var(--ink-muted);font-size:0.85rem;">Spawn a local web interface for browsing.</td></tr>
-            </tbody>
-          </table>
+    </div>
+
+    <!-- Full command reference -->
+    <div style="margin-top:3rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin:0 0 1.5rem;">Command Reference</h3>
+
+      <!-- single unified table -->
+      <div class="terminal" style="margin-bottom:1rem;">
+        <div class="terminal-bar">
+          <span class="terminal-dot" style="background:#f87171;"></span>
+          <span class="terminal-dot" style="background:#fbbf24;"></span>
+          <span class="terminal-dot" style="background:#4ade80;"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#64748b;margin-left:0.75rem;">local-doc help</span>
+        </div>
+        <div class="terminal-body" style="font-size:0.8rem;line-height:2;">
+
+          <!-- REPO MANAGEMENT — open by default -->
+          <span style="color:#4ade80;"># REPO MANAGEMENT</span><br>
+          <span style="color:#93c5fd;">local-doc repo add</span> &lt;folder&gt; [name]<span style="color:#64748b;padding-left:1rem;">Register a spec repo</span><br>
+          <span style="color:#93c5fd;">local-doc repo remove</span> &lt;name&gt;<span style="color:#64748b;padding-left:1rem;">Remove a repo</span><br>
+          <span style="color:#93c5fd;">local-doc repo list</span><span style="color:#64748b;padding-left:1rem;">Show all repos</span><br>
+
+          <!-- SCANNING -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># SCANNING</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#93c5fd;">local-doc scan</span><span style="color:#64748b;padding-left:1rem;">Scan all repos</span><br>
+              <span style="color:#93c5fd;">local-doc scan</span> &lt;repo-name&gt;<span style="color:#64748b;padding-left:1rem;">Scan one repo</span>
+            </div>
+          </details>
+
+          <!-- SEARCHING -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># SEARCHING</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#93c5fd;">local-doc search</span> &lt;query&gt;<span style="color:#64748b;padding-left:1rem;">Search all repos</span><br>
+              <span style="color:#93c5fd;">local-doc search</span> &lt;query&gt; &lt;repo&gt;<span style="color:#64748b;padding-left:1rem;">Search one repo</span><br>
+              <span style="color:#93c5fd;">local-doc read</span> &lt;name&gt;<span style="color:#64748b;padding-left:1rem;">Read a spec</span><br>
+              <span style="color:#93c5fd;">local-doc read</span> &lt;name&gt; &lt;repo&gt;<span style="color:#64748b;padding-left:1rem;">Read from specific repo</span><br>
+              <span style="color:#93c5fd;">local-doc related</span> &lt;name&gt;<span style="color:#64748b;padding-left:1rem;">Find related specs</span>
+            </div>
+          </details>
+
+          <!-- BROWSING -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># BROWSING</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#93c5fd;">local-doc list</span><span style="color:#64748b;padding-left:1rem;">All specs, all repos</span><br>
+              <span style="color:#93c5fd;">local-doc list</span> &lt;repo-or-project&gt;<span style="color:#64748b;padding-left:1rem;">Filter by repo or project</span><br>
+              <span style="color:#93c5fd;">local-doc projects</span><span style="color:#64748b;padding-left:1rem;">List all projects</span><br>
+              <span style="color:#93c5fd;">local-doc tags</span><span style="color:#64748b;padding-left:1rem;">List all tags</span><br>
+              <span style="color:#93c5fd;">local-doc tags</span> &lt;tag&gt;<span style="color:#64748b;padding-left:1rem;">Specs with a tag</span><br>
+              <span style="color:#93c5fd;">local-doc recent</span> [n]<span style="color:#64748b;padding-left:1rem;">Recently modified</span>
+            </div>
+          </details>
+
+          <!-- INFO -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># INFO</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#93c5fd;">local-doc stats</span><span style="color:#64748b;padding-left:1rem;">Index statistics</span><br>
+              <span style="color:#93c5fd;">local-doc db</span><span style="color:#64748b;padding-left:1rem;">Print database file path</span><br>
+              <span style="color:#93c5fd;">local-doc inspect</span><span style="color:#64748b;padding-left:1rem;">Dump full index</span><br>
+              <span style="color:#93c5fd;">local-doc reset</span><span style="color:#64748b;padding-left:1rem;">Delete everything and start over</span><br>
+              <span style="color:#93c5fd;">local-doc help</span><span style="color:#64748b;padding-left:1rem;">This help</span>
+            </div>
+          </details>
+
+          <!-- AGENT COMMANDS -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># AGENT COMMANDS (JSON)</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#c4b5fd;">local-doc json search</span> &lt;query&gt; [repo]<br>
+              <span style="color:#c4b5fd;">local-doc json read</span> &lt;name&gt;<br>
+              <span style="color:#c4b5fd;">local-doc json list</span> [repo-or-project]<br>
+              <span style="color:#c4b5fd;">local-doc json repos</span><br>
+              <span style="color:#c4b5fd;">local-doc json related</span> &lt;name&gt;<br>
+              <span style="color:#c4b5fd;">local-doc json tags</span><br>
+              <span style="color:#c4b5fd;">local-doc json stats</span>
+            </div>
+          </details>
+
+          <!-- SEARCH FEATURES -->
+          <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;list-style:none;outline:none;">
+              <span style="color:#4ade80;"># SEARCH FEATURES</span>
+              <span style="color:#475569;font-size:0.72rem;padding-left:0.5rem;">▶ expand</span>
+            </summary>
+            <div style="padding-top:0.25rem;">
+              <span style="color:#64748b;">Stemming</span>   <span style="color:#e2e8f0;">"refunding" matches "refund"</span><br>
+              <span style="color:#64748b;">Ranking</span>    <span style="color:#e2e8f0;">Best matches first (BM25)</span><br>
+              <span style="color:#64748b;">Boolean</span>    <span style="color:#e2e8f0;">"refund OR chargeback"  /  "billing NOT fraud"</span><br>
+              <span style="color:#64748b;">Prefix</span>     <span style="color:#e2e8f0;">"payment*"</span><br>
+              <span style="color:#64748b;">Phrase</span>     <span style="color:#e2e8f0;">'"refund request"'</span><br>
+              <span style="color:#64748b;">Deep</span>       <span style="color:#e2e8f0;">Searches full file content, not just titles</span><br>
+              <br>
+              <span style="color:#64748b;">SUPPORTED FILES:  </span><span style="color:#93c5fd;">.md  .mdx  .txt</span>
+            </div>
+          </details>
+
         </div>
       </div>
     </div>
