@@ -52,7 +52,7 @@ git_changed_files() {
   local last_commit current_commit
 
   current_commit="$(git -C "$rpath" rev-parse HEAD 2>/dev/null)" || return 1
-  last_commit="$(sql "SELECT value FROM meta WHERE key='git_commit_${rname//\'/\'\'}';" 2>/dev/null)"
+  last_commit="$(sql "SELECT value FROM meta WHERE key='git_commit_$(e "$rname")';" 2>/dev/null)"
 
   local changed_files=""
 
@@ -137,17 +137,13 @@ index_asset_with_companion() {
   modified="$(stat -c '%Y' "$asset_file" 2>/dev/null || stat -f '%m' "$asset_file" 2>/dev/null || echo "0")"
   size="$(stat -c '%s' "$asset_file" 2>/dev/null || stat -f '%z' "$asset_file" 2>/dev/null || echo "0")"
 
-  title="${title//"'"/"''"}"
-  tags="${tags//"'"/"''"}"
-  summary="${summary//"'"/"''"}"
-
   # path = asset rel path (unique key); fullpath = asset absolute path (what AI opens)
   # content = companion .md content (what FTS indexes)
   sql "INSERT OR REPLACE INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
-       VALUES ('${rname//\'/\'\'}', '${asset_rel//\'/\'\'}', '${project//\'/\'\'}', '${name//\'/\'\'}', '${title}', '${tags}', '${summary}', '${asset_file//\'/\'\'}', '${modified}', ${size}, '${ext}', readfile('${companion_file//\'/\'\'}'));" 2>/dev/null
+       VALUES ('$(e "$rname")', '$(e "$asset_rel")', '$(e "$project")', '$(e "$name")', '$(e "$title")', '$(e "$tags")', '$(e "$summary")', '$(e "$asset_file")', '$(e "$modified")', ${size}, '$(e "$ext")', readfile('$(e "$companion_file")'));" 2>/dev/null
 
   local new_id
-  new_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${asset_rel//\'/\'\'}';")"
+  new_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$asset_rel")';")"
   if [[ -n "$new_id" ]]; then
     if [[ "$populate_fts" -eq 1 ]]; then
       sql "INSERT INTO specs_fts (rowid, repo, name, title, tags, summary, content)
@@ -157,8 +153,8 @@ index_asset_with_companion() {
     if [[ -n "$tags" ]]; then
       local IFS=','
       for tag in $tags; do
-        tag="$(echo "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//" | sed "s/'/''/g")"
-        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES (${new_id}, '${tag}');"
+        tag="$(printf '%s' "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//")"
+        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES (${new_id}, '$(e "$tag")');"
       done
     fi
   fi
@@ -185,7 +181,7 @@ incremental_reindex() {
       if [[ ! -f "$file" ]]; then
         # Asset deleted — remove its DB entry by asset path
         local spec_id
-        spec_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';" 2>/dev/null)"
+        spec_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")';" 2>/dev/null)"
         if [[ -n "$spec_id" ]]; then
           fts_delete "$spec_id"
           sql "DELETE FROM spec_tags WHERE spec_id=${spec_id};" 2>/dev/null
@@ -194,7 +190,7 @@ incremental_reindex() {
       else
         # Asset changed — delete old row, re-index via companion helper
         local old_id
-        old_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';" 2>/dev/null)"
+        old_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")';" 2>/dev/null)"
         if [[ -n "$old_id" ]]; then
           fts_delete "$old_id"
           sql "DELETE FROM spec_tags WHERE spec_id=${old_id};" 2>/dev/null
@@ -208,7 +204,7 @@ incremental_reindex() {
     # If text file was deleted, remove from index
     if [[ ! -f "$file" ]]; then
       local spec_id
-      spec_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';" 2>/dev/null)"
+      spec_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")';" 2>/dev/null)"
       if [[ -n "$spec_id" ]]; then
         fts_delete "$spec_id"
         sql "DELETE FROM spec_tags WHERE spec_id=${spec_id};" 2>/dev/null
@@ -216,6 +212,14 @@ incremental_reindex() {
       fi
       continue
     fi
+
+    # Skip .md/.mdx files that have a media companion — the media entry covers them
+    local _name_no_ext="${rel%.*}"
+    local _has_media=0
+    for _mext in jpg jpeg png gif webp svg pdf; do
+      [[ -f "${rpath}/${_name_no_ext}.${_mext}" ]] && { _has_media=1; break; }
+    done
+    [[ "$_has_media" -eq 1 ]] && continue
 
     local project
     [[ "$rel" == */* ]] && project="${rel%%/*}" || project="_root"
@@ -249,13 +253,9 @@ incremental_reindex() {
     modified="$(stat -c '%Y' "$file" 2>/dev/null || stat -f '%m' "$file" 2>/dev/null || echo "0")"
     size="$(stat -c '%s' "$file" 2>/dev/null || stat -f '%z' "$file" 2>/dev/null || echo "0")"
 
-    title="${title//"'"/"''"}"
-    tags="${tags//"'"/"''"}"
-    summary="${summary//"'"/"''"}"
-
     # Remove old entry if exists
     local old_id
-    old_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';" 2>/dev/null)"
+    old_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")';" 2>/dev/null)"
     if [[ -n "$old_id" ]]; then
       fts_delete "$old_id"
       sql "DELETE FROM spec_tags WHERE spec_id=${old_id};" 2>/dev/null
@@ -264,11 +264,11 @@ incremental_reindex() {
 
     # Insert fresh
     sql "INSERT INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
-         VALUES ('${rname//"'"/"''"}', '${rel//"'"/"''"}', '${project//"'"/"''"}', '${name//"'"/"''"}', '${title}', '${tags}', '${summary}', '${file//"'"/"''"}', '${modified}', ${size}, '${ext}', readfile('${file//"'"/"''"}'));" 2>/dev/null
+         VALUES ('$(e "$rname")', '$(e "$rel")', '$(e "$project")', '$(e "$name")', '$(e "$title")', '$(e "$tags")', '$(e "$summary")', '$(e "$file")', '$(e "$modified")', ${size}, '$(e "$ext")', readfile('$(e "$file")'));" 2>/dev/null
 
     # FTS entry
     local new_id
-    new_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';")"
+    new_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")';")"
     sql "INSERT INTO specs_fts (rowid, repo, name, title, tags, summary, content)
          SELECT id, repo, name, title, tags, summary, content FROM specs WHERE id=${new_id};" 2>/dev/null
 
@@ -276,8 +276,8 @@ incremental_reindex() {
     if [[ -n "$tags" ]]; then
       local IFS=','
       for tag in $tags; do
-        tag="$(echo "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//" | sed "s/'/''/g")"
-        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES (${new_id}, '${tag}');"
+        tag="$(printf '%s' "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//")"
+        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES (${new_id}, '$(e "$tag")');"
       done
     fi
 
@@ -294,7 +294,7 @@ incremental_reindex() {
       local media_file="${rpath}/${media_rel}"
       if [[ -f "$media_file" ]]; then
         local old_media_id
-        old_media_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${media_rel//\'/\'\'}';" 2>/dev/null)"
+        old_media_id="$(sql "SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$media_rel")';" 2>/dev/null)"
         if [[ -n "$old_media_id" ]]; then
           fts_delete "$old_media_id"
           sql "DELETE FROM spec_tags WHERE spec_id=${old_media_id};" 2>/dev/null
@@ -330,7 +330,7 @@ ensure_db() {
         # Store current commit
         local commit
         commit="$(git -C "$rpath" rev-parse HEAD 2>/dev/null)"
-        [[ -n "$commit" ]] && sql "INSERT OR REPLACE INTO meta VALUES ('git_commit_${rname//\'/\'\'}', '${commit}');"
+        [[ -n "$commit" ]] && sql "INSERT OR REPLACE INTO meta VALUES ('git_commit_$(e "$rname")', '$(e "$commit")');"
         echo ""
       fi
     else
@@ -353,6 +353,11 @@ ensure_db() {
 
 sql() { sqlite3 "$DB_FILE" "$@"; }
 sql_json() { sqlite3 -json "$DB_FILE" "$@"; }
+
+# Escape a string for safe embedding in a SQLite single-quoted literal.
+# Replaces every ' with '' (the only escape SQLite recognises).
+# Usage: val=$(e "$untrusted_string")  then use '$val' in SQL.
+e() { printf '%s' "$1" | sed "s/'/''/g"; }
 
 # Remove a row from the contentless FTS5 index by rowid.
 # FTS5 contentless tables don't support DELETE — use the 'delete' command instead.
@@ -497,6 +502,15 @@ index_repo() {
 
   while IFS= read -r -d '' file; do
     local rel="${file#$rpath/}"
+
+    # Skip .md/.mdx files that have a media companion — indexed_asset_with_companion handles them
+    local name_no_ext="${rel%.*}"
+    local has_media=0
+    for _mext in jpg jpeg png gif webp svg pdf; do
+      [[ -f "${rpath}/${name_no_ext}.${_mext}" ]] && { has_media=1; break; }
+    done
+    [[ "$has_media" -eq 1 ]] && continue
+
     local project
     [[ "$rel" == */* ]] && project="${rel%%/*}" || project="_root"
 
@@ -532,20 +546,15 @@ index_repo() {
     modified="$(stat -c '%Y' "$file" 2>/dev/null || stat -f '%m' "$file" 2>/dev/null || echo "0")"
     size="$(stat -c '%s' "$file" 2>/dev/null || stat -f '%z' "$file" 2>/dev/null || echo "0")"
 
-    # Escape short metadata
-    title="${title//"'"/"''"}"
-    tags="${tags//"'"/"''"}"
-    summary="${summary//"'"/"''"}"
-
     sql "INSERT INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
-         VALUES ('${rname//"'"/"''"}', '${rel//"'"/"''"}', '${project//"'"/"''"}', '${name//"'"/"''"}', '${title}', '${tags}', '${summary}', '${file//"'"/"''"}', '${modified}', ${size}, '${ext}', readfile('${file//"'"/"''"}'));" 2>/dev/null
+         VALUES ('$(e "$rname")', '$(e "$rel")', '$(e "$project")', '$(e "$name")', '$(e "$title")', '$(e "$tags")', '$(e "$summary")', '$(e "$file")', '$(e "$modified")', ${size}, '$(e "$ext")', readfile('$(e "$file")'));" 2>/dev/null
 
     # Tags
     if [[ -n "$tags" ]]; then
       local IFS=','
       for tag in $tags; do
-        tag="$(echo "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//" | sed "s/'/''/g")"
-        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES ((SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}'), '${tag}');"
+        tag="$(printf '%s' "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//")"
+        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES ((SELECT id FROM specs WHERE repo='$(e "$rname")' AND path='$(e "$rel")'), '$(e "$tag")');"
       done
     fi
 
@@ -601,7 +610,7 @@ cmd_scan() {
 
   # Store repos in DB too
   while IFS='|' read -r rname rpath; do
-    sql "INSERT OR REPLACE INTO repos (name, path) VALUES ('${rname//\'/\'\'}', '${rpath//\'/\'\'}');"
+    sql "INSERT OR REPLACE INTO repos (name, path) VALUES ('$(e "$rname")', '$(e "$rpath")');"
   done < "$REPOS_FILE"
 
   # Store git commit hashes for incremental detection on next query
@@ -626,8 +635,8 @@ cmd_search() {
   local repo_filter="${2:-}"
   ensure_repos; ensure_db
 
-  local where_clause="specs_fts MATCH '${query//\'/\'\'}'"
-  [[ -n "$repo_filter" ]] && where_clause="${where_clause} AND s.repo = '${repo_filter//\'/\'\'}'"
+  local where_clause="specs_fts MATCH '$(e "$query")'"
+  [[ -n "$repo_filter" ]] && where_clause="${where_clause} AND s.repo = '$(e "$repo_filter")'"
 
   local results
   results="$(sql "SELECT s.repo, s.project || '/' || s.name, s.title, COALESCE(NULLIF(s.tags, ''), '-'), s.ext, s.fullpath FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE ${where_clause} ORDER BY f.rank LIMIT 20;" 2>/dev/null)" || true
@@ -664,8 +673,8 @@ cmd_read() {
   local repo_filter="${2:-}"
   ensure_repos; ensure_db
 
-  local where="LOWER(name) LIKE '%$(echo "$query" | tr '[:upper:]' '[:lower:]' | sed "s/'/''/g")%'"
-  [[ -n "$repo_filter" ]] && where="${where} AND repo = '${repo_filter//\'/\'\'}'"
+  local where="LOWER(name) LIKE '%$(printf '%s' "$query" | tr '[:upper:]' '[:lower:]' | sed "s/'/''/g")%'"
+  [[ -n "$repo_filter" ]] && where="${where} AND repo = '$(e "$repo_filter")'"
 
   local fullpath
   fullpath="$(sql "SELECT fullpath FROM specs WHERE ${where} LIMIT 1;")"
@@ -767,7 +776,7 @@ cmd_related() {
   echo ""
 
   local results
-  results="$(sql "SELECT s.repo, s.project || '/' || s.name, s.title FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE specs_fts MATCH '${fts_query//\'/\'\'}' AND s.name != '${spec_name//\'/\'\'}' ORDER BY f.rank LIMIT 10;" 2>/dev/null)" || true
+  results="$(sql "SELECT s.repo, s.project || '/' || s.name, s.title FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE specs_fts MATCH '$(e "$fts_query")' AND s.name != '$(e "$spec_name")' ORDER BY f.rank LIMIT 10;" 2>/dev/null)" || true
 
   if [[ -z "$results" ]]; then
     echo "  No related specs found."
@@ -860,8 +869,8 @@ cmd_json() {
     search)
       local query="${1:?Usage: local-doc json search <query>}"
       local repo_filter="${2:-}"
-      local where="specs_fts MATCH '${query//\'/\'\'}'"
-      [[ -n "$repo_filter" ]] && where="${where} AND s.repo = '${repo_filter//\'/\'\'}'"
+      local where="specs_fts MATCH '$(e "$query")'"
+      [[ -n "$repo_filter" ]] && where="${where} AND s.repo = '$(e "$repo_filter")'"
       sql_json "SELECT s.repo, s.project, s.name, s.title, s.tags, s.path, s.ext, ROUND(f.rank, 2) as relevance FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE ${where} ORDER BY f.rank LIMIT 20;"
       ;;
 
@@ -906,7 +915,7 @@ with open('${fullpath}') as f:
       search_terms="$(echo "${spec_title} ${spec_tags}" | tr ',' ' ' | tr -cs '[:alnum:]' ' ' | tr '[:upper:]' '[:lower:]' | xargs)"
       local fts_query
       fts_query="$(echo "$search_terms" | sed 's/[[:space:]]\+/ OR /g')"
-      sql_json "SELECT s.repo, s.project, s.name, s.title, s.tags FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE specs_fts MATCH '${fts_query//\'/\'\'}' AND s.name != '${spec_name//\'/\'\'}' ORDER BY f.rank LIMIT 10;"
+      sql_json "SELECT s.repo, s.project, s.name, s.title, s.tags FROM specs_fts f JOIN specs s ON s.id = f.rowid WHERE specs_fts MATCH '$(e "$fts_query")' AND s.name != '$(e "$spec_name")' ORDER BY f.rank LIMIT 10;"
       ;;
 
     tags)
