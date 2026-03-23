@@ -6,7 +6,7 @@
 # Powered by SQLite FTS5. Uses pre-installed sqlite3.
 # The .db is a disposable cache — your files are the source of truth.
 #
-# Supports: .md  .mdx  .txt
+# Supports: .md  .mdx  .txt  .jpg  .jpeg  .png  .gif  .webp  .svg  .pdf
 #
 # ─────────────────────────────────────────────────────────
 
@@ -18,8 +18,11 @@ APP_DIR="${HOME}/.local-doc"
 REPOS_FILE="${APP_DIR}/repos"
 DB_FILE="${APP_DIR}/specs.db"
 
-# File extensions to index
+# File extensions to index (text-based)
 FILE_PATTERNS=(-name '*.md' -o -name '*.mdx' -o -name '*.txt')
+
+# Media/binary extensions requiring a companion .md for metadata
+MEDIA_PATTERNS=(-name '*.jpg' -o -name '*.jpeg' -o -name '*.png' -o -name '*.gif' -o -name '*.webp' -o -name '*.svg' -o -name '*.pdf')
 
 # ── Helpers ─────────────────────────────────────────────
 
@@ -55,19 +58,19 @@ git_changed_files() {
 
   if [[ -z "$last_commit" ]]; then
     # Never scanned with git — treat all spec files as changed
-    changed_files="$(git -C "$rpath" ls-files -- '*.md' '*.mdx' '*.txt' 2>/dev/null)"
+    changed_files="$(git -C "$rpath" ls-files -- '*.md' '*.mdx' '*.txt' '*.jpg' '*.jpeg' '*.png' '*.gif' '*.webp' '*.svg' '*.pdf' 2>/dev/null)"
   elif [[ "$last_commit" != "$current_commit" ]]; then
     # Committed changes since last scan
-    changed_files="$(git -C "$rpath" diff --name-only "$last_commit" "$current_commit" -- '*.md' '*.mdx' '*.txt' 2>/dev/null)"
+    changed_files="$(git -C "$rpath" diff --name-only "$last_commit" "$current_commit" -- '*.md' '*.mdx' '*.txt' '*.jpg' '*.jpeg' '*.png' '*.gif' '*.webp' '*.svg' '*.pdf' 2>/dev/null)"
   fi
 
   # Also check uncommitted changes (staged + unstaged + untracked spec files)
   local dirty
-  dirty="$(git -C "$rpath" diff --name-only -- '*.md' '*.mdx' '*.txt' 2>/dev/null)"
+  dirty="$(git -C "$rpath" diff --name-only -- '*.md' '*.mdx' '*.txt' '*.jpg' '*.jpeg' '*.png' '*.gif' '*.webp' '*.svg' '*.pdf' 2>/dev/null)"
   local staged
-  staged="$(git -C "$rpath" diff --cached --name-only -- '*.md' '*.mdx' '*.txt' 2>/dev/null)"
+  staged="$(git -C "$rpath" diff --cached --name-only -- '*.md' '*.mdx' '*.txt' '*.jpg' '*.jpeg' '*.png' '*.gif' '*.webp' '*.svg' '*.pdf' 2>/dev/null)"
   local untracked
-  untracked="$(git -C "$rpath" ls-files --others --exclude-standard -- '*.md' '*.mdx' '*.txt' 2>/dev/null)"
+  untracked="$(git -C "$rpath" ls-files --others --exclude-standard -- '*.md' '*.mdx' '*.txt' '*.jpg' '*.jpeg' '*.png' '*.gif' '*.webp' '*.svg' '*.pdf' 2>/dev/null)"
 
   # Combine all sources, deduplicate
   changed_files="$(printf '%s\n%s\n%s\n%s' "$changed_files" "$dirty" "$staged" "$untracked" | sort -u | sed '/^$/d')"
@@ -80,6 +83,89 @@ git_changed_files() {
   return 0
 }
 
+# Index a media/binary asset using its companion .md file for metadata.
+# Args: $1=rname $2=rpath $3=asset_rel (relative path to image/PDF)
+#       $4=populate_fts (1=insert into FTS now; 0=skip, caller does bulk FTS later)
+# Returns 0 if indexed, 1 if skipped (no companion or empty .md).
+index_asset_with_companion() {
+  local rname="$1" rpath="$2" asset_rel="$3" populate_fts="${4:-1}"
+  local asset_file="${rpath}/${asset_rel}"
+
+  # Derive companion .md: same dir, same basename, .md extension
+  local dir name_no_ext companion_rel companion_file
+  dir="$(dirname "$asset_rel")"
+  name_no_ext="$(basename "$asset_rel")"
+  name_no_ext="${name_no_ext%.*}"
+  [[ "$dir" == "." ]] && companion_rel="${name_no_ext}.md" || companion_rel="${dir}/${name_no_ext}.md"
+  companion_file="${rpath}/${companion_rel}"
+
+  # Companion must exist and be non-empty
+  if [[ ! -f "$companion_file" ]] || [[ ! -s "$companion_file" ]]; then
+    printf 'Warning: %s — skipped (no companion .md with metadata)\n' "$asset_file" >&2
+    return 1
+  fi
+
+  local project
+  [[ "$asset_rel" == */* ]] && project="${asset_rel%%/*}" || project="_root"
+
+  local ext="${asset_file##*.}"
+  local name="$name_no_ext"
+
+  # Metadata from companion .md
+  local title
+  title="$(grep -m1 '^#[[:space:]]' "$companion_file" 2>/dev/null | sed 's/^#[[:space:]]*//' || true)"
+  [[ -z "$title" ]] && title="$name"
+
+  local tags=""
+  if head -1 "$companion_file" 2>/dev/null | grep -q '^---'; then
+    tags="$(sed -n '/^---$/,/^---$/p' "$companion_file" | grep -i '^tags:' | sed 's/^tags:[[:space:]]*//' || true)"
+  fi
+
+  local summary
+  summary="$(awk '
+    BEGIN { fm=0; got=0 }
+    /^---$/ && NR==1 { fm=1; next }
+    /^---$/ && fm { fm=0; next }
+    fm { next }
+    /^#/ { next }
+    /^[[:space:]]*$/ { if (got) exit; next }
+    { got=1; print }
+  ' "$companion_file" | head -c 300)"
+
+  # modified/size from the asset file itself
+  local modified size
+  modified="$(stat -c '%Y' "$asset_file" 2>/dev/null || stat -f '%m' "$asset_file" 2>/dev/null || echo "0")"
+  size="$(stat -c '%s' "$asset_file" 2>/dev/null || stat -f '%z' "$asset_file" 2>/dev/null || echo "0")"
+
+  title="${title//"'"/"''"}"
+  tags="${tags//"'"/"''"}"
+  summary="${summary//"'"/"''"}"
+
+  # path = asset rel path (unique key); fullpath = asset absolute path (what AI opens)
+  # content = companion .md content (what FTS indexes)
+  sql "INSERT OR REPLACE INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
+       VALUES ('${rname//\'/\'\'}', '${asset_rel//\'/\'\'}', '${project//\'/\'\'}', '${name//\'/\'\'}', '${title}', '${tags}', '${summary}', '${asset_file//\'/\'\'}', '${modified}', ${size}, '${ext}', readfile('${companion_file//\'/\'\'}'));" 2>/dev/null
+
+  local new_id
+  new_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${asset_rel//\'/\'\'}';")"
+  if [[ -n "$new_id" ]]; then
+    if [[ "$populate_fts" -eq 1 ]]; then
+      sql "INSERT INTO specs_fts (rowid, repo, name, title, tags, summary, content)
+           SELECT id, repo, name, title, tags, summary, content FROM specs WHERE id=${new_id};" 2>/dev/null
+    fi
+
+    if [[ -n "$tags" ]]; then
+      local IFS=','
+      for tag in $tags; do
+        tag="$(echo "$tag" | sed "s/^[[:space:]]*//;s/[[:space:]]*$//" | sed "s/'/''/g")"
+        [[ -n "$tag" ]] && sql "INSERT INTO spec_tags (spec_id, tag) VALUES (${new_id}, '${tag}');"
+      done
+    fi
+  fi
+
+  return 0
+}
+
 # Incremental re-index: update only the changed files for a git repo.
 incremental_reindex() {
   local rname="$1" rpath="$2" changed_files="$3"
@@ -87,14 +173,44 @@ incremental_reindex() {
 
   while IFS= read -r rel; do
     [[ -z "$rel" ]] && continue
+
+    # Classify: media file or text file?
+    local file_ext="${rel##*.}"
+    local is_media=0
+    case "$file_ext" in jpg|jpeg|png|gif|webp|svg|pdf) is_media=1 ;; esac
     local file="${rpath}/${rel}"
 
-    # If file was deleted, remove from index
+    # Media branch
+    if [[ "$is_media" -eq 1 ]]; then
+      if [[ ! -f "$file" ]]; then
+        # Asset deleted — remove its DB entry by asset path
+        local spec_id
+        spec_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';" 2>/dev/null)"
+        if [[ -n "$spec_id" ]]; then
+          fts_delete "$spec_id"
+          sql "DELETE FROM spec_tags WHERE spec_id=${spec_id};" 2>/dev/null
+          sql "DELETE FROM specs WHERE id=${spec_id};" 2>/dev/null
+        fi
+      else
+        # Asset changed — delete old row, re-index via companion helper
+        local old_id
+        old_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';" 2>/dev/null)"
+        if [[ -n "$old_id" ]]; then
+          fts_delete "$old_id"
+          sql "DELETE FROM spec_tags WHERE spec_id=${old_id};" 2>/dev/null
+          sql "DELETE FROM specs WHERE id=${old_id};" 2>/dev/null
+        fi
+        index_asset_with_companion "$rname" "$rpath" "$rel" && count=$((count + 1))
+      fi
+      continue
+    fi
+
+    # If text file was deleted, remove from index
     if [[ ! -f "$file" ]]; then
       local spec_id
       spec_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';" 2>/dev/null)"
       if [[ -n "$spec_id" ]]; then
-        sql "DELETE FROM specs_fts WHERE rowid=${spec_id};" 2>/dev/null
+        fts_delete "$spec_id"
         sql "DELETE FROM spec_tags WHERE spec_id=${spec_id};" 2>/dev/null
         sql "DELETE FROM specs WHERE id=${spec_id};" 2>/dev/null
       fi
@@ -133,26 +249,26 @@ incremental_reindex() {
     modified="$(stat -c '%Y' "$file" 2>/dev/null || stat -f '%m' "$file" 2>/dev/null || echo "0")"
     size="$(stat -c '%s' "$file" 2>/dev/null || stat -f '%z' "$file" 2>/dev/null || echo "0")"
 
-    title="${title//\'/\'\'}"
-    tags="${tags//\'/\'\'}"
-    summary="${summary//\'/\'\'}"
+    title="${title//"'"/"''"}"
+    tags="${tags//"'"/"''"}"
+    summary="${summary//"'"/"''"}"
 
     # Remove old entry if exists
     local old_id
-    old_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';" 2>/dev/null)"
+    old_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';" 2>/dev/null)"
     if [[ -n "$old_id" ]]; then
-      sql "DELETE FROM specs_fts WHERE rowid=${old_id};" 2>/dev/null
+      fts_delete "$old_id"
       sql "DELETE FROM spec_tags WHERE spec_id=${old_id};" 2>/dev/null
       sql "DELETE FROM specs WHERE id=${old_id};" 2>/dev/null
     fi
 
     # Insert fresh
     sql "INSERT INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
-         VALUES ('${rname//\'/\'\'}', '${rel//\'/\'\'}', '${project//\'/\'\'}', '${name//\'/\'\'}', '${title}', '${tags}', '${summary}', '${file//\'/\'\'}', '${modified}', ${size}, '${ext}', readfile('${file}'));" 2>/dev/null
+         VALUES ('${rname//"'"/"''"}', '${rel//"'"/"''"}', '${project//"'"/"''"}', '${name//"'"/"''"}', '${title}', '${tags}', '${summary}', '${file//"'"/"''"}', '${modified}', ${size}, '${ext}', readfile('${file//"'"/"''"}'));" 2>/dev/null
 
     # FTS entry
     local new_id
-    new_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${rel//\'/\'\'}';")"
+    new_id="$(sql "SELECT id FROM specs WHERE repo='${rname//"'"/"''"}' AND path='${rel//"'"/"''"}';")"
     sql "INSERT INTO specs_fts (rowid, repo, name, title, tags, summary, content)
          SELECT id, repo, name, title, tags, summary, content FROM specs WHERE id=${new_id};" 2>/dev/null
 
@@ -166,6 +282,27 @@ incremental_reindex() {
     fi
 
     count=$((count + 1))
+
+    # Propagate to any media companion with the same base name
+    local dir_part name_part
+    dir_part="$(dirname "$rel")"
+    name_part="$(basename "$rel")"
+    name_part="${name_part%.*}"
+    for media_ext in jpg jpeg png gif webp svg pdf; do
+      local media_rel
+      [[ "$dir_part" == "." ]] && media_rel="${name_part}.${media_ext}" || media_rel="${dir_part}/${name_part}.${media_ext}"
+      local media_file="${rpath}/${media_rel}"
+      if [[ -f "$media_file" ]]; then
+        local old_media_id
+        old_media_id="$(sql "SELECT id FROM specs WHERE repo='${rname//\'/\'\'}' AND path='${media_rel//\'/\'\'}';" 2>/dev/null)"
+        if [[ -n "$old_media_id" ]]; then
+          fts_delete "$old_media_id"
+          sql "DELETE FROM spec_tags WHERE spec_id=${old_media_id};" 2>/dev/null
+          sql "DELETE FROM specs WHERE id=${old_media_id};" 2>/dev/null
+        fi
+        index_asset_with_companion "$rname" "$rpath" "$media_rel" || true
+      fi
+    done
   done <<< "$changed_files"
 
   echo "  ${rname}: ${count} files updated (incremental)"
@@ -199,7 +336,7 @@ ensure_db() {
     else
       # Fallback: filesystem timestamp comparison
       local latest
-      latest="$(find "$rpath" \( "${FILE_PATTERNS[@]}" \) -type f -newer "$DB_FILE" -print -quit 2>/dev/null)"
+      latest="$(find "$rpath" -type f \( \( "${FILE_PATTERNS[@]}" \) -o \( "${MEDIA_PATTERNS[@]}" \) \) -newer "$DB_FILE" -print -quit 2>/dev/null)"
       if [[ -n "$latest" ]]; then
         needs_rebuild="$rname"
         break
@@ -216,6 +353,14 @@ ensure_db() {
 
 sql() { sqlite3 "$DB_FILE" "$@"; }
 sql_json() { sqlite3 -json "$DB_FILE" "$@"; }
+
+# Remove a row from the contentless FTS5 index by rowid.
+# FTS5 contentless tables don't support DELETE — use the 'delete' command instead.
+fts_delete() {
+  local rid="$1"
+  sql "INSERT INTO specs_fts (specs_fts, rowid, repo, name, title, tags, summary, content)
+       SELECT 'delete', id, repo, name, title, tags, summary, content FROM specs WHERE id=${rid};" 2>/dev/null || true
+}
 
 # ── Schema ──────────────────────────────────────────────
 
@@ -323,10 +468,10 @@ cmd_repo() {
       echo ""
       while IFS='|' read -r rname rpath; do
         local fcount
-        fcount="$(find "$rpath" \( "${FILE_PATTERNS[@]}" \) -type f 2>/dev/null | wc -l | tr -d ' ')"
+        fcount="$(find "$rpath" -type f \( \( "${FILE_PATTERNS[@]}" \) -o \( "${MEDIA_PATTERNS[@]}" \) \) 2>/dev/null | wc -l | tr -d ' ')"
         echo "  ${rname}"
         echo "    ${rpath}"
-        echo "    ${fcount} files (.md .mdx .txt)"
+        echo "    ${fcount} files (.md .mdx .txt .jpg .png .pdf …)"
         echo ""
       done < "$REPOS_FILE"
       ;;
@@ -388,12 +533,12 @@ index_repo() {
     size="$(stat -c '%s' "$file" 2>/dev/null || stat -f '%z' "$file" 2>/dev/null || echo "0")"
 
     # Escape short metadata
-    title="${title//\'/\'\'}"
-    tags="${tags//\'/\'\'}"
-    summary="${summary//\'/\'\'}"
+    title="${title//"'"/"''"}"
+    tags="${tags//"'"/"''"}"
+    summary="${summary//"'"/"''"}"
 
     sql "INSERT INTO specs (repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
-         VALUES ('${rname//\'/\'\'}', '${rel//\'/\'\'}', '${project//\'/\'\'}', '${name//\'/\'\'}', '${title}', '${tags}', '${summary}', '${file//\'/\'\'}', '${modified}', ${size}, '${ext}', readfile('${file}'));" 2>/dev/null
+         VALUES ('${rname//"'"/"''"}', '${rel//"'"/"''"}', '${project//"'"/"''"}', '${name//"'"/"''"}', '${title}', '${tags}', '${summary}', '${file//"'"/"''"}', '${modified}', ${size}, '${ext}', readfile('${file//"'"/"''"}'));" 2>/dev/null
 
     # Tags
     if [[ -n "$tags" ]]; then
@@ -406,6 +551,16 @@ index_repo() {
 
     count=$((count + 1))
   done < <(find "$rpath" \( "${FILE_PATTERNS[@]}" \) -type f -print0 | sort -z)
+
+  # Scan media files — each requires a companion .md for metadata
+  local media_count=0
+  while IFS= read -r -d '' asset_file; do
+    local asset_rel="${asset_file#$rpath/}"
+    if index_asset_with_companion "$rname" "$rpath" "$asset_rel" 0; then
+      media_count=$((media_count + 1))
+    fi
+  done < <(find "$rpath" \( "${MEDIA_PATTERNS[@]}" \) -type f -print0 | sort -z)
+  count=$((count + media_count))
 
   echo "  ${rname}: ${count} files indexed"
   return $count
