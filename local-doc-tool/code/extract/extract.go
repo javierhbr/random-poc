@@ -158,6 +158,19 @@ func fromCompanionInfo(repoName, repoRoot, mediaAbsPath string, mediaInfo os.Fil
 	}, nil
 }
 
+// BuildMediaStems returns a set of file stems (without extension) that have a
+// media extension in the given directory entries. Used for O(1) sidecar checks.
+func BuildMediaStems(entries []fs.DirEntry) map[string]bool {
+	stems := make(map[string]bool, len(entries)/4+1)
+	for _, e := range entries {
+		ext := strings.ToLower(filepath.Ext(e.Name()))
+		if MediaExts[ext] {
+			stems[strings.TrimSuffix(e.Name(), filepath.Ext(e.Name()))] = true
+		}
+	}
+	return stems
+}
+
 // HasMediaCompanion checks whether any media file exists with the same stem as the given .md path.
 // Used to skip indexing .md files that are sidecars.
 // For hot paths (WalkDir), prefer HasMediaCompanionInDir which reuses cached directory entries.
@@ -257,9 +270,18 @@ func extractSummary(content string) string {
 	var lines []string
 	collecting := false
 
-	for _, line := range strings.Split(body, "\n") {
+	// Scan line-by-line without allocating a []string for all lines.
+	// Stops as soon as the first paragraph ends, so large files are not fully scanned.
+	for len(body) > 0 {
+		var line string
+		if i := strings.IndexByte(body, '\n'); i >= 0 {
+			line = body[:i]
+			body = body[i+1:]
+		} else {
+			line = body
+			body = ""
+		}
 		trimmed := strings.TrimSpace(line)
-
 		if strings.HasPrefix(trimmed, "#") {
 			continue // skip headings
 		}

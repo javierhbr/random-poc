@@ -23,18 +23,11 @@ type workItem struct {
 
 // FullScan indexes all spec files in repoRoot under repoName.
 //
-// Design: workers read files in parallel and stream parsed Specs through a
-// channel. The main goroutine drains the channel and writes each Spec into the
-// database immediately inside a single transaction, so memory usage is bounded
-// by (workerCount × maxContentBytes) rather than (totalFiles × maxContentBytes).
+// Design: walkItems streams work items directly into workCh as WalkDir visits
+// them, so workers start reading files immediately rather than waiting for the
+// full walk to complete. Memory is bounded by (workerCount × maxContentBytes)
+// because the channel buffers apply backpressure.
 func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
-	// Phase 1: walk the directory tree — collect file paths only (fast, no I/O).
-	items, err := walkItems(repoRoot)
-	if err != nil {
-		return 0, err
-	}
-
-	// Phase 2: start worker pool — reads file content in parallel.
 	// Cap workers between 2 and 16 to avoid overwhelming the kernel's dir cache.
 	workerCount := runtime.NumCPU()
 	if workerCount < 2 {
@@ -72,26 +65,24 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 		}()
 	}
 
-	// Feed workers and close the work channel when done.
-	go func() {
-		for _, item := range items {
-			workCh <- item
-		}
-		close(workCh)
-	}()
-
 	// Close results channel once all workers finish.
 	go func() {
 		wg.Wait()
 		close(resultsCh)
 	}()
 
-	// Phase 3: open transaction and stream Specs directly into the DB.
+	// Walk and feed workers directly — streaming, no intermediate slice.
+	walkErr := make(chan error, 1)
+	go func() {
+		err := walkItems(repoRoot, workCh)
+		close(workCh)
+		walkErr <- err
+	}()
+
+	// Open transaction and stream Specs directly into the DB.
 	tx, err := db.Begin()
 	if err != nil {
-		// Drain the channel to unblock workers before returning.
-		for range resultsCh {
-		}
+		for range resultsCh {}
 		return 0, err
 	}
 	defer tx.Rollback() //nolint:errcheck
@@ -125,6 +116,10 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 		count++
 	}
 
+	if err := <-walkErr; err != nil {
+		return 0, err
+	}
+
 	// FTS and tags are cheap SELECT-driven operations; run after all specs are inserted.
 	if err := batchInsertFTS(tx, repoName); err != nil {
 		return 0, err
@@ -142,6 +137,7 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
+	RefreshStats(db) //nolint:errcheck — best-effort cache update
 	return count, nil
 }
 
@@ -149,8 +145,8 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 // lastCommit is the previously stored HEAD hash (empty string = first scan).
 // Returns the number of files updated and the new HEAD commit hash.
 //
-// Design: file reads happen outside the transaction (no DB lock held during I/O).
-// All DB writes are batched into a single transaction after all files are read.
+// Design: file reads happen outside the transaction via a worker pool (no DB
+// lock held during I/O). All DB writes are batched into a single transaction.
 func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string) (int, string, error) {
 	changed, err := git.ChangedFiles(repoRoot, lastCommit)
 	if err != nil {
@@ -164,55 +160,94 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string) (int, st
 		return 0, newCommit, nil
 	}
 
-	// Phase 1: read all changed files OUTSIDE the transaction.
+	// Phase 1: read all changed files concurrently OUTSIDE the transaction.
 	type pendingSpec struct {
 		relPath string
 		sp      *extract.Spec // nil = file was deleted
 	}
-	var toDelete []string          // rel paths to remove from DB
-	var toInsert []pendingSpec     // new/updated specs
+	type workResult struct {
+		toDelete []string
+		toInsert []pendingSpec
+		err      error
+	}
 
-	for _, rel := range changed {
-		absPath := filepath.Join(repoRoot, filepath.FromSlash(rel))
-		ext := strings.ToLower(filepath.Ext(rel))
+	workerCount := runtime.NumCPU()
+	if workerCount < 2 {
+		workerCount = 2
+	} else if workerCount > 16 {
+		workerCount = 16
+	}
 
-		switch {
-		case extract.MediaExts[ext]:
-			toDelete = append(toDelete, rel)
-			if git.FileExists(repoRoot, rel) {
-				companion := extract.CompanionPath(absPath)
-				sp, err := extract.FromCompanion(repoName, repoRoot, absPath, companion)
-				if err != nil || sp == nil {
-					fmt.Fprintf(os.Stderr, "warning: %s — skipped (no companion .md)\n", rel)
-					continue
-				}
-				toInsert = append(toInsert, pendingSpec{rel, sp})
-			}
+	relCh := make(chan string, workerCount*2)
+	resCh := make(chan workResult, workerCount*2)
 
-		case extract.TextExts[ext]:
-			// If this .md is a sidecar for a media file, re-index the media files instead.
-			if extract.HasMediaCompanion(absPath) {
-				mediaSpecs, mediaRels, err := readMediaForCompanion(repoName, repoRoot, absPath)
-				if err != nil {
-					return 0, lastCommit, err
-				}
-				for i, mrel := range mediaRels {
-					toDelete = append(toDelete, mrel)
-					if mediaSpecs[i] != nil {
-						toInsert = append(toInsert, pendingSpec{mrel, mediaSpecs[i]})
+	var wg sync.WaitGroup
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for rel := range relCh {
+				absPath := filepath.Join(repoRoot, filepath.FromSlash(rel))
+				ext := strings.ToLower(filepath.Ext(rel))
+				var res workResult
+				switch {
+				case extract.MediaExts[ext]:
+					res.toDelete = []string{rel}
+					if git.FileExists(repoRoot, rel) {
+						companion := extract.CompanionPath(absPath)
+						sp, e := extract.FromCompanion(repoName, repoRoot, absPath, companion)
+						if e != nil || sp == nil {
+							fmt.Fprintf(os.Stderr, "warning: %s — skipped (no companion .md)\n", rel)
+						} else {
+							res.toInsert = []pendingSpec{{rel, sp}}
+						}
+					}
+				case extract.TextExts[ext]:
+					if extract.HasMediaCompanion(absPath) {
+						mediaSpecs, mediaRels, e := readMediaForCompanion(repoName, repoRoot, absPath)
+						if e != nil {
+							res.err = e
+						} else {
+							for i, mrel := range mediaRels {
+								res.toDelete = append(res.toDelete, mrel)
+								if mediaSpecs[i] != nil {
+									res.toInsert = append(res.toInsert, pendingSpec{mrel, mediaSpecs[i]})
+								}
+							}
+						}
+					} else {
+						res.toDelete = []string{rel}
+						if git.FileExists(repoRoot, rel) {
+							sp, e := extract.FromFile(repoName, repoRoot, absPath)
+							if e == nil {
+								res.toInsert = []pendingSpec{{rel, sp}}
+							}
+						}
 					}
 				}
-				continue
+				resCh <- res
 			}
-			toDelete = append(toDelete, rel)
-			if git.FileExists(repoRoot, rel) {
-				sp, err := extract.FromFile(repoName, repoRoot, absPath)
-				if err != nil {
-					continue
-				}
-				toInsert = append(toInsert, pendingSpec{rel, sp})
-			}
+		}()
+	}
+	go func() {
+		wg.Wait()
+		close(resCh)
+	}()
+	go func() {
+		for _, rel := range changed {
+			relCh <- rel
 		}
+		close(relCh)
+	}()
+
+	var toDelete []string
+	var toInsert []pendingSpec
+	for res := range resCh {
+		if res.err != nil {
+			return 0, lastCommit, res.err
+		}
+		toDelete = append(toDelete, res.toDelete...)
+		toInsert = append(toInsert, res.toInsert...)
 	}
 
 	if len(toDelete) == 0 && len(toInsert) == 0 {
@@ -271,6 +306,7 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string) (int, st
 	if err := tx.Commit(); err != nil {
 		return 0, lastCommit, err
 	}
+	RefreshStats(db) //nolint:errcheck — best-effort cache update
 
 	newCommit := git.CurrentCommit(repoRoot)
 	if newCommit == "" {
@@ -307,15 +343,17 @@ func DeleteRepo(db *sql.DB, repoName string) error {
 
 // ── directory walk ────────────────────────────────────────────────────────────
 
-// walkItems collects all indexable files from repoRoot.
-// It caches directory listings to answer HasMediaCompanionInDir without extra stats.
+// walkItems walks repoRoot and sends indexable files directly to workCh.
+// Workers start consuming as soon as the first item arrives — no intermediate
+// slice is built. Cache entries are evicted as soon as WalkDir moves to a
+// different parent directory, keeping memory O(current depth) regardless of
+// whether directories contain indexable files.
 // Permission-denied errors are skipped; other errors abort the walk.
-func walkItems(repoRoot string) ([]workItem, error) {
-	// dirEntries caches os.ReadDir results keyed by directory path.
-	dirEntries := map[string][]fs.DirEntry{}
+func walkItems(repoRoot string, workCh chan<- workItem) error {
+	mediaStems := map[string]map[string]bool{} // dir → stem → true
+	lastDir := ""
 
-	var items []workItem
-	err := filepath.WalkDir(repoRoot, func(path string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(repoRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			if os.IsPermission(err) {
 				return nil // skip unreadable dirs/files, continue walk
@@ -323,53 +361,82 @@ func walkItems(repoRoot string) ([]workItem, error) {
 			return err
 		}
 		if d.IsDir() {
-			// d.ReadDir(-1) reuses the already-opened directory handle from
-			// WalkDir, avoiding a second getdents syscall per directory.
-			if rd, ok := d.(fs.ReadDirFile); ok {
-				if entries, readErr := rd.ReadDir(-1); readErr == nil {
-					dirEntries[path] = entries
-				}
-			} else {
-				// Fallback for implementations that don't expose ReadDirFile.
-				if entries, readErr := os.ReadDir(path); readErr == nil {
-					dirEntries[path] = entries
-				}
+			// Evict the previous directory's cache as soon as we descend into a
+			// new one. WalkDir is depth-first so lastDir won't be visited again.
+			if lastDir != "" && lastDir != path {
+				delete(mediaStems, lastDir)
 			}
+			entries, readErr := os.ReadDir(path)
+			if readErr == nil {
+				mediaStems[path] = extract.BuildMediaStems(entries)
+			}
+			lastDir = path
 			return nil
 		}
 
 		ext := strings.ToLower(filepath.Ext(path))
+		dir := filepath.Dir(path)
+
+		// Evict when the file's parent differs from the last-seen directory
+		// (handles directories that contain only subdirs and no files).
+		if dir != lastDir {
+			delete(mediaStems, lastDir)
+			lastDir = dir
+		}
+
 		switch {
 		case extract.TextExts[ext]:
 			// Skip .md/.mdx files that are sidecars for a media file.
 			stem := strings.TrimSuffix(d.Name(), filepath.Ext(d.Name()))
-			dir := filepath.Dir(path)
-			if entries, ok := dirEntries[dir]; ok {
-				if extract.HasMediaCompanionInDir(stem, entries) {
+			if stems, ok := mediaStems[dir]; ok {
+				if stems[stem] {
 					return nil // sidecar — skip
 				}
 			} else if extract.HasMediaCompanion(path) {
-				return nil // fallback
+				return nil // fallback (rare: dir not in cache)
 			}
-			items = append(items, workItem{path, d, false})
+			workCh <- workItem{path, d, false}
 
 		case extract.MediaExts[ext]:
-			items = append(items, workItem{path, d, true})
+			workCh <- workItem{path, d, true}
 		}
+
 		return nil
 	})
-	return items, err
 }
 
 // ── batch DB operations ───────────────────────────────────────────────────────
 
 func deleteRepoEntries(tx *sql.Tx, repoName string) error {
-	// FTS5 contentless tables require the 'delete' command with explicit content.
-	// Stream rows and issue the delete command inline — no intermediate slice needed.
+	// FTS5 contentless tables require the 'delete' command with the indexed
+	// fields. We omit the full 'content' column (up to 10 MB per row) and pass
+	// an empty string instead — FTS5 contentless tables do not verify content
+	// on delete, so this is safe and avoids loading large blobs into RAM.
+	// Materialize all rows first, close the read cursor, then execute writes —
+	// avoids holding a read cursor open while issuing write statements on the
+	// same connection (can serialize or deadlock with modernc.org/sqlite).
 	rows, err := tx.Query(
-		"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=?", repoName,
+		"SELECT id,repo,name,title,tags,summary FROM specs WHERE repo=?", repoName,
 	)
 	if err != nil {
+		return err
+	}
+
+	type specRow struct {
+		id                                  int64
+		repo, name, title, tags, summary string
+	}
+	var toDelete []specRow
+	for rows.Next() {
+		var r specRow
+		if err := rows.Scan(&r.id, &r.repo, &r.name, &r.title, &r.tags, &r.summary); err != nil {
+			rows.Close()
+			return err
+		}
+		toDelete = append(toDelete, r)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
 		return err
 	}
 
@@ -378,26 +445,15 @@ func deleteRepoEntries(tx *sql.Tx, repoName string) error {
 			"VALUES('delete',?,?,?,?,?,?,?)",
 	)
 	if err != nil {
-		rows.Close()
 		return err
 	}
 	defer ftsStmt.Close()
 
-	for rows.Next() {
-		var id int64
-		var repo, name, title, tags, summary, content string
-		if err := rows.Scan(&id, &repo, &name, &title, &tags, &summary, &content); err != nil {
-			rows.Close()
+	for _, r := range toDelete {
+		// Pass "" for content — FTS5 contentless delete does not validate it.
+		if _, err := ftsStmt.Exec(r.id, r.repo, r.name, r.title, r.tags, r.summary, ""); err != nil {
 			return err
 		}
-		if _, err := ftsStmt.Exec(id, repo, name, title, tags, summary, content); err != nil {
-			rows.Close()
-			return err
-		}
-	}
-	rows.Close()
-	if err := rows.Err(); err != nil {
-		return err
 	}
 
 	if _, err := tx.Exec(
@@ -420,69 +476,70 @@ func batchInsertFTS(tx *sql.Tx, repoName string) error {
 	return err
 }
 
+// sqliteMaxVars is the default SQLITE_MAX_VARIABLE_NUMBER limit. We reserve
+// one slot for the repo argument, so batches use at most sqliteMaxVars-1 paths.
+const sqliteMaxVars = 999
+
 // batchInsertFTSPaths inserts FTS entries for a specific set of paths within a repo.
-// Used by IncrementalScan to avoid N+1 per-file SELECT round-trips.
+// Paths are chunked into batches of ≤998 to stay within SQLite's variable limit.
 func batchInsertFTSPaths(tx *sql.Tx, repoName string, paths []string) error {
-	if len(paths) == 0 {
-		return nil
-	}
-	stmt, err := tx.Prepare(
-		"INSERT INTO specs_fts(rowid,repo,name,title,tags,summary,content) " +
-			"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=? AND path=?",
-	)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	for _, p := range paths {
-		if _, err := stmt.Exec(repoName, p); err != nil {
-			return err
+	return chunkPaths(paths, func(chunk []string) error {
+		placeholders := strings.Repeat("?,", len(chunk))
+		placeholders = placeholders[:len(placeholders)-1]
+		args := make([]any, 0, len(chunk)+1)
+		args = append(args, repoName)
+		for _, p := range chunk {
+			args = append(args, p)
 		}
-	}
-	return nil
+		_, err := tx.Exec(
+			"INSERT INTO specs_fts(rowid,repo,name,title,tags,summary,content) "+
+				"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=? AND path IN ("+placeholders+")",
+			args...,
+		)
+		return err
+	})
 }
 
 // batchInsertTagsPaths inserts spec_tags rows for a specific set of paths within a repo.
-// Used by IncrementalScan to avoid N+1 per-file SELECT round-trips.
+// Paths are chunked into batches of ≤998 to stay within SQLite's variable limit.
 func batchInsertTagsPaths(tx *sql.Tx, repoName string, paths []string) error {
-	if len(paths) == 0 {
-		return nil
-	}
-	placeholders := strings.Repeat("?,", len(paths))
-	placeholders = placeholders[:len(placeholders)-1] // trim trailing comma
-	args := make([]any, 0, len(paths)+1)
-	args = append(args, repoName)
-	for _, p := range paths {
-		args = append(args, p)
-	}
-	rows, err := tx.Query(
-		"SELECT id, tags FROM specs WHERE repo=? AND tags != '' AND path IN ("+placeholders+")",
-		args...,
-	)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
 	stmt, err := tx.Prepare("INSERT INTO spec_tags (spec_id,tag) VALUES (?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	for rows.Next() {
-		var id int64
-		var tags string
-		if err := rows.Scan(&id, &tags); err != nil {
+	return chunkPaths(paths, func(chunk []string) error {
+		placeholders := strings.Repeat("?,", len(chunk))
+		placeholders = placeholders[:len(placeholders)-1]
+		args := make([]any, 0, len(chunk)+1)
+		args = append(args, repoName)
+		for _, p := range chunk {
+			args = append(args, p)
+		}
+		rows, err := tx.Query(
+			"SELECT id, tags FROM specs WHERE repo=? AND tags != '' AND path IN ("+placeholders+")",
+			args...,
+		)
+		if err != nil {
 			return err
 		}
-		for _, tag := range splitTags(tags) {
-			if _, err := stmt.Exec(id, tag); err != nil {
+		defer rows.Close()
+
+		for rows.Next() {
+			var id int64
+			var tags string
+			if err := rows.Scan(&id, &tags); err != nil {
 				return err
 			}
+			for _, tag := range splitTags(tags) {
+				if _, err := stmt.Exec(id, tag); err != nil {
+					return err
+				}
+			}
 		}
-	}
-	return rows.Err()
+		return rows.Err()
+	})
 }
 
 func batchInsertTags(tx *sql.Tx, repoName string) error {
@@ -519,11 +576,11 @@ func batchInsertTags(tx *sql.Tx, repoName string) error {
 
 func deleteSpecEntry(tx *sql.Tx, repoName, relPath string) error {
 	var id int64
-	var repo, name, title, tags, summary, content string
+	var repo, name, title, tags, summary string
 	err := tx.QueryRow(
-		"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=? AND path=?",
+		"SELECT id,repo,name,title,tags,summary FROM specs WHERE repo=? AND path=?",
 		repoName, relPath,
-	).Scan(&id, &repo, &name, &title, &tags, &summary, &content)
+	).Scan(&id, &repo, &name, &title, &tags, &summary)
 	if err == sql.ErrNoRows {
 		return nil
 	}
@@ -531,10 +588,11 @@ func deleteSpecEntry(tx *sql.Tx, repoName, relPath string) error {
 		return err
 	}
 
+	// Pass "" for content — FTS5 contentless delete does not validate it.
 	if _, err := tx.Exec(
 		"INSERT INTO specs_fts(specs_fts,rowid,repo,name,title,tags,summary,content) "+
 			"VALUES('delete',?,?,?,?,?,?,?)",
-		id, repo, name, title, tags, summary, content,
+		id, repo, name, title, tags, summary, "",
 	); err != nil {
 		return err
 	}
@@ -584,4 +642,22 @@ func splitTags(tags string) []string {
 		}
 	}
 	return result
+}
+
+// chunkPaths calls fn for each sub-slice of paths of length ≤ sqliteMaxVars-1,
+// keeping every batch within SQLite's SQLITE_MAX_VARIABLE_NUMBER limit (one
+// slot is reserved for the repo argument that always accompanies the batch).
+func chunkPaths(paths []string, fn func([]string) error) error {
+	const batchSize = sqliteMaxVars - 1 // 998
+	for len(paths) > 0 {
+		end := batchSize
+		if end > len(paths) {
+			end = len(paths)
+		}
+		if err := fn(paths[:end]); err != nil {
+			return err
+		}
+		paths = paths[end:]
+	}
+	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -458,9 +459,23 @@ type StatsResult struct {
 	LastScan   string `json:"last_scan"`
 }
 
-// Stats returns aggregate index statistics.
+// Stats returns aggregate index statistics. Reads from the meta cache populated
+// by RefreshStats after each scan. Falls back to live queries if cache is absent.
 func Stats(db *sql.DB) (StatsResult, error) {
 	var s StatsResult
+
+	// Try cache first — O(1) indexed meta lookups.
+	if v := getMeta(db, "stats_specs"); v != "" {
+		s.Repos, _      = strconv.Atoi(getMeta(db, "stats_repos"))
+		s.TotalSpecs, _ = strconv.Atoi(v)
+		s.Projects, _   = strconv.Atoi(getMeta(db, "stats_projects"))
+		s.UniqueTags, _  = strconv.Atoi(getMeta(db, "stats_tags"))
+		s.TotalBytes, _  = strconv.ParseInt(getMeta(db, "stats_bytes"), 10, 64)
+		s.LastScan       = getMeta(db, "last_scan")
+		return s, nil
+	}
+
+	// Cache miss: compute live (first run before any scan completes).
 	err := db.QueryRow(`
 		SELECT
 		  (SELECT COUNT(*) FROM repos),
@@ -471,6 +486,40 @@ func Stats(db *sql.DB) (StatsResult, error) {
 		  (SELECT COALESCE(value,'never') FROM meta WHERE key='last_scan')
 	`).Scan(&s.Repos, &s.TotalSpecs, &s.Projects, &s.UniqueTags, &s.TotalBytes, &s.LastScan)
 	return s, err
+}
+
+// RefreshStats recomputes aggregate statistics and caches them in the meta table.
+// Call after any scan that modifies the index so Stats() reads from cache.
+func RefreshStats(db *sql.DB) error {
+	var repos, specs, projects, tags int
+	var bytes int64
+	err := db.QueryRow(`
+		SELECT
+		  (SELECT COUNT(*) FROM repos),
+		  (SELECT COUNT(*) FROM specs),
+		  (SELECT COUNT(DISTINCT project) FROM specs),
+		  (SELECT COUNT(DISTINCT tag) FROM spec_tags),
+		  (SELECT COALESCE(SUM(size),0) FROM specs)
+	`).Scan(&repos, &specs, &projects, &tags, &bytes)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(
+		"INSERT OR REPLACE INTO meta (key,value) VALUES (?,?),(?,?),(?,?),(?,?),(?,?)",
+		"stats_repos", strconv.Itoa(repos),
+		"stats_specs", strconv.Itoa(specs),
+		"stats_projects", strconv.Itoa(projects),
+		"stats_tags", strconv.Itoa(tags),
+		"stats_bytes", strconv.FormatInt(bytes, 10),
+	)
+	return err
+}
+
+// getMeta reads a single meta value without propagating errors.
+func getMeta(db *sql.DB, key string) string {
+	var val string
+	db.QueryRow("SELECT value FROM meta WHERE key=?", key).Scan(&val) //nolint:errcheck
+	return val
 }
 
 // PrintStats writes human-readable statistics.

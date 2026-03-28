@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS spec_tags (
   FOREIGN KEY (spec_id) REFERENCES specs(id)
 );
 CREATE INDEX IF NOT EXISTS idx_tags ON spec_tags(tag);
+CREATE INDEX IF NOT EXISTS idx_spec_tags_spec_id ON spec_tags(spec_id);
+CREATE INDEX IF NOT EXISTS idx_specs_name_lower ON specs(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_tags_lower ON spec_tags(LOWER(tag));
 
 CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
