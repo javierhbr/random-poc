@@ -382,15 +382,9 @@ func cmdList(args []string) {
 	db := ensureDB()
 	defer db.Close()
 
-	rows, err := localdb.List(db, filter)
-	if err != nil {
+	if err := localdb.StreamList(db, filter); err != nil {
 		die(err.Error())
 	}
-	if len(rows) == 0 {
-		fmt.Println("No specs found.")
-		return
-	}
-	localdb.PrintList(rows)
 }
 
 // ── Projects ──────────────────────────────────────────────────────────────────

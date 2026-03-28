@@ -29,6 +29,7 @@ func Search(db *sql.DB, query, repoFilter string) ([]SearchResult, error) {
 		rows *sql.Rows
 		err  error
 	)
+	const searchLimit = 200
 	baseSQL := `
 		SELECT s.repo, s.project, s.name, s.title, s.tags,
 		       s.path, s.ext, f.rank
@@ -37,9 +38,9 @@ func Search(db *sql.DB, query, repoFilter string) ([]SearchResult, error) {
 		WHERE specs_fts MATCH ?`
 
 	if repoFilter != "" {
-		rows, err = db.Query(baseSQL+" AND s.repo=? ORDER BY f.rank", query, repoFilter)
+		rows, err = db.Query(baseSQL+" AND s.repo=? ORDER BY f.rank LIMIT ?", query, repoFilter, searchLimit)
 	} else {
-		rows, err = db.Query(baseSQL+" ORDER BY f.rank", query)
+		rows, err = db.Query(baseSQL+" ORDER BY f.rank LIMIT ?", query, searchLimit)
 	}
 	if err != nil {
 		return nil, err
@@ -183,7 +184,8 @@ func listByProject(db *sql.DB, project string) ([]ListRow, error) {
 }
 
 func scanListRows(rows *sql.Rows) ([]ListRow, error) {
-	var result []ListRow
+	// Pre-allocate with a reasonable guess to avoid repeated slice doublings.
+	result := make([]ListRow, 0, 256)
 	for rows.Next() {
 		var r ListRow
 		if err := rows.Scan(&r.Repo, &r.Project, &r.Name, &r.Title, &r.Ext); err != nil {
@@ -192,6 +194,61 @@ func scanListRows(rows *sql.Rows) ([]ListRow, error) {
 		result = append(result, r)
 	}
 	return result, rows.Err()
+}
+
+// StreamList writes human-readable grouped list output directly from the DB
+// without materialising the full result set into memory. Use this instead of
+// List+PrintList when JSON output is not needed.
+func StreamList(db *sql.DB, filter string) error {
+	var (
+		rows *sql.Rows
+		err  error
+	)
+	if filter == "" {
+		rows, err = db.Query(
+			"SELECT repo, project, name, title, ext FROM specs ORDER BY repo, project, name",
+		)
+	} else {
+		var count int
+		db.QueryRow("SELECT COUNT(*) FROM repos WHERE name=?", filter).Scan(&count) //nolint:errcheck
+		if count > 0 {
+			rows, err = db.Query(
+				"SELECT repo, project, name, title, ext FROM specs WHERE repo=? ORDER BY project, name", filter,
+			)
+		} else {
+			rows, err = db.Query(
+				"SELECT repo, project, name, title, ext FROM specs WHERE project=? ORDER BY repo, name", filter,
+			)
+		}
+	}
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	empty := true
+	var lastRepo, lastProject string
+	for rows.Next() {
+		var r ListRow
+		if err := rows.Scan(&r.Repo, &r.Project, &r.Name, &r.Title, &r.Ext); err != nil {
+			return err
+		}
+		empty = false
+		if r.Repo != lastRepo {
+			fmt.Printf("\n[%s]\n", r.Repo)
+			lastRepo = r.Repo
+			lastProject = ""
+		}
+		if r.Project != lastProject {
+			fmt.Printf("  %s/\n", r.Project)
+			lastProject = r.Project
+		}
+		fmt.Printf("    %s  %s  .%s\n", r.Name, r.Title, r.Ext)
+	}
+	if empty {
+		fmt.Println("No specs found.")
+	}
+	return rows.Err()
 }
 
 // PrintList writes human-readable grouped list output.

@@ -6,14 +6,13 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
 	"local-search/extract"
 	"local-search/git"
 )
-
-const workerCount = 4
 
 // workItem is a file discovered during directory walking.
 type workItem struct {
@@ -36,6 +35,14 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 	}
 
 	// Phase 2: start worker pool — reads file content in parallel.
+	// Cap workers between 2 and 16 to avoid overwhelming the kernel's dir cache.
+	workerCount := runtime.NumCPU()
+	if workerCount < 2 {
+		workerCount = 2
+	} else if workerCount > 16 {
+		workerCount = 16
+	}
+
 	type result struct {
 		sp  *extract.Spec
 		err error
@@ -249,23 +256,16 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string) (int, st
 		}
 	}
 
-	// Batch FTS and tags for newly inserted specs only.
-	for _, p := range toInsert {
-		if err := insertSpecFTS(tx, repoName, p.relPath); err != nil {
-			return 0, lastCommit, err
-		}
+	// Batch FTS and tags for all newly inserted specs in two SQL passes.
+	insertedPaths := make([]string, len(toInsert))
+	for i, p := range toInsert {
+		insertedPaths[i] = p.relPath
 	}
-
-	tagStmt, err := tx.Prepare("INSERT INTO spec_tags (spec_id,tag) VALUES (?,?)")
-	if err != nil {
+	if err := batchInsertFTSPaths(tx, repoName, insertedPaths); err != nil {
 		return 0, lastCommit, err
 	}
-	defer tagStmt.Close()
-
-	for _, p := range toInsert {
-		if err := insertSpecTagsStmt(tx, tagStmt, repoName, p.relPath); err != nil {
-			return 0, lastCommit, err
-		}
+	if err := batchInsertTagsPaths(tx, repoName, insertedPaths); err != nil {
+		return 0, lastCommit, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -298,13 +298,9 @@ func DeleteRepo(db *sql.DB, repoName string) error {
 		return err
 	}
 
-	// Repopulate FTS for remaining repos
-	if _, err := tx.Exec(
-		"INSERT INTO specs_fts(rowid,repo,name,title,tags,summary,content) " +
-			"SELECT id,repo,name,title,tags,summary,content FROM specs",
-	); err != nil {
-		return err
-	}
+	// deleteRepoEntries already removed only this repo's FTS entries via
+	// "DELETE FROM specs_fts WHERE rowid IN (...)" — remaining repos' FTS data
+	// is intact, so no re-index is needed.
 
 	return tx.Commit()
 }
@@ -327,10 +323,17 @@ func walkItems(repoRoot string) ([]workItem, error) {
 			return err
 		}
 		if d.IsDir() {
-			// Cache this directory's entries for sibling-check lookups.
-			entries, readErr := os.ReadDir(path)
-			if readErr == nil {
-				dirEntries[path] = entries
+			// d.ReadDir(-1) reuses the already-opened directory handle from
+			// WalkDir, avoiding a second getdents syscall per directory.
+			if rd, ok := d.(fs.ReadDirFile); ok {
+				if entries, readErr := rd.ReadDir(-1); readErr == nil {
+					dirEntries[path] = entries
+				}
+			} else {
+				// Fallback for implementations that don't expose ReadDirFile.
+				if entries, readErr := os.ReadDir(path); readErr == nil {
+					dirEntries[path] = entries
+				}
 			}
 			return nil
 		}
@@ -361,40 +364,40 @@ func walkItems(repoRoot string) ([]workItem, error) {
 // ── batch DB operations ───────────────────────────────────────────────────────
 
 func deleteRepoEntries(tx *sql.Tx, repoName string) error {
-	// Delete FTS entries row-by-row for this repo only (not delete-all, which
-	// would wipe other repos' FTS entries in a multi-repo scan).
+	// FTS5 contentless tables require the 'delete' command with explicit content.
+	// Stream rows and issue the delete command inline — no intermediate slice needed.
 	rows, err := tx.Query(
 		"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=?", repoName,
 	)
 	if err != nil {
 		return err
 	}
-	type ftsRow struct {
-		id                                    int64
-		repo, name, title, tags, summary, content string
+
+	ftsStmt, err := tx.Prepare(
+		"INSERT INTO specs_fts(specs_fts,rowid,repo,name,title,tags,summary,content) " +
+			"VALUES('delete',?,?,?,?,?,?,?)",
+	)
+	if err != nil {
+		rows.Close()
+		return err
 	}
-	var toDelete []ftsRow
+	defer ftsStmt.Close()
+
 	for rows.Next() {
-		var r ftsRow
-		if err := rows.Scan(&r.id, &r.repo, &r.name, &r.title, &r.tags, &r.summary, &r.content); err != nil {
+		var id int64
+		var repo, name, title, tags, summary, content string
+		if err := rows.Scan(&id, &repo, &name, &title, &tags, &summary, &content); err != nil {
 			rows.Close()
 			return err
 		}
-		toDelete = append(toDelete, r)
+		if _, err := ftsStmt.Exec(id, repo, name, title, tags, summary, content); err != nil {
+			rows.Close()
+			return err
+		}
 	}
 	rows.Close()
 	if err := rows.Err(); err != nil {
 		return err
-	}
-
-	for _, r := range toDelete {
-		if _, err := tx.Exec(
-			"INSERT INTO specs_fts(specs_fts,rowid,repo,name,title,tags,summary,content) "+
-				"VALUES('delete',?,?,?,?,?,?,?)",
-			r.id, r.repo, r.name, r.title, r.tags, r.summary, r.content,
-		); err != nil {
-			return err
-		}
 	}
 
 	if _, err := tx.Exec(
@@ -415,6 +418,71 @@ func batchInsertFTS(tx *sql.Tx, repoName string) error {
 		repoName,
 	)
 	return err
+}
+
+// batchInsertFTSPaths inserts FTS entries for a specific set of paths within a repo.
+// Used by IncrementalScan to avoid N+1 per-file SELECT round-trips.
+func batchInsertFTSPaths(tx *sql.Tx, repoName string, paths []string) error {
+	if len(paths) == 0 {
+		return nil
+	}
+	stmt, err := tx.Prepare(
+		"INSERT INTO specs_fts(rowid,repo,name,title,tags,summary,content) " +
+			"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=? AND path=?",
+	)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	for _, p := range paths {
+		if _, err := stmt.Exec(repoName, p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// batchInsertTagsPaths inserts spec_tags rows for a specific set of paths within a repo.
+// Used by IncrementalScan to avoid N+1 per-file SELECT round-trips.
+func batchInsertTagsPaths(tx *sql.Tx, repoName string, paths []string) error {
+	if len(paths) == 0 {
+		return nil
+	}
+	placeholders := strings.Repeat("?,", len(paths))
+	placeholders = placeholders[:len(placeholders)-1] // trim trailing comma
+	args := make([]any, 0, len(paths)+1)
+	args = append(args, repoName)
+	for _, p := range paths {
+		args = append(args, p)
+	}
+	rows, err := tx.Query(
+		"SELECT id, tags FROM specs WHERE repo=? AND tags != '' AND path IN ("+placeholders+")",
+		args...,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	stmt, err := tx.Prepare("INSERT INTO spec_tags (spec_id,tag) VALUES (?,?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for rows.Next() {
+		var id int64
+		var tags string
+		if err := rows.Scan(&id, &tags); err != nil {
+			return err
+		}
+		for _, tag := range splitTags(tags) {
+			if _, err := stmt.Exec(id, tag); err != nil {
+				return err
+			}
+		}
+	}
+	return rows.Err()
 }
 
 func batchInsertTags(tx *sql.Tx, repoName string) error {
@@ -475,36 +543,6 @@ func deleteSpecEntry(tx *sql.Tx, repoName, relPath string) error {
 	}
 	if _, err := tx.Exec("DELETE FROM specs WHERE id=?", id); err != nil {
 		return err
-	}
-	return nil
-}
-
-func insertSpecFTS(tx *sql.Tx, repoName, relPath string) error {
-	_, err := tx.Exec(
-		"INSERT INTO specs_fts(rowid,repo,name,title,tags,summary,content) "+
-			"SELECT id,repo,name,title,tags,summary,content FROM specs WHERE repo=? AND path=?",
-		repoName, relPath,
-	)
-	return err
-}
-
-// insertSpecTagsStmt inserts tags for a newly-inserted spec using a pre-prepared statement.
-func insertSpecTagsStmt(tx *sql.Tx, stmt *sql.Stmt, repoName, relPath string) error {
-	var id int64
-	var tags string
-	err := tx.QueryRow(
-		"SELECT id,tags FROM specs WHERE repo=? AND path=?", repoName, relPath,
-	).Scan(&id, &tags)
-	if err == sql.ErrNoRows || tags == "" {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	for _, tag := range splitTags(tags) {
-		if _, err := stmt.Exec(id, tag); err != nil {
-			return err
-		}
 	}
 	return nil
 }

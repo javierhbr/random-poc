@@ -247,8 +247,12 @@ func extractTags(content string) string {
 }
 
 func extractSummary(content string) string {
-	// Strip frontmatter
-	body := frontmatterRe.ReplaceAllString(content, "")
+	// Strip frontmatter by slicing past the match end — avoids allocating a
+	// new string copy of the entire content on every call.
+	body := content
+	if loc := frontmatterRe.FindStringIndex(content); loc != nil {
+		body = content[loc[1]:]
+	}
 
 	var lines []string
 	collecting := false
