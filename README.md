@@ -181,3 +181,8 @@ Results of the loading and scanning process:
 - custom-skills/sdd/bmad-codex-skill/README.png is detected as an image file, the .md custom-skills/sdd/bmad-codex-skill/README.md file is present, so the .md file it's proccessed but the path loaded will be the .png  files.
 
 - custom-skills/sdd/openspec-codex-skill/no_md_file.png is detected as an image file, but the corresponding .md file is not present, so the image file is ignored in the processing. A warning message is generated indicating that the image was not processed due to missing metadata.
+
+---
+
+
+I've experianced peformance issue to load ans scan  files using the local-search script to add repos.  impleent a runtime python script rpo batch the inserts or updates  to improve performace in the insert and scan . serch form more performacne  issues 
