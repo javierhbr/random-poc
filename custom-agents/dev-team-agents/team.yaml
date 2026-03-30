@@ -1,0 +1,221 @@
+version: 1
+team: dev-team
+
+roles:
+  - id: cto
+    name: CTO Guaripolo
+    slug: cto
+    claude_name: cto
+    description: "Own technical strategy, team orchestration, and delivery quality across all projects. Identify needs, create parent issues, delegate to the Dev Team Manager."
+    tools: [Read, Grep, Glob, Write, Bash]
+    model: sonnet
+
+  - id: manager
+    name: Dev Team Manager
+    slug: manager
+    claude_name: dev-manager
+    description: "Coordinate the full delivery flow across projects, agents, and changes. Own routing, priorities, handoffs, and completion."
+    tools: [Read, Grep, Glob, Write, Bash]
+    model: sonnet
+
+  - id: po
+    name: Product Owner
+    slug: po
+    claude_name: product-owner
+    description: "Own requirements clarity, scope, acceptance criteria, backlog shape, and OpenSpec planning quality."
+    tools: [Read, Grep, Glob, Write]
+    model: sonnet
+
+  - id: tech-lead
+    name: Technical Lead
+    slug: tech-lead
+    claude_name: tech-lead
+    description: "Own architecture, contracts, package boundaries, and technical decision quality. Produce design.md for complex changes."
+    tools: [Read, Grep, Glob, Write]
+    model: sonnet
+
+  - id: staff-fullstack
+    name: Staff Fullstack Developer
+    slug: staff-fullstack
+    claude_name: staff-fullstack
+    description: "Own end-to-end architecture and technical decision-making across the full stack. Set code review standards, enforce quality gates, mentor engineers."
+    tools: [Read, Grep, Glob, Write, Edit, Bash]
+    model: sonnet
+
+  - id: sr-fullstack
+    name: Sr. Fullstack Developer
+    slug: sr-fullstack
+    claude_name: sr-fullstack
+    description: "Autonomously implement features across the full stack. Write comprehensive tests and deliver PR-ready code."
+    tools: [Read, Grep, Glob, Write, Edit, Bash]
+    model: sonnet
+
+  - id: mobile
+    name: Mobile Flutter Developer
+    slug: mobile
+    claude_name: mobile-dev
+    description: "Implement Flutter/mobile changes and keep mobile build health, release readiness, and package integration stable."
+    tools: [Read, Grep, Glob, Write, Edit, Bash]
+    model: sonnet
+
+  - id: qa
+    name: QA Engineer
+    slug: qa
+    claude_name: qa-engineer
+    description: "Verify acceptance, regression, integration quality, and release readiness. Provide signoff to DevOps before deployment."
+    tools: [Read, Grep, Glob, Bash]
+    model: sonnet
+
+  - id: devops
+    name: DevOps Engineer
+    slug: devops
+    claude_name: devops
+    description: "Own GCP infrastructure, CI/CD pipelines, deployment automation, and production reliability via Terraform."
+    tools: [Read, Grep, Glob, Write, Edit, Bash]
+    model: sonnet
+
+workflows:
+  - id: propose
+    description: "Create or refine a change proposal with acceptance criteria."
+    primary_role: po
+    claude_skill: propose
+
+  - id: plan-change
+    description: "Create the OpenSpec change folder with proposal.md, tasks.md, and handoff.md."
+    primary_role: manager
+    claude_skill: plan-change
+
+  - id: design-arch
+    description: "Produce an architecture design document for a complex change."
+    primary_role: tech-lead
+    claude_skill: design-arch
+
+  - id: implement
+    description: "Implement a feature following the OpenSpec change spec."
+    primary_role: sr-fullstack
+    claude_skill: implement
+
+  - id: test-verify
+    description: "Verify a completed change against its acceptance criteria."
+    primary_role: qa
+    claude_skill: test-verify
+
+  - id: deploy-gcp
+    description: "Deploy a verified change to GCP via Terraform and CI/CD."
+    primary_role: devops
+    claude_skill: deploy-gcp
+
+  - id: review-code
+    description: "Conduct a structured code review covering all quality dimensions."
+    primary_role: staff-fullstack
+    claude_skill: review-code
+
+  - id: handoff
+    description: "Create or update a handoff document when ownership moves between agents."
+    primary_role: manager
+    claude_skill: handoff
+
+  - id: openspec-change
+    description: "Full OpenSpec change lifecycle from requirements through deployment."
+    primary_role: manager
+    claude_skill: openspec-change
+
+commands:
+  - id: team-status
+    description: "Show status of all active changes and agent assignments."
+
+  - id: delegate
+    description: "Route a task to the appropriate agent using the routing table."
+
+shared_skills:
+  - handoff-standard
+  - openspec-sdd
+  - project-bootstrap
+  - project-map-reader
+  - monorepo-navigation
+  - git-worktree-discipline
+  - self-learning-loop
+  - mc-task-poll
+  - ui-design          # Premium UI design for staff-fullstack and sr-fullstack
+
+# Token mapping for adapter substitution
+# Format: [token] → tool-specific value
+tokens:
+  role:
+    cto:
+      claude: "@cto"
+      codex: "the CTO (Guaripolo)"
+      opencode: "the CTO (Guaripolo)"
+    manager:
+      claude: "@dev-manager"
+      codex: "the Dev Team Manager"
+      opencode: "the Dev Team Manager"
+    po:
+      claude: "@product-owner"
+      codex: "the Product Owner"
+      opencode: "the Product Owner"
+    tech-lead:
+      claude: "@tech-lead"
+      codex: "the Technical Lead"
+      opencode: "the Technical Lead"
+    staff-fullstack:
+      claude: "@staff-fullstack"
+      codex: "the Staff Fullstack Developer"
+      opencode: "the Staff Fullstack Developer"
+    sr-fullstack:
+      claude: "@sr-fullstack"
+      codex: "the Sr. Fullstack Developer"
+      opencode: "the Sr. Fullstack Developer"
+    mobile:
+      claude: "@mobile-dev"
+      codex: "the Mobile Flutter Developer"
+      opencode: "the Mobile Flutter Developer"
+    qa:
+      claude: "@qa-engineer"
+      codex: "the QA Engineer"
+      opencode: "the QA Engineer"
+    devops:
+      claude: "@devops"
+      codex: "the DevOps Engineer"
+      opencode: "the DevOps Engineer"
+  skill:
+    propose:
+      claude: "/propose"
+      codex: "the Propose workflow"
+      opencode: "the Propose workflow"
+    plan-change:
+      claude: "/plan-change"
+      codex: "the Plan Change workflow"
+      opencode: "the Plan Change workflow"
+    design-arch:
+      claude: "/design-arch"
+      codex: "the Design Architecture workflow"
+      opencode: "the Design Architecture workflow"
+    design-ui:
+      claude: "/design-ui"
+      codex: "the UI Design skill"
+      opencode: "the UI Design skill"
+    implement:
+      claude: "/implement"
+      codex: "the Implement workflow"
+      opencode: "the Implement workflow"
+    test-verify:
+      claude: "/test-verify"
+      codex: "the Test & Verify workflow"
+      opencode: "the Test & Verify workflow"
+    deploy-gcp:
+      claude: "/deploy-gcp"
+      codex: "the Deploy to GCP workflow"
+      opencode: "the Deploy to GCP workflow"
+    review-code:
+      claude: "/review-code"
+      codex: "the Code Review workflow"
+      opencode: "the Code Review workflow"
+    handoff:
+      claude: "/handoff"
+      codex: "the Handoff workflow"
+      opencode: "the Handoff workflow"
+    openspec-change:
+      claude: "/openspec-change"
+      codex: "the OpenSpec Change workflow"
+      opencode: "the OpenSpec Change workflow"
