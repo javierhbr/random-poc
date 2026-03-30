@@ -312,18 +312,37 @@ func cmdSearch(args []string) {
 	repoFlag := fs.String("repo", "", "Filter results to this repo")
 	var excludeLocations stringSliceFlag
 	fs.Var(&excludeLocations, "exclude-location", "Exclude results whose path contains this string (repeatable)")
-	fs.Parse(args) //nolint:errcheck
 
-	remaining := fs.Args()
-	if len(remaining) == 0 {
+	// Go's flag package stops at the first non-flag argument, so flags after
+	// the query term are silently ignored. Split positional args from flags
+	// before parsing so --repo / --exclude-location work in any position.
+	var positional, flagArgs []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if strings.HasPrefix(a, "-") {
+			flagArgs = append(flagArgs, a)
+			// Consume the next token if the flag uses "= value" or separate value.
+			// flag.Parse handles "--flag value" by consuming the next arg itself,
+			// but we must keep them together in flagArgs.
+			if !strings.Contains(a, "=") && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				i++
+				flagArgs = append(flagArgs, args[i])
+			}
+		} else {
+			positional = append(positional, a)
+		}
+	}
+	fs.Parse(flagArgs) //nolint:errcheck
+
+	if len(positional) == 0 {
 		die("Usage: local-search search <query> [--repo <name>] [--exclude-location <pattern>]...")
 	}
-	query := remaining[0]
+	query := positional[0]
 
 	// Positional repo arg (backward-compat)
 	repo := ""
-	if len(remaining) > 1 {
-		repo = remaining[1]
+	if len(positional) > 1 {
+		repo = positional[1]
 	}
 	// Named flag takes precedence
 	if *repoFlag != "" {

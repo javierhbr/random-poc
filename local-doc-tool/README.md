@@ -1,29 +1,52 @@
-# local-doc
+# local-search
 
-A fast, offline spec registry that searches your project documentation across multiple repos. One bash script, zero dependencies beyond `sqlite3`.
+A fast, offline spec registry that searches your project documentation across multiple repos. Single Go binary, no runtime dependencies.
 
 ## Why
 
-Teams store specs as markdown files scattered across repos. Finding the right spec means grepping, scrolling, or asking someone. MCP servers add latency and complexity. `local-doc` gives you instant full-text search across all your spec repos with a 3-word command.
+Teams store specs as markdown files scattered across repos. Finding the right spec means grepping, scrolling, or asking someone. MCP servers add latency and complexity. `local-search` gives you instant full-text search across all your spec repos with a 3-word command.
 
 ## Install
 
+### Pre-built binary (fastest)
+
 ```bash
-cp local-doc-tool.sh /usr/local/bin/local-doc
-chmod +x /usr/local/bin/local-doc
+# macOS Apple Silicon
+cp local-search-tool/code/dist/local-search-mac-silicon-darwin-arm64 /usr/local/bin/local-search
+chmod +x /usr/local/bin/local-search
+
+# macOS Intel
+cp local-search-tool/code/dist/local-search-darwin-amd64 /usr/local/bin/local-search
+chmod +x /usr/local/bin/local-search
+
+# Linux amd64
+cp local-search-tool/code/dist/local-search-linux-amd64 /usr/local/bin/local-search
+chmod +x /usr/local/bin/local-search
+
+# Linux arm64
+cp local-search-tool/code/dist/local-search-linux-arm64 /usr/local/bin/local-search
+chmod +x /usr/local/bin/local-search
 ```
 
-Requirements: `bash` + `sqlite3` (both pre-installed on macOS and most Linux). Optional: `git` for smart incremental updates on git repos.
+### Build from source
+
+```bash
+cd local-search-tool/code
+go build -o local-search .
+cp local-search /usr/local/bin/local-search
+```
+
+Requirements: Go 1.21+ to build. No runtime dependencies — SQLite is compiled in via `modernc.org/sqlite` (pure Go, no CGO, no C toolchain needed).
 
 ## Quick start
 
 ```bash
 # 1. Register your spec folders (auto-scans immediately)
-local-doc repo add ./product-specs product
-local-doc repo add ./platform-docs platform
+local-search repo add ./product-specs product
+local-search repo add ./platform-docs platform
 
 # 2. Search — no manual scan needed, it just works
-local-doc search refund
+local-search search refund
 ```
 
 The index auto-rebuilds when you add/remove repos, and auto-detects when files change on your next search.
@@ -33,7 +56,7 @@ The index auto-rebuilds when you add/remove repos, and auto-detects when files c
 ### Search
 
 ```
-$ local-doc search refund
+$ local-search search refund
 
 Results for "refund":
 
@@ -45,7 +68,7 @@ Results for "refund":
 ### Search across multiple repos
 
 ```
-$ local-doc search "refund OR authentication"
+$ local-search search "refund OR authentication"
 
 Results for "refund OR authentication":
 
@@ -61,7 +84,7 @@ Results for "refund OR authentication":
 ### Stemming — "refunding" finds "refund"
 
 ```
-$ local-doc search refunding
+$ local-search search refunding
 
 Results for "refunding":
 
@@ -73,7 +96,7 @@ Results for "refunding":
 ### Exclude terms with NOT
 
 ```
-$ local-doc search "billing NOT fraud"
+$ local-search search "billing NOT fraud"
 
 Results for "billing NOT fraud":
 
@@ -89,7 +112,7 @@ Results for "billing NOT fraud":
 ### Deep content search — finds words inside files, not just titles
 
 ```
-$ local-doc search webhook
+$ local-search search webhook
 
 Results for "webhook":
 
@@ -101,7 +124,7 @@ Results for "webhook":
 ### Filter by repo
 
 ```
-$ local-doc search "billing" product
+$ local-search search "billing" --repo product
 
 Results for "billing":
 (filtered to repo: product)
@@ -115,10 +138,22 @@ Results for "billing":
      tags: billing, refund, customer, payments
 ```
 
+### Exclude paths
+
+```
+$ local-search search "billing" --exclude-location archived
+
+Results for "billing":
+
+  1. [product] billing/invoices  (.md)
+     Invoice generation
+     tags: billing, invoices, payments, accounting
+```
+
 ### List all specs
 
 ```
-$ local-doc list
+$ local-search list
 
 All specs:
 
@@ -136,7 +171,7 @@ All specs:
 ### List one repo
 
 ```
-$ local-doc list platform
+$ local-search list platform
 
 Specs in repo "platform":
 
@@ -149,7 +184,7 @@ Specs in repo "platform":
 ### Browse projects
 
 ```
-$ local-doc projects
+$ local-search projects
 
 Projects:
 
@@ -163,7 +198,7 @@ Projects:
 ### Tags
 
 ```
-$ local-doc tags
+$ local-search tags
 
 All tags:
 
@@ -180,7 +215,7 @@ All tags:
 ### Stats
 
 ```
-$ local-doc stats
+$ local-search stats
 
 Local Doc Stats
 
@@ -201,7 +236,7 @@ Local Doc Stats
 ### JSON output for agents
 
 ```
-$ local-doc json search "billing OR security"
+$ local-search json search "billing OR security"
 
 [
   {
@@ -228,7 +263,7 @@ $ local-doc json search "billing OR security"
 ```
 
 ```
-$ local-doc json repos
+$ local-search json repos
 
 [
   {"repo": "platform", "path": "/path/to/platform-docs", "spec_count": 2},
@@ -237,7 +272,7 @@ $ local-doc json repos
 ```
 
 ```
-$ local-doc json read chargeback
+$ local-search json read chargeback
 
 {
   "path": "/path/to/product-specs/payments/chargeback.md",
@@ -250,14 +285,14 @@ $ local-doc json read chargeback
 Register as many repos as you need. Each gets a name for easy filtering.
 
 ```bash
-local-doc repo add ./frontend-specs frontend
-local-doc repo add ./backend-specs backend
-local-doc repo add ./shared-docs shared
+local-search repo add ./frontend-specs frontend
+local-search repo add ./backend-specs backend
+local-search repo add ./shared-docs shared
 
-local-doc repo list          # See all repos
-local-doc search auth        # Search across all
-local-doc search auth backend # Search one repo
-local-doc list frontend      # Browse one repo
+local-search repo list           # See all repos
+local-search search auth         # Search across all
+local-search search auth --repo backend  # Search one repo
+local-search list frontend       # Browse one repo
 ```
 
 ## Supported file types
@@ -339,7 +374,7 @@ when explaining deployment topology or onboarding new engineers.
 **Search result** — only one entry per image/PDF, path points to the asset:
 
 ```text
-$ local-doc search architecture
+$ local-search search architecture
 
 Results for "architecture":
 
@@ -355,58 +390,87 @@ The `.md` sidecar is not indexed as a separate record — it only serves as meta
 
 ### Repo management
 ```bash
-local-doc repo add <folder> [name]   # Add a repo (auto-scans)
-local-doc repo remove <name>         # Remove a repo (auto-rebuilds)
-local-doc repo list                  # List all repos
+local-search repo add <folder> [name]   # Add a repo (auto-scans)
+local-search repo remove <name>         # Remove a repo (auto-rebuilds)
+local-search repo list                  # List all repos
 ```
+
+Aliases: `repo rm` = `repo remove`, `repo ls` = `repo list`
 
 ### Searching
 ```bash
-local-doc search refund              # Keyword
-local-doc search refunding           # Stemming (matches "refund")
-local-doc search "refund OR signup"  # Boolean OR
-local-doc search "billing NOT fraud" # Exclude
-local-doc search "payment*"          # Prefix
-local-doc search refund my-repo      # Filter by repo
+local-search search <query>                            # Keyword search, all repos
+local-search search refunding                          # Stemming (matches "refund")
+local-search search "refund OR signup"                 # Boolean OR
+local-search search "billing NOT fraud"                # Exclude terms
+local-search search "payment*"                         # Prefix match
+local-search search '"refund request"'                 # Exact phrase
+local-search search refund --repo my-repo              # Filter by repo (named flag)
+local-search search refund my-repo                     # Filter by repo (positional, legacy)
+local-search search refund --exclude-location archived # Exclude paths containing pattern
+```
+
+`--exclude-location` can be repeated to exclude multiple path patterns:
+```bash
+local-search search billing --exclude-location archived --exclude-location deprecated
 ```
 
 ### Browsing
 ```bash
-local-doc list                       # All specs
-local-doc list <repo>                # One repo
-local-doc projects                   # All projects
-local-doc tags                       # All tags
-local-doc tags billing               # Specs with tag
-local-doc recent 5                   # Recently modified
-local-doc related refund             # Find related specs
+local-search list                       # All specs, grouped by repo
+local-search list <repo-or-project>     # Filter by repo or project name
+local-search projects                   # All projects with spec counts
+local-search tags                       # All tags with usage counts
+local-search tags <tag>                 # Specs with a specific tag
+local-search recent                     # Recently modified (default 10)
+local-search recent <n>                 # Recently modified, limit n
+local-search related <name>             # Find related specs by tags/title
 ```
 
 ### Reading
 ```bash
-local-doc read refund                # Print full content
-local-doc read signup my-repo        # From specific repo
+local-search read <name>                # Print full spec content
+local-search read <name> <repo>         # From specific repo
 ```
 
 ### JSON output (for agents)
 ```bash
-local-doc json search "refund"       # Ranked results
-local-doc json search "refund" repo  # Filter by repo
-local-doc json read signup           # Full content
-local-doc json list my-repo          # Project listing
-local-doc json repos                 # All repos + counts
-local-doc json related refund        # Related specs
-local-doc json tags                  # All tags
-local-doc json stats                 # Stats
+local-search json search <query>            # Ranked results
+local-search json search <query> <repo>     # Filter by repo
+local-search json read <name>               # Full content
+local-search json read <name> <repo>        # From specific repo
+local-search json list                      # All specs
+local-search json list <repo-or-project>    # Filter listing
+local-search json repos                     # All repos + counts
+local-search json related <name>            # Related specs
+local-search json tags                      # All tags
+local-search json stats                     # Stats
 ```
 
 ### Maintenance
 ```bash
-local-doc scan                       # Force full rebuild
-local-doc scan <repo>                # Rebuild one repo
-local-doc stats                      # Index statistics
-local-doc inspect                    # Dump full index
-local-doc reset                      # Delete everything
+local-search scan                       # Force full rebuild, all repos
+local-search scan <repo>                # Rebuild one repo
+local-search stats                      # Index statistics
+local-search db                         # Print database file path
+local-search inspect                    # Dump full index
+local-search reset                      # Delete everything (prompts for confirmation)
+local-search --version                  # Print version
 ```
+
+### Command aliases
+
+| Alias | Full command |
+|---|---|
+| `s`, `find`, `f` | `search` |
+| `r`, `get`, `show` | `read` |
+| `ls` | `list` |
+| `p` | `projects` |
+| `rel` | `related` |
+| `t` | `tags` |
+| `j` | `json` |
+| `rebuild`, `index` | `scan` |
+| `dump`, `debug` | `inspect` |
 
 ## Search features
 
@@ -424,15 +488,15 @@ local-doc reset                      # Delete everything
 
 ## Change detection
 
-`local-doc` automatically detects file changes before every query. It uses two strategies depending on whether your repo is a git repository.
+`local-search` automatically detects file changes before every query. It uses two strategies depending on whether your repo is a git repository.
 
 ### Git repos (default)
 
-When a registered repo has git initialized, `local-doc` uses git to detect changes. This is faster and smarter than filesystem scanning — git already knows exactly what changed.
+When a registered repo has git initialized, `local-search` uses git to detect changes. This is faster and smarter than filesystem scanning — git already knows exactly what changed.
 
 **How it works:**
 
-1. On the first full scan (`local-doc scan` or `repo add`), the current `HEAD` commit hash is stored in the database
+1. On the first full scan (`local-search scan` or `repo add`), the current `HEAD` commit hash is stored in the database
 2. On every subsequent query, the tool compares the stored commit against the current `HEAD`
 3. If commits differ, it asks git for the exact list of changed spec and media files
 4. It also checks for uncommitted changes (staged, unstaged, and untracked files)
@@ -452,7 +516,7 @@ When a registered repo has git initialized, `local-doc` uses git to detect chang
 **Incremental updates** mean that if you edited 2 files out of 500, only those 2 get re-indexed. The rest of the index stays untouched.
 
 ```
-$ local-doc search refund
+$ local-search search refund
 (product: git changes detected — incremental update...)
 
   product: 2 files updated (incremental)
@@ -463,7 +527,7 @@ Results for "refund":
 
 ### Non-git repos (fallback)
 
-When a registered repo is **not** a git repository, `local-doc` falls back to filesystem timestamp comparison using `find -newer`. If any spec file has a modification time newer than the database file, a full rebuild is triggered.
+When a registered repo is **not** a git repository, `local-search` falls back to filesystem timestamp comparison using `find -newer`. If any spec file has a modification time newer than the database file, a full rebuild is triggered.
 
 This works reliably but is less efficient — it can't tell which files changed, so it rebuilds the entire index.
 
@@ -478,16 +542,16 @@ This works reliably but is less efficient — it can't tell which files changed,
 | New untracked spec files | Incremental update | Full rebuild |
 | Deleted spec files | Removed from index | Full rebuild |
 | No changes at all | Skipped (zero cost) | Skipped (zero cost) |
-| `local-doc scan` | Full rebuild + store commit hash | Full rebuild |
+| `local-search scan` | Full rebuild + store commit hash | Full rebuild |
 
 You never have to think about the index.
 
 ## How it works
 
 1. Your files (`.md`, `.mdx`, `.txt`, images, PDFs) are always the **source of truth**
-2. `local-doc` reads them and builds a SQLite FTS5 index
+2. `local-search` reads them and builds a SQLite FTS5 index
 3. For images and PDFs, the companion `.md` sidecar is what gets indexed; the asset path is stored so agents can open it
-4. The `.db` file is a **disposable cache** at `~/.local-doc/specs.db`
+4. The `.db` file is a **disposable cache** at `~/.local-search/specs.db`
 5. Searches use Porter stemming + BM25 ranking
 6. Delete the `.db` anytime — it auto-rebuilds on next use
 7. For git repos, commit hashes are stored in the database to enable incremental updates
@@ -509,19 +573,18 @@ CPU at rest: zero. Memory at rest: zero. Disk: one small `.db` file.
 
 | Problem | Fix |
 |---|---|
-| "No repos added yet" | `local-doc repo add /path/to/specs` |
-| Search returns nothing | Check `local-doc repo list` — is the path correct? |
-| Index seems stale | Should auto-rebuild. Force with `local-doc scan` |
-| Something is broken | `rm ~/.local-doc/specs.db && local-doc scan` |
-| Nuclear reset | `local-doc reset` |
-| sqlite3 not found | `sudo apt install sqlite3` (Linux) / pre-installed (macOS) |
+| "No repos added yet" | `local-search repo add /path/to/specs` |
+| Search returns nothing | Check `local-search repo list` — is the path correct? |
+| Index seems stale | Should auto-rebuild. Force with `local-search scan` |
+| Something is broken | `rm ~/.local-search/specs.db && local-search scan` |
+| Nuclear reset | `local-search reset` |
 
 ### Git-related issues
 
 | Problem | Fix |
 |---|---|
 | Git changes not detected | Make sure the repo has at least one commit. Bare `git init` with no commits won't have a `HEAD` to compare against |
-| Incremental update missed a file | Run `local-doc scan` to force a full rebuild. The git commit hash will be re-stored |
+| Incremental update missed a file | Run `local-search scan` to force a full rebuild. The git commit hash will be re-stored |
 | "incremental update" on every query | You have uncommitted changes to spec files. Commit them or the tool will keep detecting them as dirty |
 | Repo is git but using timestamp fallback | Check that `git` is on your `$PATH`. Run `git -C /path/to/repo status` to verify |
 | Submodule or worktree repo not recognized | The tool checks for `.git` directory or runs `git rev-parse --git-dir`. Both submodules and worktrees are supported |
@@ -532,26 +595,26 @@ If anything feels off, the database is disposable:
 
 ```bash
 # Option 1: delete and let it auto-rebuild on next query
-rm ~/.local-doc/specs.db
+rm ~/.local-search/specs.db
 
 # Option 2: force rebuild now
-local-doc scan
+local-search scan
 
 # Option 3: nuclear — remove everything including repo registrations
-local-doc reset
+local-search reset
 ```
 
 ### Verifying the index
 
 ```bash
 # Check what's registered
-local-doc repo list
+local-search repo list
 
 # See full index contents
-local-doc inspect
+local-search inspect
 
 # Check stats (repo count, spec count, last scan time)
-local-doc stats
+local-search stats
 ```
 
 ## FAQ
@@ -566,7 +629,7 @@ It works the same as before — `find -newer` checks if any spec file was modifi
 Yes. For git repos, the tool checks committed changes (via `git diff`), staged changes (`git diff --cached`), unstaged edits (`git diff`), and new untracked files (`git ls-files --others`). Everything is covered.
 
 **Q: How does incremental update differ from a full scan?**
-A full scan (`local-doc scan`) drops the entire database and re-indexes everything from scratch. An incremental update only touches the files that changed — deleting removed entries, updating modified ones, and adding new ones. The rest of the index stays untouched.
+A full scan (`local-search scan`) drops the entire database and re-indexes everything from scratch. An incremental update only touches the files that changed — deleting removed entries, updating modified ones, and adding new ones. The rest of the index stays untouched.
 
 **Q: Can I mix git and non-git repos?**
 Yes. Each repo is evaluated independently. You can have three git repos and two plain folders registered at the same time. Each uses the appropriate change detection strategy.
@@ -584,14 +647,14 @@ Switching branches changes `HEAD`, so the tool detects it and incrementally upda
 For large repos with thousands of files, git detection is significantly faster because `git diff` is O(changed files) while `find -newer` must stat every file. For small repos (< 100 files), the difference is negligible.
 
 **Q: Can I force a full rebuild even if git is available?**
-Yes. `local-doc scan` always does a full rebuild regardless of git status. It also re-stores the current commit hash for future incremental updates.
+Yes. `local-search scan` always does a full rebuild regardless of git status. It also re-stores the current commit hash for future incremental updates.
 
 **Q: Where is the commit hash stored?**
 In the SQLite database's `meta` table, keyed as `git_commit_<reponame>`. It's part of the disposable cache — deleting the `.db` file clears it, and the next full scan re-stores it.
 
 ## Claude Code skill
 
-`local-doc` ships with a custom Claude Code skill that teaches Claude how to search, read, and reason over your specs automatically. When the skill is active, Claude will search your specs before answering domain questions instead of relying on general knowledge.
+`local-search` ships with a custom Claude Code skill that teaches Claude how to search, read, and reason over your specs automatically. When the skill is active, Claude will search your specs before answering domain questions instead of relying on general knowledge.
 
 ### What the skill does
 
@@ -605,18 +668,18 @@ This means questions like "what's the impact of changing payment eligibility rul
 
 ### Installing the skill
 
-Copy or symlink the `skills/local-doc/` folder into your project's `.claude/skills/` directory:
+Copy or symlink the `skills/local-search/` folder into your project's `.claude/skills/` directory:
 
 ```bash
 # From your project root
 mkdir -p .claude/skills
-cp -r /path/to/local-doc/skills/local-doc .claude/skills/
+cp -r /path/to/local-doc-tool/skills/local-search .claude/skills/
 
 # Or symlink it (stays up to date automatically)
-ln -s /path/to/local-doc/skills/local-doc .claude/skills/local-doc
+ln -s /path/to/local-doc-tool/skills/local-search .claude/skills/local-search
 ```
 
-The skill file lives at `.claude/skills/local-doc/SKILL.md`.
+The skill file lives at `.claude/skills/local-search/SKILL.md`.
 
 ### How Claude uses it
 
@@ -639,7 +702,7 @@ The skill enforces these behaviors on Claude:
 - **Cite sources.** Every claim references the spec file it came from: "According to payments/refund.md, eligibility requires..."
 - **Flag gaps.** If specs don't cover part of the question, Claude says so explicitly instead of guessing.
 - **Connect across specs.** When a question spans multiple specs, Claude reads all relevant files and synthesizes.
-- **Suggest related specs.** After answering, Claude points to related specs using `local-doc related`.
+- **Suggest related specs.** After answering, Claude points to related specs using `local-search related`.
 
 ### Search strategy examples
 
@@ -648,20 +711,20 @@ The skill teaches Claude how to extract good search queries from natural languag
 ```
 User: "Can international customers get refunds?"
 Claude runs:
-  local-doc search "refund international"
-  local-doc search "refund eligibility"
-  local-doc read refund
+  local-search search "refund international"
+  local-search search "refund eligibility"
+  local-search read refund
 
 User: "What APIs need auth tokens?"
 Claude runs:
-  local-doc search "authentication" platform
-  local-doc read authentication
+  local-search search "authentication" platform
+  local-search read authentication
 
 User: "What's the difference between a refund and a chargeback?"
 Claude runs:
-  local-doc search "refund OR chargeback"
-  local-doc read refund
-  local-doc read chargeback
+  local-search search "refund OR chargeback"
+  local-search read refund
+  local-search read chargeback
 ```
 
 ### JSON mode for agent pipelines
@@ -669,10 +732,10 @@ Claude runs:
 The skill also supports JSON output for automated workflows:
 
 ```bash
-local-doc json search "refund"       # ranked results as JSON
-local-doc json read refund           # full content as JSON
-local-doc json list my-repo          # listing as JSON
-local-doc json repos                 # all repos + counts
+local-search json search "refund"       # ranked results as JSON
+local-search json read refund           # full content as JSON
+local-search json list my-repo          # listing as JSON
+local-search json repos                 # all repos + counts
 ```
 
 ### When the skill does NOT trigger
@@ -702,13 +765,28 @@ references/
 ## File structure
 
 ```
-~/.local-doc/
+~/.local-search/
   repos          # Text file: repo_name|/absolute/path (one per line)
   specs.db       # SQLite database (disposable cache)
 
-local-doc/
-  local-doc-tool.sh              # Main script
-  skills/local-doc/SKILL.md # Claude Code skill
+local-doc-tool/
+  code/
+    main.go                     # CLI entry point + repo management
+    db/
+      schema.go                 # DDL, Open(), CreateSchema(), GetMeta(), SetMeta()
+      index.go                  # FullScan(), IncrementalScan(), DeleteRepo()
+      query.go                  # Search(), Read(), List(), Tags(), Stats(), etc.
+    extract/
+      extract.go                # Metadata parsing: title, tags, summary, content
+    git/
+      git.go                    # Git change detection
+    dist/
+      local-search-mac-silicon-darwin-arm64
+      local-search-darwin-amd64
+      local-search-linux-amd64
+      local-search-linux-arm64
+      local-search-windows-amd64.exe
+  skills/local-search/SKILL.md  # Claude Code skill
   references/
     commands.md                 # Full command reference
     troubleshooting.md          # Troubleshooting guide
