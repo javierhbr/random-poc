@@ -27,7 +27,7 @@ type workItem struct {
 // them, so workers start reading files immediately rather than waiting for the
 // full walk to complete. Memory is bounded by (workerCount × maxContentBytes)
 // because the channel buffers apply backpressure.
-func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
+func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (int, error) {
 	// Cap workers between 2 and 16 to avoid overwhelming the kernel's dir cache.
 	workerCount := runtime.NumCPU()
 	if workerCount < 2 {
@@ -41,8 +41,8 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 		err error
 	}
 	// Fixed-size channel buffers: backpressure keeps memory bounded.
-	workCh    := make(chan workItem, workerCount*2)
-	resultsCh := make(chan result,   workerCount*2)
+	workCh := make(chan workItem, workerCount*2)
+	resultsCh := make(chan result, workerCount*2)
 
 	var wg sync.WaitGroup
 	for i := 0; i < workerCount; i++ {
@@ -74,7 +74,7 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 	// Walk and feed workers directly — streaming, no intermediate slice.
 	walkErr := make(chan error, 1)
 	go func() {
-		err := walkItems(repoRoot, workCh)
+		err := walkItems(repoRoot, workCh, skipDirectories)
 		close(workCh)
 		walkErr <- err
 	}()
@@ -82,7 +82,8 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 	// Open transaction and stream Specs directly into the DB.
 	tx, err := db.Begin()
 	if err != nil {
-		for range resultsCh {}
+		for range resultsCh {
+		}
 		return 0, err
 	}
 	defer tx.Rollback() //nolint:errcheck
@@ -147,11 +148,12 @@ func FullScan(db *sql.DB, repoName, repoRoot string) (int, error) {
 //
 // Design: file reads happen outside the transaction via a worker pool (no DB
 // lock held during I/O). All DB writes are batched into a single transaction.
-func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string) (int, string, error) {
+func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string, skipDirectories []string) (int, string, error) {
 	changed, err := git.ChangedFiles(repoRoot, lastCommit)
 	if err != nil {
 		return 0, lastCommit, err
 	}
+	changed = filterSkippedPaths(changed, skipDirectories)
 	if len(changed) == 0 {
 		newCommit := git.CurrentCommit(repoRoot)
 		if newCommit == "" {
@@ -349,7 +351,8 @@ func DeleteRepo(db *sql.DB, repoName string) error {
 // different parent directory, keeping memory O(current depth) regardless of
 // whether directories contain indexable files.
 // Permission-denied errors are skipped; other errors abort the walk.
-func walkItems(repoRoot string, workCh chan<- workItem) error {
+func walkItems(repoRoot string, workCh chan<- workItem, skipDirectories []string) error {
+	skipSet := toSkipDirSet(skipDirectories)
 	mediaStems := map[string]map[string]bool{} // dir → stem → true
 	lastDir := ""
 
@@ -361,6 +364,9 @@ func walkItems(repoRoot string, workCh chan<- workItem) error {
 			return err
 		}
 		if d.IsDir() {
+			if shouldSkipDir(path, repoRoot, skipSet) {
+				return filepath.SkipDir
+			}
 			// Evict the previous directory's cache as soon as we descend into a
 			// new one. WalkDir is depth-first so lastDir won't be visited again.
 			if lastDir != "" && lastDir != path {
@@ -405,6 +411,53 @@ func walkItems(repoRoot string, workCh chan<- workItem) error {
 	})
 }
 
+func toSkipDirSet(skipDirectories []string) map[string]bool {
+	set := make(map[string]bool, len(skipDirectories))
+	for _, name := range skipDirectories {
+		name = strings.TrimSpace(name)
+		if name != "" {
+			set[name] = true
+		}
+	}
+	return set
+}
+
+func shouldSkipDir(path, repoRoot string, skipSet map[string]bool) bool {
+	if len(skipSet) == 0 {
+		return false
+	}
+	if path == repoRoot {
+		return false
+	}
+	return skipSet[filepath.Base(path)]
+}
+
+func filterSkippedPaths(paths, skipDirectories []string) []string {
+	if len(paths) == 0 || len(skipDirectories) == 0 {
+		return paths
+	}
+	skipSet := toSkipDirSet(skipDirectories)
+	out := make([]string, 0, len(paths))
+	for _, p := range paths {
+		if !pathHasSkippedDir(p, skipSet) {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func pathHasSkippedDir(relPath string, skipSet map[string]bool) bool {
+	if len(skipSet) == 0 {
+		return false
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(relPath), "/") {
+		if skipSet[seg] {
+			return true
+		}
+	}
+	return false
+}
+
 // ── batch DB operations ───────────────────────────────────────────────────────
 
 func deleteRepoEntries(tx *sql.Tx, repoName string) error {
@@ -423,7 +476,7 @@ func deleteRepoEntries(tx *sql.Tx, repoName string) error {
 	}
 
 	type specRow struct {
-		id                                  int64
+		id                               int64
 		repo, name, title, tags, summary string
 	}
 	var toDelete []specRow

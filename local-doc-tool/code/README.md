@@ -39,6 +39,7 @@ cp local-search /usr/local/bin/local-search
 # 1. Register your spec folders (auto-scans immediately)
 local-search repo add ./product-specs product
 local-search repo add ./platform-docs platform
+local-search repo add ./docs docs --skip-directory .skills
 
 # 2. Search — no manual scan needed, auto-detects changes
 local-search search refund
@@ -51,9 +52,13 @@ The index auto-rebuilds when you add/remove repos and auto-detects file changes 
 ### Repo management
 
 ```bash
-local-search repo add <folder> [name]   # Register a spec repo (auto-scans)
-local-search repo remove <name>         # Unregister a repo (auto-rebuilds)
-local-search repo list                  # Show all registered repos
+local-search repo add <folder> [name] [--skip-directory <folder-name>]   # Register a spec repo (auto-scans)
+  # Example: local-search repo add /path/to/specs product
+  # Example: local-search repo add ./docs docs --skip-directory .skills
+  # Example: local-search repo add ~/code backend --skip-directory vendor --skip-directory .git
+local-search repo remove <name>                                          # Unregister a repo (auto-rebuilds)
+  # Example: local-search repo remove product
+local-search repo list                                                   # Show all registered repos
 ```
 
 ### Scanning
@@ -61,16 +66,30 @@ local-search repo list                  # Show all registered repos
 ```bash
 local-search scan                       # Full rebuild of all repos
 local-search scan <repo-name>           # Full rebuild of one repo
+  # Example: local-search scan platform
 ```
 
 ### Searching
 
 ```bash
 local-search search <query>             # Search all repos
-local-search search <query> <repo>      # Search one repo
-local-search read <name>                # Print full spec content
-local-search read <name> <repo>         # From a specific repo
+  # Example: local-search search "payment refund"
+local-search search <query> --repo <name>   # Search one repo (named flag)
+  # Example: local-search search "webhook" --repo platform
+local-search search <query> <repo>          # Search one repo (positional, legacy)
+  # Example: local-search search "API endpoints" platform
+local-search search <query> --directory <path>   # Focus to paths starting with <path>
+  # Example: local-search search "checkpoint" --directory reference/
+local-search search <query> --exclude-location <pattern>   # Exclude paths containing pattern
+  # Example: local-search search "refund" --exclude-location deprecated/
+local-search read <name>                                   # Print full spec content
+  # Example: local-search read refund-flow
+local-search read <name> <repo>                            # From a specific repo
+  # Example: local-search read webhook-retry platform
+local-search read <name> <repo> --directory <path>         # By repo and directory
+  # Example: local-search read config backend --directory src/
 local-search related <name>             # Find related specs by tags/title
+  # Example: local-search related refund-flow
 ```
 
 ### Browsing
@@ -78,10 +97,13 @@ local-search related <name>             # Find related specs by tags/title
 ```bash
 local-search list                       # All specs, grouped by repo
 local-search list <repo-or-project>     # Filter by repo or project
+  # Example: local-search list platform
 local-search projects                   # All projects with spec counts
 local-search tags                       # All tags with usage counts
 local-search tags <tag>                 # Specs with a specific tag
+  # Example: local-search tags billing
 local-search recent [n]                 # Recently modified (default 10)
+  # Example: local-search recent 20
 ```
 
 ### Maintenance
@@ -97,13 +119,15 @@ local-search help                       # Full help text
 ### JSON output (for agent pipelines)
 
 ```bash
-local-search json search <query> [repo]
-local-search json read <name> [repo]
-local-search json list [repo-or-project]
-local-search json repos
-local-search json related <name>
-local-search json tags
-local-search json stats
+local-search json search <query> [repo]       # Search with optional repo
+  # Example: local-search json search "payment" platform
+local-search json read <name> [repo]          # Read with optional repo
+  # Example: local-search json read refund-flow
+local-search json list [repo-or-project]      # List by repo or project
+local-search json repos                        # All registered repos
+local-search json related <name>               # Related specs
+local-search json tags                         # All tags
+local-search json stats                        # Index statistics
 ```
 
 ### Command aliases
@@ -123,13 +147,16 @@ local-search json stats
 Uses SQLite FTS5 with Porter stemming — the same engine as the bash version.
 
 ```bash
-local-search search refund                    # keyword
-local-search search "refund OR chargeback"    # boolean OR
-local-search search "billing NOT fraud"       # exclude
-local-search search refunding                 # stemming: matches "refund"
-local-search search "payment*"                # prefix
-local-search search "refund eligibility"      # phrase
-local-search search refund product            # filter to one repo
+local-search search refund                                   # keyword
+local-search search "refund OR chargeback"                   # boolean OR
+local-search search "billing NOT fraud"                      # exclude
+local-search search refunding                                # stemming: matches "refund"
+local-search search "payment*"                               # prefix
+local-search search "refund eligibility"                     # phrase
+local-search search "payment" --repo platform                # filter to one repo
+local-search search "webhook" --directory billing/           # focus to directory
+local-search search "event" --repo backend --directory integrations/  # combine repo and directory
+local-search search "What Triggers a Checkpoint" --directory reference/  # multi-word search
 ```
 
 ## Supported file types

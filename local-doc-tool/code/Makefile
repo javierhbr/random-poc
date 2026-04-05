@@ -3,7 +3,7 @@ DIST    := dist
 INSTALL := $(HOME)/.local/bin/$(BIN)
 
 
-.PHONY: build build-all test test-v lint vet fmt install clean
+.PHONY: build build-all test test-v lint vet fmt deps install local-install clean
 
 build:
 	go build -o $(BIN) .
@@ -30,7 +30,12 @@ vet:
 fmt:
 	gofmt -w .
 
-install: build
+deps:
+	go mod download
+
+install: deps local-install
+
+local-install: build
 	mkdir -p $(dir $(INSTALL))
 	cp $(BIN) $(INSTALL)
 

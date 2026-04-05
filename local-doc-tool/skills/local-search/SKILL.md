@@ -18,17 +18,19 @@ description: >
 
 # Local Search
 
-A CLI tool that indexes `.md`, `.mdx`, and `.txt` spec files across multiple repos and provides instant full-text search. Powered by SQLite FTS5. Single bash script, zero dependencies beyond `sqlite3`.
+A CLI tool that indexes `.md`, `.mdx`, and `.txt` spec files across multiple repos and provides instant full-text search. Powered by SQLite FTS5. Single Go binary, zero runtime dependencies.
 
 ## Prerequisites
 
-The `local-search` command must be on your PATH. The script lives at:
+The `local-search` command must be on your PATH. Build from source:
 
-```
-<project-root>/local-search.sh
+```bash
+cd local-doc-tool/code
+go build -o local-search .
+cp local-search /usr/local/bin/local-search
 ```
 
-If you get "command not found", run the script directly with its full path or add its directory to PATH. The only dependency is `sqlite3` (pre-installed on macOS and most Linux).
+Requires Go 1.21+ to build. No runtime dependencies — SQLite is compiled in.
 
 ## Core workflow: search, read, reason
 
@@ -120,7 +122,8 @@ Related specs to review: payments/chargeback, billing/invoices.
 
 ```bash
 local-search repo add /path/to/specs my-project   # auto-scans immediately
-local-search search <keyword>                       # ready to use
+local-search repo add /path/to/docs docs --skip-directory .skills   # skip folder by name
+local-search search "payment refund"              # ready to use
 ```
 
 The index auto-rebuilds when repos are added/removed and auto-detects when files change on next search. No manual scan needed.
@@ -129,41 +132,52 @@ The index auto-rebuilds when repos are added/removed and auto-detects when files
 
 ### Search
 ```bash
-local-search search refund                   # keyword
-local-search search "refund OR chargeback"   # boolean OR
-local-search search "billing NOT fraud"      # exclude
-local-search search refunding                # stemming: matches "refund"
-local-search search refund my-repo           # filter by repo
+local-search search "payment refund"              # keyword
+local-search search "refund OR chargeback"        # boolean OR
+local-search search "billing NOT fraud"           # exclude
+local-search search refunding                     # stemming: matches "refund"
+local-search search "payment" --repo platform     # filter by repo
+local-search search "webhook" --directory billing/             # focus to directory
+local-search search "event" --repo backend --directory integrations/  # combine both
+local-search search "refund" --exclude-location deprecated/   # exclude path pattern
 ```
+
+Results display the **full path** of each matching file.
 
 ### Read
 ```bash
-local-search read refund                     # full content
-local-search read signup my-repo             # from specific repo
+local-search read refund-flow                     # full content
+local-search read refund-flow platform            # from specific repo
+local-search read config backend --directory src/ # from specific repo and directory
 ```
 
 ### Browse
 ```bash
-local-search list                            # all specs, all repos
-local-search list my-repo                    # one repo
-local-search projects                        # all projects
-local-search tags                            # all tags
-local-search related refund                  # related specs
+local-search list                              # all specs, all repos
+local-search list platform                    # one repo
+local-search projects                         # all projects
+local-search tags                             # all tags
+local-search related refund-flow              # related specs
+local-search recent 20                        # recently modified
 ```
 
 ### Repos
 ```bash
-local-search repo add <folder> [name]        # register + auto-scan
-local-search repo remove <name>              # unregister + auto-rebuild
-local-search repo list                       # show all repos
+local-search repo add ./specs product                              # register + auto-scan
+local-search repo add ./docs docs --skip-directory .skills         # skip folder by name
+local-search repo add ./code backend --skip-directory vendor --skip-directory .git
+local-search repo remove product                                   # unregister + rebuild
+local-search repo list                                             # show all repos
 ```
+
+`--skip-directory` takes a folder **name** (not a path). It's repeatable and persisted — future scans will also skip it. Matching is exact: `.skills` won't skip `.skills-old`.
 
 ### JSON (agent pipelines)
 ```bash
-local-search json search "refund"            # ranked results
-local-search json read refund                # full content as JSON
-local-search json list my-repo               # listing
-local-search json repos                      # all repos + counts
+local-search json search "payment" platform   # ranked results
+local-search json read refund-flow            # full content as JSON
+local-search json list platform               # listing
+local-search json repos                       # all repos + counts
 ```
 
 ## References (load on demand)

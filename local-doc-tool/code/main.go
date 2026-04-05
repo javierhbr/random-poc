@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -114,20 +115,22 @@ func cmdRepo(args []string) {
 }
 
 func repoAdd(args []string) {
-	if len(args) == 0 {
-		die("Usage: local-search repo add /path/to/specs [name]")
-	}
-	dir, err := filepath.Abs(args[0])
+	dirArg, nameArg, skipDirs, err := parseRepoAddArgs(args)
 	if err != nil {
-		die("Cannot resolve path: " + args[0])
+		die(err.Error())
+	}
+
+	dir, err := filepath.Abs(dirArg)
+	if err != nil {
+		die("Cannot resolve path: " + dirArg)
 	}
 	if _, err := os.Stat(dir); err != nil {
 		die("Directory not found: " + dir)
 	}
 
 	name := filepath.Base(dir)
-	if len(args) > 1 {
-		name = args[1]
+	if nameArg != "" {
+		name = nameArg
 	}
 
 	if err := os.MkdirAll(appDir, 0755); err != nil {
@@ -139,16 +142,85 @@ func repoAdd(args []string) {
 		die(fmt.Sprintf("Repo %q already registered", name))
 	}
 
-	f, err := os.OpenFile(reposFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		die(err.Error())
-	}
-	fmt.Fprintf(f, "%s|%s\n", name, dir)
-	f.Close()
+	repos := loadRepos()
+	repos = append(repos, repoEntry{Name: name, Path: dir, SkipDirectories: skipDirs})
+	saveRepos(repos)
 
 	fmt.Printf("Added repo %q (%s)\n", name, dir)
+	if len(skipDirs) > 0 {
+		fmt.Printf("Skipping directories by name: %s\n", strings.Join(skipDirs, ", "))
+	}
 	fmt.Println("Scanning…")
 	cmdScan("all")
+}
+
+func parseRepoAddArgs(args []string) (dir, name string, skipDirs []string, err error) {
+	if len(args) == 0 {
+		return "", "", nil, fmt.Errorf("Usage: local-search repo add <folder> [name] [--skip-directory <folder-name>]...")
+	}
+
+	var positional []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--skip-directory":
+			if i+1 >= len(args) {
+				return "", "", nil, fmt.Errorf("--skip-directory requires a folder name")
+			}
+			i++
+			skipDirs = append(skipDirs, args[i])
+		case strings.HasPrefix(a, "--skip-directory="):
+			skipDirs = append(skipDirs, strings.TrimPrefix(a, "--skip-directory="))
+		case strings.HasPrefix(a, "-"):
+			return "", "", nil, fmt.Errorf("unknown flag: %s", a)
+		default:
+			positional = append(positional, a)
+		}
+	}
+
+	if len(positional) == 0 {
+		return "", "", nil, fmt.Errorf("Usage: local-search repo add <folder> [name] [--skip-directory <folder-name>]...")
+	}
+	if len(positional) > 2 {
+		return "", "", nil, fmt.Errorf("Usage: local-search repo add <folder> [name] [--skip-directory <folder-name>]...")
+	}
+
+	normalized, err := normalizeSkipDirectoryNames(skipDirs)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	dir = positional[0]
+	if len(positional) == 2 {
+		name = positional[1]
+	}
+	return dir, name, normalized, nil
+}
+
+func normalizeSkipDirectoryNames(values []string) ([]string, error) {
+	seen := make(map[string]bool)
+	out := make([]string, 0, len(values))
+	for _, raw := range values {
+		v := strings.TrimSpace(raw)
+		if v == "" {
+			return nil, fmt.Errorf("--skip-directory requires a non-empty folder name")
+		}
+		if v == "." || v == ".." {
+			return nil, fmt.Errorf("invalid --skip-directory value %q: use a folder name", v)
+		}
+		if strings.Contains(v, "/") || strings.Contains(v, "\\") {
+			return nil, fmt.Errorf("invalid --skip-directory value %q: expected folder name, not path", v)
+		}
+		if strings.Contains(v, "|") || strings.Contains(v, ",") {
+			return nil, fmt.Errorf("invalid --skip-directory value %q: characters '|' and ',' are not allowed", v)
+		}
+		if !seen[v] {
+			seen[v] = true
+			out = append(out, v)
+		}
+	}
+	sort.Strings(out)
+	return out, nil
 }
 
 func repoRemove(args []string) {
@@ -223,7 +295,7 @@ func cmdScan(target string) {
 			continue
 		}
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
-		n, err := localdb.FullScan(db, r.Name, r.Path)
+		n, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
 			continue
@@ -263,7 +335,7 @@ func ensureDB() *sql.DB {
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit)
+		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit, r.SkipDirectories)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
 			continue
@@ -283,8 +355,8 @@ func ensureDB() *sql.DB {
 // stringSliceFlag implements flag.Value for a repeatable string flag.
 type stringSliceFlag []string
 
-func (s *stringSliceFlag) String() string      { return strings.Join(*s, ", ") }
-func (s *stringSliceFlag) Set(v string) error  { *s = append(*s, v); return nil }
+func (s *stringSliceFlag) String() string     { return strings.Join(*s, ", ") }
+func (s *stringSliceFlag) Set(v string) error { *s = append(*s, v); return nil }
 
 // filterByLocation removes results whose Path contains any of the given patterns.
 func filterByLocation(results []localdb.SearchResult, patterns []string) []localdb.SearchResult {
@@ -310,6 +382,7 @@ func filterByLocation(results []localdb.SearchResult, patterns []string) []local
 func cmdSearch(args []string) {
 	fs := flag.NewFlagSet("search", flag.ExitOnError)
 	repoFlag := fs.String("repo", "", "Filter results to this repo")
+	directoryFlag := fs.String("directory", "", "Filter results to paths starting with this directory")
 	var excludeLocations stringSliceFlag
 	fs.Var(&excludeLocations, "exclude-location", "Exclude results whose path contains this string (repeatable)")
 
@@ -335,7 +408,7 @@ func cmdSearch(args []string) {
 	fs.Parse(flagArgs) //nolint:errcheck
 
 	if len(positional) == 0 {
-		die("Usage: local-search search <query> [--repo <name>] [--exclude-location <pattern>]...")
+		die("Usage: local-search search <query> [--repo <name>] [--directory <path>] [--exclude-location <pattern>]...")
 	}
 	query := positional[0]
 
@@ -352,7 +425,7 @@ func cmdSearch(args []string) {
 	db := ensureDB()
 	defer db.Close()
 
-	results, err := localdb.Search(db, query, repo)
+	results, err := localdb.Search(db, query, repo, *directoryFlag)
 	if err != nil {
 		die(err.Error())
 	}
@@ -363,19 +436,42 @@ func cmdSearch(args []string) {
 // ── Read ──────────────────────────────────────────────────────────────────────
 
 func cmdRead(args []string) {
-	if len(args) == 0 {
-		die("Usage: local-search read <name> [repo]")
+	fs := flag.NewFlagSet("read", flag.ExitOnError)
+	repoFlag := fs.String("repo", "", "Read from specific repo")
+	directoryFlag := fs.String("directory", "", "Filter to paths starting with this directory")
+
+	// Split positional args from flags
+	var positional, flagArgs []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if strings.HasPrefix(a, "-") {
+			flagArgs = append(flagArgs, a)
+			if !strings.Contains(a, "=") && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				i++
+				flagArgs = append(flagArgs, args[i])
+			}
+		} else {
+			positional = append(positional, a)
+		}
 	}
-	name := args[0]
+	fs.Parse(flagArgs) //nolint:errcheck
+
+	if len(positional) == 0 {
+		die("Usage: local-search read <name> [repo] [--directory <path>]")
+	}
+	name := positional[0]
 	repo := ""
-	if len(args) > 1 {
-		repo = args[1]
+	if len(positional) > 1 {
+		repo = positional[1]
+	}
+	if *repoFlag != "" {
+		repo = *repoFlag
 	}
 
 	db := ensureDB()
 	defer db.Close()
 
-	fullpath, err := localdb.ReadSpec(db, name, repo)
+	fullpath, err := localdb.ReadSpec(db, name, repo, *directoryFlag)
 	if err != nil {
 		die(err.Error())
 	}
@@ -549,7 +645,7 @@ func cmdJSON(args []string) {
 		if len(rest) > 1 {
 			repo = rest[1]
 		}
-		results, err := localdb.Search(db, rest[0], repo)
+		results, err := localdb.Search(db, rest[0], repo, "")
 		if err != nil {
 			die(err.Error())
 		}
@@ -563,7 +659,7 @@ func cmdJSON(args []string) {
 		if len(rest) > 1 {
 			repo = rest[1]
 		}
-		fullpath, err := localdb.ReadSpec(db, rest[0], repo)
+		fullpath, err := localdb.ReadSpec(db, rest[0], repo, "")
 		if err != nil {
 			die(err.Error())
 		}
@@ -632,19 +728,21 @@ func cmdHelp() {
 	fmt.Print(`local-search — search your project specs across multiple repos
 
 Usage:
-  local-search repo add <folder> [name]   Register a spec repo
+	local-search repo add <folder> [name] [--skip-directory <folder-name>]   Register a spec repo
   local-search repo remove <name>         Remove a repo
   local-search repo list                  Show all repos
 
   local-search scan                       Scan all repos
   local-search scan <repo-name>           Scan one repo
 
-  local-search search <query>                                Search all repos
-  local-search search <query> --repo <name>                  Search one repo (named flag)
-  local-search search <query> <repo>                         Search one repo (positional, legacy)
-  local-search search <query> --exclude-location <pattern>   Exclude paths containing pattern
-  local-search read <name>                                   Read a spec
-  local-search read <name> <repo>                            Read from specific repo
+  local-search search <query>                                                        Search all repos
+  local-search search <query> --repo <name>                                          Search one repo (named flag)
+  local-search search <query> <repo>                                                 Search one repo (positional, legacy)
+  local-search search <query> --directory <path>                                     Focus to paths starting with <path>
+  local-search search <query> --exclude-location <pattern>                           Exclude paths containing pattern
+  local-search read <name>                                                           Read a spec
+  local-search read <name> <repo>                                                    Read from specific repo
+  local-search read <name> <repo> --directory <path>                                 Read from specific repo and directory
   local-search related <name>             Find related specs
 
   local-search list                       All specs, all repos
@@ -683,8 +781,37 @@ File locations:
 // ── Repo file helpers ─────────────────────────────────────────────────────────
 
 type repoEntry struct {
-	Name string
-	Path string
+	Name            string
+	Path            string
+	SkipDirectories []string
+}
+
+func parseRepoEntryLine(line string) (repoEntry, bool) {
+	parts := strings.SplitN(line, "|", 3)
+	if len(parts) < 2 {
+		return repoEntry{}, false
+	}
+	r := repoEntry{Name: parts[0], Path: parts[1]}
+	if len(parts) == 3 && strings.TrimSpace(parts[2]) != "" {
+		r.SkipDirectories = strings.Split(parts[2], ",")
+	}
+	norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
+	if err != nil {
+		return repoEntry{}, false
+	}
+	r.SkipDirectories = norm
+	return r, true
+}
+
+func formatRepoEntryLine(r repoEntry) string {
+	line := r.Name + "|" + r.Path
+	if len(r.SkipDirectories) > 0 {
+		norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
+		if err == nil && len(norm) > 0 {
+			line += "|" + strings.Join(norm, ",")
+		}
+	}
+	return line
 }
 
 func loadRepos() []repoEntry {
@@ -701,9 +828,8 @@ func loadRepos() []repoEntry {
 		if line == "" {
 			continue
 		}
-		parts := strings.SplitN(line, "|", 2)
-		if len(parts) == 2 {
-			repos = append(repos, repoEntry{Name: parts[0], Path: parts[1]})
+		if r, ok := parseRepoEntryLine(line); ok {
+			repos = append(repos, r)
 		}
 	}
 	return repos
@@ -724,7 +850,7 @@ func saveRepos(repos []repoEntry) {
 	}
 	defer f.Close()
 	for _, r := range repos {
-		fmt.Fprintf(f, "%s|%s\n", r.Name, r.Path)
+		fmt.Fprintln(f, formatRepoEntryLine(r))
 	}
 }
 

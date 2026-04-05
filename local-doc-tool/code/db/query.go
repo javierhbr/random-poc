@@ -20,12 +20,13 @@ type SearchResult struct {
 	Title     string  `json:"title"`
 	Tags      string  `json:"tags"`
 	Path      string  `json:"path"`
+	FullPath  string  `json:"fullpath"`
 	Ext       string  `json:"ext"`
 	Relevance float64 `json:"relevance"`
 }
 
-// Search performs a BM25-ranked FTS5 query. repoFilter="" means all repos.
-func Search(db *sql.DB, query, repoFilter string) ([]SearchResult, error) {
+// Search performs a BM25-ranked FTS5 query. repoFilter="" means all repos, directoryFilter="" means all paths.
+func Search(db *sql.DB, query, repoFilter, directoryFilter string) ([]SearchResult, error) {
 	var (
 		rows *sql.Rows
 		err  error
@@ -33,16 +34,28 @@ func Search(db *sql.DB, query, repoFilter string) ([]SearchResult, error) {
 	const searchLimit = 200
 	baseSQL := `
 		SELECT s.repo, s.project, s.name, s.title, s.tags,
-		       s.path, s.ext, f.rank
+		       s.path, s.fullpath, s.ext, f.rank
 		FROM specs_fts f
 		JOIN specs s ON s.id = f.rowid
 		WHERE specs_fts MATCH ?`
 
+	var args []interface{}
+	args = append(args, query)
+
 	if repoFilter != "" {
-		rows, err = db.Query(baseSQL+" AND s.repo=? ORDER BY f.rank LIMIT ?", query, repoFilter, searchLimit)
-	} else {
-		rows, err = db.Query(baseSQL+" ORDER BY f.rank LIMIT ?", query, searchLimit)
+		baseSQL += " AND s.repo=?"
+		args = append(args, repoFilter)
 	}
+
+	if directoryFilter != "" {
+		baseSQL += " AND s.path LIKE ?"
+		args = append(args, directoryFilter+"%")
+	}
+
+	baseSQL += " ORDER BY f.rank LIMIT ?"
+	args = append(args, searchLimit)
+
+	rows, err = db.Query(baseSQL, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +64,7 @@ func Search(db *sql.DB, query, repoFilter string) ([]SearchResult, error) {
 	var results []SearchResult
 	for rows.Next() {
 		var r SearchResult
-		if err := rows.Scan(&r.Repo, &r.Project, &r.Name, &r.Title, &r.Tags, &r.Path, &r.Ext, &r.Relevance); err != nil {
+		if err := rows.Scan(&r.Repo, &r.Project, &r.Name, &r.Title, &r.Tags, &r.Path, &r.FullPath, &r.Ext, &r.Relevance); err != nil {
 			return nil, err
 		}
 		results = append(results, r)
@@ -70,7 +83,7 @@ func PrintSearch(results []SearchResult, query string) {
 		return
 	}
 	for _, r := range results {
-		fmt.Printf("  [%s] %s\n", r.Repo, r.Path)
+		fmt.Printf("  [%s] %s\n", r.Repo, r.FullPath)
 		fmt.Printf("    %s", r.Title)
 		if r.Tags != "" {
 			fmt.Printf("  (%s)", r.Tags)
@@ -81,18 +94,27 @@ func PrintSearch(results []SearchResult, query string) {
 
 // ── Read ──────────────────────────────────────────────────────────────────────
 
-// ReadSpec returns the fullpath of the spec matching name (and optional repo).
+// ReadSpec returns the fullpath of the spec matching name (and optional repo and directory).
 // If multiple match, prints choices and returns "".
-func ReadSpec(db *sql.DB, name, repoFilter string) (string, error) {
+func ReadSpec(db *sql.DB, name, repoFilter, directoryFilter string) (string, error) {
 	var rows *sql.Rows
 	var err error
 
 	base := "SELECT fullpath, repo, project||'/'||name FROM specs WHERE LOWER(name)=LOWER(?)"
+	var args []interface{}
+	args = append(args, name)
+
 	if repoFilter != "" {
-		rows, err = db.Query(base+" AND repo=?", name, repoFilter)
-	} else {
-		rows, err = db.Query(base, name)
+		base += " AND repo=?"
+		args = append(args, repoFilter)
 	}
+
+	if directoryFilter != "" {
+		base += " AND path LIKE ?"
+		args = append(args, directoryFilter+"%")
+	}
+
+	rows, err = db.Query(base, args...)
 	if err != nil {
 		return "", err
 	}
@@ -371,10 +393,10 @@ func buildRelatedQuery(tags, title, exclude string) string {
 
 // RecentRow is one row from the recent command.
 type RecentRow struct {
-	Repo    string
-	Project string
-	Name    string
-	Title   string
+	Repo     string
+	Project  string
+	Name     string
+	Title    string
 	Modified string
 }
 
@@ -466,12 +488,12 @@ func Stats(db *sql.DB) (StatsResult, error) {
 
 	// Try cache first — O(1) indexed meta lookups.
 	if v := getMeta(db, "stats_specs"); v != "" {
-		s.Repos, _      = strconv.Atoi(getMeta(db, "stats_repos"))
+		s.Repos, _ = strconv.Atoi(getMeta(db, "stats_repos"))
 		s.TotalSpecs, _ = strconv.Atoi(v)
-		s.Projects, _   = strconv.Atoi(getMeta(db, "stats_projects"))
-		s.UniqueTags, _  = strconv.Atoi(getMeta(db, "stats_tags"))
-		s.TotalBytes, _  = strconv.ParseInt(getMeta(db, "stats_bytes"), 10, 64)
-		s.LastScan       = getMeta(db, "last_scan")
+		s.Projects, _ = strconv.Atoi(getMeta(db, "stats_projects"))
+		s.UniqueTags, _ = strconv.Atoi(getMeta(db, "stats_tags"))
+		s.TotalBytes, _ = strconv.ParseInt(getMeta(db, "stats_bytes"), 10, 64)
+		s.LastScan = getMeta(db, "last_scan")
 		return s, nil
 	}
 
