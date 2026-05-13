@@ -1,0 +1,9 @@
+{
+  "name": "noony-framework",
+  "version": "1.0.0",
+  "description": "Noony Serverless Framework — complete skill set for building type-safe Cloud Functions with middleware chains, DI, validation, error handling, testing, and performance optimization.",
+  "author": {
+    "name": "Javier Benavides"
+  },
+  "license": "MIT"
+}

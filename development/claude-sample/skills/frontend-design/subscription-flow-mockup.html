@@ -1,0 +1,1634 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Creation & Subscription Flow - Mockup</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #22c55e;
+        --success-light: #dcfce7;
+        --warning: #f59e0b;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --radius: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Plus Jakarta Sans',
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: var(--gray-800);
+        line-height: 1.5;
+      }
+
+      /* Step Navigation */
+      .step-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 12px 20px;
+        z-index: 100;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+      }
+
+      .step-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+
+      .step-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .step-btn:not(.active) {
+        background: var(--gray-100);
+        color: var(--gray-600);
+      }
+
+      .step-btn:not(.active):hover {
+        background: var(--gray-200);
+      }
+
+      /* Main Container */
+      .container {
+        padding: 80px 16px 40px;
+        max-width: 100%;
+      }
+
+      /* Wizard Card */
+      .wizard-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+        max-width: 480px;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+
+      .wizard-card.wide {
+        max-width: 900px;
+      }
+
+      /* Step Indicator */
+      .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 24px 24px 0;
+      }
+
+      .step-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--gray-200);
+        transition: all 0.3s;
+      }
+
+      .step-dot.active {
+        background: var(--primary);
+        width: 32px;
+        border-radius: 5px;
+      }
+
+      .step-dot.completed {
+        background: var(--success);
+      }
+
+      /* Wizard Content */
+      .wizard-content {
+        padding: 24px;
+      }
+
+      .wizard-title {
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 8px;
+        color: var(--gray-900);
+      }
+
+      .wizard-subtitle {
+        font-size: 14px;
+        color: var(--gray-500);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 8px;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        font-size: 16px;
+        transition: border-color 0.2s;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .form-hint {
+        font-size: 12px;
+        color: var(--gray-400);
+        margin-top: 6px;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+      }
+
+      .btn-secondary:hover {
+        background: var(--gray-200);
+      }
+
+      .btn-outline {
+        background: white;
+        border: 2px solid var(--gray-200);
+        color: var(--gray-700);
+      }
+
+      .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .btn-actions .btn {
+        flex: 1;
+      }
+
+      /* Child Card */
+      .child-card {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+
+      .child-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .child-number {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .child-remove {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: #fee2e2;
+        color: #dc2626;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .child-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .child-customization {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+
+      .emoji-btn {
+        width: 44px;
+        height: 44px;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        background: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .color-picker {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .color-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .color-dot:hover {
+        transform: scale(1.15);
+      }
+
+      .color-dot.selected {
+        border-color: var(--gray-800);
+        box-shadow: 0 0 0 2px white inset;
+      }
+
+      .child-preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      .preview-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .btn-add-child {
+        width: 100%;
+        padding: 14px;
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius);
+        background: none;
+        color: var(--gray-500);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-add-child:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #f5f3ff;
+      }
+
+      /* Upgrade Prompt */
+      .upgrade-prompt {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 2px solid #c4b5fd;
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-top: 16px;
+      }
+
+      .upgrade-icon {
+        width: 44px;
+        height: 44px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+      }
+
+      .upgrade-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .upgrade-text strong {
+        font-size: 14px;
+        color: var(--gray-800);
+      }
+
+      .upgrade-text span {
+        font-size: 13px;
+        color: var(--gray-600);
+      }
+
+      /* ======================= */
+      /* PLAN SELECTION STEP */
+      /* ======================= */
+
+      .billing-toggle {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        background: var(--gray-100);
+        padding: 4px;
+        border-radius: 30px;
+        margin-bottom: 24px;
+      }
+
+      .billing-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 26px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: transparent;
+        color: var(--gray-500);
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+
+      .billing-btn.active {
+        background: white;
+        color: var(--gray-800);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .billing-btn .discount {
+        color: var(--success);
+        font-weight: 700;
+      }
+
+      /* Plan Cards Grid */
+      .plans-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      @media (min-width: 768px) {
+        .plans-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+      }
+
+      .plan-card {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        position: relative;
+        transition: all 0.2s;
+      }
+
+      .plan-card:hover {
+        border-color: var(--primary);
+      }
+
+      .plan-card.popular {
+        border-color: var(--primary);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+      }
+
+      .popular-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .plan-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 4px;
+      }
+
+      .plan-price {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin-bottom: 4px;
+      }
+
+      .price-amount {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--gray-900);
+      }
+
+      .price-period {
+        font-size: 14px;
+        color: var(--gray-500);
+      }
+
+      .price-yearly {
+        font-size: 13px;
+        color: var(--gray-400);
+      }
+
+      .price-savings {
+        color: var(--success);
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .plan-features {
+        margin: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--gray-600);
+      }
+
+      .feature-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        flex-shrink: 0;
+      }
+
+      .feature-icon.check {
+        background: var(--success-light);
+        color: var(--success);
+      }
+
+      .feature-icon.cross {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .plan-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: var(--radius);
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .plan-btn-current {
+        background: white;
+        border: 2px solid var(--gray-200);
+        color: var(--gray-500);
+      }
+
+      .plan-btn-start {
+        background: var(--gray-900);
+        border: none;
+        color: white;
+      }
+
+      .plan-btn-start:hover {
+        background: var(--gray-800);
+        transform: translateY(-1px);
+      }
+
+      .plan-btn.popular-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .plan-btn.popular-btn:hover {
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .trial-text {
+        text-align: center;
+        font-size: 12px;
+        color: var(--gray-400);
+        margin-top: 8px;
+      }
+
+      /* Value Proposition Section */
+      .value-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-top: 24px;
+      }
+
+      .value-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--gray-800);
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .value-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      .value-col h4 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gray-500);
+        margin-bottom: 12px;
+      }
+
+      .value-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--gray-600);
+        margin-bottom: 8px;
+      }
+
+      /* Trust Badges */
+      .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      .trust-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--gray-500);
+      }
+
+      .trust-badge svg {
+        width: 16px;
+        height: 16px;
+        color: var(--gray-400);
+      }
+
+      /* ======================= */
+      /* ADD-ONS STEP */
+      /* ======================= */
+
+      .addons-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .addon-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .addon-card:hover {
+        border-color: var(--primary);
+      }
+
+      .addon-card.selected {
+        border-color: var(--primary);
+        background: #f5f3ff;
+      }
+
+      .addon-icon {
+        width: 48px;
+        height: 48px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .addon-info {
+        flex: 1;
+      }
+
+      .addon-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 2px;
+      }
+
+      .addon-desc {
+        font-size: 13px;
+        color: var(--gray-500);
+      }
+
+      .addon-price {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--gray-800);
+      }
+
+      .addon-qty {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: 2px solid var(--gray-200);
+        border-radius: 8px;
+        background: white;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .qty-value {
+        width: 32px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      /* ======================= */
+      /* CHECKOUT STEP */
+      /* ======================= */
+
+      .checkout-summary {
+        background: var(--gray-50);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+
+      .summary-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gray-500);
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .summary-item:last-of-type {
+        border-bottom: none;
+      }
+
+      .summary-item-name {
+        font-size: 14px;
+        color: var(--gray-700);
+      }
+
+      .summary-item-price {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gray-800);
+      }
+
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        margin-top: 8px;
+        border-top: 2px solid var(--gray-300);
+      }
+
+      .total-label {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--gray-800);
+      }
+
+      .total-price {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--gray-900);
+      }
+
+      .total-period {
+        font-size: 14px;
+        color: var(--gray-500);
+        font-weight: 400;
+      }
+
+      .trial-notice {
+        background: var(--success-light);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+
+      .trial-notice-icon {
+        width: 24px;
+        height: 24px;
+        background: var(--success);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+      }
+
+      .trial-notice-text {
+        font-size: 14px;
+        color: #166534;
+      }
+
+      .trial-notice-text strong {
+        font-weight: 700;
+      }
+
+      /* Paddle Placeholder */
+      .paddle-container {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius);
+        padding: 40px;
+        text-align: center;
+        color: var(--gray-400);
+        margin-bottom: 24px;
+      }
+
+      .paddle-placeholder {
+        font-size: 48px;
+        margin-bottom: 8px;
+      }
+
+      /* Promo Code */
+      .promo-input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+
+      .promo-input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+
+      .promo-btn {
+        padding: 12px 20px;
+        background: var(--gray-100);
+        border: none;
+        border-radius: var(--radius);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      /* Step Section */
+      .step-section {
+        display: none;
+      }
+
+      .step-section.active {
+        display: block;
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .child-fields {
+          grid-template-columns: 1fr;
+        }
+
+        .value-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .trust-badges {
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Step Navigation (for demo purposes) -->
+    <nav class="step-nav">
+      <button class="step-btn active" onclick="showStep(1)">1. Family Info</button>
+      <button class="step-btn" onclick="showStep(2)">2. Children</button>
+      <button class="step-btn" onclick="showStep(3)">3. Select Plan</button>
+      <button class="step-btn" onclick="showStep(4)">4. Add-ons</button>
+      <button class="step-btn" onclick="showStep(5)">5. Checkout</button>
+    </nav>
+
+    <div class="container">
+      <!-- ================== STEP 1: FAMILY INFO ================== -->
+      <div id="step1" class="step-section active">
+        <div class="wizard-card">
+          <div class="step-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+          </div>
+
+          <div class="wizard-content">
+            <h2 class="wizard-title">Create Your Family</h2>
+            <p class="wizard-subtitle">Let's start by naming your family</p>
+
+            <div class="form-group">
+              <label class="form-label">Family Name</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="e.g., The García Family"
+                value="Familia García"
+              />
+              <p class="form-hint">This is how your family will appear in the app</p>
+            </div>
+
+            <div class="btn-actions">
+              <button class="btn btn-primary" onclick="showStep(2)">
+                Continue
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== STEP 2: CHILDREN ================== -->
+      <div id="step2" class="step-section">
+        <div class="wizard-card">
+          <div class="step-indicator">
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+          </div>
+
+          <div class="wizard-content">
+            <h2 class="wizard-title">Add Your Children</h2>
+            <p class="wizard-subtitle">Who will be using the app?</p>
+
+            <!-- Child 1 -->
+            <div class="child-card">
+              <div class="child-header">
+                <span class="child-number">Child 1</span>
+              </div>
+
+              <div class="child-fields">
+                <div class="form-group" style="margin-bottom: 0">
+                  <label class="form-label" style="font-size: 12px">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g., Juliana"
+                    value="Juliana"
+                    style="padding: 10px 12px; font-size: 14px"
+                  />
+                </div>
+                <div class="form-group" style="margin-bottom: 0">
+                  <label class="form-label" style="font-size: 12px">Nickname</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g., Juli"
+                    value="Juli"
+                    style="padding: 10px 12px; font-size: 14px"
+                  />
+                </div>
+              </div>
+
+              <div class="child-customization">
+                <div>
+                  <label class="form-label" style="font-size: 12px">Emoji</label>
+                  <button class="emoji-btn">🦊</button>
+                </div>
+                <div style="flex: 1">
+                  <label class="form-label" style="font-size: 12px">Color</label>
+                  <div class="color-picker">
+                    <button class="color-dot selected" style="background: #ec4899"></button>
+                    <button class="color-dot" style="background: #f43f5e"></button>
+                    <button class="color-dot" style="background: #ef4444"></button>
+                    <button class="color-dot" style="background: #f97316"></button>
+                    <button class="color-dot" style="background: #eab308"></button>
+                    <button class="color-dot" style="background: #22c55e"></button>
+                    <button class="color-dot" style="background: #14b8a6"></button>
+                    <button class="color-dot" style="background: #06b6d4"></button>
+                    <button class="color-dot" style="background: #3b82f6"></button>
+                    <button class="color-dot" style="background: #8b5cf6"></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="child-preview">
+                <span style="font-size: 12px; color: var(--gray-400)">Preview:</span>
+                <span class="preview-badge" style="background: #ec4899">🦊 Juli</span>
+              </div>
+            </div>
+
+            <!-- Child 2 -->
+            <div class="child-card">
+              <div class="child-header">
+                <span class="child-number">Child 2</span>
+                <button class="child-remove">✕</button>
+              </div>
+
+              <div class="child-fields">
+                <div class="form-group" style="margin-bottom: 0">
+                  <label class="form-label" style="font-size: 12px">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g., Rafael"
+                    value="Rafael"
+                    style="padding: 10px 12px; font-size: 14px"
+                  />
+                </div>
+                <div class="form-group" style="margin-bottom: 0">
+                  <label class="form-label" style="font-size: 12px">Nickname</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g., Rafa"
+                    value="Rafa"
+                    style="padding: 10px 12px; font-size: 14px"
+                  />
+                </div>
+              </div>
+
+              <div class="child-customization">
+                <div>
+                  <label class="form-label" style="font-size: 12px">Emoji</label>
+                  <button class="emoji-btn">🦁</button>
+                </div>
+                <div style="flex: 1">
+                  <label class="form-label" style="font-size: 12px">Color</label>
+                  <div class="color-picker">
+                    <button class="color-dot" style="background: #ec4899"></button>
+                    <button class="color-dot" style="background: #f43f5e"></button>
+                    <button class="color-dot" style="background: #ef4444"></button>
+                    <button class="color-dot" style="background: #f97316"></button>
+                    <button class="color-dot" style="background: #eab308"></button>
+                    <button class="color-dot" style="background: #22c55e"></button>
+                    <button class="color-dot" style="background: #14b8a6"></button>
+                    <button class="color-dot selected" style="background: #06b6d4"></button>
+                    <button class="color-dot" style="background: #3b82f6"></button>
+                    <button class="color-dot" style="background: #8b5cf6"></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="child-preview">
+                <span style="font-size: 12px; color: var(--gray-400)">Preview:</span>
+                <span class="preview-badge" style="background: #06b6d4">🦁 Rafa</span>
+              </div>
+            </div>
+
+            <!-- Upgrade prompt for more children -->
+            <div class="upgrade-prompt">
+              <div class="upgrade-icon">👶</div>
+              <div class="upgrade-text">
+                <strong>Need more than 2 children?</strong>
+                <span>Upgrade to Family plan for up to 4 children, or Premium for unlimited</span>
+              </div>
+            </div>
+
+            <div class="btn-actions">
+              <button class="btn btn-secondary" onclick="showStep(1)">Back</button>
+              <button class="btn btn-primary" onclick="showStep(3)">
+                Continue
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== STEP 3: PLAN SELECTION ================== -->
+      <div id="step3" class="step-section">
+        <div class="wizard-card wide">
+          <div class="step-indicator">
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+          </div>
+
+          <div class="wizard-content">
+            <h2 class="wizard-title">Choose Your Plan</h2>
+            <p class="wizard-subtitle">Select the plan that works best for your family</p>
+
+            <!-- Billing Toggle -->
+            <div class="billing-toggle">
+              <button class="billing-btn">Monthly</button>
+              <button class="billing-btn">Quarterly <span class="discount">-14%</span></button>
+              <button class="billing-btn active">Yearly <span class="discount">-30%</span></button>
+            </div>
+
+            <!-- Plan Cards -->
+            <div class="plans-grid">
+              <!-- FREE Plan -->
+              <div class="plan-card">
+                <div class="plan-name">FREE</div>
+                <div class="plan-price">
+                  <span class="price-amount">$0</span>
+                  <span class="price-period">/forever</span>
+                </div>
+
+                <div class="plan-features">
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>1 child</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>10 tasks</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>1 adult</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon cross">✕</span>
+                    <span style="color: var(--gray-400)">Consequences</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon cross">✕</span>
+                    <span style="color: var(--gray-400)">Rewards</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon cross">✕</span>
+                    <span style="color: var(--gray-400)">Analytics</span>
+                  </div>
+                </div>
+
+                <button class="plan-btn plan-btn-current">Current Plan</button>
+              </div>
+
+              <!-- FAMILY Plan -->
+              <div class="plan-card popular">
+                <div class="popular-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                    />
+                  </svg>
+                  POPULAR
+                </div>
+
+                <div class="plan-name">FAMILY</div>
+                <div class="plan-price">
+                  <span class="price-amount">$4.92</span>
+                  <span class="price-period">/month</span>
+                </div>
+                <div class="price-yearly">$59 per year</div>
+                <div class="price-savings">Save $24</div>
+
+                <div class="plan-features">
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span><strong>4 children</strong></span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span><strong>Unlimited</strong> tasks</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Consequences</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Rewards</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Heat map</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>2 adults</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>History</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Child health log (symptoms + medications)</span>
+                  </div>
+                </div>
+
+                <button class="plan-btn plan-btn-start popular-btn" onclick="showStep(4)">
+                  START FREE
+                </button>
+                <p class="trial-text">14 days free</p>
+              </div>
+
+              <!-- PREMIUM Plan -->
+              <div class="plan-card">
+                <div class="plan-name">PREMIUM</div>
+                <div class="plan-price">
+                  <span class="price-amount">$8.25</span>
+                  <span class="price-period">/month</span>
+                </div>
+                <div class="price-yearly">$99 per year</div>
+                <div class="price-savings">Save $44</div>
+
+                <div class="plan-features">
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span><strong>Unlimited</strong> children</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Everything in Family +</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Privileges</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Unlocks</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Integrations</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>API access</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>VIP support</span>
+                  </div>
+                  <div class="feature">
+                    <span class="feature-icon check">✓</span>
+                    <span>Advanced health tracking with export reports</span>
+                  </div>
+                </div>
+
+                <button class="plan-btn plan-btn-start" onclick="showStep(4)">START FREE</button>
+                <p class="trial-text">14 days free</p>
+              </div>
+            </div>
+
+            <!-- Value Proposition -->
+            <div class="value-section">
+              <h3 class="value-title">$4.92/month is less than...</h3>
+              <div class="value-grid">
+                <div class="value-col">
+                  <div class="value-item">☕ A Starbucks coffee</div>
+                  <div class="value-item">🍿 A bag of movie popcorn</div>
+                  <div class="value-item">⛽ 2 liters of gas</div>
+                </div>
+                <div class="value-col">
+                  <h4>But it gives you back:</h4>
+                  <div class="value-item">
+                    <span
+                      class="feature-icon check"
+                      style="width: 16px; height: 16px; font-size: 9px"
+                      >✓</span
+                    >
+                    2-3 hours per week
+                  </div>
+                  <div class="value-item">
+                    <span
+                      class="feature-icon check"
+                      style="width: 16px; height: 16px; font-size: 9px"
+                      >✓</span
+                    >
+                    Priceless peace of mind
+                  </div>
+                  <div class="value-item">
+                    <span
+                      class="feature-icon check"
+                      style="width: 16px; height: 16px; font-size: 9px"
+                      >✓</span
+                    >
+                    More responsible kids
+                  </div>
+                  <div class="value-item">
+                    <span
+                      class="feature-icon check"
+                      style="width: 16px; height: 16px; font-size: 9px"
+                      >✓</span
+                    >
+                    Less fighting, more connection
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="trust-badges">
+              <div class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Secure payment with Stripe and PayPal
+              </div>
+              <div class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                Cancel anytime, no questions asked
+              </div>
+              <div class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                No charge until your trial ends
+              </div>
+            </div>
+
+            <div class="btn-actions" style="margin-top: 32px">
+              <button class="btn btn-secondary" onclick="showStep(2)">Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== STEP 4: ADD-ONS ================== -->
+      <div id="step4" class="step-section">
+        <div class="wizard-card">
+          <div class="step-indicator">
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+          </div>
+
+          <div class="wizard-content">
+            <h2 class="wizard-title">Customize Your Plan</h2>
+            <p class="wizard-subtitle">Add extras to fit your family's needs (optional)</p>
+
+            <div class="addons-grid">
+              <div class="addon-card selected">
+                <div class="addon-icon">👶</div>
+                <div class="addon-info">
+                  <div class="addon-name">Extra Child Slot</div>
+                  <div class="addon-desc">Add more children beyond your plan limit</div>
+                </div>
+                <div style="text-align: right">
+                  <div class="addon-price">+$1.99/mo</div>
+                  <div class="addon-qty">
+                    <button class="qty-btn">-</button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="addon-card">
+                <div class="addon-icon">👨‍👩‍👧</div>
+                <div class="addon-info">
+                  <div class="addon-name">Extra Adult Account</div>
+                  <div class="addon-desc">Add grandparents, nannies, or tutors</div>
+                </div>
+                <div style="text-align: right">
+                  <div class="addon-price">+$2.49/mo</div>
+                  <div class="addon-qty">
+                    <button class="qty-btn">-</button>
+                    <span class="qty-value">0</span>
+                    <button class="qty-btn">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="addon-card">
+                <div class="addon-icon">📊</div>
+                <div class="addon-info">
+                  <div class="addon-name">Advanced Analytics</div>
+                  <div class="addon-desc">Detailed insights and progress reports</div>
+                </div>
+                <div style="text-align: right">
+                  <div class="addon-price">+$2.99/mo</div>
+                  <div class="addon-qty">
+                    <button class="qty-btn">-</button>
+                    <span class="qty-value">0</span>
+                    <button class="qty-btn">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="addon-card">
+                <div class="addon-icon">🏥</div>
+                <div class="addon-info">
+                  <div class="addon-name">Health Tracking Pro</div>
+                  <div class="addon-desc">Extended health logs with PDF export</div>
+                </div>
+                <div style="text-align: right">
+                  <div class="addon-price">+$1.49/mo</div>
+                  <div class="addon-qty">
+                    <button class="qty-btn">-</button>
+                    <span class="qty-value">0</span>
+                    <button class="qty-btn">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-actions">
+              <button class="btn btn-secondary" onclick="showStep(3)">Back</button>
+              <button class="btn btn-primary" onclick="showStep(5)">
+                Continue to Checkout
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== STEP 5: CHECKOUT ================== -->
+      <div id="step5" class="step-section">
+        <div class="wizard-card">
+          <div class="step-indicator">
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+          </div>
+
+          <div class="wizard-content">
+            <h2 class="wizard-title">Complete Your Order</h2>
+            <p class="wizard-subtitle">Review your subscription and start your free trial</p>
+
+            <!-- Trial Notice -->
+            <div class="trial-notice">
+              <div class="trial-notice-icon">✓</div>
+              <div class="trial-notice-text">
+                <strong>14-day free trial</strong> — You won't be charged until Jan 15, 2026
+              </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="checkout-summary">
+              <div class="summary-title">Order Summary</div>
+
+              <div class="summary-item">
+                <span class="summary-item-name">Family Plan (Yearly)</span>
+                <span class="summary-item-price">$59.00/yr</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-item-name">Extra Child Slot × 1</span>
+                <span class="summary-item-price">$23.88/yr</span>
+              </div>
+
+              <div class="summary-total">
+                <span class="total-label">Total after trial</span>
+                <span class="total-price">$82.88<span class="total-period">/year</span></span>
+              </div>
+            </div>
+
+            <!-- Promo Code -->
+            <div class="promo-input-group">
+              <input type="text" class="promo-input" placeholder="Promo code" />
+              <button class="promo-btn">Apply</button>
+            </div>
+
+            <!-- Paddle Checkout Placeholder -->
+            <div class="paddle-container">
+              <div class="paddle-placeholder">💳</div>
+              <div>Paddle Checkout will appear here</div>
+              <div style="font-size: 12px; margin-top: 8px">
+                Secure payment processing by Paddle
+              </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="trust-badges" style="border: none; padding: 0; margin: 0">
+              <div class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                256-bit SSL encryption
+              </div>
+              <div class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                30-day money-back guarantee
+              </div>
+            </div>
+
+            <div class="btn-actions">
+              <button class="btn btn-secondary" onclick="showStep(4)">Back</button>
+              <button class="btn btn-primary">
+                Start Free Trial
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showStep(step) {
+        // Hide all steps
+        document.querySelectorAll('.step-section').forEach((s) => s.classList.remove('active'));
+        document.querySelectorAll('.step-btn').forEach((b) => b.classList.remove('active'));
+
+        // Show selected step
+        document.getElementById('step' + step).classList.add('active');
+        document.querySelectorAll('.step-btn')[step - 1].classList.add('active');
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Add interactivity to billing toggle
+      document.querySelectorAll('.billing-btn').forEach((btn) => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.billing-btn').forEach((b) => b.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Add interactivity to color dots
+      document.querySelectorAll('.color-dot').forEach((dot) => {
+        dot.addEventListener('click', function () {
+          const picker = this.closest('.color-picker');
+          picker.querySelectorAll('.color-dot').forEach((d) => d.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+
+      // Add interactivity to addon cards
+      document.querySelectorAll('.addon-card').forEach((card) => {
+        card.addEventListener('click', function (e) {
+          if (!e.target.classList.contains('qty-btn')) {
+            this.classList.toggle('selected');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

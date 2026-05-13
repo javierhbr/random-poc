@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [],
+    "FileChanged": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify update . --quiet",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

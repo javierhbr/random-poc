@@ -1,0 +1,43 @@
+Route a task to the appropriate agent based on its type and current state.
+
+The user will provide: a task description, change ID (optional), and project name (optional).
+
+Follow this routing logic:
+
+1. Read `` to confirm the project exists
+2. If a change ID is provided, read `openspec/changes/<change-id>/handoff.md` to understand current state
+3. Apply the routing table:
+
+| Situation | Route to |
+|-----------|----------|
+| Requirements unclear or missing | @product-owner |
+| Need to create change folder and break down tasks | @dev-manager |
+| Architecture decision or design.md needed | @tech-lead |
+| Web, backend, API, DB, or UI implementation | @sr-fullstack |
+| Architecture ownership, complex design, code review | @staff-fullstack |
+| Flutter/mobile implementation | @mobile-dev |
+| Testing, verification, QA signoff | @qa-engineer |
+| GCP deployment, infrastructure, CI/CD | @devops |
+| Blocker escalation, cross-team issue | escalate to @cto |
+
+4. Explain your routing decision: which agent, why, and what they should do
+5. Provide the delegating message for that agent, including:
+   - Project code and change ID
+   - What the task is
+   - What context they should read
+   - Expected output
+
+Format the output as:
+```
+**Routing to:** <agent>
+**Reason:** <why this agent owns this task>
+
+**Message to <agent>:**
+---
+Project: <code>
+Change: <change-id>
+Task: <what to do>
+Read: <what files to read first>
+Expected output: <what they should produce>
+---
+```
