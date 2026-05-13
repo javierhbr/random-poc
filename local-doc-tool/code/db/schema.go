@@ -11,9 +11,25 @@ import (
 
 const schemaSQL = `
 CREATE TABLE IF NOT EXISTS repos (
-  id    INTEGER PRIMARY KEY,
-  name  TEXT UNIQUE NOT NULL,
-  path  TEXT UNIQUE NOT NULL
+  id                    INTEGER PRIMARY KEY,
+  name                  TEXT UNIQUE NOT NULL,
+  path                  TEXT UNIQUE NOT NULL,
+  graph_path            TEXT,
+  graph_mtime           INTEGER,
+  graph_node_count      INTEGER,
+  graph_last_seen       INTEGER,
+  code_graph_path       TEXT,
+  code_graph_mtime      INTEGER,
+  code_graph_node_count INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS external_graphs (
+  name        TEXT PRIMARY KEY,
+  graph_path  TEXT NOT NULL,
+  graph_mtime INTEGER,
+  node_count  INTEGER,
+  added_at    INTEGER,
+  kind        TEXT NOT NULL DEFAULT 'graphify'
 );
 
 CREATE TABLE IF NOT EXISTS specs (
@@ -91,10 +107,87 @@ func Open(dbPath string) (*sql.DB, error) {
 	return db, nil
 }
 
-// CreateSchema initialises all tables and indexes if they do not exist yet.
+// CreateSchema initialises all tables and indexes if they do not exist yet,
+// and runs additive ALTER TABLE migrations to upgrade older databases that
+// were created before code-review-graph integration columns existed.
 func CreateSchema(db *sql.DB) error {
-	_, err := db.Exec(schemaSQL)
-	return err
+	if _, err := db.Exec(schemaSQL); err != nil {
+		return err
+	}
+	return runMigrations(db)
+}
+
+// runMigrations applies additive column migrations idempotently. Each ALTER
+// TABLE is wrapped in a column-existence check so re-running is safe.
+func runMigrations(db *sql.DB) error {
+	for _, m := range migrations {
+		has, err := hasColumn(db, m.table, m.column)
+		if err != nil {
+			return err
+		}
+		if has {
+			continue
+		}
+		if _, err := db.Exec(m.sql); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type columnMigration struct {
+	table  string
+	column string
+	sql    string
+}
+
+// migrations is intentionally ordered by historical introduction: graphify
+// columns were added before code-review-graph columns. Each entry is gated by
+// hasColumn(), so re-running on an up-to-date DB is a no-op. DBs that pre-date
+// any of these columns (older releases of local-search) get caught up here.
+var migrations = []columnMigration{
+	// Graphify integration (older release).
+	{"repos", "graph_path", `ALTER TABLE repos ADD COLUMN graph_path TEXT`},
+	{"repos", "graph_mtime", `ALTER TABLE repos ADD COLUMN graph_mtime INTEGER`},
+	{"repos", "graph_node_count", `ALTER TABLE repos ADD COLUMN graph_node_count INTEGER`},
+	{"repos", "graph_last_seen", `ALTER TABLE repos ADD COLUMN graph_last_seen INTEGER`},
+	// External graphs (graphify standalone).
+	{"external_graphs", "graph_mtime", `ALTER TABLE external_graphs ADD COLUMN graph_mtime INTEGER`},
+	{"external_graphs", "node_count", `ALTER TABLE external_graphs ADD COLUMN node_count INTEGER`},
+	{"external_graphs", "added_at", `ALTER TABLE external_graphs ADD COLUMN added_at INTEGER`},
+	// Code-review-graph integration (this release).
+	{"repos", "code_graph_path", `ALTER TABLE repos ADD COLUMN code_graph_path TEXT`},
+	{"repos", "code_graph_mtime", `ALTER TABLE repos ADD COLUMN code_graph_mtime INTEGER`},
+	{"repos", "code_graph_node_count", `ALTER TABLE repos ADD COLUMN code_graph_node_count INTEGER`},
+	{"external_graphs", "kind", `ALTER TABLE external_graphs ADD COLUMN kind TEXT NOT NULL DEFAULT 'graphify'`},
+}
+
+// hasColumn reports whether the given column exists on the given table.
+// Returns (false, nil) when the table itself does not yet exist (CREATE
+// TABLE IF NOT EXISTS in schemaSQL will have created it before this runs).
+func hasColumn(db *sql.DB, table, column string) (bool, error) {
+	rows, err := db.Query("PRAGMA table_info(" + table + ")")
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			cid          int
+			name         string
+			ctype        string
+			notnull      int
+			dfltValue    sql.NullString
+			pk           int
+		)
+		if err := rows.Scan(&cid, &name, &ctype, &notnull, &dfltValue, &pk); err != nil {
+			return false, err
+		}
+		if name == column {
+			return true, nil
+		}
+	}
+	return false, rows.Err()
 }
 
 // GetMeta retrieves a value from the meta table. Returns "" if the key is absent.

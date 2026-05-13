@@ -72,6 +72,48 @@ func Search(db *sql.DB, query, repoFilter, directoryFilter string) ([]SearchResu
 	return results, rows.Err()
 }
 
+// SearchInRepos performs the same FTS5 query as Search but restricts results
+// to a specific set of repo names. Empty repos slice returns no results (use
+// Search with repoFilter="" for the all-repos case).
+func SearchInRepos(db *sql.DB, query string, repos []string) ([]SearchResult, error) {
+	if len(repos) == 0 {
+		return nil, nil
+	}
+	const searchLimit = 200
+	placeholders := strings.Repeat("?,", len(repos))
+	placeholders = placeholders[:len(placeholders)-1]
+	args := make([]any, 0, len(repos)+2)
+	args = append(args, query)
+	for _, r := range repos {
+		args = append(args, r)
+	}
+	args = append(args, searchLimit)
+
+	rows, err := db.Query(`
+		SELECT s.repo, s.project, s.name, s.title, s.tags,
+		       s.path, s.ext, f.rank
+		FROM specs_fts f
+		JOIN specs s ON s.id = f.rowid
+		WHERE specs_fts MATCH ? AND s.repo IN (`+placeholders+`)
+		ORDER BY f.rank LIMIT ?`,
+		args...,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []SearchResult
+	for rows.Next() {
+		var r SearchResult
+		if err := rows.Scan(&r.Repo, &r.Project, &r.Name, &r.Title, &r.Tags, &r.Path, &r.Ext, &r.Relevance); err != nil {
+			return nil, err
+		}
+		results = append(results, r)
+	}
+	return results, rows.Err()
+}
+
 // PrintSearch writes human-readable search output to stdout.
 func PrintSearch(results []SearchResult, query string) {
 	if len(results) == 0 {
@@ -498,6 +540,8 @@ func Stats(db *sql.DB) (StatsResult, error) {
 	}
 
 	// Cache miss: compute live (first run before any scan completes).
+	// COALESCE wraps the WHOLE subquery (not just `value`) so a missing row
+	// also produces 'never' rather than a NULL that fails Scan into a string.
 	err := db.QueryRow(`
 		SELECT
 		  (SELECT COUNT(*) FROM repos),
@@ -505,7 +549,7 @@ func Stats(db *sql.DB) (StatsResult, error) {
 		  (SELECT COUNT(DISTINCT project) FROM specs),
 		  (SELECT COUNT(DISTINCT tag) FROM spec_tags),
 		  (SELECT COALESCE(SUM(size),0) FROM specs),
-		  (SELECT COALESCE(value,'never') FROM meta WHERE key='last_scan')
+		  COALESCE((SELECT value FROM meta WHERE key='last_scan'), 'never')
 	`).Scan(&s.Repos, &s.TotalSpecs, &s.Projects, &s.UniqueTags, &s.TotalBytes, &s.LastScan)
 	return s, err
 }
@@ -561,20 +605,35 @@ func PrintStats(s StatsResult, dbPath string) {
 
 // ── Repos ─────────────────────────────────────────────────────────────────────
 
-// RepoRow is one registered repository with its spec count.
+// RepoRow is one registered repository with its spec count and (optionally)
+// graphify and code-review-graph metadata. Graph fields are zero-valued when
+// the corresponding artifact was not detected during the last scan.
 type RepoRow struct {
-	Name  string `json:"repo"`
-	Path  string `json:"path"`
-	Count int    `json:"spec_count"`
+	Name               string `json:"repo"`
+	Path               string `json:"path"`
+	Count              int    `json:"spec_count"`
+	GraphPath          string `json:"graph_path,omitempty"`
+	GraphMTime         int64  `json:"graph_mtime,omitempty"`
+	GraphNodeCount     int    `json:"graph_node_count,omitempty"`
+	CodeGraphPath      string `json:"code_graph_path,omitempty"`
+	CodeGraphMTime     int64  `json:"code_graph_mtime,omitempty"`
+	CodeGraphNodeCount int    `json:"code_graph_node_count,omitempty"`
 }
 
-// Repos returns all registered repositories with spec counts.
+// Repos returns all registered repositories with spec counts and graph metadata.
 func Repos(db *sql.DB) ([]RepoRow, error) {
 	rows, err := db.Query(`
-		SELECT r.name, r.path, COUNT(s.id)
+		SELECT r.name, r.path, COUNT(s.id),
+		       COALESCE(r.graph_path, ''),
+		       COALESCE(r.graph_mtime, 0),
+		       COALESCE(r.graph_node_count, 0),
+		       COALESCE(r.code_graph_path, ''),
+		       COALESCE(r.code_graph_mtime, 0),
+		       COALESCE(r.code_graph_node_count, 0)
 		FROM repos r
 		LEFT JOIN specs s ON s.repo = r.name
-		GROUP BY r.name, r.path
+		GROUP BY r.name, r.path, r.graph_path, r.graph_mtime, r.graph_node_count,
+		         r.code_graph_path, r.code_graph_mtime, r.code_graph_node_count
 		ORDER BY r.name`,
 	)
 	if err != nil {
@@ -585,12 +644,94 @@ func Repos(db *sql.DB) ([]RepoRow, error) {
 	var result []RepoRow
 	for rows.Next() {
 		var r RepoRow
-		if err := rows.Scan(&r.Name, &r.Path, &r.Count); err != nil {
+		if err := rows.Scan(&r.Name, &r.Path, &r.Count,
+			&r.GraphPath, &r.GraphMTime, &r.GraphNodeCount,
+			&r.CodeGraphPath, &r.CodeGraphMTime, &r.CodeGraphNodeCount,
+		); err != nil {
 			return nil, err
 		}
 		result = append(result, r)
 	}
 	return result, rows.Err()
+}
+
+// ── External graphs (graphs not tied to a registered repo) ────────────────────
+
+// Kinds an external graph can be tagged with.
+const (
+	GraphKindGraphify       = "graphify"
+	GraphKindCodeReviewGraph = "code-review-graph"
+)
+
+// ExternalGraphRow is a graph registered manually via `local-search graphs add`.
+// Used for graphify clone outputs (~/.graphify/repos/<owner>/<name>/graphify-out/),
+// code-review-graph SQLite databases, or any graph artifact the user wants to
+// include in queries without registering its parent directory as a spec repo.
+//
+// The Kind field discriminates between graphify (NetworkX node-link JSON) and
+// code-review-graph (SQLite). Defaults to "graphify" for legacy rows.
+type ExternalGraphRow struct {
+	Name       string `json:"name"`
+	GraphPath  string `json:"graph_path"`
+	GraphMTime int64  `json:"graph_mtime,omitempty"`
+	NodeCount  int    `json:"node_count,omitempty"`
+	AddedAt    int64  `json:"added_at,omitempty"`
+	Kind       string `json:"kind"`
+}
+
+// ExternalGraphs returns all manually-registered external graphs.
+func ExternalGraphs(db *sql.DB) ([]ExternalGraphRow, error) {
+	rows, err := db.Query(`
+		SELECT name, graph_path,
+		       COALESCE(graph_mtime, 0),
+		       COALESCE(node_count, 0),
+		       COALESCE(added_at, 0),
+		       COALESCE(kind, 'graphify')
+		FROM external_graphs
+		ORDER BY name`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []ExternalGraphRow
+	for rows.Next() {
+		var r ExternalGraphRow
+		if err := rows.Scan(&r.Name, &r.GraphPath, &r.GraphMTime, &r.NodeCount, &r.AddedAt, &r.Kind); err != nil {
+			return nil, err
+		}
+		result = append(result, r)
+	}
+	return result, rows.Err()
+}
+
+// AddExternalGraph registers a graph file by name with its kind discriminator.
+// Returns an error if the name is already taken. kind must be "graphify" or
+// "code-review-graph"; empty kind defaults to "graphify" for backward-compat.
+func AddExternalGraph(db *sql.DB, name, graphPath string, mtime int64, nodeCount int, kind string) error {
+	if kind == "" {
+		kind = GraphKindGraphify
+	}
+	_, err := db.Exec(
+		"INSERT INTO external_graphs (name, graph_path, graph_mtime, node_count, added_at, kind) VALUES (?,?,?,?,?,?)",
+		name, graphPath, mtime, nodeCount, time.Now().Unix(), kind,
+	)
+	return err
+}
+
+// RemoveExternalGraph deletes a registered external graph by name.
+// Returns sql.ErrNoRows if the name is not registered.
+func RemoveExternalGraph(db *sql.DB, name string) error {
+	res, err := db.Exec("DELETE FROM external_graphs WHERE name=?", name)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // ── JSON output ───────────────────────────────────────────────────────────────

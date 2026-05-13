@@ -2,16 +2,18 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
+	"local-search/codegraph"
 	"local-search/extract"
 	"local-search/git"
+	"local-search/graph"
 )
 
 // workItem is a file discovered during directory walking.
@@ -53,9 +55,9 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 				if item.isMedia {
 					companion := extract.CompanionPath(item.absPath)
 					sp, e := extract.FromCompanionEntry(repoName, repoRoot, item.absPath, item.entry, companion)
-					if e == nil && sp == nil {
-						fmt.Fprintf(os.Stderr, "warning: %s — skipped (no companion .md)\n", item.absPath)
-					}
+					// Media without a companion .md is intentionally skipped.
+					// We do not warn — repos like fastapi have hundreds of
+					// images and the warning spam buries useful output.
 					resultsCh <- result{sp, e}
 				} else {
 					sp, e := extract.FromFileEntry(repoName, repoRoot, item.absPath, item.entry)
@@ -129,8 +131,41 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 		return 0, err
 	}
 
+	// Detect graphify-out/graph.json. Missing graph is fine — columns stay NULL.
+	gi := graph.Detect(repoRoot)
+	now := time.Now().Unix()
+	var (
+		graphPath  any = nil
+		graphMTime any = nil
+		graphNodes any = nil
+	)
+	if gi.Path != "" {
+		graphPath = gi.Path
+		graphMTime = gi.MTime
+		graphNodes = gi.NodeCount
+	}
+
+	// Detect .code-review-graph/graph.sqlite. Independent of graphify above —
+	// either, both, or neither may be present.
+	cgi := codegraph.Detect(repoRoot)
+	var (
+		codeGraphPath  any = nil
+		codeGraphMTime any = nil
+		codeGraphNodes any = nil
+	)
+	if cgi.Path != "" {
+		codeGraphPath = cgi.Path
+		codeGraphMTime = cgi.MTime
+		codeGraphNodes = cgi.NodeCount
+	}
+
 	if _, err := tx.Exec(
-		"INSERT OR REPLACE INTO repos (name, path) VALUES (?,?)", repoName, repoRoot,
+		"INSERT OR REPLACE INTO repos "+
+			"(name, path, graph_path, graph_mtime, graph_node_count, graph_last_seen, "+
+			" code_graph_path, code_graph_mtime, code_graph_node_count) "+
+			"VALUES (?,?,?,?,?,?,?,?,?)",
+		repoName, repoRoot, graphPath, graphMTime, graphNodes, now,
+		codeGraphPath, codeGraphMTime, codeGraphNodes,
 	); err != nil {
 		return 0, err
 	}
@@ -198,11 +233,10 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string, skipDire
 					if git.FileExists(repoRoot, rel) {
 						companion := extract.CompanionPath(absPath)
 						sp, e := extract.FromCompanion(repoName, repoRoot, absPath, companion)
-						if e != nil || sp == nil {
-							fmt.Fprintf(os.Stderr, "warning: %s — skipped (no companion .md)\n", rel)
-						} else {
+						if e == nil && sp != nil {
 							res.toInsert = []pendingSpec{{rel, sp}}
 						}
+						// Silent skip when no companion: see FullScan above.
 					}
 				case extract.TextExts[ext]:
 					if extract.HasMediaCompanion(absPath) {
