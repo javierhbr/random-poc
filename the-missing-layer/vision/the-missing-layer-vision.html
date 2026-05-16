@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="warm-sand">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Missing Layer — A Working Paper on Behavioral Truth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!--
+  TYPOGRAPHY · editorial newspaper aesthetic
+  ─────────────────────────────────────────────────────────
+  Display — DM Serif Display: warm transitional serif with
+    high-contrast strokes; designed for editorial mastheads.
+    Reads as a serious working-paper, not a SaaS landing.
+  Body — Source Serif 4: variable optical-size serif by
+    Adobe, exceptional reading performance at body sizes;
+    distinct from Lora's calligraphic style.
+  Mono / data — JetBrains Mono: developer-grade monospace
+    with ligature support and clear letterform separation.
+  Banned: Inter, Roboto, Helvetica, Arial, system-ui,
+    Space Grotesk, Open Sans, Montserrat, Lora, Spectral
+    (deliberately diversifying from previous iterations).
+-->
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════
+   THEME LAYER — swap active theme via data-theme="X"
+   on <html>. All component styles reference only the
+   semantic vars below; never raw hex values.
+   ══════════════════════════════════════════════════ */
+
+/* ── theme: teal-gold (original) ── */
+[data-theme="teal-gold"] {
+  --bg:        #faf8f4;
+  --bg-soft:   #f0ede6;
+  --bg-elev:   #e3dfd5;
+  --paper:     #18181a;
+  --paper-dim: #524e47;
+  --rule:      #ccc8be;
+  --rule-soft: #dedad2;
+  --accent:    #0d5c63;
+  --accent-2:  #b5881a;
+  --accent-3:  #7a6a52;
+  --signal:    #b03a2a;
+  --highlight: rgba(13,92,99,0.08);
+  --f-display: 'DM Serif Display', serif;
+  --f-body:    'Source Serif 4', Georgia, serif;
+  --f-display-weight: 300;
+  --f-display-ls: -0.025em;
+  --f-body-sz: 17px;
+  --f-body-style: italic;
+  --masthead-bg: rgba(250,248,244,0.92);
+  --pulse-color: rgba(13,92,99,0.5);
+  --pulse-color-end: rgba(13,92,99,0);
+}
+
+/* ── theme: 1-D warm-sand (active) ── */
+[data-theme="warm-sand"] {
+  --bg:        #fff;
+  --bg-soft:   #f5f3ee;
+  --bg-elev:   #e8e4da;
+  --paper:     #1a1812;
+  --paper-dim: #4e4838;
+  --rule:      #d0cab8;
+  --rule-soft: #e2dcd2;
+  --accent:    #2e5230;
+  --accent-2:  #b88020;
+  --accent-3:  #7a6a52;
+  --signal:    #9e3428;
+  --highlight: rgba(46,82,48,0.08);
+  --f-display: 'Libre Baskerville', Georgia, serif;
+  --f-body:    'Lato', system-ui, sans-serif;
+  --f-display-weight: 400;
+  --f-display-ls: -0.01em;
+  --f-body-sz: 16px;
+  --f-body-style: italic;
+  --masthead-bg: rgba(255,255,255,0.92);
+  --pulse-color: rgba(46,82,48,0.5);
+  --pulse-color-end: rgba(46,82,48,0);
+}
+
+/* ── theme: 1-B terracotta (available) ── */
+[data-theme="terracotta"] {
+  --bg:        #fff;
+  --bg-soft:   #f6f3f0;
+  --bg-elev:   #ebe6e0;
+  --paper:     #1e1a16;
+  --paper-dim: #524840;
+  --rule:      #d4cdc5;
+  --rule-soft: #e4deda;
+  --accent:    #8a3e28;
+  --accent-2:  #b07a20;
+  --accent-3:  #7a6a52;
+  --signal:    #8a2828;
+  --highlight: rgba(138,62,40,0.08);
+  --f-display: 'Fraunces', Georgia, serif;
+  --f-body:    'Inter', system-ui, sans-serif;
+  --f-display-weight: 300;
+  --f-display-ls: -0.015em;
+  --f-body-sz: 15px;
+  --f-body-style: normal;
+  --masthead-bg: rgba(255,255,255,0.92);
+  --pulse-color: rgba(138,62,40,0.5);
+  --pulse-color-end: rgba(138,62,40,0);
+}
+
+/* ── theme: 2-C forest (available) ── */
+[data-theme="forest"] {
+  --bg:        #fff;
+  --bg-soft:   #f5f7f4;
+  --bg-elev:   #e6ebe4;
+  --paper:     #161a14;
+  --paper-dim: #445040;
+  --rule:      #d0d8cc;
+  --rule-soft: #e2e8de;
+  --accent:    #2a5c34;
+  --accent-2:  #b86820;
+  --accent-3:  #7a6a52;
+  --signal:    #a03030;
+  --highlight: rgba(42,92,52,0.08);
+  --f-display: 'Fraunces', Georgia, serif;
+  --f-body:    'Inter', system-ui, sans-serif;
+  --f-display-weight: 300;
+  --f-display-ls: -0.015em;
+  --f-body-sz: 15px;
+  --f-body-style: normal;
+  --masthead-bg: rgba(255,255,255,0.92);
+  --pulse-color: rgba(42,92,52,0.5);
+  --pulse-color-end: rgba(42,92,52,0);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-synthesis:weight style}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--paper);
+  font-family:var(--f-body);
+  font-size:var(--f-body-sz);
+  line-height:1.7;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--highlight) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(24,24,26,0.04) 0%, transparent 40%);
+  pointer-events:none;z-index:1;
+}
+body::after{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(24,24,26,0.012) 2px, rgba(24,24,26,0.012) 3px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(24,24,26,0.008) 2px, rgba(24,24,26,0.008) 3px);
+  pointer-events:none;z-index:1;mix-blend-mode:multiply;
+}
+
+.display{font-family:var(--f-display)}
+.mono{font-family:'JetBrains Mono', monospace}
+
+/* ─── MASTHEAD ────────────────────────────── */
+.masthead{
+  position:sticky;top:0;z-index:50;
+  background:var(--masthead-bg);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--rule);
+  padding:14px 32px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+}
+.masthead .left{display:flex;gap:24px;align-items:center}
+.masthead .dot{
+  width:8px;height:8px;background:var(--accent);
+  border-radius:50%;
+  animation:pulse 2.4s infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 var(--pulse-color)}
+  50%{box-shadow:0 0 0 8px var(--pulse-color-end)}
+}
+.masthead nav{display:flex;gap:22px}
+.masthead nav a{color:var(--paper-dim);text-decoration:none;transition:color 0.2s}
+.masthead nav a:hover{color:var(--accent)}
+@media (max-width:760px){.masthead nav{display:none}.masthead{font-size:10px}}
+
+/* ─── LAYOUT ─────────────────────────────── */
+.section{
+  position:relative;
+  padding:110px 32px;
+  max-width:1280px;
+  margin:0 auto;
+  z-index:2;
+}
+.chapter-mark{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:28px;
+  display:flex;align-items:center;gap:14px;
+}
+.chapter-mark::before{
+  content:"";display:inline-block;
+  width:36px;height:1px;background:var(--accent);
+}
+
+/* ─── HERO ───────────────────────────────── */
+.hero{
+  min-height:92vh;
+  display:grid;
+  grid-template-columns:1fr;
+  align-content:center;
+  padding-top:80px;
+  padding-bottom:60px;
+  position:relative;
+}
+.hero-issue{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:64px;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  padding:14px 0;
+}
+.hero h1{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-size:clamp(40px, 7.5vw, 110px);
+  line-height:0.95;
+  letter-spacing:var(--f-display-ls);
+  margin-bottom:44px;
+}
+.hero h1 .strong{font-weight:800;display:block}
+.hero h1 em{font-style:italic;color:var(--accent);font-weight:400}
+.hero h1 .underline-style{
+  position:relative;display:inline-block;font-style:italic;color:var(--accent);
+}
+.hero h1 .underline-style::after{
+  content:"";position:absolute;
+  bottom:0.05em;left:-2%;width:104%;height:2px;
+  background:var(--accent);
+}
+.hero-deck{
+  font-family:var(--f-body);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(19px, 2vw, 26px);
+  line-height:1.5;
+  max-width:680px;
+  color:var(--paper-dim);
+  margin-bottom:56px;
+}
+.hero-deck em{color:var(--accent);font-weight:500}
+.hero-meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:32px;
+  border-top:1px solid var(--rule);
+  padding-top:24px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;
+}
+.hero-meta .label{
+  text-transform:uppercase;letter-spacing:0.18em;
+  color:var(--accent);font-size:10px;margin-bottom:6px;
+}
+
+.hero-diagram{
+  position:absolute;
+  right:32px;top:140px;
+  width:300px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  border:1px solid var(--rule);
+  background:var(--bg-elev);
+  padding:22px;
+  transform:rotate(1.5deg);
+  box-shadow:
+    -2px -2px 0 var(--accent),
+    8px 8px 0 var(--paper);
+}
+.hero-diagram .hd-label{
+  text-transform:uppercase;letter-spacing:0.22em;
+  font-size:9px;color:var(--accent);margin-bottom:14px;
+  border-bottom:1px solid var(--rule);padding-bottom:10px;
+}
+.hero-diagram .hd-row{
+  padding:7px 0;
+  border-bottom:1px dashed var(--rule-soft);
+  color:var(--paper-dim);
+}
+.hero-diagram .hd-row.missing{
+  color:var(--signal);font-weight:600;
+  background:rgba(176,58,42,0.08);
+  margin:6px -10px;padding:8px 10px;
+  border:1px dashed var(--signal);
+}
+.hero-diagram .arrow{text-align:center;color:var(--rule);padding:6px 0;font-size:14px}
+.hero-diagram .arrow.signal{color:var(--signal)}
+@media (max-width:1100px){.hero-diagram{display:none}}
+
+/* ─── PULLQUOTE ──────────────────────────── */
+.pullquote{
+  background:var(--paper);
+  color:var(--bg);
+  padding:90px 32px;
+  margin:0;
+  position:relative;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+}
+.pullquote-inner{
+  max-width:1000px;margin:0 auto;
+  font-family:var(--f-display);
+  font-style:italic;
+  font-weight:var(--f-display-weight);
+  font-size:clamp(28px, 4.6vw, 56px);
+  line-height:1.18;
+  letter-spacing:var(--f-display-ls);
+  color:var(--bg);
+}
+.pullquote-inner::before{
+  content:"";display:block;
+  width:60px;height:3px;
+  background:var(--accent);
+  margin-bottom:32px;
+}
+.pullquote-attribution{
+  font-family:'JetBrains Mono', monospace;
+  font-style:normal;
+  font-size:11px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  margin-top:36px;
+  color:var(--rule);
+}
+
+/* ─── VISION CARDS ────────────────────────── */
+.vision-statement{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-size:clamp(32px, 5vw, 56px);
+  line-height:1.18;
+  letter-spacing:var(--f-display-ls);
+  max-width:1100px;
+  margin-bottom:80px;
+}
+.vision-statement em{
+  font-style:italic;color:var(--accent);font-weight:500;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:0;
+  border-top:1px solid var(--rule);
+  border-left:1px solid var(--rule);
+}
+.card{
+  padding:36px 28px;
+  border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  background:var(--bg);
+  position:relative;
+  transition:background 0.3s;
+}
+.card:hover{background:var(--bg-soft)}
+.card-num{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;letter-spacing:0.22em;
+  color:var(--accent);margin-bottom:18px;
+}
+.card h3{
+  font-family:var(--f-display);
+  font-weight:600;font-size:24px;
+  line-height:1.2;margin-bottom:14px;
+  letter-spacing:-0.008em;
+}
+.card p{
+  font-size:15px;line-height:1.65;
+  color:var(--paper-dim);
+}
+
+/* ─── BUCKET ─────────────── */
+.bucket-section{
+  background:var(--bg-soft);
+  margin:0 -32px;
+  padding:110px 32px;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+}
+.two-col{
+  display:grid;
+  grid-template-columns:1.1fr 1fr;
+  gap:80px;align-items:start;
+  max-width:1280px;margin:0 auto;
+}
+@media (max-width:900px){.two-col{grid-template-columns:1fr;gap:48px}}
+.col-text h2{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-size:clamp(36px, 5vw, 62px);
+  line-height:1.1;letter-spacing:var(--f-display-ls);
+  margin-bottom:32px;
+}
+.col-text h2 .strong{font-weight:800}
+.col-text h2 em{font-style:italic;color:var(--accent);font-weight:500}
+.col-text p{
+  font-size:17px;line-height:1.75;
+  color:var(--paper-dim);margin-bottom:20px;max-width:540px;
+}
+.col-text p em{color:var(--accent);font-weight:500}
+.pain-list{margin-top:32px;list-style:none}
+.pain-list li{
+  font-family:'JetBrains Mono', monospace;
+  font-size:14px;padding:12px 0;
+  border-bottom:1px dashed var(--rule);
+  display:flex;gap:14px;align-items:baseline;
+  color:var(--paper);
+}
+.pain-list li::before{
+  content:"⊗";color:var(--signal);font-weight:bold;
+}
+
+.bucket{
+  border:1px solid var(--rule);
+  background:var(--bg);padding:28px;
+  position:relative;
+  box-shadow:
+    -3px -3px 0 var(--accent-2),
+    12px 12px 0 var(--paper);
+}
+.bucket-label{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;letter-spacing:0.25em;
+  text-transform:uppercase;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--rule);
+  margin-bottom:22px;
+  display:flex;justify-content:space-between;
+  color:var(--paper-dim);
+}
+.bucket-label .stamp{
+  color:var(--signal);
+  border:1px solid var(--signal);
+  padding:3px 10px;
+  transform:rotate(-2deg);font-weight:500;
+}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;padding:6px 12px;
+  border:1px solid var(--rule);
+  background:var(--bg);color:var(--paper-dim);
+}
+.tag.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:500}
+.tag.deprecated{text-decoration:line-through;opacity:0.5}
+.tag.future{border-style:dashed;color:var(--accent-2)}
+.tag.experimental{background:rgba(181,136,26,0.12);transform:rotate(-1.5deg);color:var(--accent-2);border-color:var(--accent-2)}
+.tag.rejected{color:var(--signal);border-color:var(--signal);text-decoration:line-through}
+.tag.historical{background:var(--bg-elev);font-style:italic;color:var(--accent-3)}
+.tag.pending{border-style:dotted}
+.tag.partial{background:repeating-linear-gradient(45deg, var(--bg), var(--bg) 4px, var(--bg-elev) 4px, var(--bg-elev) 8px)}
+
+/* ─── COMPARISON ─────────────────────────── */
+.comparison{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border:1px solid var(--rule);margin-top:48px;
+}
+@media (max-width:760px){.comparison{grid-template-columns:1fr}}
+.comp-side{padding:40px;position:relative}
+.comp-side.gap{background:var(--bg-soft);border-left:1px solid var(--rule)}
+@media (max-width:760px){.comp-side.gap{border-left:none;border-top:1px solid var(--rule)}}
+.comp-side h4{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;letter-spacing:0.22em;
+  text-transform:uppercase;margin-bottom:24px;
+  color:var(--paper-dim);
+}
+.comp-side h4 .check{color:var(--accent);font-weight:bold;margin-right:8px}
+.comp-side.gap h4 .check{color:var(--signal)}
+.comp-side ul{list-style:none}
+.comp-side ul li{
+  padding:10px 0;font-size:15px;
+  border-bottom:1px dashed var(--rule);
+  color:var(--paper-dim);
+}
+.comp-side ul li:last-child{border-bottom:none}
+
+.code-block{
+  font-family:'JetBrains Mono', monospace;
+  background:var(--bg-elev);color:var(--paper);
+  padding:24px 28px;font-size:13px;line-height:1.85;
+  margin:32px 0;position:relative;overflow-x:auto;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--accent);
+  white-space:pre-wrap;
+}
+.code-block::before{
+  content:"◈ SPEC";
+  position:absolute;top:10px;right:18px;
+  font-size:9px;letter-spacing:0.25em;color:var(--accent);
+}
+.code-block .kw{color:var(--accent-3)}
+.code-block .at{color:var(--accent)}
+.code-block .str{color:var(--accent-2)}
+.code-block .comment{color:#8a8070;font-style:italic}
+
+/* ─── LAYERED ──────────────────────────── */
+.layered{
+  display:flex;flex-direction:column;gap:0;
+  margin-top:48px;max-width:760px;
+}
+.layer{
+  padding:26px 32px;
+  border:1px solid var(--rule);
+  font-family:'JetBrains Mono', monospace;
+  font-size:14px;position:relative;
+  transition:transform 0.25s;color:var(--paper);
+}
+.layer:not(:last-child){border-bottom:none}
+.layer:hover{transform:translateX(10px)}
+.layer .scope{
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px;
+}
+.layer:nth-child(1){
+  background:var(--accent);color:var(--bg);
+  border-color:var(--accent);
+}
+.layer:nth-child(1) .scope{color:var(--bg);font-weight:600}
+.layer:nth-child(2){background:var(--bg-elev);margin-left:24px}
+.layer:nth-child(3){background:var(--bg-soft);margin-left:48px}
+.layer:nth-child(4){background:var(--bg);margin-left:72px}
+
+/* ─── DOCUMENTATION SHELF (imbalance visual) ─── */
+.doc-shelf{
+  margin-top:32px;
+  border:1px solid var(--rule);
+  background:var(--bg);
+  padding:36px 36px 28px;
+  position:relative;
+}
+.doc-shelf-label{
+  position:absolute;top:-1px;left:32px;
+  background:var(--bg-soft);
+  border:1px solid var(--rule);
+  border-top:none;
+  padding:6px 14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:0.28em;text-transform:uppercase;
+  color:var(--accent);
+}
+.doc-shelf-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:48px;
+  margin-top:24px;
+}
+@media (max-width:820px){.doc-shelf-grid{grid-template-columns:1fr;gap:40px}}
+.shelf-side h6{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.24em;text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;
+}
+.shelf-side.heavy h6{color:var(--accent-2)}
+.shelf-side.thin h6{color:var(--signal)}
+.shelf-side .count{
+  font-family:var(--f-display);
+  font-size:48px;font-weight:var(--f-display-weight);line-height:1;
+  letter-spacing:-0.03em;
+  margin-bottom:16px;
+}
+.shelf-side.heavy .count{color:var(--accent-2)}
+.shelf-side.thin .count{color:var(--signal)}
+.shelf-side .count .unit{
+  font-family:var(--f-body);font-style:italic;
+  font-size:14px;color:var(--paper-dim);
+  margin-left:8px;letter-spacing:0;
+}
+/* Stacked "documents" — visual metaphor */
+.stack{
+  display:flex;flex-direction:column;gap:4px;
+  margin-top:8px;
+}
+.stack .doc{
+  height:14px;
+  background:var(--bg-elev);
+  border-left:3px solid var(--accent-2);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;line-height:14px;
+  padding-left:10px;
+  color:var(--paper-dim);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.shelf-side.thin .stack .doc{
+  border-left-color:var(--signal);
+  opacity:0.7;
+}
+.shelf-side.thin .stack .doc.faint{opacity:0.3}
+.shelf-side.thin .empty-row{
+  height:14px;
+  border-left:3px dashed var(--rule);
+  padding-left:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;line-height:14px;
+  color:#8a8070;font-style:italic;
+}
+
+/* Imbalance scale */
+.imbalance-bar{
+  margin-top:40px;
+  height:8px;
+  display:flex;
+  border:1px solid var(--rule);
+  background:var(--bg-elev);
+}
+.imbalance-bar .heavy-fill{
+  background:var(--accent-2);
+  width:82%;
+}
+.imbalance-bar .thin-fill{
+  background:var(--signal);
+  width:18%;
+}
+.imbalance-labels{
+  display:flex;justify-content:space-between;
+  margin-top:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+}
+.imbalance-labels .l{color:var(--accent-2)}
+.imbalance-labels .r{color:var(--signal)}
+
+.shelf-question{
+  margin-top:40px;
+  padding:28px 32px;
+  background:var(--bg-soft);
+  border-left:3px solid var(--signal);
+  font-family:var(--f-display);
+  font-style:italic;
+  font-size:20px;line-height:1.5;
+  color:var(--paper);
+}
+.shelf-question strong{
+  font-style:normal;font-weight:700;color:var(--signal);
+}
+
+/* ─── INVERSION (Architecture serves behavior) ──── */
+.inversion-section{
+  background:var(--bg-soft);
+  margin:0 -32px;
+  padding:110px 32px;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  position:relative;
+}
+.inversion-section::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(13,92,99,0.05) 0%, transparent 40%);
+  pointer-events:none;
+}
+.inversion-lede{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-style:italic;
+  font-size:clamp(28px, 4vw, 44px);
+  line-height:1.25;
+  letter-spacing:-0.015em;
+  max-width:880px;
+  margin-bottom:64px;
+  color:var(--paper);
+}
+.inversion-lede em{font-style:italic;color:var(--accent);font-weight:500;font-style:normal;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px;text-decoration-color:var(--accent)}
+
+.inversion-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border:1px solid var(--rule);
+  margin-bottom:80px;
+}
+@media (max-width:820px){.inversion-grid{grid-template-columns:1fr}}
+.inv-col{
+  padding:48px 40px;
+  position:relative;
+}
+.inv-col.before{background:var(--bg)}
+.inv-col.after{
+  background:var(--bg-elev);
+  border-left:1px solid var(--rule);
+}
+@media (max-width:820px){.inv-col.after{border-left:none;border-top:1px solid var(--rule)}}
+.inv-col h4{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+  margin-bottom:24px;
+  display:flex;align-items:center;gap:10px;
+}
+.inv-col.before h4{color:#8a8070}
+.inv-col.before h4::before{content:"⊗";color:var(--signal);font-size:14px}
+.inv-col.after h4{color:var(--accent)}
+.inv-col.after h4::before{content:"◈";color:var(--accent);font-size:14px}
+
+.inv-flow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;line-height:1.4;
+}
+.inv-flow .node-row{
+  padding:14px 18px;
+  margin-bottom:6px;
+  border:1px solid var(--rule);
+  background:var(--bg-soft);
+  color:var(--paper-dim);
+}
+.inv-col.before .inv-flow .node-row:first-child{
+  background:var(--bg-elev);
+  border-color:#8a8070;
+  color:#8a8070;
+  font-weight:500;
+}
+.inv-col.after .inv-flow .node-row:first-child{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--bg);
+  font-weight:600;
+  letter-spacing:0.01em;
+}
+.inv-col.after .inv-flow .node-row{
+  background:rgba(13,92,99,0.06);
+}
+.inv-flow .arrow{
+  text-align:center;
+  color:var(--rule);
+  padding:4px 0;
+  font-size:14px;
+}
+.inv-col.after .inv-flow .arrow{color:var(--accent);opacity:0.5}
+
+.inv-caption{
+  margin-top:24px;
+  font-family:var(--f-display);
+  font-style:italic;
+  font-size:15px;line-height:1.5;
+  color:var(--paper-dim);
+}
+.inv-col.before .inv-caption{color:#8a8070}
+.inv-col.after .inv-caption{color:var(--paper)}
+
+/* Infrastructure-change card */
+.infra-card{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:0;
+  margin-top:24px;
+  border:1px solid var(--rule);
+  background:var(--bg);
+}
+@media (max-width:900px){.infra-card{grid-template-columns:1fr}}
+.infra-side{padding:40px}
+.infra-side.changes{
+  border-right:1px solid var(--rule);
+}
+@media (max-width:900px){.infra-side.changes{border-right:none;border-bottom:1px solid var(--rule)}}
+.infra-side.stable{
+  background:rgba(13,92,99,0.06);
+  position:relative;
+}
+.infra-side h5{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+  margin-bottom:20px;color:var(--paper-dim);
+}
+.infra-side.changes h5{color:var(--accent-2)}
+.infra-side.stable h5{color:var(--accent)}
+.infra-side h5 .badge{
+  margin-left:auto;
+  padding:3px 9px;
+  font-size:9px;
+  border:1px solid currentColor;
+}
+.infra-side h5{display:flex;align-items:center}
+.infra-side ul{list-style:none}
+.infra-side ul li{
+  font-family:var(--f-body);
+  font-size:15px;line-height:1.5;
+  padding:8px 0;
+  border-bottom:1px dashed var(--rule);
+  color:var(--paper-dim);
+}
+.infra-side ul li:last-child{border-bottom:none}
+.infra-side ul li::before{
+  margin-right:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+}
+.infra-side.changes ul li::before{content:"~";color:var(--accent-2)}
+.infra-side.stable ul li::before{content:"=";color:var(--accent)}
+
+.infra-verdict{
+  margin-top:32px;
+  padding:24px 28px;
+  background:var(--bg-elev);
+  border-left:3px solid var(--accent);
+  font-family:var(--f-display);
+  font-style:italic;
+  font-size:18px;line-height:1.5;
+  color:var(--paper);
+}
+.infra-verdict strong{
+  font-style:normal;font-weight:700;
+  color:var(--accent);
+}
+
+/* ─── WORKFLOW ────────────────────────────── */
+.workflow{
+  background:var(--paper);color:var(--bg);
+  margin:0 -32px;padding:110px 32px;
+  position:relative;overflow:hidden;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+}
+.workflow .chapter-mark{color:var(--accent)}
+.workflow .chapter-mark::before{background:var(--accent)}
+.workflow h2{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-size:clamp(36px, 5vw, 64px);
+  line-height:1.1;letter-spacing:-0.025em;
+  margin-bottom:64px;max-width:900px;color:var(--bg);
+}
+.workflow h2 .strong{font-weight:800;color:var(--accent)}
+.workflow h2 em{font-style:italic}
+.flow-compare{
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;
+  position:relative;z-index:2;
+}
+@media (max-width:900px){.flow-compare{grid-template-columns:1fr}}
+.flow-col h3{
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
+  padding-bottom:18px;border-bottom:1px solid var(--bg);
+  margin-bottom:28px;color:var(--bg);
+}
+.flow-col.before h3{opacity:0.6}
+.flow-col.after h3 .label{color:var(--paper);background:var(--bg);padding:3px 8px;margin-left:8px;border-radius:0}
+.flow-step{
+  padding:14px 20px;margin-bottom:8px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px;
+  border-left:2px solid var(--rule-soft);
+  display:flex;align-items:center;gap:14px;
+  transition:all 0.2s;
+  background:rgba(250,248,244,0.04);color:var(--bg);
+}
+.flow-col.before .flow-step{opacity:0.7}
+.flow-col.after .flow-step{
+  background:rgba(13,92,99,0.18);
+  border-left-color:var(--accent);
+}
+.flow-step .num{
+  font-size:10px;letter-spacing:0.22em;
+  opacity:0.6;min-width:24px;
+}
+.flow-col.before .summary{
+  margin-top:24px;padding-top:24px;
+  border-top:1px dashed var(--rule);
+  font-family:var(--f-display);font-style:italic;
+  font-size:16px;line-height:1.5;color:#8a8070;
+}
+.flow-col.after .summary{
+  margin-top:24px;padding-top:24px;
+  border-top:1px dashed var(--accent);
+  font-family:var(--f-display);font-style:italic;
+  font-size:16px;line-height:1.5;
+  color:var(--bg);font-weight:600;
+}
+
+/* ─── REPO ──────────────────────── */
+.repo-section{
+  display:grid;grid-template-columns:1fr 1.2fr;gap:72px;align-items:start;
+}
+@media (max-width:900px){.repo-section{grid-template-columns:1fr;gap:48px}}
+.tree{
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px;line-height:2;
+  background:var(--bg-soft);
+  border:1px solid var(--rule);
+  padding:36px;
+  box-shadow:8px 8px 0 var(--paper);
+  position:relative;color:var(--paper-dim);
+}
+.tree::before{
+  content:"/repo";
+  position:absolute;top:10px;right:18px;
+  font-size:10px;color:var(--accent);letter-spacing:0.25em;
+}
+.tree .dir{color:var(--accent);font-weight:600}
+.tree .star{color:var(--accent-2);margin-left:10px;font-style:italic}
+.tree .file{color:var(--paper-dim)}
+.tree .indent-1{padding-left:22px}
+.tree .indent-2{padding-left:44px}
+.tree .indent-3{padding-left:66px}
+
+.aside-block{
+  margin-top:36px;padding:24px;
+  background:var(--bg-soft);
+  border-left:3px solid var(--accent);
+  font-family:var(--f-display);font-style:italic;
+  font-size:18px;line-height:1.55;color:var(--paper);
+}
+
+/* ─── TWO-LEVEL TRACEABILITY ─── */
+.trace-principle{
+  font-family:var(--f-display);
+  font-weight:var(--f-display-weight);
+  font-style:italic;
+  font-size:clamp(22px, 2.4vw, 30px);
+  line-height:1.45;
+  max-width:880px;
+  margin:0 0 56px;
+  color:var(--paper);
+  padding-left:28px;
+  border-left:3px solid var(--accent);
+}
+.trace-principle em{
+  font-style:italic;color:var(--accent);font-weight:500;
+}
+
+.trace-contrast{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:32px;
+  margin-top:32px;
+}
+@media (max-width:860px){.trace-contrast{grid-template-columns:1fr}}
+.trace-snippet{
+  border:1px solid var(--rule);
+  background:var(--bg-soft);
+  position:relative;
+  display:flex;flex-direction:column;
+}
+.trace-snippet.bad{border-left:3px solid var(--signal)}
+.trace-snippet.good{border-left:3px solid var(--accent)}
+.trace-snippet-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;
+  border-bottom:1px solid var(--rule);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+}
+.trace-snippet.bad .trace-snippet-head{color:var(--signal)}
+.trace-snippet.good .trace-snippet-head{color:var(--accent)}
+.trace-snippet-head .filename{
+  color:var(--paper-dim);
+  letter-spacing:0.08em;
+  text-transform:none;
+  font-size:11px;
+}
+.trace-snippet-body{
+  padding:24px 22px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;
+  line-height:1.85;
+  overflow-x:auto;
+  flex:1;
+  white-space:pre-wrap;
+}
+.trace-snippet-body .anno{color:var(--accent-2)}
+.trace-snippet-body .anno.heavy{color:var(--signal)}
+.trace-snippet-body .anno.spec{color:var(--accent);font-weight:600}
+.trace-snippet-body .kw{color:var(--accent-3)}
+.trace-snippet-body .fn{color:var(--paper)}
+.trace-snippet-body .str{color:var(--accent-2);opacity:0.85}
+.trace-snippet-body .cm{color:#8a8070;font-style:italic}
+.trace-snippet-body .dim{color:#8a8070}
+
+.trace-caption{
+  padding:18px 22px;
+  border-top:1px solid var(--rule);
+  font-family:var(--f-display);
+  font-style:italic;
+  font-size:15px;
+  line-height:1.5;
+}
+.trace-snippet.bad .trace-caption{color:#8a8070}
+.trace-snippet.good .trace-caption{color:var(--paper)}
+.trace-snippet.good .trace-caption strong{
+  font-style:normal;font-weight:700;color:var(--accent);
+}
+
+/* The split-layer diagram */
+.layer-split{
+  margin-top:80px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border:1px solid var(--rule);
+}
+@media (max-width:900px){.layer-split{grid-template-columns:1fr}}
+.split-side{
+  padding:48px 40px;
+  position:relative;
+}
+.split-side.code-side{background:var(--bg)}
+.split-side.spec-side{
+  background:var(--bg-elev);
+  border-left:1px solid var(--rule);
+}
+@media (max-width:900px){.split-side.spec-side{border-left:none;border-top:1px solid var(--rule)}}
+.split-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.24em;text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:14px;
+}
+.split-side.code-side .split-eyebrow{color:var(--accent-3)}
+.split-title{
+  font-family:var(--f-display);
+  font-weight:600;
+  font-size:24px;
+  line-height:1.2;
+  letter-spacing:-0.012em;
+  color:var(--paper);
+  margin-bottom:10px;
+}
+.split-title em{font-style:italic;color:var(--accent);font-weight:500}
+.split-sub{
+  font-family:var(--f-body);font-style:italic;
+  font-size:15px;line-height:1.6;
+  color:var(--paper-dim);
+  margin-bottom:24px;
+  max-width:380px;
+}
+
+.split-anchor{
+  display:inline-block;
+  padding:8px 14px;
+  background:var(--bg-soft);
+  border:1px solid var(--rule);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  margin-bottom:24px;
+}
+.split-side.code-side .split-anchor{
+  border-left:3px solid var(--accent-3);
+  color:var(--accent-3);
+}
+.split-side.spec-side .split-anchor{
+  border-left:3px solid var(--accent);
+  color:var(--accent);
+}
+
+.split-list{list-style:none;margin-top:8px}
+.split-list li{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;
+  padding:9px 0;
+  border-bottom:1px dashed var(--rule);
+  display:flex;align-items:baseline;gap:12px;
+  color:var(--paper-dim);
+}
+.split-list li:last-child{border-bottom:none}
+.split-list li .at{
+  color:var(--accent);font-weight:600;font-size:14px;
+}
+.split-side.spec-side .split-list li .at{color:var(--accent-2)}
+
+.split-arrow{
+  position:absolute;
+  top:50%;right:-22px;
+  width:44px;height:44px;
+  background:var(--accent);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:600;
+  transform:translateY(-50%);
+  z-index:5;
+  border-radius:50%;
+}
+@media (max-width:900px){
+  .split-arrow{
+    top:auto;bottom:-22px;right:50%;
+    transform:translateX(50%);
+  }
+}
+
+.trace-verdict{
+  margin-top:48px;
+  padding:32px 36px;
+  background:var(--bg-soft);
+  border-left:3px solid var(--accent);
+  position:relative;
+}
+.trace-verdict-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.24em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px;
+}
+.trace-verdict-text{
+  font-family:var(--f-display);
+  font-style:italic;
+  font-size:21px;
+  line-height:1.5;
+  color:var(--paper);
+}
+.trace-verdict-text strong{
+  font-style:normal;font-weight:700;color:var(--accent);
+}
+
+/* ─── TRACE TAGS ─────────────────────────── */
+.trace-code{
+  background:var(--bg-soft);
+  border:1px solid var(--rule);
+  padding:36px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:15px;line-height:2.1;
+  margin-top:32px;position:relative;
+}
+.trace-code .tag-line{display:flex;align-items:center;gap:16px}
+.trace-code .tag-line .at-sym{
+  color:var(--accent);font-weight:600;font-size:18px;
+}
+.trace-code .tag-line .keyword{color:var(--paper);font-weight:600}
+.trace-code .tag-line .value{color:var(--accent-3);font-style:italic}
+
+/* ─── GRAPH ─────────────────────────── */
+.graph-wrapper{
+  position:relative;height:540px;
+  border:1px solid var(--rule);
+  background:var(--bg-soft);
+  margin-top:48px;overflow:hidden;
+  background-image:
+    linear-gradient(rgba(24,24,26,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24,24,26,0.06) 1px, transparent 1px);
+  background-size:32px 32px;
+}
+.graph-wrapper::before{
+  content:"GRAPH.JSON";
+  position:absolute;top:14px;left:18px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;letter-spacing:0.28em;color:var(--accent);z-index:5;
+}
+.graph-wrapper svg{position:absolute;inset:0;width:100%;height:100%}
+.node{
+  position:absolute;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;padding:9px 14px;
+  background:var(--bg);
+  border:1.5px solid var(--rule);
+  color:var(--paper);z-index:2;
+  transform:translate(-50%,-50%);
+  white-space:nowrap;transition:all 0.3s;
+}
+.node:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.node.feature{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:500}
+.node.rule{background:var(--accent-2);color:var(--bg);border-color:var(--accent-2);font-weight:500}
+.node.component{border-style:dashed;border-color:var(--accent-3);color:var(--accent-3)}
+.node.test{background:var(--bg-elev);border-color:var(--signal);color:var(--signal);transform:translate(-50%,-50%) rotate(-2deg)}
+.node-label{
+  position:absolute;
+  font-family:'JetBrains Mono', monospace;
+  font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);
+  background:var(--bg-soft);padding:3px 7px;z-index:3;
+  transform:translate(-50%,-50%);
+}
+
+/* ─── HIERARCHICAL KNOWLEDGE TREE ─── */
+.hierarchy-tree{
+  margin-top:48px;
+  background:var(--bg-soft);
+  border:1px solid var(--rule);
+  padding:48px 40px;
+  font-family:'JetBrains Mono', monospace;
+  position:relative;
+  box-shadow:8px 8px 0 var(--paper);
+}
+.hierarchy-tree::before{
+  content:"GRAPH.JSON · hierarchical view";
+  position:absolute;top:14px;left:18px;
+  font-size:10px;letter-spacing:0.28em;
+  color:var(--accent);text-transform:uppercase;
+}
+.hierarchy-tree::after{
+  content:"top-down";
+  position:absolute;top:14px;right:18px;
+  font-size:9px;letter-spacing:0.24em;
+  color:var(--paper-dim);text-transform:uppercase;
+}
+
+.tree-node{
+  display:flex;align-items:flex-start;
+  margin-top:12px;
+  position:relative;
+}
+.tree-node:first-of-type{margin-top:24px}
+
+.tree-rail{
+  font-family:'JetBrains Mono', monospace;
+  color:var(--rule);
+  user-select:none;
+  flex-shrink:0;
+  white-space:pre;
+  font-size:14px;
+  line-height:1.4;
+  padding-top:8px;
+}
+
+.tree-label{
+  border:1px solid var(--rule);
+  padding:10px 16px;
+  font-size:13px;
+  background:var(--bg);
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  min-width:280px;
+}
+.tree-label .badge{
+  font-size:9px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  padding:2px 7px;
+  border:1px solid currentColor;
+  font-weight:500;
+}
+.tree-label .name{
+  font-weight:500;
+  color:var(--paper);
+}
+
+/* Tier styling */
+.tree-node.tier-enterprise .tree-label{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--bg);
+  font-weight:600;
+  box-shadow:4px 4px 0 var(--paper);
+}
+.tree-node.tier-enterprise .tree-label .name{color:var(--bg)}
+
+.tree-node.tier-ecosystem .tree-label{
+  background:var(--bg-elev);
+  border-color:var(--paper);
+  border-width:1.5px;
+}
+.tree-node.tier-ecosystem .tree-label .badge{color:var(--accent-2)}
+
+.tree-node.tier-platform .tree-label{
+  background:var(--bg-soft);
+  border-color:var(--accent-2);
+  border-left-width:3px;
+}
+.tree-node.tier-platform .tree-label .badge{color:var(--accent-2)}
+.tree-node.tier-platform .tree-label .name{color:var(--accent-2);font-weight:600}
+
+.tree-node.tier-component .tree-label{
+  background:var(--bg);
+  border-style:dashed;
+  border-color:var(--rule);
+}
+.tree-node.tier-component .tree-label .badge{color:var(--accent-3)}
+.tree-node.tier-component .tree-label .name{color:var(--paper-dim)}
+
+/* Depth-based indent */
+.tree-node.depth-1{padding-left:0}
+.tree-node.depth-2{padding-left:40px}
+.tree-node.depth-3{padding-left:96px}
+.tree-node.depth-4{padding-left:152px}
+
+@media (max-width:760px){
+  .tree-node.depth-2{padding-left:20px}
+  .tree-node.depth-3{padding-left:48px}
+  .tree-node.depth-4{padding-left:76px}
+  .tree-label{min-width:0;font-size:12px;padding:8px 12px}
+  .hierarchy-tree{padding:36px 20px 28px}
+}
+
+.tree-caption{
+  margin-top:24px;
+  padding-top:24px;
+  border-top:1px dashed var(--rule);
+  font-family:var(--f-body);
+  font-style:italic;
+  font-size:15px;
+  line-height:1.6;
+  color:var(--paper-dim);
+}
+.tree-caption strong{
+  font-style:normal;font-weight:600;color:var(--accent);
+}
+
+/* Section divider before flat graph */
+.graph-divider{
+  margin:80px 0 32px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.24em;text-transform:uppercase;
+  color:var(--accent);
+  display:flex;align-items:center;gap:14px;
+}
+.graph-divider::before{
+  content:"";display:inline-block;
+  width:36px;height:1px;background:var(--accent);
+}
+
+/* ─── HIERARCHICAL KNOWLEDGE TREE END ─── */
+
+/* Enterprise graph tier nodes — visual echo of the hierarchy tree */
+.node.tier-l01{
+  background:var(--accent);color:var(--bg);
+  border-color:var(--accent);font-weight:600;
+  box-shadow:3px 3px 0 var(--paper);
+}
+.node.tier-l02{
+  background:var(--bg-elev);color:var(--paper);
+  border-color:var(--paper);border-width:1.5px;
+  font-weight:500;
+}
+.node.tier-l03{
+  background:var(--bg-soft);color:var(--accent-2);
+  border-color:var(--accent-2);
+  border-left-width:3px;font-weight:500;
+}
+.node.tier-l04{
+  background:var(--bg);color:var(--paper-dim);
+  border-color:var(--rule);border-style:dashed;
+}
+.node .tier-badge{
+  font-size:9px;letter-spacing:0.18em;
+  padding:2px 6px;
+  border:1px solid currentColor;
+  margin-right:8px;
+  font-weight:500;
+  opacity:0.85;
+  text-transform:uppercase;
+}
+
+.graph-wrapper.enterprise{
+  height:680px;
+}
+
+/* ─── STEP GRID ─────────────────── */
+.step-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;
+  border-top:1px solid var(--rule);border-left:1px solid var(--rule);
+  margin-top:48px;
+}
+.step-cell{
+  padding:28px 24px;
+  border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  background:var(--bg);
+}
+.step-cell.frame{background:var(--bg-soft)}
+.step-cell.peak{background:var(--accent);color:var(--bg)}
+.step-cell.peak .step-num{color:var(--bg)}
+.step-cell.peak .step-text{color:var(--bg)}
+.step-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.22em;
+  color:var(--accent);margin-bottom:14px;
+}
+.step-text{
+  font-family:var(--f-display);
+  font-size:18px;font-weight:500;line-height:1.25;color:var(--paper);
+}
+
+/* ─── FINAL ──────────────────────────── */
+.final{
+  text-align:center;padding:150px 32px 110px;position:relative;
+}
+.final h2{
+  font-family:var(--f-display);font-weight:var(--f-display-weight);
+  font-size:clamp(48px, 9vw, 144px);
+  line-height:0.96;letter-spacing:-0.03em;
+  margin-bottom:52px;max-width:1100px;margin-left:auto;margin-right:auto;
+}
+.final h2 .strong{font-weight:800;display:block}
+.final h2 em{font-style:italic;color:var(--accent);font-weight:400}
+.final-message{
+  font-family:var(--f-body);
+  font-size:21px;line-height:1.65;
+  max-width:680px;margin:0 auto 52px;color:var(--paper-dim);
+}
+.final-list{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:0;
+  max-width:1000px;margin:0 auto 64px;
+  border-top:1px solid var(--rule);border-left:1px solid var(--rule);
+}
+.final-list li{
+  list-style:none;padding:28px 16px;
+  border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;text-transform:uppercase;letter-spacing:0.16em;
+  color:var(--paper-dim);
+}
+.final-list li:first-child{color:var(--accent)}
+
+/* ─── COLOPHON ───────────────────────────── */
+.colophon{
+  background:var(--paper);
+  color:var(--bg);
+  border-top:1px solid var(--rule);
+  padding:48px 32px;text-align:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+}
+.colophon .ornament{color:var(--accent);margin:0 14px}
+.colophon .note{
+  display:block;margin-top:14px;
+  font-family:var(--f-body);font-style:italic;
+  text-transform:none;letter-spacing:0;
+  font-size:12px;color:var(--rule);line-height:1.6;
+}
+
+/* ─── ANIMATION ───────────────────────────── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero h1, .hero-deck, .hero-issue, .hero-meta{animation:fadeUp 1.1s ease both}
+.hero h1{animation-delay:0.1s}
+.hero-deck{animation-delay:0.4s}
+.hero-meta{animation-delay:0.65s}
+.hero-diagram{animation:fadeUp 1.3s ease 0.85s both}
+
+.section{opacity:0;transform:translateY(30px);transition:all 0.85s ease}
+.section.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="left">
+    <span class="dot"></span>
+    <span>The Missing Layer</span>
+    <span style="opacity:0.5">VOL.01</span>
+  </div>
+  <nav>
+    <a href="#vision">Vision</a>
+    <a href="#problem">Problem</a>
+    <a href="#gap">Gap</a>
+    <a href="#inversion">Inversion</a>
+    <a href="#agents">Agents</a>
+    <a href="#proposal">Proposal</a>
+  </nav>
+  <div class="mono" style="opacity:0.6">A WORKING PAPER · 2026</div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="section hero">
+  <div class="hero-issue">
+    <span>№ 001 · Spec-Driven Development</span>
+    <span>Behavioral source of truth</span>
+    <span>Read ~ 9 min</span>
+  </div>
+  <h1>
+    The <span class="underline-style">missing</span><br>
+    layer in<br>
+    <span class="strong"><em>Spec-Driven</em></span>
+    Development.
+  </h1>
+  <p class="hero-deck">
+    From historical specs to a living source of truth for what the system <em>currently</em> does — for humans, and for the agents that will read it.
+  </p>
+  <div class="hero-meta">
+    <div><div class="label">Subject</div>Behavioral truth</div>
+    <div><div class="label">Audience</div>Engineers &amp; AI agents</div>
+    <div><div class="label">Status</div>Proposal · v0.1</div>
+    <div><div class="label">Position</div>Layer above EARS / LID</div>
+  </div>
+
+  <div class="hero-diagram">
+    <div class="hd-label">Spec Repository · today</div>
+    <div class="hd-row">History of changes</div>
+    <div class="hd-row">Implemented behaviors</div>
+    <div class="hd-row">Deprecated ideas</div>
+    <div class="hd-row">Future proposals</div>
+    <div class="arrow">↓</div>
+    <div class="hd-row missing">Current active behavior</div>
+    <div class="arrow signal">◈ MISSING</div>
+  </div>
+</section>
+
+<!-- ─── PULLQUOTE ─── -->
+<section class="pullquote">
+  <div class="pullquote-inner">
+    Before changing the system, we must understand what the system currently does.
+    <div class="pullquote-attribution">— The first principle</div>
+  </div>
+</section>
+
+<!-- ─── VISION ─── -->
+<section class="section" id="vision">
+  <div class="chapter-mark">Chapter 01 · The Vision</div>
+  <p class="vision-statement">
+    Create a repository-native <em>source of truth</em> that describes the current active behavior of every component, platform, and ecosystem.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-num">◈ 01 / 04</div>
+      <h3>Current Behavior</h3>
+      <p>What the system does today — not last year, not next quarter. The operational truth.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">◈ 02 / 04</div>
+      <h3>Change History</h3>
+      <p>How the system evolved. Decisions, proposals, deprecations — preserved but separated.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">◈ 03 / 04</div>
+      <h3>Traceability</h3>
+      <p>How behavior connects to specs, code, tests, and architectural decisions.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">◈ 04 / 04</div>
+      <h3>Knowledge Graph</h3>
+      <p>Relationships made navigable — for humans reading docs and agents reasoning about change.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROBLEM ─── -->
+<div class="bucket-section">
+  <section class="section" id="problem" style="padding:0">
+    <div class="chapter-mark">Chapter 02 · The Current Problem</div>
+    <div class="two-col">
+      <div class="col-text">
+        <h2>Most spec systems become <span class="strong">historical archives.</span></h2>
+        <p>
+          They contain useful information, but over time they mix too many temporal states together. When everything lives in the same bucket, it becomes hard to know what is actually true <em>today</em>.
+        </p>
+        <ul class="pain-list">
+          <li>Engineers must read many specs to reconstruct truth</li>
+          <li>AI agents must infer behavior from fragments</li>
+          <li>Deprecated ideas may still look active</li>
+          <li>Future proposals get confused with shipped reality</li>
+          <li>Impact analysis becomes slow and uncertain</li>
+          <li>Context retrieval becomes expensive and noisy</li>
+        </ul>
+      </div>
+      <div class="bucket">
+        <div class="bucket-label">
+          <span>Spec Repository · today</span>
+          <span class="stamp">MIXED</span>
+        </div>
+        <div class="tags">
+          <span class="tag active">implemented</span>
+          <span class="tag future">future ideas</span>
+          <span class="tag deprecated">deprecated</span>
+          <span class="tag pending">pending</span>
+          <span class="tag experimental">experimental</span>
+          <span class="tag rejected">rejected</span>
+          <span class="tag partial">partial</span>
+          <span class="tag historical">historical decisions</span>
+          <span class="tag active">implemented</span>
+          <span class="tag historical">old ADR</span>
+          <span class="tag pending">pending</span>
+          <span class="tag deprecated">deprecated</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── GAP ─── -->
+<section class="section" id="gap">
+  <div class="chapter-mark">Chapter 03 · Where existing methods reach their edge</div>
+
+  <div class="two-col">
+    <div class="col-text">
+      <h2>EARS is <span class="strong">clear,</span><br>but not <em>current.</em></h2>
+      <p>
+        EARS is excellent for writing unambiguous behavioral requirements. It reduces ambiguity, standardizes language, and helps both humans and AI understand intent.
+      </p>
+      <p>
+        But EARS describes <em>required</em> behavior. It does not tell us whether that behavior is active today, was replaced, is future work, or is partially implemented.
+      </p>
+    </div>
+    <div>
+      <div class="code-block">
+<span class="kw">WHEN</span> a card's fraud risk score
+   exceeds the auto-lock threshold
+<span class="kw">THEN</span> the servicing platform
+   <span class="kw">SHALL</span> lock the card and notify
+   the cardholder within 30 seconds.
+
+<span class="comment">// Clear requirement.
+// But — is it active today?
+// Or replaced by ADR-014?
+// Or still pending?</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <div class="comp-side">
+      <h4><span class="check">◈</span>EARS · what it does well</h4>
+      <ul>
+        <li>Reduces ambiguity</li>
+        <li>Standardizes requirement language</li>
+        <li>Improves readability</li>
+        <li>Helps validation</li>
+        <li>Helps humans and AI understand intent</li>
+      </ul>
+    </div>
+    <div class="comp-side gap">
+      <h4><span class="check">⊗</span>EARS · what it leaves open</h4>
+      <ul>
+        <li>Is this behavior active today?</li>
+        <li>Was it replaced?</li>
+        <li>Is it future work?</li>
+        <li>Is it deprecated?</li>
+        <li>Is it still the operational truth?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:120px">
+    <div class="col-text">
+      <h2>LID <span class="strong">draws the arrow —</span><br>at the <em>project</em> level.</h2>
+      <p>
+        <a href="https://github.com/jszmajda/lid" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px">Linked-Intent Development</a> goes further than EARS. It treats design as the source of truth, with an explicit <em>arrow of intent</em> — HLD → LLDs → EARS → Tests → Code — where changes flow downstream and the docs stay current.
+      </p>
+      <p>
+        Inside a project, this is excellent. <code style="font-family:'JetBrains Mono',monospace;font-size:0.9em;color:var(--accent)">@spec</code> annotations in code link back to requirements, and arrows track coherence across the codebase.
+      </p>
+      <p>
+        What LID intentionally scopes <em>to the project</em> — not by oversight, but by design — is the ecosystem layer: how dozens of LID-managed projects compose into a platform, how their current behaviors interact, how a change in one system ripples through the others.
+      </p>
+    </div>
+    <div>
+      <div class="code-block">
+<span class="comment">// LID — the arrow of intent</span>
+HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span class="kw">→</span> Tests <span class="kw">→</span> Code
+
+<span class="at">@spec</span> CARD-LOCK-001
+<span class="kw">export function</span> lockCardOnFraud() { ... }
+
+<span class="comment">// Strong within one project.
+// What about across the
+// platform? Across the
+// ecosystem? Across teams?</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison" style="margin-top:64px">
+    <div class="comp-side">
+      <h4><span class="check">◈</span>LID · what it does well</h4>
+      <ul>
+        <li>Treats design docs as source of truth</li>
+        <li>Cascades changes downstream through the arrow</li>
+        <li>Links code to specs via <code style="font-family:'JetBrains Mono',monospace;font-size:0.88em">@spec</code> annotations</li>
+        <li>Tracks coherence across a single project</li>
+        <li>Optimizes for the project over time, not just the next change</li>
+      </ul>
+    </div>
+    <div class="comp-side gap">
+      <h4><span class="check">⊗</span>What's still open at scale</h4>
+      <ul>
+        <li>How do <em>multiple</em> LID projects compose into a platform?</li>
+        <li>Where is the ecosystem-wide behavioral view?</li>
+        <li>How do agents reason about cross-project impact?</li>
+        <li>How is current behavior separated from change history?</li>
+        <li>What is the navigable graph between systems?</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-family:var(--f-display);font-style:italic;font-size:clamp(20px,2.2vw,26px);line-height:1.5;max-width:880px;margin-top:48px;color:var(--paper-dim);padding-left:24px;border-left:3px solid var(--accent)">
+    The missing layer this paper proposes <em style="font-style:italic;color:var(--accent);font-weight:500;font-style:normal;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px">complements LID</em> — not replaces it. LID gives you the arrow inside a project. The behavioral source of truth and graph extend that thinking across many projects, the platform, and the broader ecosystem.
+  </p>
+</section>
+
+<!-- ─── SCALE ─── -->
+<section class="section">
+  <div class="chapter-mark">Chapter 04 · Behavior is composable</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:900px;margin-bottom:32px">
+    A component does not exist alone. <span style="font-weight:800">It composes upward.</span>
+  </h2>
+  <p style="font-size:17px;line-height:1.75;color:var(--paper-dim);max-width:680px">
+    If each component has a clear current-state behavior, the platform can be understood as a composition of component behaviors. Without that, platforms rely on tribal knowledge.
+  </p>
+
+  <div class="layered">
+    <div class="layer">
+      <div class="scope">Layer 01 — ◈</div>
+      Enterprise-Wide Behavior
+    </div>
+    <div class="layer">
+      <div class="scope">Layer 02</div>
+      Multi-Platform Ecosystem
+    </div>
+    <div class="layer">
+      <div class="scope">Layer 03</div>
+      Platform Behavior
+    </div>
+    <div class="layer">
+      <div class="scope">Layer 04</div>
+      Component Behavior
+    </div>
+  </div>
+</section>
+
+<!-- ─── INVERSION · Documentation imbalance ─── -->
+<div class="inversion-section" id="inversion">
+  <section class="section" style="padding:0">
+    <div class="chapter-mark">Chapter 05 · The documentation imbalance</div>
+    <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(40px,5.5vw,72px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
+      We document the <span style="font-weight:800">architecture</span> in detail.<br>
+      We document the <em style="font-style:italic;color:var(--signal);font-weight:500">product</em> almost not at all.
+    </h2>
+    <p class="inversion-lede">
+      Architectures are not supposed to change business behavior — and yet most of our written record is about <em>how</em> the system is built, not <em>what</em> the product is supposed to do.
+    </p>
+
+    <!-- THE SHELF: documentation imbalance -->
+    <div class="doc-shelf">
+      <div class="doc-shelf-label">◈ The repository shelf</div>
+
+      <div class="doc-shelf-grid">
+
+        <div class="shelf-side heavy">
+          <h6>What we write a lot of</h6>
+          <div class="count">82<span class="unit">% of pages</span></div>
+          <div class="stack">
+            <div class="doc">ADR-001 · PCI tokenization strategy</div>
+            <div class="doc">ADR-002 · event contracts (card events)</div>
+            <div class="doc">ADR-014 · cache invalidation strategy</div>
+            <div class="doc">HLA · servicing platform overview v3</div>
+            <div class="doc">LLA · dispute-engine internals</div>
+            <div class="doc">Non-functional requirements</div>
+            <div class="doc">Scalability strategy · 2025</div>
+            <div class="doc">Deployment topology · multi-region</div>
+            <div class="doc">Resiliency &amp; failover patterns</div>
+            <div class="doc">Observability stack design</div>
+            <div class="doc">Saga orchestration playbook</div>
+            <div class="doc">CQRS read-model conventions</div>
+            <div class="doc">Infrastructure migration plan</div>
+            <div class="doc">Redis caching guidelines</div>
+            <div class="doc">Service mesh configuration</div>
+          </div>
+        </div>
+
+        <div class="shelf-side thin">
+          <h6>What we barely write</h6>
+          <div class="count">18<span class="unit">% of pages</span></div>
+          <div class="stack">
+            <div class="doc">What cardholder servicing is supposed to do</div>
+            <div class="doc">How a locked card behaves, today</div>
+            <div class="doc faint">Why disputes have a 90-day window</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+            <div class="empty-row">— missing —</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="imbalance-bar">
+        <div class="heavy-fill"></div>
+        <div class="thin-fill"></div>
+      </div>
+      <div class="imbalance-labels">
+        <span class="l">◈ Architecture / Implementation</span>
+        <span class="r">Product / Behavior ⊗</span>
+      </div>
+    </div>
+
+    <div class="shelf-question">
+      If a new engineer joins on Monday — or an AI agent opens the repo for the first time — <strong>where do they read about what the product actually does?</strong>
+    </div>
+
+    <!-- THE INVERSION FLOW -->
+    <div style="max-width:920px;margin-top:96px;margin-bottom:24px">
+      <div class="chapter-mark" style="color:var(--accent-2)">Why this imbalance exists</div>
+      <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(28px,3.8vw,42px);line-height:1.15;letter-spacing:-0.02em;color:var(--paper);margin-bottom:16px">
+        Methodologies drifted toward <em style="font-style:italic;color:var(--accent);font-weight:500">implementation.</em>
+      </h3>
+      <p style="font-size:16px;line-height:1.7;color:var(--paper-dim);max-width:760px">
+        Over time, our writing optimized around <em>how</em> the system is built — components, infrastructure, patterns, resiliency. The <em>why</em> and the <em>what</em> of the product stopped being written down. Behavior moved into tribal memory.
+      </p>
+    </div>
+
+    <div class="inversion-grid">
+      <div class="inv-col before">
+        <h4>What ends up documented</h4>
+        <div class="inv-flow">
+          <div class="node-row">Architecture &amp; patterns</div>
+          <div class="arrow">↓</div>
+          <div class="node-row">Technical decomposition</div>
+          <div class="arrow">↓</div>
+          <div class="node-row">Component &amp; infra decisions</div>
+          <div class="arrow">↓</div>
+          <div class="node-row">Behavior — assumed, not written</div>
+        </div>
+        <p class="inv-caption">
+          ADRs proliferate. Sagas, CQRS, Redis, microservices are described in depth. Meanwhile the product's <em>actual behavior</em> lives in people's heads — and disappears when they leave.
+        </p>
+      </div>
+      <div class="inv-col after">
+        <h4>What should be documented first</h4>
+        <div class="inv-flow">
+          <div class="node-row">Business &amp; product behavior</div>
+          <div class="arrow">↓</div>
+          <div class="node-row">Operational expectations</div>
+          <div class="arrow">↓</div>
+          <div class="node-row">Functional contracts</div>
+          <div class="arrow">↓</div>
+          <div class="node-row" style="opacity:0.85">Architecture &amp; implementation choices</div>
+        </div>
+        <p class="inv-caption">
+          Write behavior first — explicitly, in the repo, as a first-class artifact. Architecture documentation then explains <em>how</em> we chose to deliver that behavior. Both matter; only one is currently written.
+        </p>
+      </div>
+    </div>
+
+    <!-- INFRA EXAMPLE -->
+    <div style="max-width:920px;margin-top:96px;margin-bottom:24px">
+      <div class="chapter-mark" style="color:var(--accent-2)">The proof</div>
+      <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(28px,3.8vw,42px);line-height:1.15;letter-spacing:-0.02em;color:var(--paper);margin-bottom:16px">
+        Architecture can change. Behavior <em style="font-style:italic;color:var(--accent);font-weight:500">should not.</em>
+      </h3>
+      <p style="font-size:16px;line-height:1.7;color:var(--paper-dim);max-width:760px">
+        Cloud migrations, database swaps, adopting Redis, moving to events — these are architectural moves. If our docs are mostly about architecture, every one of these rewrites the documentation. If behavior were documented separately, it would stay stable through all of it.
+      </p>
+    </div>
+
+    <div class="infra-card">
+      <div class="infra-side changes">
+        <h5>Architecture · changes often <span class="badge">written</span></h5>
+        <ul>
+          <li>High-level &amp; low-level architecture</li>
+          <li>Deployment topology</li>
+          <li>Latency &amp; throughput characteristics</li>
+          <li>Resiliency &amp; observability patterns</li>
+          <li>Storage, caching, messaging choices</li>
+          <li>Vendor &amp; infrastructure footprint</li>
+        </ul>
+      </div>
+      <div class="infra-side stable">
+        <h5>Behavior · should be stable <span class="badge">rarely written</span></h5>
+        <ul>
+          <li>Business workflows</li>
+          <li>User expectations &amp; experience</li>
+          <li>Operational contracts</li>
+          <li>Functional guarantees</li>
+          <li>Platform semantics</li>
+          <li>Product capabilities</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="infra-verdict">
+      The current-state behavioral source of truth gives the <strong>product side of the shelf</strong> a real home — so architecture can evolve underneath, and the product's intent stays explicitly written, not assumed.
+    </div>
+  </section>
+</div>
+
+<!-- ─── AGENTS ─── -->
+<div class="workflow" id="agents">
+  <section class="section" style="padding:0">
+    <div class="chapter-mark">Chapter 06 · The AI agent perspective</div>
+    <h2>
+      Without a source of truth, agents become <span class="strong">archaeologists.</span>
+    </h2>
+
+    <div class="flow-compare">
+      <div class="flow-col before">
+        <h3>Today · reconstruction from fragments</h3>
+        <div class="flow-step"><span class="num">01</span>User asks for a change</div>
+        <div class="flow-step"><span class="num">02</span>AI reads specs</div>
+        <div class="flow-step"><span class="num">03</span>AI reads code</div>
+        <div class="flow-step"><span class="num">04</span>AI reads tests</div>
+        <div class="flow-step"><span class="num">05</span>AI reads ADRs</div>
+        <div class="flow-step"><span class="num">06</span>AI guesses current behavior</div>
+        <div class="flow-step"><span class="num">07</span>AI attempts impact analysis</div>
+        <div class="summary">→ Slow. Token-hungry. Conflicting context. Hallucination risk.</div>
+      </div>
+      <div class="flow-col after">
+        <h3>Proposed <span class="label">truth-first</span></h3>
+        <div class="flow-step"><span class="num">01</span>User asks for a change</div>
+        <div class="flow-step"><span class="num">02</span>AI loads Current Behavior Spec</div>
+        <div class="flow-step"><span class="num">03</span>AI loads Graph</div>
+        <div class="flow-step"><span class="num">04</span>AI identifies impacted components</div>
+        <div class="flow-step"><span class="num">05</span>AI analyzes related specs, code, tests</div>
+        <div class="flow-step"><span class="num">06</span>AI proposes safer implementation</div>
+        <div class="flow-step" style="opacity:0.3"><span class="num">—</span>&nbsp;</div>
+        <div class="summary">→ Faster · safer · more accurate · scalable.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PROPOSAL ─── -->
+<section class="section" id="proposal">
+  <div class="chapter-mark">Chapter 07 · The proposal</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:1000px;margin-bottom:24px">
+    A <em style="font-style:italic;color:var(--accent);font-weight:500">repository-native</em> behavioral knowledge layer.
+  </h2>
+  <p style="font-size:17px;line-height:1.75;color:var(--paper-dim);max-width:680px;margin-bottom:48px">
+    Not a replacement for existing methodologies — a missing layer on top of them. Versioned alongside your code, navigable by humans and agents alike.
+  </p>
+
+  <div class="repo-section">
+    <div>
+      <div class="tree">
+<span class="dir">/spec</span>
+<span class="dir indent-1">/current-behavior</span><span class="star">◈ source of truth</span>
+<span class="file indent-2">platform.md</span>
+<span class="dir indent-2">components/</span>
+<span class="file indent-3">card-controls.md</span>
+<span class="file indent-3">dispute-engine.md</span>
+<span class="file indent-3">payment-poster.md</span>
+<span class="dir indent-1">/changes</span>
+<span class="dir indent-2">2026-001-fraud-auto-lock/</span>
+<span class="file indent-3">proposal.md</span>
+<span class="file indent-3">design.md</span>
+<span class="file indent-3">tasks.md</span>
+<span class="file indent-3">impact.md</span>
+<span class="dir indent-1">/decisions</span>
+<span class="file indent-2">adr-001-pci-tokenization.md</span>
+<span class="file indent-2">adr-002-card-event-contracts.md</span>
+<span class="dir indent-1">/traceability</span>
+<span class="file indent-2">features.yaml</span>
+<span class="file indent-2">rules.yaml</span>
+<span class="file indent-2">flows.yaml</span>
+<span class="dir indent-1">/graph</span>
+<span class="file indent-2">graph.json</span>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1.25;margin-bottom:20px;letter-spacing:-0.012em">
+        Four kinds of knowledge, four homes.
+      </h3>
+      <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);margin-bottom:20px">
+        <strong style="color:var(--accent)">/current-behavior</strong> is the operational truth. What is true <em>today</em>. The file you open first.
+      </p>
+      <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);margin-bottom:20px">
+        <strong style="color:var(--accent)">/changes</strong> holds proposals and historical evolution — not mixed in with what's live.
+      </p>
+      <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);margin-bottom:20px">
+        <strong style="color:var(--accent)">/decisions</strong> preserves the why behind constraints.
+      </p>
+      <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);margin-bottom:20px">
+        <strong style="color:var(--accent)">/traceability</strong> &amp; <strong style="color:var(--accent)">/graph</strong> make everything navigable — by humans and by agents.
+      </p>
+      <div class="aside-block">
+        A change is not complete until the current-behavior layer is updated.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRACE ─── -->
+<section class="section">
+  <div class="chapter-mark">Chapter 08 · Where traceability belongs</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:32px">
+    Tags are powerful. <span style="font-weight:800">Where you put them matters more.</span>
+  </h2>
+
+  <p class="trace-principle">
+    Tags like <em>@future</em>, <em>@rule</em>, <em>@adr</em> are useful for categorizing intent, decisions, and constraints — but they belong at the <em>specification layer</em>, not buried throughout the code.
+  </p>
+
+  <!-- BAD vs GOOD code samples -->
+  <div class="trace-contrast">
+
+    <div class="trace-snippet bad">
+      <div class="trace-snippet-head">
+        <span>⊗ Annotations everywhere</span>
+        <span class="filename">card-controls.ts</span>
+      </div>
+      <div class="trace-snippet-body">
+<span class="anno heavy">@feature</span>(card-lock-on-fraud)
+<span class="anno heavy">@rule</span>(fraud-threshold-lock)
+<span class="anno heavy">@rule</span>(notify-cardholder-on-lock)
+<span class="anno heavy">@flow</span>(dispute-90-day-window)
+<span class="anno heavy">@flow</span>(auto-lock-flow)
+<span class="anno heavy">@adr</span>(pci-tokenization-strategy)
+<span class="anno heavy">@adr</span>(card-event-contracts)
+<span class="anno heavy">@future</span>(biometric-unlock)
+<span class="anno heavy">@governance</span>(pci-dss-compliant)
+<span class="anno heavy">@owner</span>(team-card-servicing)
+<span class="anno heavy">@sla</span>(30s-lock-latency)
+<span class="kw">export async function</span> <span class="fn">lockCardOnFraud</span>() {
+  <span class="cm">// ... actual logic buried below ...</span>
+}
+      </div>
+      <div class="trace-caption">
+        The code becomes a governance document. Business, architectural, and operational metadata all compete with the logic. Hard to read, harder to maintain.
+      </div>
+    </div>
+
+    <div class="trace-snippet good">
+      <div class="trace-snippet-head">
+        <span>◈ Spec ID as the anchor</span>
+        <span class="filename">card-controls.ts</span>
+      </div>
+      <div class="trace-snippet-body">
+<span class="anno spec">@spec</span>(SPEC-card-lock-fraud-v2)
+
+<span class="kw">export async function</span> <span class="fn">lockCardOnFraud</span>() {
+  <span class="cm">// implementation here.
+  // everything else — rules, ADRs,
+  // future capabilities, governance —
+  // lives in the spec, not the code.</span>
+}
+      </div>
+      <div class="trace-caption">
+        One link. <strong>The code traces to the spec; the spec traces to everything else.</strong> Implementation stays implementation.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TWO-LEVEL DIAGRAM -->
+  <div class="layer-split">
+
+    <div class="split-side code-side">
+      <div class="split-eyebrow">◈ Inside the codebase</div>
+      <div class="split-title">Code traces to <em>spec.</em></div>
+      <p class="split-sub">A single, stable anchor inside the source. Nothing else.</p>
+
+      <div class="split-anchor">@spec(SPEC-card-lock-fraud-v2)</div>
+
+      <ul class="split-list">
+        <li><span class="at">↳</span>Component implementation</li>
+        <li><span class="at">↳</span>Tests reference the same spec ID</li>
+        <li><span class="at">↳</span>Commits / PRs reference the spec ID</li>
+      </ul>
+
+      <div class="split-arrow">→</div>
+    </div>
+
+    <div class="split-side spec-side">
+      <div class="split-eyebrow">◈ At the specification layer</div>
+      <div class="split-title">Spec traces to <em>everything.</em></div>
+      <p class="split-sub">Where business, architectural, and governance context naturally lives.</p>
+
+      <div class="split-anchor">SPEC-card-lock-fraud-v2.md</div>
+
+      <ul class="split-list">
+        <li><span class="at">@</span>rule(fraud-threshold-lock)</li>
+        <li><span class="at">@</span>flow(dispute-90-day-window)</li>
+        <li><span class="at">@</span>adr(pci-tokenization-strategy)</li>
+        <li><span class="at">@</span>future(biometric-unlock)</li>
+        <li><span class="at">@</span>governance(pci-dss-compliant)</li>
+        <li><span class="at">@</span>owner(team-card-servicing)</li>
+        <li><span class="at">@</span>change-history(2026-001, 2025-014)</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- VERDICT -->
+  <div class="trace-verdict">
+    <div class="trace-verdict-title">◈ The separation of concerns</div>
+    <div class="trace-verdict-text">
+      The codebase stays clean. The spec becomes the <strong>central traceability anchor</strong> — the meeting point between implementation and the broader business, architectural, and governance context.
+    </div>
+  </div>
+</section>
+
+<!-- ─── GRAPH ─── -->
+<section class="section">
+  <div class="chapter-mark">Chapter 09 · The knowledge graph</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
+    Behavior, specs, components, tests, APIs, decisions — <em style="color:var(--accent);font-style:italic;font-weight:500">connected.</em>
+  </h2>
+  <p style="font-size:16px;line-height:1.7;color:var(--paper-dim);max-width:620px">
+    A simple, version-controlled JSON graph. No heavy database. AI-friendly. Easy to regenerate. The graph supports two complementary views: a <em>hierarchical</em> drill-down from enterprise to component, and a <em>flat</em> network of cross-cutting relationships.
+  </p>
+
+  <!-- HIERARCHICAL VIEW · top-down -->
+  <div class="hierarchy-tree">
+
+    <div class="tree-node tier-enterprise depth-1">
+      <span class="tree-rail"></span>
+      <span class="tree-label">
+        <span class="badge">L01</span>
+        <span class="name">Enterprise-Wide Behavior</span>
+      </span>
+    </div>
+
+    <div class="tree-node tier-ecosystem depth-2">
+      <span class="tree-rail">└──</span>
+      <span class="tree-label">
+        <span class="badge">L02</span>
+        <span class="name">Multi-Platform Ecosystem · customer-servicing</span>
+      </span>
+    </div>
+
+    <div class="tree-node tier-platform depth-3">
+      <span class="tree-rail">├──</span>
+      <span class="tree-label">
+        <span class="badge">L03 · A</span>
+        <span class="name">Platform · cardholder-self-service</span>
+      </span>
+    </div>
+
+    <div class="tree-node tier-component depth-4">
+      <span class="tree-rail">│   ├──</span>
+      <span class="tree-label">
+        <span class="badge">L04</span>
+        <span class="name">component · card-controls</span>
+      </span>
+    </div>
+    <div class="tree-node tier-component depth-4">
+      <span class="tree-rail">│   └──</span>
+      <span class="tree-label">
+        <span class="badge">L04</span>
+        <span class="name">component · statement-viewer</span>
+      </span>
+    </div>
+
+    <div class="tree-node tier-platform depth-3">
+      <span class="tree-rail">└──</span>
+      <span class="tree-label">
+        <span class="badge">L03 · B</span>
+        <span class="name">Platform · servicing-operations</span>
+      </span>
+    </div>
+
+    <div class="tree-node tier-component depth-4">
+      <span class="tree-rail">    ├──</span>
+      <span class="tree-label">
+        <span class="badge">L04</span>
+        <span class="name">component · dispute-engine</span>
+      </span>
+    </div>
+    <div class="tree-node tier-component depth-4">
+      <span class="tree-rail">    └──</span>
+      <span class="tree-label">
+        <span class="badge">L04</span>
+        <span class="name">component · payment-poster</span>
+      </span>
+    </div>
+
+    <div class="tree-caption">
+      Each tier in the graph owns a <strong>current-behavior</strong> document. The enterprise composes ecosystems, ecosystems compose platforms, platforms compose components — and any change can be traced upward to ask <em>"who is affected?"</em> or downward to ask <em>"what does this mean to deliver?"</em>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE GRAPH · same visual language as cross-cutting, but composition-shaped -->
+  <div class="graph-divider">◈ Enterprise composition graph</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:0">
+    The same hierarchy, rendered as a graph. Edges read top-down — <em>composes</em>, <em>contains</em>, <em>realized_by</em> — making the composition structure navigable as data.
+  </p>
+
+  <div class="graph-wrapper enterprise">
+    <svg viewBox="0 0 1000 680" preserveAspectRatio="none">
+      <defs>
+        <marker id="ehead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#ccc8be"/>
+        </marker>
+        <marker id="ehead-acc" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#0d5c63"/>
+        </marker>
+      </defs>
+
+      <!-- L01 → L02 -->
+      <line x1="500" y1="100" x2="500" y2="195"
+            stroke="#0d5c63" stroke-width="2"
+            marker-end="url(#ehead-acc)"/>
+
+      <!-- L02 → L03·A and L03·B -->
+      <line x1="500" y1="240" x2="265" y2="335"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.75"/>
+      <line x1="500" y1="240" x2="735" y2="335"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.75"/>
+
+      <!-- L03·A → L04 components -->
+      <line x1="240" y1="380" x2="140" y2="500"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.7"/>
+      <line x1="290" y1="380" x2="380" y2="500"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.7"/>
+
+      <!-- L03·B → L04 components -->
+      <line x1="710" y1="380" x2="615" y2="500"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.7"/>
+      <line x1="760" y1="380" x2="860" y2="500"
+            stroke="#ccc8be" stroke-width="1.5"
+            marker-end="url(#ehead)" opacity="0.7"/>
+
+      <!-- Cross-platform integration hint: dashed teal edge sitting BELOW the L04 row,
+           with arc-style routing via two segments so it visibly threads under -->
+      <path d="M 380 575 Q 380 620, 500 620 T 615 575"
+            fill="none"
+            stroke="#0d5c63" stroke-width="1.5"
+            stroke-dasharray="4 4" opacity="0.7"/>
+    </svg>
+
+    <!-- L01 -->
+    <div class="node tier-l01" style="left:50%;top:14%">
+      <span class="tier-badge">L01</span>Enterprise-Wide Behavior
+    </div>
+
+    <!-- L02 -->
+    <div class="node tier-l02" style="left:50%;top:34%">
+      <span class="tier-badge">L02</span>Multi-Platform Ecosystem · customer-servicing
+    </div>
+
+    <!-- L03 · A and B -->
+    <div class="node tier-l03" style="left:26.5%;top:55%">
+      <span class="tier-badge">L03 · A</span>Platform · cardholder-self-service
+    </div>
+    <div class="node tier-l03" style="left:73.5%;top:55%">
+      <span class="tier-badge">L03 · B</span>Platform · servicing-operations
+    </div>
+
+    <!-- L04 components — two under each L03 -->
+    <div class="node tier-l04" style="left:14%;top:80%">
+      <span class="tier-badge">L04</span>card-controls
+    </div>
+    <div class="node tier-l04" style="left:38%;top:80%">
+      <span class="tier-badge">L04</span>statement-viewer
+    </div>
+    <div class="node tier-l04" style="left:61.5%;top:80%">
+      <span class="tier-badge">L04</span>dispute-engine
+    </div>
+    <div class="node tier-l04" style="left:86%;top:80%">
+      <span class="tier-badge">L04</span>payment-poster
+    </div>
+
+    <!-- Edge labels -->
+    <div class="node-label" style="left:54%;top:24%">composes</div>
+    <div class="node-label" style="left:36%;top:43%">contains</div>
+    <div class="node-label" style="left:64%;top:43%">contains</div>
+    <div class="node-label" style="left:22%;top:66%">realized_by</div>
+    <div class="node-label" style="left:78%;top:66%">realized_by</div>
+    <div class="node-label" style="left:50%;top:94%;color:var(--accent)">cross-platform integration</div>
+  </div>
+
+  <!-- FLAT NETWORK VIEW -->
+  <div class="graph-divider">◈ Cross-cutting relationships</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:0">
+    Beneath the hierarchy, the same graph models the lateral connections — features to events, rules to tests, ADRs to flows. The structure that humans navigate top-down is the same structure agents traverse sideways.
+  </p>
+
+  <div class="graph-wrapper">
+    <svg viewBox="0 0 1000 540" preserveAspectRatio="none">
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#ccc8be"/>
+        </marker>
+        <marker id="arrowhead-acc" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#0d5c63"/>
+        </marker>
+      </defs>
+      <line x1="200" y1="160" x2="450" y2="120" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="200" y1="160" x2="380" y2="280" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="450" y1="120" x2="700" y2="180" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="450" y1="120" x2="620" y2="380" stroke="#0d5c63" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrowhead-acc)"/>
+      <line x1="380" y1="280" x2="620" y2="380" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="700" y1="180" x2="850" y2="280" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="200" y1="160" x2="180" y2="380" stroke="#ccc8be" stroke-width="1.5" marker-end="url(#arrowhead)" opacity="0.7"/>
+      <line x1="380" y1="280" x2="180" y2="380" stroke="#ccc8be" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+    </svg>
+
+    <div class="node feature" style="left:20%;top:30%">FEATURE · card-lock-on-fraud</div>
+    <div class="node rule" style="left:45%;top:23%">RULE · fraud-threshold-lock</div>
+    <div class="node component" style="left:38%;top:54%">COMPONENT · card-controls</div>
+    <div class="node" style="left:70%;top:34%">EVENT · card.locked</div>
+    <div class="node" style="left:85%;top:53%">ADR · pci-tokenization</div>
+    <div class="node test" style="left:62%;top:72%">TEST · fraud-lock.test.ts</div>
+    <div class="node" style="left:18%;top:72%">SPEC · change-001</div>
+
+    <div class="node-label" style="left:32%;top:21%">implemented_by</div>
+    <div class="node-label" style="left:58%;top:25%">publishes</div>
+    <div class="node-label" style="left:54%;top:55%">validated_by</div>
+    <div class="node-label" style="left:78%;top:43%">constrains</div>
+  </div>
+</section>
+
+<!-- ─── CHANGE FLOW ─── -->
+<section class="section">
+  <div class="chapter-mark">Chapter 10 · How a new change works</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
+    Every change starts by <span style="font-weight:800">comparing proposed behavior against current behavior.</span>
+  </h2>
+
+  <div class="step-grid">
+    <div class="step-cell frame">
+      <div class="step-num">STEP 01</div>
+      <div class="step-text">Change request</div>
+    </div>
+    <div class="step-cell">
+      <div class="step-num">STEP 02</div>
+      <div class="step-text">Read current behavior</div>
+    </div>
+    <div class="step-cell">
+      <div class="step-num">STEP 03</div>
+      <div class="step-text">Identify affected rules &amp; flows</div>
+    </div>
+    <div class="step-cell">
+      <div class="step-num">STEP 04</div>
+      <div class="step-text">Walk the graph for impact</div>
+    </div>
+    <div class="step-cell">
+      <div class="step-num">STEP 05</div>
+      <div class="step-text">Write proposal</div>
+    </div>
+    <div class="step-cell">
+      <div class="step-num">STEP 06</div>
+      <div class="step-text">Implement change</div>
+    </div>
+    <div class="step-cell frame">
+      <div class="step-num">STEP 07</div>
+      <div class="step-text">Update current-behavior</div>
+    </div>
+    <div class="step-cell peak">
+      <div class="step-num">STEP 08 — ◈</div>
+      <div class="step-text">Update graph</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FINAL ─── -->
+<section class="section final">
+  <div class="chapter-mark" style="justify-content:center">Closing · The final vision</div>
+  <h2>
+    From managing<br>
+    <span class="strong">specifications</span>
+    <em>to managing</em>
+    <span class="strong">operational knowledge.</span>
+  </h2>
+  <p class="final-message">
+    Humans and AI agents should be able to quickly understand what the system currently does, why it behaves that way, how it evolved, what depends on it, and how a new change should impact it — without reverse-engineering the entire organization from code.
+  </p>
+  <ul class="final-list">
+    <li>Historical governance</li>
+    <li>Current functional behavior</li>
+    <li>Traceability</li>
+    <li>Behavioral composition</li>
+    <li>AI-ready context</li>
+  </ul>
+</section>
+
+<!-- ─── COLOPHON ─── -->
+<footer class="colophon">
+  <div>A working paper <span class="ornament">◈</span> 2026 <span class="ornament">◈</span> The Missing Layer</div>
+  <span class="note">Set in DM Serif Display, Source Serif 4 &amp; JetBrains Mono — an editorial palette of crimson, navy, and bone paper, chosen against the grain of generic AI defaults.</span>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+    }
+  });
+}, {threshold:0.08, rootMargin:'0px 0px -80px 0px'});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+document.querySelector('.hero').classList.add('visible');
+</script>
+
+</body>
+</html>

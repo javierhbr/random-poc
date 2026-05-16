@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Baseline — 8 Palette Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@300;400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=DM+Serif+Display:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body{
+  background:#e0ddd8;
+  padding:0 16px 100px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Font size control ── */
+:root{ --body-scale: 1 }
+
+/* Scaled targets: principle list, subtitle, aside body text, rules, closing quote */
+.plist li, .hero .sub, .acard .as, .closing{
+  font-size: calc(var(--f-body-sz, 15px) * var(--body-scale)) !important;
+}
+.rlist li{
+  font-size: calc(13px * var(--body-scale)) !important;
+}
+.acard .av-sm{
+  font-size: calc(17px * var(--body-scale)) !important;
+}
+
+.sticky-header{
+  position:sticky;top:0;z-index:100;
+  background:#e0ddd8;
+  padding:12px 16px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.size-bar{
+  max-width:1100px;margin:0 auto 12px;
+  display:flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#666;
+}
+.size-btn{
+  border:1px solid #bbb;background:#fff;
+  padding:7px 14px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.1em;
+  color:#333;transition:background 0.15s,color 0.15s;
+  line-height:1;
+}
+.size-btn:hover{background:#333;color:#fff;border-color:#333}
+.size-btn.active{background:#18181a;color:#fff;border-color:#18181a}
+.size-label{color:#888;font-size:10px}
+
+/* ── Page nav ── */
+.page-nav{
+  max-width:1100px;margin:0 auto 0;
+  display:flex;gap:0;flex-wrap:wrap;
+  border:1px solid #c8c4be;
+  background:#d8d4ce;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.page-nav a{
+  padding:10px 18px;color:#555;text-decoration:none;
+  border-right:1px solid #c8c4be;
+  transition:background 0.15s,color 0.15s;
+}
+.page-nav a:hover{background:#fff;color:#111}
+.page-nav .grp{
+  padding:10px 14px;color:#999;
+  border-right:1px solid #c8c4be;
+  font-size:9px;letter-spacing:0.2em;
+  background:#ccc8c2;
+}
+
+/* ── Option shell ── */
+.option{
+  max-width:1100px;margin:0 auto 52px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,0.07),0 0 0 1px rgba(0,0,0,0.06);
+}
+.option-tab{
+  padding:13px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid #e0e0e0;
+  background:#f8f8f8;
+}
+.option-tab .ttl{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;color:#1a1a1a;font-weight:500;margin-bottom:4px;
+}
+.option-tab .mood{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:#aaa;letter-spacing:0.06em;
+}
+.swatches{display:flex;gap:4px;flex-shrink:0;margin-left:16px}
+.sw{width:18px;height:18px;border:1px solid rgba(0,0,0,0.12)}
+
+/* ── Group divider ── */
+.group-divider{
+  max-width:1100px;margin:0 auto 28px;
+  padding:12px 20px;
+  background:#d0cdc8;border:1px solid #bcb9b3;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#666;
+}
+.group-divider b{color:#333;font-size:12px;display:block;margin-bottom:2px;text-transform:none;letter-spacing:0}
+
+/* ════════════════════════════════════
+   SHARED LAYOUT — CSS vars per scope
+   ════════════════════════════════════ */
+.topbar{
+  background:#fff;border-bottom:1px solid var(--rule);
+  padding:10px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--ink-mute);
+}
+.topbar .tl{display:flex;gap:14px;align-items:center}
+.topbar .dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent);
+}
+.topbar .ver{color:var(--gold);font-weight:500}
+.topbar .badge{background:var(--accent);color:#fff;padding:3px 11px;font-size:9px;letter-spacing:0.22em}
+
+.hero{padding:52px 40px 44px;border-bottom:1px solid var(--rule);background:#fff}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.26em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:18px;
+  display:flex;align-items:center;gap:12px;
+}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--accent);display:block}
+.hero h1{
+  font-family:var(--f-display);
+  font-weight:var(--f-wt);
+  font-size:clamp(34px,4.5vw,60px);
+  line-height:1.02;letter-spacing:var(--f-ls,-0.02em);
+  color:var(--ink);margin-bottom:18px;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero .sub{
+  font-family:var(--f-body);font-size:var(--f-body-sz);
+  line-height:1.65;color:var(--ink-dim);max-width:600px;
+  font-style:var(--f-sub-style,italic);
+}
+
+.body-grid{display:grid;grid-template-columns:1fr 282px;background:#fff}
+@media(max-width:760px){.body-grid{grid-template-columns:1fr}}
+
+.main-col{padding:40px;border-right:1px solid var(--rule)}
+.side-col{padding:28px 22px;background:var(--bg-soft)}
+
+.sec{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:0.26em;text-transform:uppercase;
+  color:var(--accent);
+  padding-bottom:9px;border-bottom:1px solid var(--rule);
+  margin-bottom:14px;margin-top:34px;
+}
+.sec:first-child{margin-top:0}
+
+.plist{list-style:none}
+.plist li{
+  font-family:var(--f-body);font-size:var(--f-body-sz);
+  line-height:1.7;color:var(--ink-dim);
+  padding:9px 0 9px 22px;border-bottom:1px dashed var(--rule-soft);position:relative;
+}
+.plist li::before{content:"—";position:absolute;left:0;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2}
+.plist li:last-child{border-bottom:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 12px;border:1px solid var(--rule);color:var(--ink-mute);background:#fff}
+.chip.cap{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,#fff)}
+.chip.con{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 5%,#fff)}
+
+.rlist{list-style:none}
+.rlist li{
+  font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;
+  color:var(--ink-dim);padding:8px 0 8px 18px;border-bottom:1px dashed var(--rule-soft);position:relative;
+}
+.rlist li::before{content:"◈";position:absolute;left:0;color:var(--gold);font-size:10px;line-height:1.9}
+.rlist li:last-child{border-bottom:none}
+.rlist code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-elev);padding:1px 5px}
+
+.acard{border:1px solid var(--rule);border-left:3px solid var(--accent);padding:18px 15px;margin-bottom:12px;background:#fff}
+.acard.gold{border-left-color:var(--gold)}
+.acard.signal{border-left-color:var(--signal)}
+.acard .al{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.acard.gold .al{color:var(--gold)}
+.acard.signal .al{color:var(--signal)}
+.acard .av{font-family:var(--f-display);font-size:32px;font-weight:var(--f-wt);line-height:1;color:var(--ink);letter-spacing:var(--f-ls,-0.02em);margin-bottom:5px}
+.acard .av-sm{font-family:var(--f-display);font-size:17px;line-height:1.4;color:var(--ink);margin-bottom:5px;font-weight:var(--f-wt);font-style:italic}
+.acard .as{font-family:var(--f-body);font-size:13px;color:var(--ink-dim);line-height:1.5;font-style:italic}
+
+.closing{
+  background:var(--ink);padding:44px 40px;
+  font-family:var(--f-display);font-style:italic;font-weight:var(--f-wt);
+  font-size:clamp(18px,2.4vw,28px);line-height:1.25;letter-spacing:var(--f-ls,-0.01em);color:#fff;
+}
+.closing::before{content:"";display:block;width:40px;height:2px;background:var(--accent);margin-bottom:18px}
+.closing .attr{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;margin-top:18px;font-style:normal;color:rgba(255,255,255,0.32)}
+
+/* ════════════════════════════════════
+   GROUP 1 — New color psychology palette
+   ════════════════════════════════════ */
+
+/* 1-A  Eco sage + warm amber · Cormorant Garamond + DM Sans */
+.p1a{--bg-soft:#f4f6f2;--bg-elev:#e6ebe3;--ink:#171e14;--ink-dim:#424e3c;--ink-mute:#7a8a74;--rule:#cdd4c8;--rule-soft:#dfe5da;--accent:#3a6642;--gold:#b07818;--signal:#a03428;--f-display:'Cormorant Garamond',Georgia,serif;--f-wt:400;--f-ls:-0.01em;--f-body:'DM Sans',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:normal}
+
+/* 1-B  Warm terracotta + slate · Fraunces + Inter */
+.p1b{--bg-soft:#f6f3f0;--bg-elev:#ebe6e0;--ink:#1e1a16;--ink-dim:#524840;--ink-mute:#8a7e74;--rule:#d4cdc5;--rule-soft:#e4deda;--accent:#8a3e28;--gold:#b07a20;--signal:#8a2828;--f-display:'Fraunces',Georgia,serif;--f-wt:300;--f-ls:-0.015em;--f-body:'Inter',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:normal}
+
+/* 1-C  Glassy teal + warm gold · Playfair Display + Source Sans 3 */
+.p1c{--bg-soft:#f2f7f6;--bg-elev:#e2edea;--ink:#141e1c;--ink-dim:#3c5450;--ink-mute:#6e8e88;--rule:#c4d8d4;--rule-soft:#d8e8e4;--accent:#0f6560;--gold:#b58018;--signal:#a03428;--f-display:'Playfair Display',Georgia,serif;--f-wt:400;--f-ls:-0.022em;--f-body:'Source Sans 3',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:italic}
+
+/* 1-D  Warm sand + deep forest · Libre Baskerville + Lato */
+.p1d{--bg-soft:#f5f3ee;--bg-elev:#e8e4da;--ink:#1a1812;--ink-dim:#4e4838;--ink-mute:#867e6a;--rule:#d0cab8;--rule-soft:#e2dcd2;--accent:#2e5230;--gold:#b88020;--signal:#9e3428;--f-display:'Libre Baskerville',Georgia,serif;--f-wt:400;--f-ls:-0.01em;--f-body:'Lato',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:italic}
+
+/* ════════════════════════════════════
+   GROUP 2 — First-round palettes
+   ════════════════════════════════════ */
+
+/* 2-A  Deep teal + warm gold · DM Serif Display + Source Serif 4 */
+.p2a{--bg-soft:#f7f5f0;--bg-elev:#eeebe4;--ink:#18181a;--ink-dim:#524e47;--ink-mute:#8a8070;--rule:#dedad2;--rule-soft:#edeae4;--accent:#0d5c63;--gold:#b5881a;--signal:#b03a2a;--f-display:'DM Serif Display',Georgia,serif;--f-wt:400;--f-ls:-0.025em;--f-body:'Source Serif 4',Georgia,serif;--f-body-sz:16px;--f-sub-style:italic}
+
+/* 2-B  Warm navy + amber · Playfair Display + Lato */
+.p2b{--bg-soft:#f5f5f8;--bg-elev:#e8e8ef;--ink:#181826;--ink-dim:#46465e;--ink-mute:#88889a;--rule:#d4d4e0;--rule-soft:#e6e6ee;--accent:#1e3561;--gold:#c07820;--signal:#a83232;--f-display:'Playfair Display',Georgia,serif;--f-wt:400;--f-ls:-0.02em;--f-body:'Lato',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:italic}
+
+/* 2-C  Forest green + copper · Fraunces + Inter */
+.p2c{--bg-soft:#f5f7f4;--bg-elev:#e6ebe4;--ink:#161a14;--ink-dim:#445040;--ink-mute:#7a8878;--rule:#d0d8cc;--rule-soft:#e2e8de;--accent:#2a5c34;--gold:#b86820;--signal:#a03030;--f-display:'Fraunces',Georgia,serif;--f-wt:300;--f-ls:-0.015em;--f-body:'Inter',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:normal}
+
+/* 2-D  Warm slate + ochre · Libre Baskerville + Source Sans 3 */
+.p2d{--bg-soft:#f5f4f0;--bg-elev:#eae8e0;--ink:#1c1a14;--ink-dim:#504c3e;--ink-mute:#888070;--rule:#d8d4c8;--rule-soft:#e8e4d8;--accent:#3a4a6e;--gold:#b08020;--signal:#9e3828;--f-display:'Libre Baskerville',Georgia,serif;--f-wt:400;--f-ls:-0.01em;--f-body:'Source Sans 3',system-ui,sans-serif;--f-body-sz:15px;--f-sub-style:italic}
+</style>
+</head>
+<body>
+
+<div class="sticky-header">
+<!-- Font size control -->
+<div class="size-bar">
+  <span class="size-label">BODY TEXT SIZE</span>
+  <button class="size-btn active" onclick="setScale(1,this)">S &nbsp;default</button>
+  <button class="size-btn" onclick="setScale(1.12,this)">M &nbsp;+12%</button>
+  <button class="size-btn" onclick="setScale(1.25,this)">L &nbsp;+25%</button>
+  <button class="size-btn" onclick="setScale(1.4,this)">XL &nbsp;+40%</button>
+</div>
+
+<!-- Quick nav -->
+<div class="page-nav">
+  <span class="grp">Round 1</span>
+  <a href="#p1a">1-A Sage</a>
+  <a href="#p1b">1-B Terra</a>
+  <a href="#p1c">1-C Teal</a>
+  <a href="#p1d">1-D Sand</a>
+  <span class="grp">Round 2</span>
+  <a href="#p2a">2-A Teal/Gold</a>
+  <a href="#p2b">2-B Navy</a>
+  <a href="#p2c">2-C Forest</a>
+  <a href="#p2d">2-D Slate</a>
+</div>
+</div><!-- /sticky-header -->
+
+<!-- ═══════════════════════════════════════
+     GROUP 1 — New color psychology palettes
+     ═══════════════════════════════════════ -->
+<div style="height:28px"></div>
+<div class="group-divider">
+  <b>Round 1 — New palettes (color psychology-driven)</b>
+  Eco sage · Terracotta · Glassy teal · Warm sand
+</div>
+
+<!-- 1-A -->
+<div class="option" id="p1a" style="display:none">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">1-A &nbsp;·&nbsp; Eco sage + warm amber &nbsp;·&nbsp; Cormorant Garamond + DM Sans</div>
+      <div class="mood">Green = growth / trust &nbsp;·&nbsp; Amber = warmth / quality &nbsp;·&nbsp; High-end editorial serif + clean modern sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#171e14"></span>
+      <span class="sw" style="background:#3a6642"></span>
+      <span class="sw" style="background:#b07818"></span>
+      <span class="sw" style="background:#a03428"></span>
+    </div>
+  </div>
+  <div class="p1a">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p1a">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p1a">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 1-A</div></div>
+  </div>
+</div>
+
+<!-- 1-B -->
+<div class="option" id="p1b">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">1-B &nbsp;·&nbsp; Warm terracotta + deep slate &nbsp;·&nbsp; Fraunces + Inter</div>
+      <div class="mood">Terracotta = humanity / emotional warmth &nbsp;·&nbsp; Slate = calm authority &nbsp;·&nbsp; Optical serif + neutral precision sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#1e1a16"></span>
+      <span class="sw" style="background:#8a3e28"></span>
+      <span class="sw" style="background:#b07a20"></span>
+      <span class="sw" style="background:#8a2828"></span>
+    </div>
+  </div>
+  <div class="p1b">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p1b">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p1b">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 1-B</div></div>
+  </div>
+</div>
+
+<!-- 1-C -->
+<div class="option" id="p1c" style="display:none">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">1-C &nbsp;·&nbsp; Glassy teal + warm gold &nbsp;·&nbsp; Playfair Display + Source Sans 3</div>
+      <div class="mood">Teal = clarity / reliability &nbsp;·&nbsp; Gold = quality / decision &nbsp;·&nbsp; Classic editorial serif + open readable sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#141e1c"></span>
+      <span class="sw" style="background:#0f6560"></span>
+      <span class="sw" style="background:#b58018"></span>
+      <span class="sw" style="background:#a03428"></span>
+    </div>
+  </div>
+  <div class="p1c">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p1c">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p1c">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 1-C</div></div>
+  </div>
+</div>
+
+<!-- 1-D -->
+<div class="option" id="p1d">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">1-D &nbsp;·&nbsp; Warm sand + deep forest &nbsp;·&nbsp; Libre Baskerville + Lato</div>
+      <div class="mood">Sand = welcoming / open &nbsp;·&nbsp; Forest = stable / grounded &nbsp;·&nbsp; Classic trustworthy serif + friendly clear sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#1a1812"></span>
+      <span class="sw" style="background:#2e5230"></span>
+      <span class="sw" style="background:#b88020"></span>
+      <span class="sw" style="background:#9e3428"></span>
+    </div>
+  </div>
+  <div class="p1d">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p1d">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p1d">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 1-D</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     GROUP 2 — First-round palettes
+     ═══════════════════════════════════════ -->
+<div class="group-divider">
+  <b>Round 2 — First-round palettes</b>
+  Deep teal/gold · Warm navy · Forest green · Warm slate
+</div>
+
+<!-- 2-A -->
+<div class="option" id="p2a" style="display:none">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">2-A &nbsp;·&nbsp; Deep teal + warm gold &nbsp;·&nbsp; DM Serif Display + Source Serif 4</div>
+      <div class="mood">Green = growth / reliability &nbsp;·&nbsp; Gold = warmth / quality &nbsp;·&nbsp; Editorial authority · all-serif stack</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#18181a"></span>
+      <span class="sw" style="background:#0d5c63"></span>
+      <span class="sw" style="background:#b5881a"></span>
+      <span class="sw" style="background:#b03a2a"></span>
+    </div>
+  </div>
+  <div class="p2a">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p2a">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p2a">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 2-A</div></div>
+  </div>
+</div>
+
+<!-- 2-B -->
+<div class="option" id="p2b" style="display:none">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">2-B &nbsp;·&nbsp; Warm navy + amber &nbsp;·&nbsp; Playfair Display + Lato</div>
+      <div class="mood">Blue = trust / authority &nbsp;·&nbsp; Amber = energy / warmth &nbsp;·&nbsp; Institutional trust · serif display + sans body</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#181826"></span>
+      <span class="sw" style="background:#1e3561"></span>
+      <span class="sw" style="background:#c07820"></span>
+      <span class="sw" style="background:#a83232"></span>
+    </div>
+  </div>
+  <div class="p2b">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p2b">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p2b">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 2-B</div></div>
+  </div>
+</div>
+
+<!-- 2-C -->
+<div class="option" id="p2c">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">2-C &nbsp;·&nbsp; Forest green + copper &nbsp;·&nbsp; Fraunces + Inter</div>
+      <div class="mood">Green = growth / balance &nbsp;·&nbsp; Copper = warmth / craft &nbsp;·&nbsp; Modern warmth · optical serif + neutral sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#161a14"></span>
+      <span class="sw" style="background:#2a5c34"></span>
+      <span class="sw" style="background:#b86820"></span>
+      <span class="sw" style="background:#a03030"></span>
+    </div>
+  </div>
+  <div class="p2c">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p2c">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p2c">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 2-C</div></div>
+  </div>
+</div>
+
+<!-- 2-D -->
+<div class="option" id="p2d" style="display:none">
+  <div class="option-tab">
+    <div>
+      <div class="ttl">2-D &nbsp;·&nbsp; Warm slate + ochre &nbsp;·&nbsp; Libre Baskerville + Source Sans 3</div>
+      <div class="mood">Slate = calm authority &nbsp;·&nbsp; Ochre = confident warmth &nbsp;·&nbsp; Academic confidence · classic serif + open sans</div>
+    </div>
+    <div class="swatches">
+      <span class="sw" style="background:#fff"></span>
+      <span class="sw" style="background:#1c1a14"></span>
+      <span class="sw" style="background:#3a4a6e"></span>
+      <span class="sw" style="background:#b08020"></span>
+      <span class="sw" style="background:#9e3828"></span>
+    </div>
+  </div>
+  <div class="p2d">
+    <div class="topbar"><div class="tl"><span class="dot"></span><span>Platform <span class="ver">2026.03</span> &nbsp;·&nbsp; customer-platform</span></div><span class="badge">BASELINE</span></div>
+    <div class="hero"><div class="eyebrow">Platform Baseline · customer-platform</div><h1>Customer Platform<br><em>Identity Behavior</em></h1><div class="sub">Shared truth governing customer identity across profile, auth, and notification components.</div></div>
+    <div class="body-grid">
+      <div class="main-col">
+        <div class="sec">Shared Principles</div>
+        <ul class="plist"><li>Customer identity changes must be validated before persistence</li><li>Shared contracts must stay backward compatible unless a versioned migration is approved</li><li>Identity-related failures must be explicit and observable</li></ul>
+        <div class="sec">Shared Capabilities</div><div class="chips"><span class="chip cap">capabilities.customer-identity</span></div>
+        <div class="sec">Shared Contracts</div><div class="chips"><span class="chip con">contracts.customer-profile.v2</span></div>
+        <div class="sec">Alignment Rules</div>
+        <ul class="rlist"><li>Platform repo owns shared truth</li><li>Component repos own local implementation truth</li><li>JIRA tracks workflow state and ownership</li></ul>
+        <div class="sec">Versioning Rules</div>
+        <ul class="rlist"><li>Platform truth published as <code>yyyy.mm</code></li><li>Component repos pin platform version in <code>platform-ref.yaml</code></li><li>Shared contract changes require explicit version or compatibility approval</li></ul>
+      </div>
+      <div class="side-col p2d">
+        <div class="acard"><div class="al">Platform version</div><div class="av">2026.03</div><div class="as">Current published baseline</div></div>
+        <div class="acard gold"><div class="al">JIRA convention</div><div class="av-sm">1 platform issue<br>1 epic / repo<br>1 story / slice</div><div class="as">Standard tracking structure</div></div>
+        <div class="acard signal"><div class="al">Breaking change rule</div><div class="as">Contract changes require explicit version bump or written compatibility approval before merge.</div></div>
+      </div>
+    </div>
+    <div class="closing p2d">Platform truth is owned by the platform repo. Components pin — they do not fork.<div class="attr">customer-platform · baseline 2026.03 · 2-D</div></div>
+  </div>
+</div>
+
+<script>
+function setScale(val, btn) {
+  document.documentElement.style.setProperty('--body-scale', val);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
