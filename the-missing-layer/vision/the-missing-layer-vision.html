@@ -2218,6 +2218,161 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
         <div class="summary">→ Faster · safer · more accurate · scalable.</div>
       </div>
     </div>
+
+    <!-- ─── AGENT ILLUSTRATION ─── -->
+    <div style="margin-top:72px;position:relative;z-index:2">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-dim);opacity:0.6;margin-bottom:20px;text-align:center">
+        ◈ Agent traversal · fragmented vs. graph-native
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);overflow:hidden">
+
+        <!-- LEFT: archaeologist / fragmented -->
+        <div style="background:var(--bg);padding:0;position:relative;border-right:1px solid var(--rule)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:14px 20px;border-bottom:1px solid var(--rule);color:var(--paper-dim);opacity:0.55">
+            Today · scattered reads
+          </div>
+          <svg viewBox="0 0 480 360" style="width:100%;display:block">
+            <defs>
+              <marker id="ag-arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 z" fill="#9b968c"/>
+              </marker>
+            </defs>
+
+            <!-- AI agent node, centre -->
+            <rect x="195" y="148" width="90" height="36" rx="2" fill="#3a3830" stroke="#9b968c" stroke-width="1.2"/>
+            <text x="240" y="170" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e8e4db" letter-spacing="0.1em">AI AGENT</text>
+
+            <!-- ── specs top-left ── -->
+            <rect x="18" y="22" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="63" y="39" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">specs/?</text>
+            <!-- command pill -->
+            <rect x="8" y="56" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="66" y="71" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /spec -name "*.md"</text>
+            <line x1="100" y1="48" x2="204" y2="153" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- ── code top-right ── -->
+            <rect x="372" y="14" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="417" y="31" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">code/?</text>
+            <!-- command pill -->
+            <rect x="358" y="48" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="416" y="63" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "behavior" src/</text>
+            <line x1="372" y1="27" x2="278" y2="153" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- ── tests mid-right ── -->
+            <rect x="372" y="148" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="417" y="165" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">tests/?</text>
+            <!-- command pill -->
+            <rect x="358" y="182" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="416" y="197" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find . -name "*.test.*"</text>
+            <line x1="372" y1="161" x2="285" y2="166" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- ── ADRs bottom-right ── -->
+            <rect x="372" y="268" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="417" y="285" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">adrs/?</text>
+            <!-- command pill -->
+            <rect x="356" y="302" width="118" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="415" y="317" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "adr" decisions/</text>
+            <line x1="372" y1="281" x2="278" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- ── proposals bottom-left ── -->
+            <rect x="10" y="268" width="104" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="62" y="285" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">proposals/?</text>
+            <!-- command pill -->
+            <rect x="6" y="302" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="64" y="317" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /changes -type f</text>
+            <line x1="114" y1="281" x2="204" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- ── git log bottom-mid ── -->
+            <rect x="176" y="274" width="92" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="222" y="291" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">git log/?</text>
+            <!-- command pill -->
+            <rect x="162" y="308" width="120" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="222" y="323" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">git log --oneline --all</text>
+            <line x1="222" y1="274" x2="232" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+
+            <!-- watermark + label -->
+            <text x="240" y="128" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="32" fill="#9b968c" opacity="0.15" font-weight="800">?</text>
+            <text x="240" y="220" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9b968c" letter-spacing="0.14em">GUESSES BEHAVIOR</text>
+          </svg>
+        </div>
+
+        <!-- RIGHT: truth-first / graph-native -->
+        <div style="background:var(--bg-soft);padding:0;position:relative">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:14px 20px;border-bottom:1px solid var(--rule);color:var(--accent)">
+            Proposed · graph-native
+          </div>
+          <svg viewBox="0 0 480 360" style="width:100%;display:block">
+            <defs>
+              <marker id="ag-acc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                <path d="M0,0 L7,3.5 L0,7 z" fill="#0d5c63"/>
+              </marker>
+              <marker id="ag-dim" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 z" fill="#ccc8be" opacity="0.6"/>
+              </marker>
+            </defs>
+
+            <!-- ── graphify query command — top centre ── -->
+            <rect x="80" y="16" width="320" height="38" rx="3" fill="#0d5c63" stroke="#0d5c63" stroke-width="1.5"/>
+            <text x="240" y="30" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#a8dde0" letter-spacing="0.18em">$ COMMAND</text>
+            <text x="240" y="47" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#ffffff" letter-spacing="0.03em">graphify query "what does card-lock do?"</text>
+            <!-- arrow from command pill down to SOT node -->
+            <line x1="240" y1="54" x2="240" y2="116" stroke="#0d5c63" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#ag-acc)"/>
+
+            <!-- Central SOT node -->
+            <rect x="148" y="116" width="184" height="50" rx="2" fill="#0d5c63" stroke="#0a4a50" stroke-width="2"/>
+            <text x="240" y="136" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#ffffff" letter-spacing="0.12em">CURRENT BEHAVIOR</text>
+            <text x="240" y="155" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#a8dde0" letter-spacing="0.08em">◈ source of truth</text>
+
+            <!-- graph node (left) -->
+            <rect x="30" y="94" width="96" height="30" rx="2" fill="#1e1c19" stroke="#0d5c63" stroke-width="1.5"/>
+            <text x="78" y="113" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e0dbd2" letter-spacing="0.06em">graph.json</text>
+            <line x1="126" y1="109" x2="153" y2="130" stroke="#0d5c63" stroke-width="2" marker-end="url(#ag-acc)"/>
+
+            <!-- impacted nodes (right) -->
+            <rect x="350" y="94" width="116" height="30" rx="2" fill="#1e1c19" stroke="#0d5c63" stroke-width="1.5"/>
+            <text x="408" y="113" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e0dbd2" letter-spacing="0.04em">impacted nodes</text>
+            <line x1="350" y1="109" x2="325" y2="130" stroke="#0d5c63" stroke-width="2" marker-end="url(#ag-acc)"/>
+
+            <!-- related specs -->
+            <rect x="16" y="230" width="100" height="30" rx="2" fill="#2a2822" stroke="#6b9ea1" stroke-width="1"/>
+            <text x="66" y="249" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#ccc8be" letter-spacing="0.06em">spec refs</text>
+            <line x1="66" y1="230" x2="190" y2="166" stroke="#6b9ea1" stroke-width="1" marker-end="url(#ag-dim)"/>
+
+            <!-- related tests -->
+            <rect x="180" y="244" width="100" height="30" rx="2" fill="#2a2822" stroke="#6b9ea1" stroke-width="1"/>
+            <text x="230" y="263" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#ccc8be" letter-spacing="0.06em">test refs</text>
+            <line x1="230" y1="244" x2="234" y2="166" stroke="#6b9ea1" stroke-width="1" marker-end="url(#ag-dim)"/>
+
+            <!-- ADRs -->
+            <rect x="358" y="230" width="96" height="30" rx="2" fill="#2a2822" stroke="#6b9ea1" stroke-width="1"/>
+            <text x="406" y="249" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#ccc8be" letter-spacing="0.06em">adr refs</text>
+            <line x1="406" y1="230" x2="314" y2="166" stroke="#6b9ea1" stroke-width="1" marker-end="url(#ag-dim)"/>
+
+            <!-- ── graphify result pill — bottom ── -->
+            <rect x="60" y="300" width="360" height="42" rx="3" fill="#0a3d42" stroke="#0d5c63" stroke-width="1.5"/>
+            <text x="240" y="316" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#a8dde0" letter-spacing="0.18em">RESULT</text>
+            <text x="240" y="334" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#ffffff">card-lock → fraud-rule → card-controls → card.locked</text>
+            <!-- arrow from SOT down to result -->
+            <line x1="240" y1="166" x2="240" y2="300" stroke="#0d5c63" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ag-acc)"/>
+
+            <!-- confident label -->
+            <text x="240" y="216" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#0d5c63" letter-spacing="0.14em">KNOWS BEHAVIOR</text>
+          </svg>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+        <div style="padding:16px 20px;border:1px solid var(--rule);border-top:none;border-right:none;font-family:var(--f-display);font-style:italic;font-size:14px;color:var(--paper-dim);opacity:0.6">
+          N reads · conflicting signals · hallucination risk
+        </div>
+        <div style="padding:16px 20px;border:1px solid var(--rule);border-top:none;font-family:var(--f-display);font-style:italic;font-size:14px;color:var(--accent)">
+          1 load · structured traversal · confident reasoning
+        </div>
+      </div>
+    </div>
+    <!-- ─── / AGENT ILLUSTRATION ─── -->
+
   </section>
 </div>
 
