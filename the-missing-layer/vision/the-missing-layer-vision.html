@@ -1766,7 +1766,7 @@ body::after{
 
 <!-- ─── VISION ─── -->
 <section class="section" id="vision">
-  <div class="chapter-mark">Chapter 01 · The Vision</div>
+  <div class="chapter-mark" id="chapter-01">Chapter 01 · The Vision</div>
   <p class="vision-statement">
     Create a repository-native <em>source of truth</em> that describes the current active behavior of every component, platform, and ecosystem.
   </p>
@@ -1798,7 +1798,7 @@ body::after{
 <!-- ─── PROBLEM ─── -->
 <div class="bucket-section">
   <section class="section" id="problem" style="padding:0">
-    <div class="chapter-mark">Chapter 02 · The Current Problem</div>
+    <div class="chapter-mark" id="chapter-02">Chapter 02 · The Current Problem</div>
     <div class="two-col">
       <div class="col-text">
         <h2>Most spec systems become <span class="strong">historical archives.</span></h2>
@@ -1840,7 +1840,7 @@ body::after{
 
 <!-- ─── GAP ─── -->
 <section class="section" id="gap">
-  <div class="chapter-mark">Chapter 03 · Where existing methods reach their edge</div>
+  <div class="chapter-mark" id="chapter-03">Chapter 03 · Where existing methods reach their edge</div>
 
   <div class="two-col">
     <div class="col-text">
@@ -1994,7 +1994,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── SCALE ─── -->
 <section class="section">
-  <div class="chapter-mark">Chapter 04 · Behavior is composable</div>
+  <div class="chapter-mark" id="chapter-04">Chapter 04 · Behavior is composable</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:900px;margin-bottom:32px">
     A component does not exist alone. <span style="font-weight:800">It composes upward.</span>
   </h2>
@@ -2025,7 +2025,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <!-- ─── INVERSION · Documentation imbalance ─── -->
 <div class="inversion-section" id="inversion">
   <section class="section" style="padding:0">
-    <div class="chapter-mark">Chapter 05 · The documentation imbalance</div>
+    <div class="chapter-mark" id="chapter-05">Chapter 05 · The documentation imbalance</div>
     <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(30px,4.5vw,62px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
       We document the <span style="font-weight:800">architecture</span> in detail.<br>
       We document the <em style="font-style:italic;color:var(--signal);font-weight:500">product</em> almost not at all.
@@ -2189,7 +2189,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <!-- ─── AGENTS ─── -->
 <div class="workflow" id="agents">
   <section class="section" style="padding:0">
-    <div class="chapter-mark">Chapter 06 · The AI agent perspective</div>
+    <div class="chapter-mark" id="chapter-06">Chapter 06 · The AI agent perspective</div>
     <h2>
       Without a source of truth, agents become <span class="strong">archaeologists.</span>
     </h2>
@@ -2232,68 +2232,62 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:14px 20px;border-bottom:1px solid var(--rule);color:var(--paper-dim);opacity:0.55">
             Today · scattered reads
           </div>
-          <svg viewBox="0 0 480 360" style="width:100%;display:block">
+          <svg viewBox="0 0 580 380" style="width:100%;display:block">
             <defs>
               <marker id="ag-arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                 <path d="M0,0 L6,3 L0,6 z" fill="#9b968c"/>
               </marker>
             </defs>
 
-            <!-- AI agent node, centre -->
-            <rect x="195" y="148" width="90" height="36" rx="2" fill="#3a3830" stroke="#9b968c" stroke-width="1.2"/>
-            <text x="240" y="170" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e8e4db" letter-spacing="0.1em">AI AGENT</text>
+            <!-- AI agent node, centre (cx=290) -->
+            <rect x="235" y="158" width="110" height="36" rx="2" fill="#3a3830" stroke="#9b968c" stroke-width="1.2"/>
+            <text x="290" y="180" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e8e4db" letter-spacing="0.1em">AI AGENT</text>
 
             <!-- ── specs top-left ── -->
-            <rect x="18" y="22" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="63" y="39" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">specs/?</text>
-            <!-- command pill -->
-            <rect x="8" y="56" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="66" y="71" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /spec -name "*.md"</text>
-            <line x1="100" y1="48" x2="204" y2="153" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="14" y="24" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="59" y="41" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">specs/?</text>
+            <rect x="10" y="58" width="130" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="75" y="73" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /spec -name "*.md"</text>
+            <line x1="104" y1="50" x2="242" y2="163" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- ── code top-right ── -->
-            <rect x="372" y="14" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="417" y="31" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">code/?</text>
-            <!-- command pill -->
-            <rect x="358" y="48" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="416" y="63" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "behavior" src/</text>
-            <line x1="372" y1="27" x2="278" y2="153" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="420" y="14" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="465" y="31" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">code/?</text>
+            <rect x="408" y="48" width="154" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="485" y="63" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "behavior" src/</text>
+            <line x1="420" y1="27" x2="338" y2="163" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- ── tests mid-right ── -->
-            <rect x="372" y="148" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="417" y="165" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">tests/?</text>
-            <!-- command pill -->
-            <rect x="358" y="182" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="416" y="197" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find . -name "*.test.*"</text>
-            <line x1="372" y1="161" x2="285" y2="166" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="426" y="158" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="471" y="175" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">tests/?</text>
+            <rect x="412" y="192" width="154" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="489" y="207" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find . -name "*.test.*"</text>
+            <line x1="426" y1="171" x2="345" y2="176" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- ── ADRs bottom-right ── -->
-            <rect x="372" y="268" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="417" y="285" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">adrs/?</text>
-            <!-- command pill -->
-            <rect x="356" y="302" width="118" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="415" y="317" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "adr" decisions/</text>
-            <line x1="372" y1="281" x2="278" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="420" y="284" width="90" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="465" y="301" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">adrs/?</text>
+            <rect x="406" y="318" width="154" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="483" y="333" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">grep -r "adr" decisions/</text>
+            <line x1="420" y1="297" x2="338" y2="194" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- ── proposals bottom-left ── -->
-            <rect x="10" y="268" width="104" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="62" y="285" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">proposals/?</text>
-            <!-- command pill -->
-            <rect x="6" y="302" width="116" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="64" y="317" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /changes -type f</text>
-            <line x1="114" y1="281" x2="204" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="10" y="284" width="116" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="68" y="301" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">proposals/?</text>
+            <rect x="10" y="318" width="130" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="75" y="333" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">find /changes -type f</text>
+            <line x1="126" y1="297" x2="242" y2="194" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- ── git log bottom-mid ── -->
-            <rect x="176" y="274" width="92" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
-            <text x="222" y="291" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">git log/?</text>
-            <!-- command pill -->
-            <rect x="162" y="308" width="120" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
-            <text x="222" y="323" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">git log --oneline --all</text>
-            <line x1="222" y1="274" x2="232" y2="184" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
+            <rect x="218" y="290" width="110" height="26" rx="2" fill="#e8e4db" stroke="#9b968c" stroke-width="1"/>
+            <text x="273" y="307" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3a3830">git log/?</text>
+            <rect x="198" y="324" width="150" height="22" rx="2" fill="#f5f2ec" stroke="#bab5aa" stroke-width="0.8"/>
+            <text x="273" y="339" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8.5" fill="#5a5650">git log --oneline --all</text>
+            <line x1="273" y1="290" x2="283" y2="194" stroke="#9b968c" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ag-arr)"/>
 
             <!-- watermark + label -->
-            <text x="240" y="128" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="32" fill="#9b968c" opacity="0.15" font-weight="800">?</text>
-            <text x="240" y="220" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9b968c" letter-spacing="0.14em">GUESSES BEHAVIOR</text>
+            <text x="290" y="136" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="32" fill="#9b968c" opacity="0.15" font-weight="800">?</text>
+            <text x="290" y="232" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9b968c" letter-spacing="0.14em">GUESSES BEHAVIOR</text>
           </svg>
         </div>
 
@@ -2378,13 +2372,19 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── PROPOSAL ─── -->
 <section class="section" id="proposal">
-  <div class="chapter-mark">Chapter 07 · The proposal</div>
+  <div class="chapter-mark" id="chapter-07">Chapter 07 · The proposal</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:1000px;margin-bottom:24px">
     A <em style="font-style:italic;color:var(--accent);font-weight:500">repository-native</em> behavioral knowledge layer.
   </h2>
-  <p style="font-size:17px;line-height:1.75;color:var(--paper-dim);max-width:680px;margin-bottom:48px">
+  <p style="font-size:17px;line-height:1.75;color:var(--paper-dim);max-width:680px;margin-bottom:24px">
     Not a replacement for existing methodologies — a missing layer on top of them. Versioned alongside your code, navigable by humans and agents alike.
   </p>
+  <div style="max-width:680px;margin-bottom:48px;padding:16px 20px;border-left:2px solid var(--accent);background:var(--bg-soft)">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:8px">◈ Note on structure</span>
+    <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);margin:0">
+      The folder layout shown below is a reference — not a prescription. What matters is the <strong style="color:var(--paper)">concept</strong>, not the path names: a place for <strong style="color:var(--accent)">current behavior as source of truth</strong>, a place for <strong style="color:var(--accent)">changes</strong>, a place for <strong style="color:var(--accent)">decisions</strong>, a place for <strong style="color:var(--accent)">traceability</strong>, and a place for the <strong style="color:var(--accent)">graph</strong>. How you organize them in your repo is up to you.
+    </p>
+  </div>
 
   <div class="repo-section">
     <div>
@@ -2438,7 +2438,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── TRACE ─── -->
 <section class="section">
-  <div class="chapter-mark">Chapter 08 · Where traceability belongs</div>
+  <div class="chapter-mark" id="chapter-08">Chapter 08 · Where traceability belongs</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:32px">
     Tags are powerful. <span style="font-weight:800">Where you put them matters more.</span>
   </h2>
@@ -2548,7 +2548,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── GRAPH ─── -->
 <section class="section">
-  <div class="chapter-mark">Chapter 09 · The knowledge graph</div>
+  <div class="chapter-mark" id="chapter-09">Chapter 09 · The knowledge graph</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
     Behavior, specs, components, tests, APIs, decisions — <em style="color:var(--accent);font-style:italic;font-weight:500">connected.</em>
   </h2>
@@ -2764,7 +2764,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── CHANGE FLOW ─── -->
 <section class="section">
-  <div class="chapter-mark">Chapter 10 · How a new change works</div>
+  <div class="chapter-mark" id="chapter-10">Chapter 10 · How a new change works</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
     Every change starts by <span style="font-weight:800">comparing proposed behavior against current behavior.</span>
   </h2>
@@ -2807,7 +2807,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── CH 13: PRODUCT & TECHNOLOGY COLLABORATION ─── -->
 <section class="section" id="collaboration">
-  <div class="chapter-mark">Chapter 13 · Product and Technology Collaboration</div>
+  <div class="chapter-mark" id="chapter-13">Chapter 13 · Product and Technology Collaboration</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
     Neither product nor engineering<br>can maintain this layer <em style="color:var(--accent);font-style:italic">alone.</em>
   </h2>
@@ -3032,7 +3032,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── CH 14: LONG-TERM VISION ─── -->
 <section class="section" id="long-term">
-  <div class="chapter-mark">Chapter 14 · Long-Term Vision</div>
+  <div class="chapter-mark" id="chapter-14">Chapter 14 · Long-Term Vision</div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
     From managing specifications<br>
     to <em style="color:var(--accent);font-style:italic">operational behavioral modeling.</em>
