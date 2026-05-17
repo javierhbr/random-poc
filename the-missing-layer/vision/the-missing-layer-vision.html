@@ -899,21 +899,27 @@ body::after{
 @media (max-width:900px){.repo-section{grid-template-columns:1fr;gap:48px}}
 .tree{
   font-family:'JetBrains Mono', monospace;
-  font-size:13px;line-height:2;
+  font-size:13px;line-height:1.7;
   background:var(--bg-soft);
   border:1px solid var(--rule);
   padding:36px;
   box-shadow:8px 8px 0 var(--paper);
   position:relative;color:var(--paper-dim);
+  overflow-x:auto;
+}
+.tree pre{
+  margin:0;font-family:inherit;font-size:inherit;
+  line-height:inherit;white-space:pre;
+  background:none;border:none;padding:0;
 }
 .tree::before{
   content:"/repo";
   position:absolute;top:10px;right:18px;
   font-size:10px;color:var(--accent);letter-spacing:0.25em;
 }
-.tree .dir{color:var(--accent);font-weight:600;display:block}
-.tree .star{color:var(--accent-2);margin-left:10px;font-style:italic}
-.tree .file{color:var(--paper-dim);display:block}
+.tree .dir{color:var(--accent);font-weight:600}
+.tree .star{color:var(--accent-2);font-style:italic}
+.tree .file{color:var(--paper-dim)}
 .tree .indent-1{padding-left:22px}
 .tree .indent-2{padding-left:44px}
 .tree .indent-3{padding-left:66px}
@@ -925,6 +931,50 @@ body::after{
   font-family:var(--f-display);font-style:italic;
   font-size:18px;line-height:1.55;color:var(--paper);
 }
+
+/* ─── METHODOLOGY COMPARISON TABLE ─── */
+.meth-table{
+  display:grid;
+  grid-template-columns:1fr 2fr 1.1fr 1.8fr;
+  border:1px solid var(--rule);
+  max-width:1000px;
+  font-size:13px;
+}
+.meth-head{display:contents}
+.meth-head > span{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--accent);padding:12px 18px;
+  background:var(--bg-elev);
+  border-bottom:1px solid var(--rule);
+}
+.meth-head > span:not(:last-child){border-right:1px solid var(--rule)}
+.meth-row{display:contents}
+.meth-row > span{
+  padding:16px 18px;
+  border-bottom:1px solid var(--rule-soft);
+  color:var(--paper-dim);line-height:1.5;
+}
+.meth-row:last-child > span{border-bottom:none}
+.meth-row > span:not(:last-child){border-right:1px solid var(--rule-soft)}
+.meth-name{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  font-weight:600;color:var(--paper) !important;
+}
+.meth-path{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--accent) !important;
+}
+.meth-badge{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  display:inline-block;padding:3px 8px;
+  border:1px solid currentColor;
+  align-self:start;margin-top:2px;
+}
+.meth-badge.native{color:var(--accent)}
+.meth-badge.native-ish{color:var(--accent-2)}
+.meth-badge.custom{color:var(--paper-dim)}
 
 /* ─── COLLABORATION (Ch 13) ─── */
 .collab-principles{
@@ -1896,6 +1946,50 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
   <p style="font-family:var(--f-display);font-style:italic;font-size:clamp(20px,2.2vw,26px);line-height:1.5;max-width:880px;margin-top:48px;color:var(--paper-dim);padding-left:24px;border-left:3px solid var(--accent)">
     The missing layer this paper proposes <em style="font-style:italic;color:var(--accent);font-weight:500;font-style:normal;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px">complements LID</em> — not replaces it. LID gives you the arrow inside a project. The behavioral source of truth and graph extend that thinking across many projects, the platform, and the broader ecosystem.
   </p>
+
+  <!-- Methodology comparison table -->
+  <div style="max-width:920px;margin-top:80px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">Where current state lives today</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:16px">
+      Side-by-side: how each methodology keeps current state.
+    </h3>
+    <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:720px;margin-bottom:32px">
+      None of these methodologies are wrong. Each handles current-state differently — some natively, some by convention. The gap is that none make it the <em>primary</em> artifact.
+    </p>
+  </div>
+
+  <div class="meth-table">
+    <div class="meth-head">
+      <span>Methodology</span>
+      <span>Best current-state location</span>
+      <span>Native or custom?</span>
+      <span>How it gets updated</span>
+    </div>
+    <div class="meth-row">
+      <span class="meth-name">OpenSpec</span>
+      <span class="meth-path">openspec/specs/card-balance/spec.md</span>
+      <span class="meth-badge native">Native</span>
+      <span>Archive / merge accepted change deltas</span>
+    </div>
+    <div class="meth-row">
+      <span class="meth-name">LID + EARS</span>
+      <span class="meth-path">docs/specs/card-balance.ears.md<br><span style="opacity:0.6;font-size:11px">+ trace graph</span></span>
+      <span class="meth-badge native-ish">Native-ish</span>
+      <span>Update requirement IDs, tests, and @spec links</span>
+    </div>
+    <div class="meth-row">
+      <span class="meth-name">Spec Kit</span>
+      <span class="meth-path">product-state/card-balance.md<br><span style="opacity:0.6;font-size:11px">or specs/current/card-balance.md</span></span>
+      <span class="meth-badge custom">Custom recommended</span>
+      <span>Generate from accepted feature specs</span>
+    </div>
+    <div class="meth-row">
+      <span class="meth-name">BMAD</span>
+      <span class="meth-path">docs/current-state/card-balance.md</span>
+      <span class="meth-badge custom">Custom recommended</span>
+      <span>Reconcile PRD, architecture, stories, QA</span>
+    </div>
+  </div>
 </section>
 
 <!-- ─── SCALE ─── -->
@@ -2139,9 +2233,9 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
   <div class="repo-section">
     <div>
-      <div class="tree">
+      <div class="tree"><pre>
 <span class="dir">/spec</span>
-<div style="display:flex;align-items:baseline"><span class="dir indent-1">/current-behavior</span><span class="star">◈ source of truth</span></div>
+<span class="dir indent-1">/current-behavior  <span class="star">◈ source of truth</span></span>
 <span class="file indent-2">platform.md</span>
 <span class="dir indent-2">components/</span>
 <span class="file indent-3">card-controls.md</span>
@@ -2161,7 +2255,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <span class="file indent-2">rules.yaml</span>
 <span class="file indent-2">flows.yaml</span>
 <span class="dir indent-1">/graph</span>
-<span class="file indent-2">graph.json</span>
+<span class="file indent-2">graph.json</span></pre>
       </div>
     </div>
     <div>

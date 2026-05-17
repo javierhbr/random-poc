@@ -152,6 +152,21 @@ Yet LID still allows multiple temporal states to coexist: current functionality,
 
 The architectural difference introduced by this proposal is the explicit separation between **historical evolution** and **current operational state**. Specifications continue to track evolution. A dedicated, machine-readable Source of Truth describes current behavior. The two are linked, but they are not commingled.
 
+### 6.4 Side-by-Side: Where the Current State Lives
+
+Different Spec-Driven methodologies place the current operational state in different parts of the repository, and they update it through different mechanisms. The table below summarizes where the current state lives across four representative frameworks — and whether that location is native to the methodology or has to be introduced as a custom convention.
+
+| Methodology | Best Current-State Location | Native or Custom? | How It Gets Updated |
+|-------------|------------------------------|-------------------|----------------------|
+| **OpenSpec** | `openspec/specs/card-balance/spec.md` | Native | Archive / merge accepted change deltas |
+| **LID + EARS** | `docs/specs/card-balance.ears.md` plus trace graph | Native-ish | Update requirement IDs, tests, and `@spec` links |
+| **Spec Kit** | `product-state/card-balance.md` or `specs/current/card-balance.md` | Custom recommended | Generate from accepted feature specs |
+| **BMAD** | `docs/current-state/card-balance.md` | Custom recommended | Reconcile PRD, architecture, stories, QA |
+
+Two patterns emerge from this comparison. First, **only OpenSpec treats the current state as a first-class native artifact**; everywhere else, the location is either implicit (LID + EARS, where the current state is reconstructed from requirement IDs and trace graphs) or explicitly bolted on as a convention (Spec Kit, BMAD). Second, the update mechanisms vary in how mechanically reliable they are: archiving accepted change deltas (OpenSpec) is the most deterministic; reconciling PRDs, architecture, stories, and QA artifacts after the fact (BMAD) is the most prone to drift.
+
+The framework proposed in this paper — the Four Houses of Knowledge with `/spec/current-behavior` as a dedicated, native house — generalizes the OpenSpec pattern and makes it methodology-agnostic. Any of the frameworks above can adopt this structure: OpenSpec already implies it, LID + EARS can promote requirement files into it, Spec Kit and BMAD can formalize the convention they already recommend. The current state stops being an artifact-of-convention and becomes the central house of knowledge that all other artifacts feed into.
+
 ---
 
 ## 7. Why This Matters at Enterprise Scale
