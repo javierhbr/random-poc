@@ -342,7 +342,82 @@ Create /spec/changes/<initiative> ──► Draft EARS specs
 
 ---
 
-## 13. Long-Term Vision
+## 13. Product and Technology Collaboration
+
+A Current-State Behavioral Source of Truth cannot be sustained by either product or engineering alone. Product organizations understand *what the business is supposed to do*; engineering organizations understand *what the system actually does at runtime*. The framework only stays consistent when both sides operate against the same artifact, in the same repository, under a shared contract.
+
+This section defines how product and technology roles co-own the four houses of knowledge, what each role contributes at every stage of the workflow, and what governance mechanisms keep the layer trustworthy over time.
+
+### 13.1 Shared Operating Principles
+
+Before describing role-specific responsibilities, three principles must be agreed upon across product and engineering:
+
+- **One artifact, two readers.** The specification layer is a single source of truth that must be readable by a product manager during discovery *and* by an engineer (or AI agent) during implementation. Neither side maintains a private fork.
+- **Product owns intent. Engineering owns truth.** Product defines what *should* be true. Engineering ensures the specification reflects what *is* true after deployment. Drift between intent and truth is the explicit signal the framework is designed to surface.
+- **Behavior outlives implementation.** When product behavior is stable, engineering is free to refactor, migrate, and re-platform without renegotiating with the business. This is the contract product and engineering exchange for the discipline of maintaining the layer.
+
+### 13.2 Role Ownership Across the Four Houses
+
+Each of the Four Houses of Knowledge has a primary owner, a secondary contributor, and an approval gate. Ownership is shared but not symmetrical — the framework fails when no single role is accountable for a given house.
+
+| House | Primary Owner | Secondary Contributor | Approval Gate |
+|-------|---------------|----------------------|---------------|
+| **Current Behavior** (`/spec/current-behavior`) | Engineering Lead / Tech Lead | Product Manager | Both required before promotion |
+| **Change History** (`/spec/changes`) | Product Manager | Engineering Lead, Architect | Product signs off on proposal; Engineering signs off on design |
+| **Decisions** (`/spec/decisions`) | Architect / Staff Engineer | Engineering Lead, Product (for business-impacting ADRs) | Architect approves; Product reviews when business behavior is affected |
+| **Traceability & Graph** (`/spec/traceability`, `/spec/graph`) | Platform / DevEx Team | All contributors | Automated regeneration; human review on contract breaks |
+
+Product managers do not write `current-behavior` directly — engineers do, because only engineers can guarantee the specification matches deployed code. But product managers *read* and *validate* it continuously, because only product owns whether that behavior is the right behavior.
+
+### 13.3 Role Responsibilities Across the Workflow
+
+The five-stage operational workflow defined in §12 becomes a coordination protocol when mapped to roles. The following table makes the handoffs explicit:
+
+| Stage | Product Manager | Engineering Lead | Architect | QA / Verification |
+|-------|----------------|------------------|-----------|-------------------|
+| **Discovery** | Authors `proposal.md`: business value, target users, success criteria | Reviews feasibility; flags affected components | Identifies cross-platform impact | Drafts acceptance criteria from proposal |
+| **Validation** | Validates EARS clauses match business intent | Validates technical accuracy of preconditions and triggers | Validates impact on L02/L01 flows | Validates that requirements are testable |
+| **Implementation** | Available for clarification; does not approve code | Writes execution logic, links `@spec` anchors | Reviews architectural conformance | Builds test suites against EARS clauses |
+| **Graph Regeneration** | Reviews surfaced dependency changes for business impact | Resolves contract breaks before merge | Reviews structural changes to the graph | Verifies test coverage against new graph nodes |
+| **Promotion** | Approves promotion to `current-behavior` | Executes promotion; archives change directory | Records any new ADRs | Confirms regression suite passes against new current-behavior |
+
+The most important handoff is the final one: **promotion requires explicit product sign-off**. This is not a bureaucratic formality. It is the mechanism that keeps the current-behavior layer trustworthy. If product does not recognize the specification as describing the live system, the specification is by definition wrong — even if the code works.
+
+### 13.4 Communication and Cadence
+
+The framework introduces three lightweight collaboration rituals that are sufficient to keep product and engineering aligned without imposing process overhead:
+
+- **Spec triage (weekly, 30 minutes).** Product and engineering leads review `/spec/changes/` together. Goal: agree on which proposals advance to validation, which need rework, and which are deferred. This replaces unstructured backlog grooming with a behavior-first conversation.
+- **Promotion review (per release).** Before any change is promoted to `current-behavior`, product and engineering jointly confirm the specification matches deployed behavior. This is typically a 15-minute walkthrough tied to deployment.
+- **Behavioral retrospective (quarterly).** Product, engineering, and architecture review the current-behavior layer at the L03 / L02 levels. Goal: identify drift, deprecated behaviors still documented as active, and gaps where tribal knowledge has not been captured.
+
+These three rituals replace what is typically a sprawling ecosystem of stand-ups, PRDs, design reviews, and tribal-knowledge transfers. The artifact is the meeting agenda.
+
+### 13.5 The Anti-Pattern: Documentation as Engineering Tax
+
+A common failure mode is for product to treat the specification layer as engineering's responsibility and for engineering to treat it as a documentation tax. When this happens, the layer becomes the same kind of historical archive the framework was designed to prevent — only with a cleaner directory structure.
+
+Three signals indicate the collaboration is breaking down:
+
+- Product managers ask engineers "what does the system do?" instead of reading `/spec/current-behavior`.
+- Engineers update code without updating the specification, and CI/CD does not catch it.
+- Architecture decisions are made in chat messages or meetings without producing an ADR.
+
+The remedy is not more process. It is enforcing the contract that **a change is not deployed until the specification is updated and approved by both sides**. This must be a build-pipeline gate, not a guideline.
+
+### 13.6 The Role of AI Agents in the Collaboration
+
+When the framework is healthy, AI agents become a productive third participant in the product-engineering loop:
+
+- During discovery, agents can translate informal product narratives into EARS-compliant draft specifications, which product and engineering then refine.
+- During implementation, agents can verify that proposed code changes do not break contracts declared in `current-behavior`.
+- During promotion, agents can compare the draft specification against the diff being merged and flag mismatches before product is asked to sign off.
+
+The agent is not a replacement for either role. It is a tool that lowers the cost of maintaining the layer, which is the single biggest objection product and engineering will raise when the framework is first introduced.
+
+---
+
+## 14. Long-Term Vision
 
 The long-term goal of this framework is not better documentation, better specs, or better governance in isolation. It is **operational behavioral modeling for AI-native enterprises**. Five trajectories follow from this foundation.
 
@@ -354,7 +429,7 @@ The long-term goal of this framework is not better documentation, better specs, 
 
 ---
 
-## 14. Conclusion
+## 15. Conclusion
 
 Implementing a Current-State Behavioral Source of Truth is a critical architectural step for enterprises scaling software operations in the era of AI-assisted engineering. Syntactic frameworks like EARS successfully address natural-language ambiguity. Methodologies like LID align code with business intent. Neither natively prevents the temporal drift that occurs as codebases mature. Unmanaged specifications inevitably degrade into historical archives, increasing maintenance cost and driving up hallucination risk for autonomous development agents.
 

@@ -200,7 +200,7 @@ body::after{
   z-index:2;
 }
 .chapter-mark{
-  font-family:'JetBrains Mono', monospace;
+  font-family:var(--f-body);
   font-size:11px;
   letter-spacing:0.22em;
   text-transform:uppercase;
@@ -218,8 +218,8 @@ body::after{
   min-height:92vh;
   display:grid;
   grid-template-columns:1fr;
-  align-content:center;
-  padding-top:80px;
+  align-content:start;
+  padding-top:32px;
   padding-bottom:60px;
   position:relative;
 }
@@ -238,7 +238,7 @@ body::after{
 .hero h1{
   font-family:var(--f-display);
   font-weight:var(--f-display-weight);
-  font-size:clamp(40px, 7.5vw, 110px);
+  font-size:clamp(36px, 5.5vw, 80px);
   line-height:0.95;
   letter-spacing:var(--f-display-ls);
   margin-bottom:44px;
@@ -314,8 +314,8 @@ body::after{
 
 /* ─── PULLQUOTE ──────────────────────────── */
 .pullquote{
-  background:var(--paper);
-  color:var(--bg);
+  background:var(--bg-elev);
+  color:var(--paper);
   padding:90px 32px;
   margin:0;
   position:relative;
@@ -330,7 +330,7 @@ body::after{
   font-size:clamp(28px, 4.6vw, 56px);
   line-height:1.18;
   letter-spacing:var(--f-display-ls);
-  color:var(--bg);
+  color:var(--paper);
 }
 .pullquote-inner::before{
   content:"";display:block;
@@ -345,7 +345,7 @@ body::after{
   letter-spacing:0.22em;
   text-transform:uppercase;
   margin-top:36px;
-  color:var(--rule);
+  color:var(--paper-dim);
 }
 
 /* ─── VISION CARDS ────────────────────────── */
@@ -580,7 +580,7 @@ body::after{
 .shelf-side.thin h6{color:var(--signal)}
 .shelf-side .count{
   font-family:var(--f-display);
-  font-size:48px;font-weight:var(--f-display-weight);line-height:1;
+  font-size:20px;font-weight:var(--f-display-weight);line-height:1;
   letter-spacing:-0.03em;
   margin-bottom:16px;
 }
@@ -593,31 +593,31 @@ body::after{
 }
 /* Stacked "documents" — visual metaphor */
 .stack{
-  display:flex;flex-direction:column;gap:4px;
+  display:flex;flex-direction:column;gap:3px;
   margin-top:8px;
 }
 .stack .doc{
-  height:14px;
+  height:26px;
   background:var(--bg-elev);
   border-left:3px solid var(--accent-2);
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;line-height:14px;
-  padding-left:10px;
-  color:var(--paper-dim);
+  font-family:var(--f-body);
+  font-size:13px;line-height:26px;
+  padding-left:12px;
+  color:var(--paper);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .shelf-side.thin .stack .doc{
   border-left-color:var(--signal);
-  opacity:0.7;
+  opacity:1;
 }
-.shelf-side.thin .stack .doc.faint{opacity:0.3}
+.shelf-side.thin .stack .doc.faint{opacity:0.55}
 .shelf-side.thin .empty-row{
-  height:14px;
+  height:26px;
   border-left:3px dashed var(--rule);
-  padding-left:10px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;line-height:14px;
-  color:#8a8070;font-style:italic;
+  padding-left:12px;
+  font-family:var(--f-body);
+  font-size:13px;line-height:26px;
+  color:var(--paper-dim);font-style:italic;
 }
 
 /* Imbalance scale */
@@ -678,9 +678,9 @@ body::after{
 .inversion-lede{
   font-family:var(--f-display);
   font-weight:var(--f-display-weight);
-  font-style:italic;
-  font-size:clamp(28px, 4vw, 44px);
-  line-height:1.25;
+  font-style:normal;
+  font-size:clamp(18px, 2.2vw, 26px);
+  line-height:1.5;
   letter-spacing:-0.015em;
   max-width:880px;
   margin-bottom:64px;
@@ -742,7 +742,7 @@ body::after{
   letter-spacing:0.01em;
 }
 .inv-col.after .inv-flow .node-row{
-  background:rgba(13,92,99,0.06);
+  background:var(--highlight);
 }
 .inv-flow .arrow{
   text-align:center;
@@ -829,7 +829,7 @@ body::after{
 
 /* ─── WORKFLOW ────────────────────────────── */
 .workflow{
-  background:var(--paper);color:var(--bg);
+  background:var(--bg-soft);color:var(--paper);
   margin:0 -32px;padding:110px 32px;
   position:relative;overflow:hidden;
   border-top:1px solid var(--rule);
@@ -842,7 +842,7 @@ body::after{
   font-weight:var(--f-display-weight);
   font-size:clamp(36px, 5vw, 64px);
   line-height:1.1;letter-spacing:-0.025em;
-  margin-bottom:64px;max-width:900px;color:var(--bg);
+  margin-bottom:64px;max-width:900px;color:var(--paper);
 }
 .workflow h2 .strong{font-weight:800;color:var(--accent)}
 .workflow h2 em{font-style:italic}
@@ -854,24 +854,25 @@ body::after{
 .flow-col h3{
   font-family:'JetBrains Mono', monospace;
   font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
-  padding-bottom:18px;border-bottom:1px solid var(--bg);
-  margin-bottom:28px;color:var(--bg);
+  padding-bottom:18px;border-bottom:1px solid var(--rule);
+  margin-bottom:28px;color:var(--paper-dim);
 }
 .flow-col.before h3{opacity:0.6}
-.flow-col.after h3 .label{color:var(--paper);background:var(--bg);padding:3px 8px;margin-left:8px;border-radius:0}
+.flow-col.after h3 .label{color:var(--bg);background:var(--accent);padding:3px 8px;margin-left:8px;border-radius:0}
 .flow-step{
   padding:14px 20px;margin-bottom:8px;
   font-family:'JetBrains Mono', monospace;
   font-size:13px;
-  border-left:2px solid var(--rule-soft);
+  border-left:2px solid var(--rule);
   display:flex;align-items:center;gap:14px;
   transition:all 0.2s;
-  background:rgba(250,248,244,0.04);color:var(--bg);
+  background:var(--bg);color:var(--paper-dim);
 }
-.flow-col.before .flow-step{opacity:0.7}
+.flow-col.before .flow-step{opacity:0.6}
 .flow-col.after .flow-step{
-  background:rgba(13,92,99,0.18);
+  background:var(--bg);
   border-left-color:var(--accent);
+  color:var(--paper);
 }
 .flow-step .num{
   font-size:10px;letter-spacing:0.22em;
@@ -881,14 +882,14 @@ body::after{
   margin-top:24px;padding-top:24px;
   border-top:1px dashed var(--rule);
   font-family:var(--f-display);font-style:italic;
-  font-size:16px;line-height:1.5;color:#8a8070;
+  font-size:16px;line-height:1.5;color:var(--paper-dim);
 }
 .flow-col.after .summary{
   margin-top:24px;padding-top:24px;
   border-top:1px dashed var(--accent);
   font-family:var(--f-display);font-style:italic;
   font-size:16px;line-height:1.5;
-  color:var(--bg);font-weight:600;
+  color:var(--paper);font-weight:600;
 }
 
 /* ─── REPO ──────────────────────── */
@@ -910,9 +911,9 @@ body::after{
   position:absolute;top:10px;right:18px;
   font-size:10px;color:var(--accent);letter-spacing:0.25em;
 }
-.tree .dir{color:var(--accent);font-weight:600}
+.tree .dir{color:var(--accent);font-weight:600;display:block}
 .tree .star{color:var(--accent-2);margin-left:10px;font-style:italic}
-.tree .file{color:var(--paper-dim)}
+.tree .file{color:var(--paper-dim);display:block}
 .tree .indent-1{padding-left:22px}
 .tree .indent-2{padding-left:44px}
 .tree .indent-3{padding-left:66px}
@@ -924,6 +925,44 @@ body::after{
   font-family:var(--f-display);font-style:italic;
   font-size:18px;line-height:1.55;color:var(--paper);
 }
+
+/* ─── TL;DR BLOCK ─── */
+.tldr-block{
+  margin-top:40px;margin-bottom:0;
+  border:1px solid var(--rule);
+  background:var(--bg-soft);
+  max-width:760px;
+}
+.tldr-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--accent);padding:14px 24px;
+  border-bottom:1px solid var(--rule);
+}
+.tldr-rows{border-bottom:1px solid var(--rule)}
+.tldr-row{
+  display:flex;gap:20px;align-items:baseline;
+  padding:14px 24px;
+  border-bottom:1px solid var(--rule-soft);
+}
+.tldr-row:last-child{border-bottom:none}
+.tldr-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--accent);
+  letter-spacing:0.15em;flex-shrink:0;min-width:24px;
+  padding-top:2px;
+}
+.tldr-text{
+  font-size:14px;line-height:1.6;color:var(--paper-dim);
+}
+.tldr-text strong{color:var(--accent);font-weight:600}
+.tldr-text em{color:var(--paper);font-style:italic}
+.tldr-principle{
+  font-family:var(--f-display);font-style:italic;
+  font-size:14px;line-height:1.55;
+  color:var(--paper);padding:14px 24px;
+}
+.tldr-principle strong{color:var(--accent)}
 
 /* ─── TWO-LEVEL TRACEABILITY ─── */
 .trace-principle{
@@ -1387,7 +1426,7 @@ body::after{
 }
 .final h2{
   font-family:var(--f-display);font-weight:var(--f-display-weight);
-  font-size:clamp(48px, 9vw, 144px);
+  font-size:clamp(36px, 5.5vw, 80px);
   line-height:0.96;letter-spacing:-0.03em;
   margin-bottom:52px;max-width:1100px;margin-left:auto;margin-right:auto;
 }
@@ -1481,6 +1520,34 @@ body::after{
   <p class="hero-deck">
     From historical specs to a living source of truth for what the system <em>currently</em> does — for humans, and for the agents that will read it.
   </p>
+
+  <div class="tldr-block">
+    <div class="tldr-label">TL;DR — five things to know</div>
+    <div class="tldr-rows">
+      <div class="tldr-row">
+        <span class="tldr-num">01</span>
+        <span class="tldr-text">SDD methodologies — OpenSpec, EARS, LID — excel at change management and traceability. They do not maintain what the system <em>currently</em> does.</span>
+      </div>
+      <div class="tldr-row">
+        <span class="tldr-num">02</span>
+        <span class="tldr-text">Over time, spec repos become historical archives. Features, proposals, deprecations, and experiments accumulate. The current operational truth is nowhere.</span>
+      </div>
+      <div class="tldr-row">
+        <span class="tldr-num">03</span>
+        <span class="tldr-text">At enterprise scale — components inside platforms inside ecosystems — both humans and AI agents must reconstruct current behavior from code, ADRs, tickets, and tribal knowledge.</span>
+      </div>
+      <div class="tldr-row">
+        <span class="tldr-num">04</span>
+        <span class="tldr-text">The fix is a <strong>/current-behavior</strong> layer: a continuously maintained, repository-native representation of active behavior, business rules, flows, and operational contracts.</span>
+      </div>
+      <div class="tldr-row">
+        <span class="tldr-num">05</span>
+        <span class="tldr-text">Product behavior drives architecture — not the reverse. Sagas, CQRS, Redis, cloud migrations should support business behavior. The behavior layer stays stable underneath all of it.</span>
+      </div>
+    </div>
+    <div class="tldr-principle">A change is not complete until <strong>/current-behavior</strong> is updated.</div>
+  </div>
+
   <div class="hero-meta">
     <div><div class="label">Subject</div>Behavioral truth</div>
     <div><div class="label">Audience</div>Engineers &amp; AI agents</div>
@@ -1726,7 +1793,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <div class="inversion-section" id="inversion">
   <section class="section" style="padding:0">
     <div class="chapter-mark">Chapter 05 · The documentation imbalance</div>
-    <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(40px,5.5vw,72px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
+    <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(30px,4.5vw,62px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
       We document the <span style="font-weight:800">architecture</span> in detail.<br>
       We document the <em style="font-style:italic;color:var(--signal);font-weight:500">product</em> almost not at all.
     </h2>
@@ -1741,8 +1808,8 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
       <div class="doc-shelf-grid">
 
         <div class="shelf-side heavy">
-          <h6>What we write a lot of</h6>
-          <div class="count">82<span class="unit">% of pages</span></div>
+          <!-- <h6>What we write a lot of</h6> -->
+          <div class="count">What we write a lot of</div>
           <div class="stack">
             <div class="doc">ADR-001 · PCI tokenization strategy</div>
             <div class="doc">ADR-002 · event contracts (card events)</div>
@@ -1763,8 +1830,8 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
         </div>
 
         <div class="shelf-side thin">
-          <h6>What we barely write</h6>
-          <div class="count">18<span class="unit">% of pages</span></div>
+          <!-- <h6>What we barely write</h6> -->
+          <div class="count">What we barely write</div>
           <div class="stack">
             <div class="doc">What cardholder servicing is supposed to do</div>
             <div class="doc">How a locked card behaves, today</div>
@@ -1804,7 +1871,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     <div style="max-width:920px;margin-top:96px;margin-bottom:24px">
       <div class="chapter-mark" style="color:var(--accent-2)">Why this imbalance exists</div>
       <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(28px,3.8vw,42px);line-height:1.15;letter-spacing:-0.02em;color:var(--paper);margin-bottom:16px">
-        Methodologies drifted toward <em style="font-style:italic;color:var(--accent);font-weight:500">implementation.</em>
+        Methodologies drifted toward <em style="font-style:normal;color:var(--accent);font-weight:500">implementation.</em>
       </h3>
       <p style="font-size:16px;line-height:1.7;color:var(--paper-dim);max-width:760px">
         Over time, our writing optimized around <em>how</em> the system is built — components, infrastructure, patterns, resiliency. The <em>why</em> and the <em>what</em> of the product stopped being written down. Behavior moved into tribal memory.
@@ -1935,7 +2002,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     <div>
       <div class="tree">
 <span class="dir">/spec</span>
-<span class="dir indent-1">/current-behavior</span><span class="star">◈ source of truth</span>
+<div style="display:flex;align-items:baseline"><span class="dir indent-1">/current-behavior</span><span class="star">◈ source of truth</span></div>
 <span class="file indent-2">platform.md</span>
 <span class="dir indent-2">components/</span>
 <span class="file indent-3">card-controls.md</span>
@@ -1989,7 +2056,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
   </h2>
 
   <p class="trace-principle">
-    Tags like <em>@future</em>, <em>@rule</em>, <em>@adr</em> are useful for categorizing intent, decisions, and constraints — but they belong at the <em>specification layer</em>, not buried throughout the code.
+    Tags like <em>@future</em>, <em>@rule</em>, <em>@adr</em> are useful for categorizing intent, decisions, and constraints — but they belong at the <em>active behavior and specification layer</em>. In the code we just need <em>@spec</em>.
   </p>
 
   <!-- BAD vs GOOD code samples -->
