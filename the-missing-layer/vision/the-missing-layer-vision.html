@@ -926,6 +926,139 @@ body::after{
   font-size:18px;line-height:1.55;color:var(--paper);
 }
 
+/* ─── COLLABORATION (Ch 13) ─── */
+.collab-principles{
+  display:grid;grid-template-columns:1fr;gap:0;
+  border:1px solid var(--rule);max-width:860px;
+}
+.collab-principle{
+  display:flex;gap:28px;align-items:flex-start;
+  padding:28px 32px;border-bottom:1px solid var(--rule);
+}
+.collab-principle:last-child{border-bottom:none}
+.collab-principle-num{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--accent);letter-spacing:0.12em;
+  flex-shrink:0;min-width:20px;padding-top:3px;
+}
+.collab-principle-title{
+  font-family:var(--f-display);font-weight:600;
+  font-size:17px;margin-bottom:8px;color:var(--paper);
+}
+.collab-principle-body{
+  font-size:14px;line-height:1.7;color:var(--paper-dim);margin:0;
+}
+.collab-principle-body em{color:var(--paper);font-style:italic}
+
+.collab-table{
+  display:grid;grid-template-columns:1.4fr 1.6fr 1.6fr 1.8fr;
+  border:1px solid var(--rule);max-width:1000px;
+  font-size:13px;
+}
+.collab-table--5col{
+  grid-template-columns:1fr 1.4fr 1.4fr 1.2fr 1.2fr;
+  max-width:1100px;
+}
+.collab-table--3col{
+  grid-template-columns:1fr 1.6fr 2.2fr;
+  max-width:900px;
+}
+.collab-table-head{
+  display:contents;
+}
+.collab-table-head--5col,.collab-table-head--3col{display:contents}
+.collab-table-head > span,.collab-table-head--5col > span,.collab-table-head--3col > span{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--accent);padding:12px 16px;
+  background:var(--bg-elev);border-bottom:1px solid var(--rule);
+}
+.collab-table-head > span:not(:last-child),
+.collab-table-head--5col > span:not(:last-child),
+.collab-table-head--3col > span:not(:last-child){
+  border-right:1px solid var(--rule);
+}
+.collab-table-row{display:contents}
+.collab-table-row--5col,.collab-table-row--3col{display:contents}
+.collab-table-row > span,.collab-table-row--5col > span,.collab-table-row--3col > span{
+  padding:14px 16px;
+  border-bottom:1px solid var(--rule-soft);
+  color:var(--paper-dim);line-height:1.5;
+  font-size:13px;
+}
+.collab-table-row > span:not(:last-child),
+.collab-table-row--5col > span:not(:last-child),
+.collab-table-row--3col > span:not(:last-child){
+  border-right:1px solid var(--rule-soft);
+}
+.collab-table-row.accent > span{
+  background:var(--highlight);color:var(--paper);
+  border-bottom:none;
+}
+.collab-house,.collab-stage{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--accent);
+}
+.collab-house strong,.collab-stage{font-weight:600}
+
+.collab-rituals{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;border:1px solid var(--rule);max-width:1000px;
+}
+@media(max-width:860px){.collab-rituals{grid-template-columns:1fr}}
+.collab-ritual{
+  padding:28px 28px 32px;
+  border-right:1px solid var(--rule);
+}
+.collab-ritual:last-child{border-right:none}
+@media(max-width:860px){.collab-ritual{border-right:none;border-bottom:1px solid var(--rule)}}
+.collab-ritual-head{
+  margin-bottom:16px;
+}
+.collab-ritual-freq{
+  display:block;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-2);
+  margin-bottom:6px;
+}
+.collab-ritual-name{
+  display:block;
+  font-family:var(--f-display);font-weight:600;font-size:18px;
+  color:var(--paper);
+}
+.collab-ritual-body{
+  font-size:14px;line-height:1.7;color:var(--paper-dim);margin:0;
+}
+.collab-ritual-body code{
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);
+}
+
+/* ─── LONG-TERM VISION (Ch 14) ─── */
+.lt-trajectories{
+  display:grid;grid-template-columns:1fr;gap:0;
+  border:1px solid var(--rule);max-width:860px;
+}
+.lt-trajectory{
+  display:flex;gap:28px;align-items:flex-start;
+  padding:28px 32px;border-bottom:1px solid var(--rule);
+  transition:background 0.15s;
+}
+.lt-trajectory:last-child{border-bottom:none}
+.lt-trajectory:hover{background:var(--highlight)}
+.lt-num{
+  font-family:'JetBrains Mono',monospace;font-size:22px;
+  color:var(--rule);letter-spacing:-0.02em;
+  flex-shrink:0;min-width:32px;line-height:1;padding-top:4px;
+}
+.lt-title{
+  font-family:var(--f-display);font-weight:600;
+  font-size:18px;margin-bottom:8px;color:var(--paper);
+}
+.lt-body{
+  font-size:14px;line-height:1.7;color:var(--paper-dim);margin:0;
+}
+.lt-body em{font-style:italic;color:var(--paper)}
+
 /* ─── TL;DR BLOCK ─── */
 .tldr-block{
   margin-top:40px;margin-bottom:0;
@@ -1500,6 +1633,8 @@ body::after{
     <a href="#inversion">Inversion</a>
     <a href="#agents">Agents</a>
     <a href="#proposal">Proposal</a>
+    <a href="#collaboration">Collab</a>
+    <a href="#long-term">Long-term</a>
   </nav>
   <div class="mono" style="opacity:0.6">A WORKING PAPER · 2026</div>
 </header>
@@ -1522,7 +1657,7 @@ body::after{
   </p>
 
   <div class="tldr-block">
-    <div class="tldr-label">TL;DR — five things to know</div>
+    <div class="tldr-label">TL;DR — six things to know</div>
     <div class="tldr-rows">
       <div class="tldr-row">
         <span class="tldr-num">01</span>
@@ -1543,6 +1678,10 @@ body::after{
       <div class="tldr-row">
         <span class="tldr-num">05</span>
         <span class="tldr-text">Product behavior drives architecture — not the reverse. Sagas, CQRS, Redis, cloud migrations should support business behavior. The behavior layer stays stable underneath all of it.</span>
+      </div>
+      <div class="tldr-row">
+        <span class="tldr-num">06</span>
+        <span class="tldr-text"><strong>Product owns intent. Engineering owns implementation. Both own the truth.</strong> Drift between what the system <em>should</em> do and what it <em>does</em> after deployment is the explicit signal this framework is designed to surface.</span>
       </div>
     </div>
     <div class="tldr-principle">A change is not complete until <strong>/current-behavior</strong> is updated.</div>
@@ -2413,6 +2552,281 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     <div class="step-cell peak">
       <div class="step-num">STEP 08 — ◈</div>
       <div class="step-text">Update graph</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CH 13: PRODUCT & TECHNOLOGY COLLABORATION ─── -->
+<section class="section" id="collaboration">
+  <div class="chapter-mark">Chapter 13 · Product and Technology Collaboration</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
+    Neither product nor engineering<br>can maintain this layer <em style="color:var(--accent);font-style:italic">alone.</em>
+  </h2>
+  <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);max-width:720px;margin-bottom:48px">
+    Product understands what the business is supposed to do. Engineering understands what the system actually does at runtime. The framework stays consistent only when both sides operate against the same artifact, in the same repository, under a shared contract.
+  </p>
+
+  <!-- 13.1 Shared Operating Principles -->
+  <div style="max-width:920px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">13.1 · Shared Operating Principles</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      Three principles both sides must agree on first.
+    </h3>
+  </div>
+
+  <div class="collab-principles">
+    <div class="collab-principle">
+      <div class="collab-principle-num">I</div>
+      <div>
+        <div class="collab-principle-title">One artifact, two readers.</div>
+        <p class="collab-principle-body">The specification layer is a single source of truth that must be readable by a product manager during discovery <em>and</em> by an engineer during implementation. Neither side maintains a private fork.</p>
+      </div>
+    </div>
+    <div class="collab-principle">
+      <div class="collab-principle-num">II</div>
+      <div>
+        <div class="collab-principle-title">Product owns intent. Engineering owns implementation. Both own the truth.</div>
+        <p class="collab-principle-body">Product defines what <em>should</em> be true. Engineering ensures the specification reflects what <em>is</em> true after deployment. The truth of the system — what it does today — is a shared responsibility. Drift between intent and implementation is the explicit signal the framework is designed to surface.</p>
+      </div>
+    </div>
+    <div class="collab-principle">
+      <div class="collab-principle-num">III</div>
+      <div>
+        <div class="collab-principle-title">Behavior outlives implementation.</div>
+        <p class="collab-principle-body">When product behavior is stable, engineering is free to refactor, migrate, and re-platform without renegotiating with the business. This is the contract product and engineering exchange for the discipline of maintaining the layer.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13.2 Role Ownership Table -->
+  <div style="max-width:920px;margin-top:72px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">13.2 · Role Ownership Across the Four Houses</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      Shared but not symmetrical.
+    </h3>
+    <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);max-width:720px;margin-bottom:32px">
+      Each house has a primary owner, a secondary contributor, and an approval gate. The framework fails when no single role is accountable for a given house.
+    </p>
+  </div>
+
+  <div class="collab-table">
+    <div class="collab-table-head">
+      <span>House</span>
+      <span>Primary Owner</span>
+      <span>Secondary</span>
+      <span>Approval Gate</span>
+    </div>
+    <div class="collab-table-row accent">
+      <span class="collab-house"><strong>/current-behavior</strong></span>
+      <span>Engineering Lead / Tech Lead</span>
+      <span>Product Manager</span>
+      <span>Both required before promotion</span>
+    </div>
+    <div class="collab-table-row">
+      <span class="collab-house"><strong>/changes</strong></span>
+      <span>Product Manager</span>
+      <span>Engineering Lead, Architect</span>
+      <span>Product: proposal · Engineering: design</span>
+    </div>
+    <div class="collab-table-row">
+      <span class="collab-house"><strong>/decisions</strong></span>
+      <span>Architect / Staff Engineer</span>
+      <span>Engineering Lead, Product (business ADRs)</span>
+      <span>Architect approves; Product reviews on business impact</span>
+    </div>
+    <div class="collab-table-row">
+      <span class="collab-house"><strong>/traceability &amp; /graph</strong></span>
+      <span>Platform / DevEx Team</span>
+      <span>All contributors</span>
+      <span>Automated regen · Human review on contract breaks</span>
+    </div>
+  </div>
+  <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);max-width:760px;margin-top:20px;font-style:italic">
+    Product managers do not write <strong style="color:var(--accent)">/current-behavior</strong> directly — engineers do. But product managers read and validate it continuously, because only product owns whether that behavior is the <em>right</em> behavior.
+  </p>
+
+  <!-- 13.3 Workflow Handoffs -->
+  <div style="max-width:920px;margin-top:72px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">13.3 · Role Responsibilities Across the Workflow</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      Five stages. Explicit handoffs.
+    </h3>
+  </div>
+
+  <div class="collab-table collab-table--3col">
+    <div class="collab-table-head collab-table-head--3col">
+      <span>Stage</span>
+      <span>Product</span>
+      <span>Engineering</span>
+    </div>
+    <div class="collab-table-row collab-table-row--3col">
+      <span class="collab-stage">Discovery</span>
+      <span>Authors proposal: business value, target users, success criteria</span>
+      <span>Reviews feasibility; flags affected components; identifies cross-platform impact; drafts acceptance criteria</span>
+    </div>
+    <div class="collab-table-row collab-table-row--3col">
+      <span class="collab-stage">Validation</span>
+      <span>Validates EARS clauses match business intent</span>
+      <span>Validates technical accuracy of preconditions and triggers; confirms requirements are testable and L02/L01 impact is understood</span>
+    </div>
+    <div class="collab-table-row collab-table-row--3col">
+      <span class="collab-stage">Implementation</span>
+      <span>Available for clarification; does not approve code</span>
+      <span>Writes execution logic, links @spec anchors; reviews architectural conformance; builds test suites against EARS clauses</span>
+    </div>
+    <div class="collab-table-row collab-table-row--3col">
+      <span class="collab-stage">Graph regen</span>
+      <span>Reviews surfaced dependency changes for business impact</span>
+      <span>Resolves contract breaks before merge; reviews graph structural changes; verifies test coverage against new nodes</span>
+    </div>
+    <div class="collab-table-row collab-table-row--3col accent">
+      <span class="collab-stage">Promotion ◈</span>
+      <span><strong>Approves</strong> promotion to current-behavior</span>
+      <span>Executes promotion; archives change directory; records new ADRs; confirms regression suite passes</span>
+    </div>
+  </div>
+  <div class="infra-verdict" style="margin-top:24px;max-width:760px">
+    The most important handoff is the final one. <strong>Promotion requires explicit product sign-off.</strong> If product does not recognize the specification as describing the live system, the specification is by definition wrong — even if the code works.
+  </div>
+
+  <!-- 13.4 Cadence -->
+  <div style="max-width:920px;margin-top:72px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">13.4 · Communication and Cadence</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      Three rituals. No extra process.
+    </h3>
+  </div>
+
+  <div class="collab-rituals">
+    <div class="collab-ritual">
+      <div class="collab-ritual-head">
+        <span class="collab-ritual-freq">Weekly · 30 min</span>
+        <span class="collab-ritual-name">Spec triage</span>
+      </div>
+      <p class="collab-ritual-body">Product and engineering leads review <code>/spec/changes/</code> together. Agree which proposals advance to validation, which need rework, and which are deferred. Replaces unstructured backlog grooming with a behavior-first conversation.</p>
+    </div>
+    <div class="collab-ritual">
+      <div class="collab-ritual-head">
+        <span class="collab-ritual-freq">Per release · 15 min</span>
+        <span class="collab-ritual-name">Promotion review</span>
+      </div>
+      <p class="collab-ritual-body">Before any change is promoted to <code>current-behavior</code>, product and engineering jointly confirm the specification matches deployed behavior. Tied to deployment cadence.</p>
+    </div>
+    <div class="collab-ritual">
+      <div class="collab-ritual-head">
+        <span class="collab-ritual-freq">Quarterly</span>
+        <span class="collab-ritual-name">Behavioral retrospective</span>
+      </div>
+      <p class="collab-ritual-body">Product, engineering, and architecture review the current-behavior layer at L03/L02 levels. Identify drift, deprecated behaviors still documented as active, and gaps where tribal knowledge has not been captured.</p>
+    </div>
+  </div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:720px;margin-top:24px;font-family:var(--f-display);font-style:italic">
+    These three rituals replace a sprawling ecosystem of stand-ups, PRDs, design reviews, and tribal-knowledge transfers. The artifact is the meeting agenda.
+  </p>
+
+  <!-- 13.5 Anti-Pattern -->
+  <div style="max-width:920px;margin-top:72px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--signal)">13.5 · The Anti-Pattern</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      Documentation as engineering tax.
+    </h3>
+    <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);max-width:720px;margin-bottom:32px">
+      When we collectively treat the specification layer as someone else's responsibility, it quietly becomes the same historical archive the framework was designed to prevent — only with a cleaner directory structure.
+    </p>
+  </div>
+
+  <div class="inv-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);max-width:860px">
+    <div style="padding:32px;border-right:1px solid var(--rule)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--signal);margin-bottom:20px;display:flex;align-items:center;gap:8px"><span>⊗</span> Signals of breakdown</div>
+      <ul style="list-style:none;margin:0;padding:0">
+        <li style="font-size:14px;line-height:1.6;color:var(--paper-dim);padding:10px 0;border-bottom:1px dashed var(--rule)">Product asks engineers "what does the system do?" instead of reading <strong style="color:var(--paper)">/spec/current-behavior</strong></li>
+        <li style="font-size:14px;line-height:1.6;color:var(--paper-dim);padding:10px 0;border-bottom:1px dashed var(--rule)">Engineers update code without updating the specification — and CI/CD does not catch it</li>
+        <li style="font-size:14px;line-height:1.6;color:var(--paper-dim);padding:10px 0">Architecture decisions happen in chat messages or meetings without producing an ADR</li>
+      </ul>
+    </div>
+    <div style="padding:32px;background:var(--highlight)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:8px"><span>◈</span> The remedy</div>
+      <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);margin:0">The remedy is not more process. It is enforcing the contract that <strong style="color:var(--accent)">a change is not deployed until the specification is updated and approved by both sides.</strong></p>
+      <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);margin-top:16px">This must be a build-pipeline gate, not a guideline.</p>
+    </div>
+  </div>
+
+  <!-- 13.6 AI Agents in Collaboration -->
+  <div style="max-width:920px;margin-top:72px;margin-bottom:24px">
+    <div class="chapter-mark" style="color:var(--accent-2)">13.6 · The Role of AI Agents</div>
+    <h3 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(24px,3vw,36px);line-height:1.2;margin-bottom:20px">
+      A productive third participant.
+    </h3>
+  </div>
+
+  <div class="cards" style="grid-template-columns:repeat(3,1fr)">
+    <div class="card">
+      <div class="card-num">◈ Discovery</div>
+      <h3>Draft specifications</h3>
+      <p>Translate informal product narratives into EARS-compliant draft specifications, which product and engineering then refine.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">◈ Implementation</div>
+      <h3>Verify contracts</h3>
+      <p>Check that proposed code changes do not break contracts declared in <strong>/current-behavior</strong> before a human reviews the PR.</p>
+    </div>
+    <div class="card">
+      <div class="card-num">◈ Promotion</div>
+      <h3>Flag mismatches</h3>
+      <p>Compare the draft specification against the diff being merged and surface discrepancies before product is asked to sign off.</p>
+    </div>
+  </div>
+  <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);max-width:720px;margin-top:20px;font-style:italic">
+    The agent is not a replacement for either role. It lowers the cost of maintaining the layer — which is the single biggest objection product and engineering will raise when the framework is first introduced.
+  </p>
+</section>
+
+<!-- ─── CH 14: LONG-TERM VISION ─── -->
+<section class="section" id="long-term">
+  <div class="chapter-mark">Chapter 14 · Long-Term Vision</div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
+    From managing specifications<br>
+    to <em style="color:var(--accent);font-style:italic">operational behavioral modeling.</em>
+  </h2>
+  <p style="font-size:17px;line-height:1.75;color:var(--paper-dim);max-width:680px;margin-bottom:56px">
+    The long-term goal is not better documentation, better specs, or better governance in isolation. It is an operational behavioral model for AI-native enterprises. Five trajectories follow from this foundation.
+  </p>
+
+  <div class="lt-trajectories">
+    <div class="lt-trajectory">
+      <div class="lt-num">01</div>
+      <div>
+        <div class="lt-title">Composable enterprise behavior</div>
+        <p class="lt-body">When every component publishes its active behavior, enterprise-wide operations can be assembled programmatically rather than reverse-engineered from code and organizational memory.</p>
+      </div>
+    </div>
+    <div class="lt-trajectory">
+      <div class="lt-num">02</div>
+      <div>
+        <div class="lt-title">Stable behavior under shifting infrastructure</div>
+        <p class="lt-body">Cloud migrations, database changes, and architectural refactors become low-risk because business behavior is documented independently of implementation choices.</p>
+      </div>
+    </div>
+    <div class="lt-trajectory">
+      <div class="lt-num">03</div>
+      <div>
+        <div class="lt-title">AI agents as first-class consumers</div>
+        <p class="lt-body">Agents read a clean, current, machine-readable behavioral graph instead of triangulating from contradictory sources — dramatically improving the safety and economy of automated changes.</p>
+      </div>
+    </div>
+    <div class="lt-trajectory">
+      <div class="lt-num">04</div>
+      <div>
+        <div class="lt-title">Auditable governance</div>
+        <p class="lt-body">Compliance, ownership, and architectural constraints live in the specification layer, where they can be programmatically queried and audited without polluting source code.</p>
+      </div>
+    </div>
+    <div class="lt-trajectory">
+      <div class="lt-num">05</div>
+      <div>
+        <div class="lt-title">Cross-platform impact analysis</div>
+        <p class="lt-body">The L01–L04 hierarchy and the knowledge graph make it tractable to answer <em>"if I change this, what breaks?"</em> across an entire multi-platform ecosystem — without reverse-engineering the organization first.</p>
+      </div>
     </div>
   </div>
 </section>

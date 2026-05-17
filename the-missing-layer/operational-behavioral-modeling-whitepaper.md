@@ -353,7 +353,7 @@ This section defines how product and technology roles co-own the four houses of 
 Before describing role-specific responsibilities, three principles must be agreed upon across product and engineering:
 
 - **One artifact, two readers.** The specification layer is a single source of truth that must be readable by a product manager during discovery *and* by an engineer (or AI agent) during implementation. Neither side maintains a private fork.
-- **Product owns intent. Engineering owns truth.** Product defines what *should* be true. Engineering ensures the specification reflects what *is* true after deployment. Drift between intent and truth is the explicit signal the framework is designed to surface.
+- **Product owns intent. Engineering owns implementation. Both own the truth.** Product defines what the system *should* do. Engineering decides *how* it is built and ensures the code reflects what was agreed. The specification layer — the description of what the system actually does today — is co-owned: neither side alone can declare it correct. Product confirms the behavior is the right behavior; engineering confirms the behavior matches the deployed code. The framework is designed to surface drift between intent, implementation, and truth as soon as it appears.
 - **Behavior outlives implementation.** When product behavior is stable, engineering is free to refactor, migrate, and re-platform without renegotiating with the business. This is the contract product and engineering exchange for the discipline of maintaining the layer.
 
 ### 13.2 Role Ownership Across the Four Houses
@@ -367,7 +367,7 @@ Each of the Four Houses of Knowledge has a primary owner, a secondary contributo
 | **Decisions** (`/spec/decisions`) | Architect / Staff Engineer | Engineering Lead, Product (for business-impacting ADRs) | Architect approves; Product reviews when business behavior is affected |
 | **Traceability & Graph** (`/spec/traceability`, `/spec/graph`) | Platform / DevEx Team | All contributors | Automated regeneration; human review on contract breaks |
 
-Product managers do not write `current-behavior` directly — engineers do, because only engineers can guarantee the specification matches deployed code. But product managers *read* and *validate* it continuously, because only product owns whether that behavior is the right behavior.
+The `current-behavior` house is the clearest expression of joint ownership. Engineers do the writing — only they can guarantee the specification matches deployed code. Product reads and validates continuously — only they can confirm the behavior is the right behavior. Neither role alone can declare the specification true. Promotion to `current-behavior` therefore requires both signatures: engineering attesting *this is what the system does*, product attesting *this is what the system should do*.
 
 ### 13.3 Role Responsibilities Across the Workflow
 
@@ -379,9 +379,9 @@ The five-stage operational workflow defined in §12 becomes a coordination proto
 | **Validation** | Validates EARS clauses match business intent | Validates technical accuracy of preconditions and triggers | Validates impact on L02/L01 flows | Validates that requirements are testable |
 | **Implementation** | Available for clarification; does not approve code | Writes execution logic, links `@spec` anchors | Reviews architectural conformance | Builds test suites against EARS clauses |
 | **Graph Regeneration** | Reviews surfaced dependency changes for business impact | Resolves contract breaks before merge | Reviews structural changes to the graph | Verifies test coverage against new graph nodes |
-| **Promotion** | Approves promotion to `current-behavior` | Executes promotion; archives change directory | Records any new ADRs | Confirms regression suite passes against new current-behavior |
+| **Promotion** | Confirms behavior matches intent; co-signs promotion | Confirms code matches specification; co-signs promotion | Records any new ADRs | Confirms regression suite passes against new current-behavior |
 
-The most important handoff is the final one: **promotion requires explicit product sign-off**. This is not a bureaucratic formality. It is the mechanism that keeps the current-behavior layer trustworthy. If product does not recognize the specification as describing the live system, the specification is by definition wrong — even if the code works.
+The most important handoff is the final one: **promotion requires both signatures**. Engineering attests that the specification matches the deployed code. Product attests that the behavior is the behavior the business wants. Either signature alone is insufficient — and the framework treats their absence as a deployment blocker, not a paperwork delay. If product does not recognize the specification as describing the live system, the specification is wrong even if the code works. If engineering cannot confirm the code matches the specification, the specification is wrong even if the business is happy. Both signatures together are what makes `current-behavior` trustworthy.
 
 ### 13.4 Communication and Cadence
 
