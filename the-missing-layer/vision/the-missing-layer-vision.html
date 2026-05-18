@@ -212,6 +212,12 @@ body::after{
   content:"";display:inline-block;
   width:36px;height:1px;background:var(--accent);
 }
+.chapter-mark a{
+  color:inherit;text-decoration:none;
+}
+.chapter-mark a:hover{
+  text-decoration:underline;text-underline-offset:3px;
+}
 
 /* ─── HERO ───────────────────────────────── */
 .hero{
@@ -1766,7 +1772,7 @@ body::after{
 
 <!-- ─── VISION ─── -->
 <section class="section" id="vision">
-  <div class="chapter-mark" id="chapter-01">Chapter 01 · The Vision</div>
+  <div class="chapter-mark" id="chapter-01"><a href="#chapter-01">Chapter 01 · The Vision</a></div>
   <p class="vision-statement">
     Create a repository-native <em>source of truth</em> that describes the current active behavior of every component, platform, and ecosystem.
   </p>
@@ -1798,7 +1804,7 @@ body::after{
 <!-- ─── PROBLEM ─── -->
 <div class="bucket-section">
   <section class="section" id="problem" style="padding:0">
-    <div class="chapter-mark" id="chapter-02">Chapter 02 · The Current Problem</div>
+    <div class="chapter-mark" id="chapter-02"><a href="#chapter-02">Chapter 02 · The Current Problem</a></div>
     <div class="two-col">
       <div class="col-text">
         <h2>Most spec systems become <span class="strong">historical archives.</span></h2>
@@ -1840,7 +1846,7 @@ body::after{
 
 <!-- ─── GAP ─── -->
 <section class="section" id="gap">
-  <div class="chapter-mark" id="chapter-03">Chapter 03 · Where existing methods reach their edge</div>
+  <div class="chapter-mark" id="chapter-03"><a href="#chapter-03">Chapter 03 · Where existing methods reach their edge</a></div>
 
   <div class="two-col">
     <div class="col-text">
@@ -1994,7 +2000,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── SCALE ─── -->
 <section class="section">
-  <div class="chapter-mark" id="chapter-04">Chapter 04 · Behavior is composable</div>
+  <div class="chapter-mark" id="chapter-04"><a href="#chapter-04">Chapter 04 · Behavior is composable</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:900px;margin-bottom:32px">
     A component does not exist alone. <span style="font-weight:800">It composes upward.</span>
   </h2>
@@ -2025,7 +2031,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <!-- ─── INVERSION · Documentation imbalance ─── -->
 <div class="inversion-section" id="inversion">
   <section class="section" style="padding:0">
-    <div class="chapter-mark" id="chapter-05">Chapter 05 · The documentation imbalance</div>
+    <div class="chapter-mark" id="chapter-05"><a href="#chapter-05">Chapter 05 · The documentation imbalance</a></div>
     <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(30px,4.5vw,62px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
       We document the <span style="font-weight:800">architecture</span> in detail.<br>
       We document the <em style="font-style:italic;color:var(--signal);font-weight:500">product</em> almost not at all.
@@ -2189,7 +2195,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 <!-- ─── AGENTS ─── -->
 <div class="workflow" id="agents">
   <section class="section" style="padding:0">
-    <div class="chapter-mark" id="chapter-06">Chapter 06 · The AI agent perspective</div>
+    <div class="chapter-mark" id="chapter-06"><a href="#chapter-06">Chapter 06 · The AI agent perspective</a></div>
     <h2>
       Without a source of truth, agents become <span class="strong">archaeologists.</span>
     </h2>
@@ -2372,7 +2378,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── PROPOSAL ─── -->
 <section class="section" id="proposal">
-  <div class="chapter-mark" id="chapter-07">Chapter 07 · The proposal</div>
+  <div class="chapter-mark" id="chapter-07"><a href="#chapter-07">Chapter 07 · The proposal</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(36px,5vw,62px);line-height:1.1;letter-spacing:-0.022em;max-width:1000px;margin-bottom:24px">
     A <em style="font-style:italic;color:var(--accent);font-weight:500">repository-native</em> behavioral knowledge layer.
   </h2>
@@ -2438,7 +2444,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── TRACE ─── -->
 <section class="section">
-  <div class="chapter-mark" id="chapter-08">Chapter 08 · Where traceability belongs</div>
+  <div class="chapter-mark" id="chapter-08"><a href="#chapter-08">Chapter 08 · Where traceability belongs</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:32px">
     Tags are powerful. <span style="font-weight:800">Where you put them matters more.</span>
   </h2>
@@ -2548,7 +2554,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── GRAPH ─── -->
 <section class="section">
-  <div class="chapter-mark" id="chapter-09">Chapter 09 · The knowledge graph</div>
+  <div class="chapter-mark" id="chapter-09"><a href="#chapter-09">Chapter 09 · The knowledge graph</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
     Behavior, specs, components, tests, APIs, decisions — <em style="color:var(--accent);font-style:italic;font-weight:500">connected.</em>
   </h2>
@@ -2764,7 +2770,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── CHANGE FLOW ─── -->
 <section class="section">
-  <div class="chapter-mark" id="chapter-10">Chapter 10 · How a new change works</div>
+  <div class="chapter-mark" id="chapter-10"><a href="#chapter-10">Chapter 10 · How a new change works</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
     Every change starts by <span style="font-weight:800">comparing proposed behavior against current behavior.</span>
   </h2>
@@ -2805,9 +2811,190 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
   </div>
 </section>
 
+<!-- ─── CH 11: THE SEMANTIC BEHAVIORAL TAG LAYER ─── -->
+<section class="section" id="tag-layer">
+  <div class="chapter-mark" id="chapter-11"><a href="#chapter-11">Chapter 11 · The Semantic Behavioral Tag Layer</a></div>
+  <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:900px;margin-bottom:24px">
+    One node. Multiple behavioral addresses. <em style="color:var(--accent);font-style:italic">Every audience finds it.</em>
+  </h2>
+  <p style="font-size:16px;line-height:1.75;color:var(--paper-dim);max-width:720px;margin-bottom:48px">
+    A card platform accumulates features faster than vocabulary. Within a year you have <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">fraudBlockHighRisk</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">risk-fraud-block</code>, and <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">fraud.block.txn.highrisk</code> — all referring to the same capability, written by different squads, findable through none of the same searches. The knowledge graph from §09 connects nodes structurally. But it doesn't solve the <em>addressing</em> problem. When a regulator asks "show me every fraud control on the card platform," you need to <em>find</em> the nodes before you can traverse them. The behavioral tag layer does that.
+  </p>
+
+  <!-- 11.1 · The grammar -->
+  <div class="graph-divider">◈ 11.1 · The grammar</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:28px">
+    Every behavioral tag follows a fixed three-segment format. The leftmost segment is always the domain intent; the middle segment is the surface or role; the rightmost segment is the specific variation. All segments are bounded to ten characters.
+  </p>
+
+  <div class="code-block" style="max-width:680px">
+<span class="comment"># grammar</span>
+<span class="kw">{intent}</span>:<span class="kw">{role}</span>:<span class="kw">{sub-intent}</span>
+
+<span class="comment"># valid examples — card platform</span>
+<span class="at">auth</span>:<span class="str">decline</span>:limit       <span class="comment"># authorization declined, spend-limit reason</span>
+<span class="at">fraud</span>:<span class="str">block</span>:cvv         <span class="comment"># fraud block triggered by CVV mismatch</span>
+<span class="at">dispute</span>:<span class="str">credit</span>:prov     <span class="comment"># provisional credit in a dispute flow</span>
+<span class="at">compli</span>:<span class="str">rege</span>:timeline    <span class="comment"># Reg E timeline compliance</span>
+<span class="at">ledger</span>:<span class="str">credit</span>:prov      <span class="comment"># provisional credit on the ledger side</span>
+<span class="at">cardhold</span>:<span class="str">notify</span>:credit  <span class="comment"># cardholder notification of a credit</span>
+
+<span class="comment"># validation regex (CI-enforced)</span>
+^[a-z0-9-]{1,10}(:[a-z0-9-]{1,10}){0,2}$</div>
+
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-top:0;margin-bottom:40px">
+    Three segments, ten characters each, machine-parseable. CI rejects malformed tags before they merge. No tag-swamp, no <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">fraud_block_cvv_v2_FINAL</code>.
+  </p>
+
+  <!-- 11.2 · Hierarchical search at three levels of specificity -->
+  <div class="graph-divider">◈ 11.2 · Hierarchical search — one node, three audiences</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:28px">
+    A single flat tag like <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">fraud:block:cvv</code> is precise but monolithic — it answers only the one query that matches it exactly. The behavioral tag layer attaches the same node to three search keys at three levels of specificity, serving each audience from their own vocabulary.
+  </p>
+
+  <div class="comparison" style="max-width:900px;margin-top:0">
+    <div class="comp-side">
+      <h4><span class="check">◈</span>Behavioral tag layer: "decline when spend limit exceeded"</h4>
+      <ul>
+        <li style="font-family:'JetBrains Mono',monospace;font-size:13px;padding:14px 0;border-bottom:1px dashed var(--rule)">
+          <span style="color:var(--accent);font-weight:600">auth</span>
+          <span style="color:var(--paper-dim);font-size:12px;display:block;margin-top:4px">→ risk team auditing the full auth surface</span>
+        </li>
+        <li style="font-family:'JetBrains Mono',monospace;font-size:13px;padding:14px 0;border-bottom:1px dashed var(--rule)">
+          <span style="color:var(--accent);font-weight:600">auth:decline</span>
+          <span style="color:var(--paper-dim);font-size:12px;display:block;margin-top:4px">→ auth engineer reviewing all decline reasons</span>
+        </li>
+        <li style="font-family:'JetBrains Mono',monospace;font-size:13px;padding:14px 0">
+          <span style="color:var(--accent);font-weight:600">auth:decline:limit</span>
+          <span style="color:var(--paper-dim);font-size:12px;display:block;margin-top:4px">→ agent debugging a single declined transaction</span>
+        </li>
+      </ul>
+    </div>
+    <div class="comp-side gap">
+      <h4><span class="check" style="color:var(--signal)">✕</span>Flat tag — single search key</h4>
+      <ul>
+        <li style="padding:14px 0;border-bottom:1px dashed var(--rule)">Searching <code style="font-family:'JetBrains Mono',monospace;font-size:12px">fraud</code> doesn't find it</li>
+        <li style="padding:14px 0;border-bottom:1px dashed var(--rule)">Searching <code style="font-family:'JetBrains Mono',monospace;font-size:12px">fraud:block</code> doesn't find it</li>
+        <li style="padding:14px 0">You must know the exact full string — or the node is invisible</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 11.3 · Why multi-address, not single-hierarchy -->
+  <div class="graph-divider" style="margin-top:56px">◈ 11.3 · Why multi-address — the four faces of a chargeback</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:28px">
+    Almost nothing on a card platform lives in one domain. The feature <em>"automatically credit the cardholder provisionally within 10 business days when a dispute is filed under Reg E"</em> is simultaneously a dispute concern, a ledger concern, a compliance concern, and a notification concern. A single-hierarchy tag forces a choice and the other three views lose access to it. The behavioral tag layer refuses the choice.
+  </p>
+
+  <div class="code-block" style="max-width:680px">
+<span class="comment"># Same node — four legitimate behavioral addresses</span>
+<span class="at">dispute</span>:<span class="str">credit</span>:prov    <span class="comment"># dispute team — chargebacks and reversals</span>
+<span class="at">ledger</span>:<span class="str">credit</span>:prov     <span class="comment"># ledger team — double-entry integrity</span>
+<span class="at">compli</span>:<span class="str">rege</span>:timeline   <span class="comment"># compliance team — Reg E 10-day window</span>
+<span class="at">cardhold</span>:<span class="str">notify</span>:credit <span class="comment"># notifications team — customer messaging</span></div>
+
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-top:0;margin-bottom:40px">
+    Each tag is a valid behavioral lens on the same capability. Four teams search from their own vocabulary and arrive at the same node. No renaming, no duplication, no team losing visibility.
+  </p>
+
+  <!-- behavioral tag layer visual -->
+  <div class="graph-wrapper" style="height:340px;max-width:800px">
+    <svg viewBox="0 0 900 340" preserveAspectRatio="none">
+      <defs>
+        <marker id="bt-head" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+      <line x1="450" y1="170" x2="175" y2="80"  stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bt-head)"/>
+      <line x1="450" y1="170" x2="730" y2="80"  stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bt-head)"/>
+      <line x1="450" y1="170" x2="175" y2="265" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bt-head)"/>
+      <line x1="450" y1="170" x2="730" y2="265" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bt-head)"/>
+    </svg>
+    <!-- center: feature node -->
+    <div class="node feature" style="left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;padding:14px 20px;text-align:center;line-height:1.4">
+      FEATURE<br><span style="font-size:11px;opacity:0.7">prov-credit-rege</span>
+    </div>
+    <!-- four behavioral tag addresses -->
+    <div class="node" style="left:19%;top:14%;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--accent);padding:8px 14px">dispute:credit:prov</div>
+    <div class="node" style="left:81%;top:14%;transform:translateX(-100%);font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--accent);padding:8px 14px">compli:rege:timeline</div>
+    <div class="node" style="left:19%;top:78%;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--accent);padding:8px 14px">ledger:credit:prov</div>
+    <div class="node" style="left:81%;top:78%;transform:translateX(-100%);font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-elev);border:1px solid var(--accent);color:var(--accent);padding:8px 14px">cardhold:notify:credit</div>
+    <!-- audience labels -->
+    <div class="node-label" style="left:6%;top:5%">dispute team</div>
+    <div class="node-label" style="left:72%;top:5%">compliance team</div>
+    <div class="node-label" style="left:6%;top:88%">ledger team</div>
+    <div class="node-label" style="left:72%;top:88%">notifications team</div>
+  </div>
+
+  <!-- 11.4 · Composition with the framework -->
+  <div class="graph-divider" style="margin-top:56px">◈ 11.4 · How it plugs into the framework</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:24px">
+    The behavioral tag layer is not a parallel system. It wires directly into the layers already defined.
+  </p>
+
+  <div class="layered" style="max-width:720px;margin-top:32px">
+    <div class="layer" style="background:var(--accent);color:var(--bg);border-color:var(--accent)">
+      <div class="scope">spec/current-behavior</div>
+      Each component file declares its behavioral tags in frontmatter. <code style="font-family:'JetBrains Mono',monospace;font-size:12px;opacity:0.85">payment-service.md</code> carries <code style="font-family:'JetBrains Mono',monospace;font-size:12px;opacity:0.85">auth:decline:limit</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;opacity:0.85">auth:approve:std</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;opacity:0.85">fraud:signal:velocity</code>.
+    </div>
+    <div class="layer">
+      <div class="scope">spec/graph/graph.json</div>
+      Each node carries a <code style="font-family:'JetBrains Mono',monospace;font-size:12px"><span style="color:var(--accent)">"tags": []</span></code> array. The graph becomes prefix-searchable: a query for <code style="font-family:'JetBrains Mono',monospace;font-size:12px">dispute:*</code> returns every dispute-related node and its edges.
+    </div>
+    <div class="layer">
+      <div class="scope">code — @spec anchors</div>
+      The <code style="font-family:'JetBrains Mono',monospace;font-size:12px">@spec</code> anchor still points to the spec ID for traceability. Behavioral tag lookup handles <em>discovery</em>. The two are complementary, not competing.
+    </div>
+    <div class="layer">
+      <div class="scope">AI agents</div>
+      Prefix queries reduce context dramatically. An agent asked to fix a 3DS issue queries <code style="font-family:'JetBrains Mono',monospace;font-size:12px">auth:3ds</code> and pulls in a focused subset of nodes — not every spec file on the platform. This is where the 75% token-reduction promise lands for large card platforms.
+    </div>
+    <div class="layer" style="border-color:var(--accent-2)">
+      <div class="scope" style="color:var(--accent-2)">regulators &amp; auditors</div>
+      <code style="font-family:'JetBrains Mono',monospace;font-size:12px">compli:report:reg-z</code> returns every Reg Z–implicated node. A multi-week discovery exercise collapses into a single command.
+    </div>
+  </div>
+
+  <!-- 11.5 · Governance -->
+  <div class="graph-divider" style="margin-top:56px">◈ 11.5 · Governance — the one risk worth naming</div>
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-bottom:24px">
+    The behavioral tag layer degrades if vocabulary isn't governed. Without a central registry, the fraud team invents <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">fraud</code>, the risk team invents <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">risk</code>, and the compliance team invents <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-elev);padding:2px 6px">compli</code> to mean overlapping things — and the prefix-search benefit collapses. The fix is lightweight but non-negotiable.
+  </p>
+
+  <div class="code-block" style="max-width:720px">
+<span class="comment"># spec/traceability/tags.yaml — the governing registry</span>
+
+<span class="kw">intents</span>:
+  <span class="at">auth</span>:      authorization decisions and flows
+  <span class="at">fraud</span>:     fraud detection, signals, and blocks
+  <span class="at">risk</span>:      risk scoring, capital, and reserves
+  <span class="at">dispute</span>:   chargebacks, reversals, and investigations
+  <span class="at">reward</span>:    points, cashback, and promotion redemption
+  <span class="at">ledger</span>:    double-entry accounting and posting
+  <span class="at">compli</span>:    regulatory and compliance obligations
+  <span class="at">cardhold</span>:  cardholder-facing surfaces and notifications
+  <span class="at">network</span>:   card network (Visa / MC) message flows
+  <span class="at">notify</span>:    asynchronous event and messaging surfaces
+
+<span class="kw">roles</span>:
+  <span class="at">block</span>:     prevent or reject
+  <span class="at">approve</span>:   permit or accept
+  <span class="at">decline</span>:   soft-decline with reason
+  <span class="at">credit</span>:    post a credit entry
+  <span class="at">debit</span>:     post a debit entry
+  <span class="at">signal</span>:    emit a risk or behavioral signal
+  <span class="at">report</span>:    generate a compliance artifact
+  <span class="at">notify</span>:    send a real-time notification
+  <span class="at">reverse</span>:   undo a prior action</div>
+
+  <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:680px;margin-top:0">
+    CI validates every new tag against this registry. New intents require a lightweight review — one meeting per quarter, not a process. The discipline <em>is</em> the value: squads converge on a shared behavioral dialect instead of each team inventing its own.
+  </p>
+</section>
+
 <!-- ─── CH 13: PRODUCT & TECHNOLOGY COLLABORATION ─── -->
 <section class="section" id="collaboration">
-  <div class="chapter-mark" id="chapter-13">Chapter 13 · Product and Technology Collaboration</div>
+  <div class="chapter-mark" id="chapter-13"><a href="#chapter-13">Chapter 13 · Product and Technology Collaboration</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
     Neither product nor engineering<br>can maintain this layer <em style="color:var(--accent);font-style:italic">alone.</em>
   </h2>
@@ -3032,7 +3219,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
 
 <!-- ─── CH 14: LONG-TERM VISION ─── -->
 <section class="section" id="long-term">
-  <div class="chapter-mark" id="chapter-14">Chapter 14 · Long-Term Vision</div>
+  <div class="chapter-mark" id="chapter-14"><a href="#chapter-14">Chapter 14 · Long-Term Vision</a></div>
   <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(32px,4.5vw,54px);line-height:1.15;letter-spacing:-0.02em;max-width:980px;margin-bottom:24px">
     From managing specifications<br>
     to <em style="color:var(--accent);font-style:italic">operational behavioral modeling.</em>
