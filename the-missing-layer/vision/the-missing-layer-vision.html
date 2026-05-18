@@ -218,6 +218,55 @@ body::after{
 .chapter-mark a:hover{
   text-decoration:underline;text-underline-offset:3px;
 }
+.chapter-anchor-link{
+  color:inherit;
+  text-decoration:none;
+}
+.chapter-copy-link{
+  position:relative;
+  border:none;
+  background:transparent;
+  color:var(--paper-dim);
+  font-size:12px;
+  line-height:1;
+  cursor:pointer;
+  padding:0;
+  margin-left:6px;
+  text-transform:none;
+  opacity:0.78;
+}
+.chapter-copy-link:hover{
+  color:var(--accent);
+  opacity:1;
+}
+.chapter-copy-link.copied{
+  color:var(--accent);
+  opacity:1;
+}
+.chapter-copy-link::after{
+  content:attr(data-tip);
+  position:absolute;
+  left:50%;
+  top:-24px;
+  transform:translateX(-50%) translateY(4px);
+  background:var(--bg-elev);
+  color:var(--paper-dim);
+  border:1px solid var(--rule-soft);
+  padding:2px 7px;
+  border-radius:3px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:9px;
+  letter-spacing:0.06em;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.18s ease, transform 0.18s ease;
+}
+.chapter-copy-link:hover::after,
+.chapter-copy-link.copied::after{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
 
 /* ─── HERO ───────────────────────────────── */
 .hero{
@@ -2034,7 +2083,7 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     <div class="chapter-mark" id="chapter-05"><a href="#chapter-05">Chapter 05 · The documentation imbalance</a></div>
     <h2 style="font-family:var(--f-display);font-weight:var(--f-display-weight);font-size:clamp(30px,4.5vw,62px);line-height:1.05;letter-spacing:-0.025em;max-width:1100px;margin-bottom:36px">
       We document the <span style="font-weight:800">architecture</span> in detail.<br>
-      We document the <em style="font-style:italic;color:var(--signal);font-weight:500">product</em> almost not at all.
+      However we lack clear documentation of the <em style="font-style:italic;color:var(--signal);font-weight:500">product's</em> real behavior.
     </h2>
     <p class="inversion-lede">
       Architectures are not supposed to change business behavior — and yet most of our written record is about <em>how</em> the system is built, not <em>what</em> the product is supposed to do.
@@ -3054,27 +3103,27 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     </div>
     <div class="collab-table-row accent">
       <span class="collab-house"><strong>/current-behavior</strong></span>
-      <span>Engineering Lead / Tech Lead</span>
-      <span>Product Manager</span>
+      <span>Both Engineering and Product</span>
+      <span> </span>
       <span>Both required before promotion</span>
     </div>
     <div class="collab-table-row">
       <span class="collab-house"><strong>/changes</strong></span>
-      <span>Product Manager</span>
-      <span>Engineering Lead, Architect</span>
+      <span>Product</span>
+      <span>Engineering</span>
       <span>Product: proposal · Engineering: design</span>
     </div>
     <div class="collab-table-row">
       <span class="collab-house"><strong>/decisions</strong></span>
-      <span>Architect / Staff Engineer</span>
-      <span>Engineering Lead, Product (business ADRs)</span>
-      <span>Architect approves; Product reviews on business impact</span>
+      <span>Engineering</span>
+      <span>Product</span>
+      <span>Engineering approves; Product reviews business impact</span>
     </div>
     <div class="collab-table-row">
       <span class="collab-house"><strong>/traceability &amp; /graph</strong></span>
-      <span>Platform / DevEx Team</span>
-      <span>All contributors</span>
-      <span>Automated regen · Human review on contract breaks</span>
+      <span>Engineering</span>
+      <span>Product</span>
+      <span>Automated regen · Product and Engineering review on contract breaks</span>
     </div>
   </div>
   <p style="font-size:14px;line-height:1.7;color:var(--paper-dim);max-width:760px;margin-top:20px;font-style:italic">
@@ -3304,6 +3353,95 @@ const observer = new IntersectionObserver((entries) => {
 }, {threshold:0.08, rootMargin:'0px 0px -80px 0px'});
 document.querySelectorAll('.section').forEach(s => observer.observe(s));
 document.querySelector('.hero').classList.add('visible');
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', 'readonly');
+  area.style.position = 'absolute';
+  area.style.left = '-9999px';
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand('copy');
+  document.body.removeChild(area);
+  return Promise.resolve();
+}
+
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const usedIds = new Set(Array.from(document.querySelectorAll('[id]')).map((node) => node.id));
+
+document.querySelectorAll('.chapter-mark').forEach((mark, index) => {
+  if (!mark.id) {
+    const base = slugify(mark.textContent) || ('chapter-mark-' + (index + 1));
+    let candidate = base;
+    let i = 2;
+
+    while (usedIds.has(candidate)) {
+      candidate = base + '-' + i;
+      i += 1;
+    }
+
+    mark.id = candidate;
+    usedIds.add(candidate);
+  }
+
+  let anchor = Array.from(mark.children).find((el) => {
+    return el.tagName === 'A' && !el.classList.contains('chapter-copy-link');
+  });
+
+  if (!anchor) {
+    anchor = document.createElement('a');
+    anchor.className = 'chapter-anchor-link';
+    anchor.href = '#' + mark.id;
+
+    const contentNodes = Array.from(mark.childNodes).filter((node) => {
+      return !(node.nodeType === Node.ELEMENT_NODE && node.classList && node.classList.contains('chapter-copy-link'));
+    });
+
+    contentNodes.forEach((node) => anchor.appendChild(node));
+    mark.insertBefore(anchor, mark.firstChild);
+  } else {
+    anchor.classList.add('chapter-anchor-link');
+    anchor.href = '#' + mark.id;
+  }
+
+  if (Array.from(mark.children).some((el) => el.classList.contains('chapter-copy-link'))) {
+    return;
+  }
+
+  const copyButton = document.createElement('button');
+  copyButton.type = 'button';
+  copyButton.className = 'chapter-copy-link';
+  copyButton.textContent = '🔗';
+  copyButton.setAttribute('aria-label', 'Copy section link');
+  copyButton.title = 'Copy section link';
+  copyButton.dataset.tip = 'copy link';
+
+  copyButton.addEventListener('click', async () => {
+    const url = new URL(window.location.href);
+    url.hash = mark.id;
+    await copyToClipboard(url.toString());
+
+    copyButton.classList.add('copied');
+    copyButton.dataset.tip = 'link copied';
+    window.setTimeout(() => {
+      copyButton.classList.remove('copied');
+      copyButton.dataset.tip = 'copy link';
+    }, 1100);
+  });
+
+  mark.appendChild(copyButton);
+});
 </script>
 
 </body>
