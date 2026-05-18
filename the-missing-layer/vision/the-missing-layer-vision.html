@@ -319,6 +319,29 @@ body::after{
   margin-bottom:56px;
 }
 .hero-deck em{color:var(--accent);font-weight:500}
+.hero-disclaimer{
+  max-width:980px;
+  margin:0 0 48px;
+  padding:18px 22px;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--accent-2);
+  background:var(--bg-soft);
+}
+.hero-disclaimer .label{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+.hero-disclaimer p{
+  margin:0;
+  font-size:15px;
+  line-height:1.7;
+  color:var(--paper-dim);
+}
+.hero-disclaimer p + p{margin-top:10px}
 .hero-meta{
   display:grid;
   grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
@@ -1761,6 +1784,12 @@ body::after{
     From historical specs to a living source of truth for what the system <em>currently</em> does — for humans, and for the agents that will read it.
   </p>
 
+  <div class="hero-disclaimer" role="note" aria-label="Scope disclaimer">
+    <div class="label">Disclaimer</div>
+    <p>This paper focuses primarily on the <strong>what</strong> and the <strong>why</strong>, not the how. Implementation details depend entirely on each team's chosen technologies, architectures, frameworks, and delivery approaches.</p>
+    <p>The solutions, methodologies, structures, workflows, and examples proposed here are reference proposals only, intended to illustrate concepts and possible directions, not prescriptive implementation requirements.</p>
+  </div>
+
   <div class="tldr-block">
     <div class="tldr-label">TL;DR — six things to know</div>
     <div class="tldr-rows">
@@ -2010,6 +2039,8 @@ HLD <span class="kw">→</span> LLDs <span class="kw">→</span> EARS <span clas
     </h3>
     <p style="font-size:15px;line-height:1.7;color:var(--paper-dim);max-width:720px;margin-bottom:32px">
       None of these methodologies are wrong. Each handles current-state differently — some natively, some by convention. The gap is that none make it the <em>primary</em> artifact.
+      See the expanded comparison:
+      <a href="methodology-state-comparison.html" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px">methodology-state-comparison.html</a>.
     </p>
   </div>
 

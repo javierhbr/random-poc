@@ -12,6 +12,18 @@
 
 ---
 
+## A Note Before Reading
+
+> **This paper focuses on the *what* and the *why* — not the *how*.**
+
+The intent here is to make a case for a missing layer in Spec-Driven Development and to explain why it matters for humans and AI agents alike. *How* that layer is implemented depends entirely on the technologies, architectures, frameworks, and engineering culture of each team.
+
+The repository structures, workflows, tag vocabularies, role models, and code examples that appear throughout this document are **reference proposals**, not prescriptions. They are included to make abstract concepts concrete, to give readers something tangible to react to, and to illustrate one coherent way the pieces can fit together. They are not a specification to be adopted verbatim.
+
+Read them as *one possible shape* of the solution — and feel free to disagree, adapt, or replace any of them. What should survive translation across teams is the underlying argument: that **current operational behavior deserves its own first-class home**, separated from history, navigable as a graph, addressable by semantics, and co-owned by product and engineering.
+
+---
+
 ## Table of Contents
 
 1. [The Vision](#chapter-01--the-vision)

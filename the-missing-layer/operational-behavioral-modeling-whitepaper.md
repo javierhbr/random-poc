@@ -9,6 +9,18 @@
 
 ---
 
+## A Note on Scope
+
+> **This paper focuses on the *what* and the *why* — not the *how*.**
+
+The intent of this document is to make a structural case for a missing layer in Spec-Driven Development and to explain why it matters for both human engineering organizations and the AI agents now integrated into the development lifecycle. *How* that layer is implemented depends entirely on the technologies, architectures, frameworks, and engineering culture of each adopting team.
+
+The repository structures, operational workflows, role ownership models, tag vocabularies, tooling references (such as Graphify), and code examples that appear throughout this paper should be read as **reference proposals**, not prescriptive requirements. They are included to make the conceptual model concrete, to illustrate one coherent way the pieces can fit together, and to give readers tangible artifacts to evaluate, adapt, or contest. They are not a specification to be adopted verbatim.
+
+What should survive translation across teams is the underlying argument: that current operational behavior deserves its own first-class home — separated from historical evolution, navigable as a graph, addressable by semantics, and co-owned by product and engineering. The specific shape of the implementation is left to the adopting organization.
+
+---
+
 ## Executive Summary
 
 Modern systems engineering is undergoing a fundamental transition driven by the scale of distributed software architectures and the integration of autonomous artificial intelligence agents into the development lifecycle. Traditional Spec-Driven Development methodologies — including the Easy Approach to Requirements Syntax (EARS), Linked-Intent Development (LID), and various structured specification frameworks such as BIMA, OpenSpec, and SpecKit — have successfully introduced syntactic discipline to early-stage requirements engineering. Yet they exhibit a systemic design flaw over long-term software lifecycles.
