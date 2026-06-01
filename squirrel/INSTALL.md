@@ -302,88 +302,221 @@ Useful for automation (cron, scripts) or if you want to use the protocol without
 
 ## 🛡️ Manual install from DMG (Gatekeeper blocked)
 
-Use this path when macOS blocks the `Install Squirrel` script with a "can't be opened because it is from an unidentified developer" error, or when you need a quick install during development without waiting for a signed build.
+Use this path when macOS blocks `Install Squirrel` with *"can't be opened because it is from an unidentified developer"*, or when you need to install a dev build that has not been signed yet.
 
 ### Why the normal installer fails
 
-macOS attaches a `com.apple.quarantine` flag to every file downloaded from the internet (including DMG contents). The `Install Squirrel` script is a shell script, not a notarized binary, so Gatekeeper refuses to run it. Additionally, the installer runs `codesign --verify --strict --deep` on the binaries before copying them — this also fails on unsigned dev builds.
+macOS attaches a `com.apple.quarantine` flag to every file that arrives via the internet, including all files inside a downloaded DMG. Because `Install Squirrel` is a shell script (not a notarized app bundle), Gatekeeper blocks it before it can run. The installer also runs `codesign --verify --strict --deep` on the two binaries before copying them — this step fails on any unsigned dev build and aborts the install.
+
+---
 
 ### Step-by-step manual install
 
-**1. Mount the DMG**
+#### 1. Mount the DMG
 
-Double-click the `.dmg` file in Finder, or from the terminal:
+Double-click the `.dmg` in Finder, or:
 
 ```bash
 hdiutil attach ~/Downloads/Squirrel.dmg
-# Note the mount path printed — usually /Volumes/Squirrel
+# macOS prints the mount path — normally /Volumes/Squirrel
+DMG=/Volumes/Squirrel   # adjust if different
 ```
 
-**2. Strip the quarantine flag from all DMG contents**
+#### 2. Strip the quarantine flag from everything inside the DMG
 
 ```bash
-xattr -cr /Volumes/Squirrel/
+xattr -cr "$DMG"
 ```
 
-This removes `com.apple.quarantine` recursively so macOS stops blocking the files.
+This removes `com.apple.quarantine` recursively. Without this step macOS silently kills any binary you copy from the DMG even after `chmod +x`.
 
-**3. Copy the binaries** (skipping the codesign check)
+#### 3. Copy the binaries
 
 ```bash
 mkdir -p ~/.local/bin
 
-cp /Volumes/Squirrel/bin/squirrel           ~/.local/bin/squirrel
-cp /Volumes/Squirrel/bin/squirrel-backend   ~/.local/bin/squirrel-backend
+cp "$DMG/bin/squirrel"         ~/.local/bin/squirrel
+cp "$DMG/bin/squirrel-backend" ~/.local/bin/squirrel-backend
 chmod +x ~/.local/bin/squirrel ~/.local/bin/squirrel-backend
 
-# Remove quarantine from the copied binaries too
+# Belt-and-suspenders: also strip quarantine from the copies
 xattr -d com.apple.quarantine ~/.local/bin/squirrel          2>/dev/null || true
 xattr -d com.apple.quarantine ~/.local/bin/squirrel-backend  2>/dev/null || true
 ```
 
-**4. Ensure `~/.local/bin` is on your PATH**
+- `squirrel` — the CLI you type in the terminal
+- `squirrel-backend` — the web-UI server daemon (required for `/sq-*` commands that need live vault data)
+
+#### 4. Ensure `~/.local/bin` is on your PATH
 
 ```bash
-echo $PATH | grep -q "$HOME/.local/bin" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+# Check first
+echo "$PATH" | tr ':' '\n' | grep -q "$HOME/.local/bin" \
+  || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+
+source ~/.zshrc   # or open a new terminal tab
+which squirrel    # should print ~/.local/bin/squirrel
 ```
 
-**5. Install the agent-pack**
+#### 5. Install the agent-pack (Claude Code skills and slash commands)
 
 ```bash
 mkdir -p ~/.claude/plugins/squirrel
-rsync -a --delete /Volumes/Squirrel/agent-pack/ ~/.claude/plugins/squirrel/
+rsync -a --delete "$DMG/agent-pack/" ~/.claude/plugins/squirrel/
 ```
 
-**6. Seed the config** (skip if `~/.squirrel/config.toml` already exists)
+What lands there:
+
+```
+~/.claude/plugins/squirrel/
+  skills/        ← AI skill packs (/sq-brief, /sq-capture, …)
+  commands/      ← slash command definitions
+  lib/           ← Python helper scripts
+  hooks/         ← hooks.json (proactive triggers)
+  templates/     ← intent.md, dashboard templates
+```
+
+#### 6. Seed the config
+
+Skip this step if `~/.squirrel/config.toml` already exists.
 
 ```bash
 mkdir -p ~/.squirrel
-cp /Volumes/Squirrel/resources/squirrel.toml.example ~/.squirrel/config.toml
-$EDITOR ~/.squirrel/config.toml   # set vault path
+cp "$DMG/resources/squirrel.toml.example" ~/.squirrel/config.toml
 ```
 
-**7. Install and start the background service**
+Edit the file and at minimum set your vault path:
+
+```bash
+$EDITOR ~/.squirrel/config.toml
+```
+
+Key fields to update:
+
+```toml
+default_email = "you@example.com"
+machine_environment = "personal"   # or "work"
+
+[[vaults]]
+name = "personal"
+path = "~/your-vault-folder"       # ← set this
+default = true
+```
+
+---
+
+### 7. Set up the background daemon (web UI server)
+
+`squirrel-backend` is the web server that runs on `http://127.0.0.1:3939` and backs the `/sq-*` commands that need live vault data. macOS **launchd** manages it — it starts at login and auto-restarts on crash.
+
+> **Do not use `resources/plist.template`** from the DMG for a manual install. That template contains Python-based placeholders (`__PYTHON__`, `__SERVER_PY__`) that do not match the compiled binary. Write the plist directly as shown below.
+
+#### How it works
+
+```
+launchd
+  └── org.squirrel.web-ui  (~/Library/LaunchAgents/org.squirrel.web-ui.plist)
+        └── ~/.local/bin/squirrel-backend --port 3939 --token-file ~/.squirrel/launchd-token
+              ├── reads  ~/.squirrel/config.toml
+              ├── writes ~/.squirrel/web-ui.stdout.log
+              └── writes ~/.squirrel/web-ui.stderr.log
+```
+
+The server requires a **64-character hex auth token** in `~/.squirrel/launchd-token` (permissions `0600`, owned by you). The file must exist *before* the plist is registered.
+
+#### Step 7a — Generate the auth token
+
+```bash
+TOKEN_FILE="$HOME/.squirrel/launchd-token"
+mkdir -p ~/.squirrel
+
+umask 077
+openssl rand -hex 32 > "$TOKEN_FILE"   # openssl ships with macOS, no install needed
+umask 022
+chmod 600 "$TOKEN_FILE"
+
+# Verify
+echo "Chars: $(wc -c < "$TOKEN_FILE" | tr -d ' ')"   # must print 65 (64 hex + newline)
+ls -la "$TOKEN_FILE"                                   # must show -rw------- and your username
+```
+
+#### Step 7b — Write the plist
 
 ```bash
 BACKEND_BIN="$HOME/.local/bin/squirrel-backend"
+TOKEN_FILE="$HOME/.squirrel/launchd-token"
 PLIST_PATH="$HOME/Library/LaunchAgents/org.squirrel.web-ui.plist"
 mkdir -p "$HOME/Library/LaunchAgents"
 
-plist="$(cat /Volumes/Squirrel/resources/plist.template)"
-plist="${plist//__BINARY__/$BACKEND_BIN}"
-plist="${plist//__PORT__/3939}"
-plist="${plist//__HOME__/$HOME}"
-printf '%s\n' "$plist" > "$PLIST_PATH"
+cat > "$PLIST_PATH" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.squirrel.web-ui</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>$BACKEND_BIN</string>
+    <string>--port</string>
+    <string>3939</string>
+    <string>--token-file</string>
+    <string>$TOKEN_FILE</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>$HOME/.squirrel/web-ui.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>$HOME/.squirrel/web-ui.stderr.log</string>
+  <key>WorkingDirectory</key>
+  <string>$HOME</string>
+</dict>
+</plist>
+EOF
 
-launchctl load "$PLIST_PATH"
+# Sanity-check: no unexpanded variables remain
+grep -c '__' "$PLIST_PATH" && echo "ERROR: unexpanded placeholder in plist — check the variables above" || echo "Plist OK"
+cat "$PLIST_PATH"
 ```
 
-**8. Verify**
+#### Step 7c — Register and start the daemon
 
 ```bash
+PLIST_PATH="$HOME/Library/LaunchAgents/org.squirrel.web-ui.plist"
+
+# Unload any previous version (safe even if not loaded)
+launchctl unload "$PLIST_PATH" 2>/dev/null || true
+
+# Load — starts immediately because RunAtLoad = true
+launchctl load "$PLIST_PATH"
+echo "Daemon loaded."
+```
+
+---
+
+### 8. Verify everything works
+
+```bash
+# CLI
 squirrel --help
-curl -s http://127.0.0.1:3939/health   # should return {"status":"ok"}
+
+# Daemon
+curl -s http://127.0.0.1:3939/health
+# expected: {"status":"ok"}  or a JSON payload — any 200 means the server is up
+
+# Logs (if something is wrong)
+tail -40 ~/.squirrel/web-ui.stderr.log
+tail -40 ~/.squirrel/web-ui.stdout.log
+
+# launchd status
+launchctl list | grep squirrel
+# expected: a line with PID (non-zero) and "org.squirrel.web-ui"
 ```
 
 Then inside Claude Code:
@@ -392,25 +525,52 @@ Then inside Claude Code:
 /sq-status
 ```
 
+---
+
+### Daemon management cheat sheet
+
+| Task | Command |
+|------|---------|
+| Start daemon | `launchctl load ~/Library/LaunchAgents/org.squirrel.web-ui.plist` |
+| Stop daemon | `launchctl unload ~/Library/LaunchAgents/org.squirrel.web-ui.plist` |
+| Restart daemon | `launchctl unload … && launchctl load …` |
+| Check if running | `launchctl list \| grep squirrel` |
+| View stdout log | `tail -f ~/.squirrel/web-ui.stdout.log` |
+| View stderr log | `tail -f ~/.squirrel/web-ui.stderr.log` |
+| Regenerate token | `bash apps/backend/launchd/install.sh --reinstall` |
+| Remove daemon entirely | `launchctl unload ~/Library/LaunchAgents/org.squirrel.web-ui.plist && rm ~/Library/LaunchAgents/org.squirrel.web-ui.plist` |
+
+---
+
 ### Potential issues
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `zsh: killed squirrel` or binary crashes silently | macOS Gatekeeper killed the unsigned binary | `xattr -d com.apple.quarantine ~/.local/bin/squirrel` |
-| `command not found: squirrel` | `~/.local/bin` not on PATH | Add `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc` and re-open the terminal |
-| `launchctl: service already loaded` | Previous install left the plist registered | `launchctl unload "$PLIST_PATH" && launchctl load "$PLIST_PATH"` |
-| `curl` to port 3939 times out | Backend plist still points to old binary path | Check the plist: `cat ~/Library/LaunchAgents/org.squirrel.web-ui.plist` — rerun step 7 if the `__BINARY__` placeholder was not replaced |
-| `/sq-*` commands missing in Claude Code | agent-pack not installed or wrong destination | Verify `~/.claude/plugins/squirrel/` exists and contains `SKILL.md` files; re-run step 5 |
-| `rsync: No such file or directory` | DMG not mounted | Run `hdiutil attach ~/Downloads/Squirrel.dmg` first |
+| `zsh: killed squirrel` / binary silently crashes | Gatekeeper killed the unsigned binary | `xattr -d com.apple.quarantine ~/.local/bin/squirrel` |
+| `command not found: squirrel` after install | `~/.local/bin` not on PATH | Add `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc`, then open a new terminal |
+| `curl` to port 3939 times out | Daemon not running or plist still has unreplaced placeholders | Check `cat ~/Library/LaunchAgents/org.squirrel.web-ui.plist` for `__PLACEHOLDER__` strings; re-run step 7 |
+| `launchctl: service already loaded` | Previous install left the plist registered | `launchctl unload "$PLIST_PATH"` then `launchctl load "$PLIST_PATH"` |
+| `token-file must be mode 0600` error in stderr log | Token file has wrong permissions | `chmod 600 ~/.squirrel/launchd-token` |
+| `token-file must contain exactly 64 hex chars` | File is empty or truncated | `openssl rand -hex 32 > ~/.squirrel/launchd-token && chmod 600 ~/.squirrel/launchd-token`, then restart daemon |
+| `Could not find server.py` in stderr log | `__SERVER_PY__` in plist points to wrong path | Edit the plist: `nano ~/Library/LaunchAgents/org.squirrel.web-ui.plist`, fix the `<string>` after `<string>__SERVER_PY__</string>`, then restart |
+| `/sq-*` commands missing in Claude Code | agent-pack not in the right folder | Verify `~/.claude/plugins/squirrel/skills/` exists; re-run step 5 |
+| `rsync: No such file or directory` | DMG not mounted | `hdiutil attach ~/Downloads/Squirrel.dmg` |
+| Daemon starts then immediately exits (PID shows 0 in `launchctl list`) | Python import error (missing sibling module) | `tail ~/.squirrel/web-ui.stderr.log` — usually `ModuleNotFoundError`; copy all `.py` files from `apps/backend/` to the same folder as `server.py` |
 
 ### Uninstalling
 
 ```bash
+# Stop and remove the daemon
 launchctl unload ~/Library/LaunchAgents/org.squirrel.web-ui.plist 2>/dev/null || true
 rm -f ~/Library/LaunchAgents/org.squirrel.web-ui.plist
+
+# Remove binaries
 rm -f ~/.local/bin/squirrel ~/.local/bin/squirrel-backend
+
+# Remove agent-pack (skills and commands)
 rm -rf ~/.claude/plugins/squirrel
-# Optionally remove config and vault:
+
+# Optionally remove all config, logs, and the auth token:
 # rm -rf ~/.squirrel
 ```
 
@@ -473,6 +633,19 @@ The other side decrypts with `/sq-sync-in` if it has the private key.
 ---
 
 ## ❓ Troubleshooting
+
+### "`Install Squirrel` is blocked by macOS / codesign error"
+
+macOS quarantines every file from the internet, including DMG contents. The installer also runs `codesign --verify --strict --deep` on the binaries — this fails on unsigned dev builds.
+
+**Quick fix** — strip the quarantine flag before running the installer:
+
+```bash
+xattr -cr /Volumes/Squirrel/
+"/Volumes/Squirrel/Install Squirrel"
+```
+
+If that still fails (e.g. the binaries are unsigned), follow the **Manual install from DMG** section above — it skips the codesign check entirely.
 
 ### "Slash commands do not appear in Claude Code"
 - Verify the directory is at `~/.claude/plugins/squirrel/`
