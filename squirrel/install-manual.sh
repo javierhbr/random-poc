@@ -165,12 +165,88 @@ else
   fi
 fi
 
-# ─── Step 5: Install agent-pack ───────────────────────────────────────────────
-hdr "Step 5 — Install agent-pack"
-info "rsync → $PLUGIN_DIR"
+# ─── Step 5: Install as Claude Code plugin ────────────────────────────────────
+hdr "Step 5 — Register Claude Code plugin"
+
+CLAUDE_PLUGINS_DIR="$HOME/.claude/plugins"
+INSTALLED_PLUGINS_JSON="$CLAUDE_PLUGINS_DIR/installed_plugins.json"
+PLUGIN_KEY="squirrel@squirrel"
+
+# Remove any legacy squirrel symlink so we can place a real directory
+if [[ -L "$PLUGIN_DIR" ]]; then
+  warn "Removing legacy squirrel symlink: $PLUGIN_DIR → $(readlink "$PLUGIN_DIR")"
+  rm "$PLUGIN_DIR"
+fi
+
+# Copy agent-pack files into the plugin directory
+info "Copying agent-pack → $PLUGIN_DIR"
 mkdir -p "$PLUGIN_DIR"
 rsync -a --delete "$SCRIPT_DIR/agent-pack/" "$PLUGIN_DIR/"
-ok "agent-pack installed"
+ok "Plugin files installed"
+
+# Register in installed_plugins.json so Claude Code loads it
+INSTALL_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")"
+PLUGIN_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo "0.0.0")"
+
+info "Registering in $INSTALLED_PLUGINS_JSON"
+python3 - <<PYEOF
+import json, os, sys
+
+path = os.path.expanduser("$INSTALLED_PLUGINS_JSON")
+os.makedirs(os.path.dirname(path), exist_ok=True)
+
+# Load or init the registry
+try:
+    with open(path) as f:
+        registry = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    registry = {"version": 2, "plugins": {}}
+
+if "version" not in registry:
+    registry["version"] = 2
+if "plugins" not in registry:
+    registry["plugins"] = {}
+
+canonical_key = "$PLUGIN_KEY"
+now = "$INSTALL_TIMESTAMP"
+new_version = "$PLUGIN_VERSION"
+install_path = "$PLUGIN_DIR"
+
+# Find any existing squirrel entry (may be under squirrel@local or another variant)
+stale_keys = [k for k in registry["plugins"] if k != canonical_key and k.startswith("squirrel@")]
+existing = registry["plugins"].get(canonical_key, [{}])[0]
+
+# Preserve the original installedAt if this is an update
+installed_at = existing.get("installedAt", now)
+old_version  = existing.get("version", "")
+
+entry = {
+    "scope": "user",
+    "installPath": install_path,
+    "version": new_version,
+    "installedAt": installed_at,
+    "lastUpdated": now,
+}
+
+# Remove stale keys (e.g. squirrel@local from older installer runs)
+for k in stale_keys:
+    del registry["plugins"][k]
+    print("  removed stale key: %s" % k)
+
+registry["plugins"][canonical_key] = [entry]
+
+with open(path, "w") as f:
+    json.dump(registry, f, indent=4)
+
+action = "updated" if old_version else "registered"
+print("  %s: %s v%s" % (action, canonical_key, new_version))
+if old_version and old_version != new_version:
+    print("  version: %s → %s" % (old_version, new_version))
+PYEOF
+
+ok "Plugin registered in installed_plugins.json"
+say ""
+info "Verify inside Claude Code with:  /plugin list"
 
 # ─── Step 6: Seed config ──────────────────────────────────────────────────────
 hdr "Step 6 — Config"
