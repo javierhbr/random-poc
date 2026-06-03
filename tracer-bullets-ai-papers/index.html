@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uncle Dev — Spec-driven development for AI coding agents</title>
+  <meta name="description" content="Uncle Dev is a pack of engineering skills that makes your AI coding agent work like a disciplined senior engineer — spec first, test as it goes, review before commit.">
+
+  <!-- Tailwind (utility classes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Fonts: Inter (body) + Geist (headings/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>.font-geist { font-family: 'Geist', sans-serif !important; }</style>
+
+  <!-- Entrance animation keyframe (from the Wallet template) -->
+  <style>
+    @keyframes fadeSlideIn {
+      0%   { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+      100% { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+    }
+    #lifecycleCards::-webkit-scrollbar { display: none; }
+
+    /* WebGL background canvas — sits behind all content, reacts to the cursor */
+    #bgScene { position: fixed; inset: 0; z-index: -10; pointer-events: none;
+               filter: var(--bg-filter, none); transition: filter .7s ease; }
+    /* Subtle static fallback gradient shown until/if the WebGL scene loads */
+    #bgScene::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(40rem 30rem at 72% 12%, rgba(217,70,239,0.12), transparent 60%),
+        radial-gradient(38rem 28rem at 28% 30%, rgba(99,102,241,0.12), transparent 60%);
+    }
+    #bgScene canvas { position: relative; }
+
+    /* Palette dock — frosted control to test background color combinations */
+    #paletteDock {
+      position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%);
+      z-index: 50; display: flex; align-items: center; gap: .5rem;
+      padding: .5rem .625rem; border-radius: 9999px;
+      background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.6);
+      backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      box-shadow: 0 1px 1px rgba(0,0,0,.04), 0 8px 24px rgba(17,24,39,.12), 0 24px 48px rgba(17,24,39,.10);
+    }
+    #paletteDock .pd-label {
+      font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+      color: #6b7280; padding: 0 .25rem 0 .375rem; user-select: none;
+    }
+    .pd-swatch {
+      position: relative; height: 1.6rem; width: 1.6rem; border-radius: 9999px;
+      cursor: pointer; border: 0; padding: 0; outline: none; flex: none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .pd-swatch:hover { transform: translateY(-2px) scale(1.06); }
+    .pd-swatch:focus-visible { box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 0 0 3px rgba(17,24,39,.25); }
+    .pd-swatch[aria-pressed="true"] {
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 0 0 2px #fff, 0 0 0 4px rgba(17,24,39,.85);
+    }
+    .pd-swatch::after {
+      content: attr(data-name); position: absolute; bottom: calc(100% + .5rem); left: 50%;
+      transform: translateX(-50%) translateY(4px); white-space: nowrap;
+      font-size: 11px; font-weight: 500; color: #fff; background: rgba(17,24,39,.9);
+      padding: .2rem .45rem; border-radius: .375rem; opacity: 0; pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .pd-swatch:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 480px) { #paletteDock .pd-label { display: none; } }
+  </style>
+
+  <!-- Replay-on-scroll: pause fadeSlideIn until element enters the viewport -->
+  <script>
+    (function () {
+      const style = document.createElement("style");
+      style.textContent = `
+        .animate-on-scroll { animation-play-state: paused !important; }
+        .animate-on-scroll.animate { animation-play-state: running !important; }
+      `;
+      document.head.appendChild(style);
+
+      const once = true;
+      if (!window.__inViewIO) {
+        window.__inViewIO = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("animate");
+              if (once) window.__inViewIO.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.2, rootMargin: "0px 0px -10% 0px" });
+      }
+      window.initInViewAnimations = function (selector = ".animate-on-scroll") {
+        document.querySelectorAll(selector).forEach((el) => window.__inViewIO.observe(el));
+      };
+      document.addEventListener("DOMContentLoaded", () => initInViewAnimations());
+    })();
+  </script>
+</head>
+
+<body class="min-h-screen antialiased text-gray-900 bg-white" style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;">
+
+  <!-- Cursor-reactive WebGL background (same UnicornStudio scene as the Wallet template).
+       Capped fps + reduced resolution, and paused when off-screen/hidden to bound CPU. -->
+  <div id="bgScene">
+    <div id="usEl" data-us-project="yACzULFKkgXAmEcep6hu"
+         data-us-fps="30" data-us-dpi="1" data-us-scale="1" data-us-disablemobile="true"
+         class="absolute inset-0 w-full h-full"></div>
+    <script type="text/javascript">
+      // Load the library only — the controller in the page script decides when to render.
+      (function () {
+        if (window.UnicornStudio) { window.__usReady && window.__usReady(); return; }
+        window.UnicornStudio = { isInitialized: false };
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js";
+        s.onload = function () { window.__usLoaded = true; window.__usReady && window.__usReady(); };
+        (document.head || document.body).appendChild(s);
+      })();
+    </script>
+  </div>
+
+  <!-- ───────────────────────── Top Navigation ───────────────────────── -->
+  <header class="relative z-20 border-b border-gray-100">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between py-4 sm:py-6">
+        <!-- Brand -->
+        <a href="#" class="flex items-center gap-2.5">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 text-white shadow-lg shadow-gray-900/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="hard-hat" class="h-5 w-5"></svg>
+          </span>
+          <span class="text-base font-semibold tracking-tight font-geist">Uncle Dev</span>
+        </a>
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-gray-600">
+          <a href="#getting-started" class="hover:text-gray-900 transition-colors font-geist">Getting Started</a>
+          <a href="#lifecycle" class="hover:text-gray-900 transition-colors font-geist">Lifecycle</a>
+          <a href="#areas" class="hover:text-gray-900 transition-colors font-geist">Docs</a>
+          <a href="#reference" class="hover:text-gray-900 transition-colors font-geist">Reference</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <a href="#getting-started" class="hidden sm:inline-flex items-center rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-gray-900/20 hover:bg-black transition-colors font-geist">Install</a>
+          <!-- Mobile toggle -->
+          <button id="mobileToggle" aria-controls="mobileMenu" aria-expanded="false" class="md:hidden inline-flex items-center rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="menu" id="iconMenu" class="h-5 w-5"></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" id="iconClose" class="h-5 w-5 hidden"></svg>
+            <span class="sr-only font-geist">Toggle navigation</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="py-3 space-y-1 divide-y divide-gray-100 border-t border-b border-gray-100">
+          <a href="#getting-started" class="block px-2 py-3 text-sm text-gray-700 hover:text-gray-900 font-geist">Getting Started</a>
+          <a href="#lifecycle" class="block px-2 py-3 text-sm text-gray-700 hover:text-gray-900 font-geist">Lifecycle</a>
+          <a href="#areas" class="block px-2 py-3 text-sm text-gray-700 hover:text-gray-900 font-geist">Docs</a>
+          <a href="#reference" class="block px-2 py-3 text-sm text-gray-700 hover:text-gray-900 font-geist">Reference</a>
+          <div class="pt-3">
+            <a href="#getting-started" class="inline-flex w-full items-center justify-center rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-gray-900/20 hover:bg-black transition-colors font-geist">Install</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ───────────────────────── Hero ───────────────────────── -->
+  <main class="relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 sm:pt-24 lg:pt-32 xl:pt-40 pb-24 sm:pb-24 lg:pb-32 xl:pb-40">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 xl:gap-20 items-center">
+        <!-- Left: copy -->
+        <section class="order-2 lg:order-1 relative">
+          <div class="inline-flex items-center gap-2 text-xs text-gray-700 font-geist bg-white/10 border border-white/20 rounded-full px-3 py-1 backdrop-blur-md" style="animation: fadeSlideIn 1s ease-out 0.1s both;">
+            <span class="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            Spec-driven development for AI agents
+          </div>
+
+          <h1 class="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl leading-[0.95] tracking-tighter font-geist" style="animation: fadeSlideIn 1s ease-out 0.2s both;">
+            Make your AI agent work like a senior engineer.
+          </h1>
+
+          <p class="mt-6 text-base sm:text-lg lg:text-base xl:text-lg text-gray-600 font-geist max-w-xl" style="animation: fadeSlideIn 1s ease-out 0.2s both;">
+            Left alone, AI coding agents take the shortest path — skip the spec, guess the architecture, skip the tests. Uncle Dev overrides that at every phase: <span class="text-gray-900 font-medium">spec first, test as it goes, review before commit.</span>
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center" style="animation: fadeSlideIn 1s ease-out 0.4s both;">
+            <a href="#getting-started" class="group inline-flex items-center gap-3 text-sm font-medium text-white bg-black rounded-full px-8 py-3 xl:py-4 hover:bg-gray-800 hover:shadow-xl transition-all duration-300 transform hover:scale-105 shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]">
+              <span>Install Uncle Dev</span>
+              <div class="relative flex items-center justify-center w-5 h-5 bg-white/20 rounded-full group-hover:bg-white/30 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 group-hover:translate-x-0.5">
+                  <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+                </svg>
+              </div>
+            </a>
+            <a href="#getting-started" class="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-900 font-geist bg-white/10 border border-white/20 rounded-full px-4 sm:px-5 py-3 backdrop-blur-md hover:bg-white/10 transition shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" class="h-5 w-5 text-gray-700"></svg>
+              Read the intro
+            </a>
+          </div>
+
+          <div class="mt-6 sm:mt-8 h-px bg-gray-900/10"></div>
+
+          <!-- Feature bullets -->
+          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6" style="animation: fadeSlideIn 1s ease-out 0.5s both;">
+            <div class="flex items-start gap-3">
+              <div class="flex shrink-0 w-8 h-8 sm:w-9 sm:h-9 items-center justify-center bg-white/10 border border-white/10 rounded-lg mt-0.5 backdrop-blur-md shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-text" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-700"></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 font-geist">Spec first</p>
+                <p class="text-sm text-gray-600 font-geist">Writes a spec and waits for approval before coding.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex shrink-0 w-8 h-8 sm:w-9 sm:h-9 items-center justify-center bg-white/10 border border-white/10 rounded-lg mt-0.5 backdrop-blur-md shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="flask-conical" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-700"></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 font-geist">Test as it goes</p>
+                <p class="text-sm text-gray-600 font-geist">Builds one tested slice at a time, then debugs.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex shrink-0 w-8 h-8 sm:w-9 sm:h-9 items-center justify-center bg-white/10 border border-white/10 rounded-lg mt-0.5 backdrop-blur-md shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-check" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-700"></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 font-geist">Review before commit</p>
+                <p class="text-sm text-gray-600 font-geist">Reviews its own diff at a QA gate before shipping.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: visual — the lifecycle as a glass card -->
+        <section class="order-1 lg:order-2 relative" style="animation: fadeSlideIn 1s ease-out 0.6s both;">
+          <div class="pointer-events-none absolute -inset-6 sm:-inset-10">
+            <div class="absolute right-6 sm:right-10 top-0 h-48 w-48 sm:h-72 sm:w-72 rounded-full bg-fuchsia-500/30 blur-3xl"></div>
+            <div class="absolute left-2 sm:left-5 top-12 sm:top-20 h-48 w-48 sm:h-72 sm:w-72 rounded-full bg-indigo-500/30 blur-3xl"></div>
+          </div>
+          <div class="relative rounded-3xl bg-white/60 border border-white/40 backdrop-blur-xl p-6 sm:p-8 shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_12.5px_10px_rgba(0,0,0,0.06),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-gray-500 font-geist uppercase tracking-wider">The lifecycle</span>
+              <span class="inline-flex items-center gap-1.5 text-xs text-gray-500 font-geist"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> 6 phases</span>
+            </div>
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <!-- phase chips -->
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Define</p><code class="text-xs text-fuchsia-600">/spec</code></div>
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Plan</p><code class="text-xs text-fuchsia-600">/plan</code></div>
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Build</p><code class="text-xs text-fuchsia-600">/build</code></div>
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Verify</p><code class="text-xs text-fuchsia-600">/test</code></div>
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Review</p><code class="text-xs text-fuchsia-600">/review</code></div>
+              <div class="rounded-xl bg-white/70 border border-gray-100 px-4 py-3"><p class="text-sm font-semibold font-geist">Ship</p><code class="text-xs text-fuchsia-600">/ship</code></div>
+            </div>
+            <p class="mt-5 text-sm text-gray-600 font-geist">Spec → tasks → tested slices → QA gate → go live. Works with Claude Code, Codex, Cursor, OpenCode, Copilot, and Gemini CLI.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- ───────────────────────── Lifecycle flow ───────────────────────── -->
+  <section id="lifecycle" aria-labelledby="lifecycle-title" class="overflow-hidden border-t border-black/5 relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="max-w-2xl">
+        <p class="text-xs sm:text-sm text-gray-500 font-geist animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.1s both;">How a feature moves</p>
+        <h2 id="lifecycle-title" class="mt-4 text-3xl sm:text-5xl md:text-6xl tracking-tight font-geist animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.2s both;">Six phases, one disciplined flow</h2>
+        <p class="mt-4 text-gray-600 font-geist animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.25s both;">Spec → tasks → tested slices → QA gate → go live. Each phase has a command.</p>
+      </div>
+
+      <!-- Flow diagram: label → box → command, linked by arrows (horizontal on lg+, vertical on mobile) -->
+      <div class="mt-12 flex flex-col lg:flex-row lg:items-stretch gap-3 lg:gap-2 animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.35s both;">
+
+        <!-- step -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Define</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-white border border-gray-100 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-900 text-white group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="pencil-ruler" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist text-gray-900">Spec first</p>
+            <p class="mt-1 text-xs text-gray-500 font-geist">Write &amp; approve</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/spec</code>
+        </div>
+
+        <!-- connector -->
+        <div class="flow-arrow flex items-center justify-center shrink-0 self-center text-gray-300 lg:mt-1">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="h-5 w-5 rotate-90 lg:rotate-0"></svg>
+        </div>
+
+        <!-- step -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Plan</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-white border border-gray-100 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-900 text-white group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="list-checks" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist text-gray-900">Break into tasks</p>
+            <p class="mt-1 text-xs text-gray-500 font-geist">Small, ordered</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/plan</code>
+        </div>
+
+        <!-- connector -->
+        <div class="flow-arrow flex items-center justify-center shrink-0 self-center text-gray-300 lg:mt-1">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="h-5 w-5 rotate-90 lg:rotate-0"></svg>
+        </div>
+
+        <!-- step -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Build</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-white border border-gray-100 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-900 text-white group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="code-2" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist text-gray-900">Code one slice</p>
+            <p class="mt-1 text-xs text-gray-500 font-geist">Incrementally</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/build</code>
+        </div>
+
+        <!-- connector -->
+        <div class="flow-arrow flex items-center justify-center shrink-0 self-center text-gray-300 lg:mt-1">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="h-5 w-5 rotate-90 lg:rotate-0"></svg>
+        </div>
+
+        <!-- step -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Verify</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-white border border-gray-100 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-900 text-white group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="flask-conical" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist text-gray-900">Test &amp; debug</p>
+            <p class="mt-1 text-xs text-gray-500 font-geist">Until it works</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/test</code>
+        </div>
+
+        <!-- connector -->
+        <div class="flow-arrow flex items-center justify-center shrink-0 self-center text-gray-300 lg:mt-1">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="h-5 w-5 rotate-90 lg:rotate-0"></svg>
+        </div>
+
+        <!-- step -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Review</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-white border border-gray-100 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-900 text-white group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="search-check" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist text-gray-900">QA gate</p>
+            <p class="mt-1 text-xs text-gray-500 font-geist">Review the diff</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/review</code>
+        </div>
+
+        <!-- connector -->
+        <div class="flow-arrow flex items-center justify-center shrink-0 self-center text-gray-300 lg:mt-1">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="h-5 w-5 rotate-90 lg:rotate-0"></svg>
+        </div>
+
+        <!-- step (final, accent) -->
+        <div class="flow-step flex flex-col items-center text-center lg:flex-1">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 font-geist">Ship</span>
+          <div class="group mt-3 flex w-full flex-1 flex-col items-center justify-center rounded-2xl bg-gray-900 text-white border border-gray-900 px-4 py-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl shadow-lg shadow-gray-900/20">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-gray-900 group-hover:scale-105 transition-transform"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="rocket" class="h-5 w-5"></svg></div>
+            <p class="mt-3 text-sm font-semibold font-geist">Go live</p>
+            <p class="mt-1 text-xs text-gray-400 font-geist">Clean history</p>
+          </div>
+          <code class="mt-3 text-xs font-medium text-fuchsia-600">/ship</code>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── Browse by area ───────────────────────── -->
+  <section id="areas" aria-labelledby="areas-title" class="overflow-hidden border-t border-black/5 relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="max-w-2xl animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.1s both;">
+        <p class="text-xs sm:text-sm text-gray-500 font-geist">What's inside</p>
+        <h2 id="areas-title" class="mt-4 text-3xl sm:text-5xl tracking-tight font-geist">Five areas, grouped so you can find things</h2>
+        <p class="mt-4 text-gray-600 font-geist">The docs are split into five areas so you can find things without reading everything.</p>
+      </div>
+
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.3s both;">
+        <!-- area card -->
+        <a href="#" class="group rounded-2xl bg-white border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-fuchsia-500/10 text-fuchsia-600"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="play" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">Getting Started</h3>
+          <p class="mt-2 text-sm text-gray-600 font-geist">Understand it, install it, run your first task, see common workflows.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+        <a href="#" class="group rounded-2xl bg-white border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">User Guide</h3>
+          <p class="mt-2 text-sm text-gray-600 font-geist">Core concepts — SDD &amp; OpenSpec, the .devlocal dir, spec annotations — and per-tool setup.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+        <a href="#" class="group rounded-2xl bg-white border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">Agent Guide</h3>
+          <p class="mt-2 text-sm text-gray-600 font-geist">The personas you invoke (uncle-po, uncle-lead, uncle-senior, reviewers) and specialist subagents.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+        <a href="#" class="group rounded-2xl bg-white border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="puzzle" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">Customization</h3>
+          <p class="mt-2 text-sm text-gray-600 font-geist">Author your own skills and wire in @spec annotations — greenfield or brownfield.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+        <a href="#reference" class="group rounded-2xl bg-white border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="library" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">Reference</h3>
+          <p class="mt-2 text-sm text-gray-600 font-geist">Every skill and command by phase, plus copy-paste prompt templates.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+        <a href="#" class="group rounded-2xl bg-gray-900 text-white p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 shadow-lg">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-stack" class="h-5 w-5"></svg></div>
+          <h3 class="mt-5 text-lg font-semibold font-geist">All in one page</h3>
+          <p class="mt-2 text-sm text-gray-300 font-geist">The complete documentation on a single page for offline reading or quick search.</p>
+          <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white group-hover:gap-3 transition-all font-geist">Open <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right"></svg></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── Recommended path (dark) ───────────────────────── -->
+  <section id="getting-started" aria-labelledby="path-title" class="overflow-hidden bg-gray-950 border-t border-white/10 relative text-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+        <div class="animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.1s both;">
+          <p class="text-xs sm:text-sm text-gray-400 font-geist">Recommended path</p>
+          <h2 id="path-title" class="mt-4 text-3xl sm:text-5xl tracking-tight font-geist">Follow these in order the first time</h2>
+          <p class="mt-4 text-gray-400 font-geist max-w-md">Each step links to one document. Works with Claude Code, Codex, Cursor, OpenCode, GitHub Copilot, and Gemini CLI.</p>
+          <a href="#" class="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-gray-900 px-5 py-2.5 text-sm font-medium hover:bg-gray-100 transition shadow-lg font-geist">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="download"></svg>
+            Install Uncle Dev
+          </a>
+        </div>
+        <ol class="space-y-4 animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.2s both;">
+          <li class="flex gap-4 rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md"><span class="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white text-gray-900 text-sm font-semibold">1</span><div><p class="font-medium font-geist">Understand the idea</p><p class="text-sm text-gray-400 font-geist">What is Uncle Dev? — the problem it solves and why it works.</p></div></li>
+          <li class="flex gap-4 rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md"><span class="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white text-gray-900 text-sm font-semibold">2</span><div><p class="font-medium font-geist">Install it</p><p class="text-sm text-gray-400 font-geist">Set up Uncle Dev in your AI coding tool.</p></div></li>
+          <li class="flex gap-4 rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md"><span class="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white text-gray-900 text-sm font-semibold">3</span><div><p class="font-medium font-geist">Run your first task</p><p class="text-sm text-gray-400 font-geist">Walk through using skills end to end.</p></div></li>
+          <li class="flex gap-4 rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md"><span class="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white text-gray-900 text-sm font-semibold">4</span><div><p class="font-medium font-geist">See common workflows</p><p class="text-sm text-gray-400 font-geist">How a feature moves through every phase.</p></div></li>
+          <li class="flex gap-4 rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-md"><span class="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white text-gray-900 text-sm font-semibold">5</span><div><p class="font-medium font-geist">Keep the references handy</p><p class="text-sm text-gray-400 font-geist">Commands &amp; skills, prompts by phase, prompts by skill.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── Reference: documentation map ───────────────────────── -->
+  <section id="reference" aria-labelledby="ref-title" class="overflow-hidden border-t border-black/5 relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div class="animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.1s both;">
+          <p class="text-xs sm:text-sm text-gray-500 font-geist">Documentation map</p>
+          <h2 id="ref-title" class="mt-4 text-3xl sm:text-5xl tracking-tight font-geist">Everything at once</h2>
+          <p class="mt-4 text-gray-600 font-geist max-w-md">The complete list of pages, for when you want to see everything. Grouped into five areas plus an all-in-one page.</p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <a href="#" class="inline-flex items-center gap-3 text-sm font-medium text-white bg-black rounded-full px-6 py-3 hover:bg-gray-800 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] font-geist shadow-[0_12.5px_10px_rgba(0,0,0,0.06),_0_41.8px_33.4px_rgba(0,0,0,0.086)]">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="map"></svg>
+              Open the full map
+            </a>
+            <a href="#" class="inline-flex items-center gap-2 text-sm font-medium text-gray-900 font-geist bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-3 hover:bg-white/20 transition">Prompts by phase</a>
+          </div>
+        </div>
+        <!-- file tree -->
+        <div class="animate-on-scroll" style="animation: fadeSlideIn 1s ease-out 0.2s both;">
+          <pre class="rounded-2xl bg-gray-950 text-gray-300 text-xs sm:text-sm leading-relaxed font-mono p-6 overflow-x-auto shadow-xl"><code>docs/
+├── 01-getting-started/   → understand, install, first task
+│   ├── What is Uncle Dev?
+│   ├── Installation
+│   ├── First task
+│   └── Common workflows
+├── 02-user-guide/        → concepts and per-tool setup
+│   ├── Concepts (SDD, .devlocal, annotations…)
+│   └── Tool Setup (Copilot · Cursor · Gemini…)
+├── 03-agent-guide/       → personas and subagents
+│   └── Available agents
+├── 04-customization/     → extend Uncle Dev
+│   ├── Authoring skills
+│   └── Spec annotations (green/brownfield)
+├── 05-reference/         → look up the details
+│   ├── Commands and skills
+│   ├── Prompts by phase
+│   └── Prompts by skill
+├── all-in-one.md         → full docs, single page
+└── roadmap.md            → planned sections</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── Footer ───────────────────────── -->
+  <footer class="text-white bg-gray-900 border-t border-black/5 relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div class="col-span-2 md:col-span-1">
+          <a href="#" class="flex items-center gap-2.5">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white text-gray-900"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="hard-hat" class="h-5 w-5"></svg></span>
+            <span class="text-base font-semibold tracking-tight font-geist">Uncle Dev</span>
+          </a>
+          <p class="mt-4 text-sm text-gray-400 font-geist max-w-xs">Spec first, test as it goes, review before commit.</p>
+        </div>
+        <div>
+          <p class="text-sm font-semibold font-geist">Getting Started</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">What is Uncle Dev?</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Installation</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">First task</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Common workflows</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-semibold font-geist">User Guide</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Concepts</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">SDD &amp; OpenSpec</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Spec annotations</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Tool setup</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-semibold font-geist">Reference</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Commands &amp; skills</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Prompts by phase</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Prompts by skill</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">All in one page</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-semibold font-geist">More</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Agent guide</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Authoring skills</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition font-geist">Roadmap</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+        <p class="font-geist">© <span id="year"></span> Uncle Dev. Documentation.</p>
+        <div class="flex items-center gap-6">
+          <a href="#" class="hover:text-white transition font-geist">GitHub</a>
+          <a href="#" class="hover:text-white transition font-geist">Roadmap</a>
+          <a href="#reference" class="hover:text-white transition font-geist">Reference</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Palette dock: live-test background color combinations -->
+  <div id="paletteDock" role="group" aria-label="Background palette">
+    <span class="pd-label font-geist">Palette</span>
+    <button class="pd-swatch" data-name="Aurora"  data-filter="none"
+            style="background:linear-gradient(135deg,#f7944d,#d65cc8,#6f74f0)"></button>
+    <button class="pd-swatch" data-name="Lagoon"  data-filter="hue-rotate(160deg) saturate(1.12)"
+            style="background:linear-gradient(135deg,#22d3ee,#38bdf8,#6366f1)"></button>
+    <button class="pd-swatch" data-name="Emerald" data-filter="hue-rotate(115deg) saturate(1.05)"
+            style="background:linear-gradient(135deg,#34d399,#22d3ee,#4ade80)"></button>
+    <button class="pd-swatch" data-name="Sunset"  data-filter="hue-rotate(-28deg) saturate(1.22) brightness(1.02)"
+            style="background:linear-gradient(135deg,#fb923c,#f43f5e,#f59e0b)"></button>
+    <button class="pd-swatch" data-name="Rosé"    data-filter="hue-rotate(312deg) saturate(1.12)"
+            style="background:linear-gradient(135deg,#fb7185,#e879f9,#f472b6)"></button>
+    <button class="pd-swatch" data-name="Iris"    data-filter="hue-rotate(38deg) saturate(0.82)"
+            style="background:linear-gradient(135deg,#818cf8,#a78bfa,#c084fc)"></button>
+    <button class="pd-swatch" data-name="Noir"    data-filter="saturate(0.18) brightness(1.04)"
+            style="background:linear-gradient(135deg,#d1d5db,#9ca3af,#4b5563)"></button>
+  </div>
+
+  <!-- ───────────────────────── Scripts ───────────────────────── -->
+  <script>
+    // Render Lucide icons
+    if (window.lucide && typeof lucide.createIcons === 'function') {
+      lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+    }
+
+    // Palette dock — apply a CSS filter to the WebGL background to preview color combinations
+    (function () {
+      const dock = document.getElementById('paletteDock');
+      if (!dock) return;
+      const swatches = Array.from(dock.querySelectorAll('.pd-swatch'));
+      const root = document.documentElement;
+      const KEY = 'ud-bg-palette';
+
+      function apply(name, persist) {
+        const btn = swatches.find(s => s.dataset.name === name) || swatches[0];
+        const filter = btn.dataset.filter || 'none';
+        root.style.setProperty('--bg-filter', filter);
+        swatches.forEach(s => s.setAttribute('aria-pressed', String(s === btn)));
+        if (persist) { try { localStorage.setItem(KEY, btn.dataset.name); } catch (e) {} }
+      }
+      swatches.forEach(s => s.addEventListener('click', () => apply(s.dataset.name, true)));
+
+      let saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      apply(saved || 'Aurora', false);
+    })();
+
+    // Mobile menu toggle
+    const toggleBtn = document.getElementById('mobileToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const iconMenu = document.getElementById('iconMenu');
+    const iconClose = document.getElementById('iconClose');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.toggle('hidden');
+        const expanded = !isHidden;
+        toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        iconMenu.classList.toggle('hidden', expanded);
+        iconClose.classList.toggle('hidden', !expanded);
+      });
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // WebGL background lifecycle: render only when the tab is visible AND the hero is on screen.
+    // Pausing destroys the scene's render loop, so CPU drops to ~0 when it's not needed.
+    (function () {
+      const el = document.getElementById('usEl');
+      const hero = document.querySelector('main');
+      if (!el || !hero) return;
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let scene = null, starting = false, heroVisible = true, stopTimer = null;
+
+      function shouldRun() {
+        return !reduce && !document.hidden && heroVisible && window.__usLoaded;
+      }
+      function start() {
+        if (scene || starting || !shouldRun()) return;
+        starting = true;
+        try {
+          Promise.resolve(window.UnicornStudio.init())
+            .then((scenes) => { scene = (scenes && scenes[0]) || true; starting = false; if (!shouldRun()) stop(); })
+            .catch(() => { starting = false; });
+        } catch (e) { starting = false; }
+      }
+      function stop() {
+        clearTimeout(stopTimer);
+        if (!scene) return;
+        try {
+          if (scene && typeof scene.destroy === 'function') scene.destroy();
+          else if (window.UnicornStudio && typeof window.UnicornStudio.destroy === 'function') window.UnicornStudio.destroy();
+        } catch (e) {}
+        scene = null;
+        if (window.UnicornStudio) window.UnicornStudio.isInitialized = false;
+      }
+      function stopSoon() { clearTimeout(stopTimer); stopTimer = setTimeout(stop, 1200); }
+
+      // Pause when the hero leaves the viewport (reading lower sections shouldn't burn CPU)
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+          heroVisible = entries[0].isIntersecting;
+          if (heroVisible) start(); else stopSoon();
+        }, { threshold: 0.01 }).observe(hero);
+      }
+      // Pause when the tab is backgrounded
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop(); else start();
+      });
+
+      // Start once the library is ready (handles both load orders)
+      window.__usReady = start;
+      if (window.__usLoaded) start();
+    })();
+  </script>
+</body>
+</html>

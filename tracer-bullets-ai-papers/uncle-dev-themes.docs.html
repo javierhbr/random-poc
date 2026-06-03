@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uncle Dev — Documentation</title>
+<meta name="description" content="Make your AI coding agent work like a disciplined senior engineer — spec first, test as it goes, review before commit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body class="antialiased text-[var(--ink-1)] bg-[var(--bg)] selection:bg-[var(--accent-line)] selection:text-[var(--on-accent)]" style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial;">
+
+  <!-- Background glow -->
+  <div class="absolute top-0 w-full h-[700px] -z-10 bg-[radial-gradient(ellipse_at_top,var(--glow),transparent_60%)]"></div>
+
+  <!-- Frosted top edge (static gradient — no backdrop-filter, no idle CPU) -->
+  <div class="gradient-blur"></div>
+  <style>
+    html { font-size: 17.5px; }
+
+    /* ===== base tokens (default = Violet, light) + derived overlays ===== */
+    :root{
+      --bg:#e6e6ef; --surface:#f0f0f8; --panel:#eae9f3; --panel-ink:#4a4458;
+      --ink:#2c2540; --ink-1:#3c3550; --ink-2:#524b63; --ink-3:#6f6880; --ink-4:#857e92;
+      --accent:#7c3aed; --accent-link:#6d28d9; --accent-deep:#5b21b6; --on-accent:#ffffff;
+      --grad-from:#3b1d6e; --grad-to:#9333ea; --code-str:#047857;
+    }
+    [data-theme="violet-dark"]{
+      --bg:#30303f; --surface:#3a3a4d; --panel:#211d2b; --panel-ink:#d9d6e6;
+      --ink:#f4f2ff; --ink-1:#e2def0; --ink-2:#c3bdd6; --ink-3:#9c95b0; --ink-4:#827b96;
+      --accent:#a855f7; --accent-link:#c084fc; --accent-deep:#d8b4fe; --on-accent:#1a1226;
+      --grad-from:#ffffff; --grad-to:#a39fea; --code-str:#6ee7b7;
+    }
+    [data-theme="coral-dark"]{
+      --bg:#15141b; --surface:#201e29; --panel:#1b1a24; --panel-ink:#e7e2ea;
+      --ink:#fbeff0; --ink-1:#f0e4e6; --ink-2:#d4c4c8; --ink-3:#a99ba0; --ink-4:#8a7d83;
+      --accent:#ff6b6b; --accent-link:#ff5a5f; --accent-deep:#ff8787; --on-accent:#2a0b0c;
+      --grad-from:#ffffff; --grad-to:#ff8a8a; --code-str:#5eead4;
+    }
+    [data-theme="azure-light"]{
+      --bg:#eaf0f8; --surface:#f4f8fd; --panel:#e6eef8; --panel-ink:#33415c;
+      --ink:#10243f; --ink-1:#1d3354; --ink-2:#33476b; --ink-3:#5a6b87; --ink-4:#7d8aa1;
+      --accent:#2563eb; --accent-link:#1d4ed8; --accent-deep:#1e40af; --on-accent:#ffffff;
+      --grad-from:#0b2a6b; --grad-to:#3b82f6; --code-str:#0f766e;
+    }
+    [data-theme="teal-dark"]{
+      --bg:#0e1917; --surface:#152523; --panel:#10201d; --panel-ink:#dbeee9;
+      --ink:#ecfdf7; --ink-1:#d6f3ec; --ink-2:#a9d6cd; --ink-3:#7ba79e; --ink-4:#5f8880;
+      --accent:#2dd4bf; --accent-link:#5eead4; --accent-deep:#99f6e4; --on-accent:#04201c;
+      --grad-from:#ffffff; --grad-to:#5eead4; --code-str:#fcd34d;
+    }
+    [data-theme="magenta-light"]{
+      --bg:#f2ecf1; --surface:#faf5f9; --panel:#f0e7ef; --panel-ink:#4a2f44;
+      --ink:#3a1230; --ink-1:#4f2244; --ink-2:#6b3a60; --ink-3:#8c6483; --ink-4:#a98aa3;
+      --accent:#db2777; --accent-link:#be185d; --accent-deep:#9d174d; --on-accent:#ffffff;
+      --grad-from:#6b1647; --grad-to:#ec4899; --code-str:#0f766e;
+    }
+    [data-theme="indigo-dark"]{
+      --bg:#11132a; --surface:#1a1d3a; --panel:#14162e; --panel-ink:#dfe2ff;
+      --ink:#eef0ff; --ink-1:#dadcf7; --ink-2:#b3b6e0; --ink-3:#8589b8; --ink-4:#6b6f9c;
+      --accent:#818cf8; --accent-link:#a5b4fc; --accent-deep:#c7d2fe; --on-accent:#141431;
+      --grad-from:#ffffff; --grad-to:#a5b4fc; --code-str:#6ee7b7;
+    }
+    [data-theme="slate-mono"]{
+      --bg:#e8eaee; --surface:#f3f4f7; --panel:#e3e5ea; --panel-ink:#3a4150;
+      --ink:#1b2430; --ink-1:#2b3543; --ink-2:#434f60; --ink-3:#646f80; --ink-4:#8a93a1;
+      --accent:#475569; --accent-link:#334155; --accent-deep:#1e293b; --on-accent:#ffffff;
+      --grad-from:#0f172a; --grad-to:#64748b; --code-str:#0f766e;
+    }
+    [data-theme="slate-dark"]{
+      --bg:#181c23; --surface:#222731; --panel:#1c212a; --panel-ink:#d3d9e2;
+      --ink:#f1f4f9; --ink-1:#dde2ea; --ink-2:#b4bcc9; --ink-3:#828c9c; --ink-4:#666f7e;
+      --accent:#94a3b8; --accent-link:#cbd5e1; --accent-deep:#e2e8f0; --on-accent:#161a20;
+      --grad-from:#ffffff; --grad-to:#94a3b8; --code-str:#5eead4;
+    }
+    [data-theme="zinc-light"]{
+      --bg:#e9e9eb; --surface:#f5f5f6; --panel:#e3e3e6; --panel-ink:#3f3f46;
+      --ink:#18181b; --ink-1:#27272a; --ink-2:#3f3f46; --ink-3:#65656e; --ink-4:#8b8b93;
+      --accent:#52525b; --accent-link:#3f3f46; --accent-deep:#27272a; --on-accent:#ffffff;
+      --grad-from:#18181b; --grad-to:#71717a; --code-str:#0f766e;
+    }
+    [data-theme="zinc-dark"]{
+      --bg:#1a1a1d; --surface:#252528; --panel:#1e1e21; --panel-ink:#d4d4d8;
+      --ink:#fafafa; --ink-1:#e8e8ea; --ink-2:#bcbcc1; --ink-3:#86868d; --ink-4:#67676d;
+      --accent:#a1a1aa; --accent-link:#d4d4d8; --accent-deep:#e4e4e7; --on-accent:#18181b;
+      --grad-from:#ffffff; --grad-to:#a1a1aa; --code-str:#6ee7b7;
+    }
+    [data-theme="stone-light"]{
+      --bg:#eae8e4; --surface:#f5f4f1; --panel:#e5e3de; --panel-ink:#44403c;
+      --ink:#1c1917; --ink-1:#292524; --ink-2:#44403c; --ink-3:#6b655f; --ink-4:#928b82;
+      --accent:#57534e; --accent-link:#44403c; --accent-deep:#292524; --on-accent:#ffffff;
+      --grad-from:#1c1917; --grad-to:#78716c; --code-str:#0f766e;
+    }
+    [data-theme="stone-dark"]{
+      --bg:#1c1a18; --surface:#272422; --panel:#201d1b; --panel-ink:#d6d3d1;
+      --ink:#fafaf9; --ink-1:#ebe9e7; --ink-2:#c0bbb6; --ink-3:#8c857e; --ink-4:#6d665f;
+      --accent:#a8a29e; --accent-link:#d6d3d1; --accent-deep:#e7e5e4; --on-accent:#1c1917;
+      --grad-from:#ffffff; --grad-to:#a8a29e; --code-str:#6ee7b7;
+    }
+    [data-theme="terracotta-light"]{
+      --bg:#efe6df; --surface:#f8f1ec; --panel:#ece0d8; --panel-ink:#5b3a2e;
+      --ink:#3a1e14; --ink-1:#4d2b1f; --ink-2:#6b4234; --ink-3:#8c6353; --ink-4:#a98575;
+      --accent:#c2410c; --accent-link:#9a3412; --accent-deep:#7c2d12; --on-accent:#ffffff;
+      --grad-from:#7c2d12; --grad-to:#ea580c; --code-str:#0f766e;
+    }
+    [data-theme="terracotta-dark"]{
+      --bg:#1f1714; --surface:#2b201b; --panel:#241a16; --panel-ink:#ecd9cf;
+      --ink:#fbeee7; --ink-1:#f0ddd2; --ink-2:#d3b6a8; --ink-3:#a8867a; --ink-4:#87695e;
+      --accent:#f97316; --accent-link:#fb923c; --accent-deep:#fdba74; --on-accent:#2a1206;
+      --grad-from:#ffffff; --grad-to:#fb923c; --code-str:#5eead4;
+    }
+    [data-theme="clay-light"]{
+      --bg:#ece3dd; --surface:#f6efea; --panel:#e6dad2; --panel-ink:#5a4039;
+      --ink:#2f1d18; --ink-1:#432b24; --ink-2:#5f433a; --ink-3:#836458; --ink-4:#a48578;
+      --accent:#b45f52; --accent-link:#9c4a3f; --accent-deep:#7e3a30; --on-accent:#ffffff;
+      --grad-from:#7e3a30; --grad-to:#cd7e6e; --code-str:#0f766e;
+    }
+    [data-theme="sienna-light"]{
+      --bg:#f0e7e0; --surface:#f9f2ec; --panel:#ebdfd6; --panel-ink:#59362c;
+      --ink:#361a12; --ink-1:#4a271c; --ink-2:#663d30; --ink-3:#8a5f50; --ink-4:#a98173;
+      --accent:#a63d2f; --accent-link:#8a2f23; --accent-deep:#6e2419; --on-accent:#ffffff;
+      --grad-from:#6e2419; --grad-to:#d65f47; --code-str:#0f766e;
+    }
+    [data-theme="adobe-light"]{
+      --bg:#f1e9df; --surface:#faf4ec; --panel:#ece1d3; --panel-ink:#5e4634;
+      --ink:#382414; --ink-1:#4c3320; --ink-2:#6a4d36; --ink-3:#8d6e54; --ink-4:#ab8d72;
+      --accent:#c97b4a; --accent-link:#b1602f; --accent-deep:#8f4a20; --on-accent:#ffffff;
+      --grad-from:#8f4a20; --grad-to:#e0975f; --code-str:#0f766e;
+    }
+    [data-theme="apricot-light"]{
+      --bg:#f3e8e2; --surface:#fcf3ee; --panel:#efe0d8; --panel-ink:#5c3d33;
+      --ink:#3a201a; --ink-1:#4e2d25; --ink-2:#6c453a; --ink-3:#8e665a; --ink-4:#ab877b;
+      --accent:#d97757; --accent-link:#c25a3a; --accent-deep:#9e4528; --on-accent:#ffffff;
+      --grad-from:#9e4528; --grad-to:#f0926e; --code-str:#0f766e;
+    }
+
+    /* derived overlays — recompute from active theme's ink/accent */
+    :root{
+      --line:    color-mix(in srgb, var(--ink) 12%, transparent);
+      --line-2:  color-mix(in srgb, var(--ink) 16%, transparent);
+      --line-3:  color-mix(in srgb, var(--ink) 26%, transparent);
+      --fill-0:  color-mix(in srgb, var(--ink)  3%, transparent);
+      --fill-1:  color-mix(in srgb, var(--ink)  6%, transparent);
+      --fill-2:  color-mix(in srgb, var(--ink)  9%, transparent);
+      --fill-3:  color-mix(in srgb, var(--ink) 13%, transparent);
+      --accent-soft:  color-mix(in srgb, var(--accent) 10%, transparent);
+      --accent-soft2: color-mix(in srgb, var(--accent) 16%, transparent);
+      --accent-line:  color-mix(in srgb, var(--accent) 24%, transparent);
+      --accent-line2: color-mix(in srgb, var(--accent) 34%, transparent);
+      --accent-line3: color-mix(in srgb, var(--accent) 55%, transparent);
+      --accent-glow:  color-mix(in srgb, var(--accent) 14%, transparent);
+      --accent-glow2: color-mix(in srgb, var(--accent) 22%, transparent);
+      --accent-glow3: color-mix(in srgb, var(--accent) 18%, transparent);
+      --glow:         color-mix(in srgb, var(--accent) 16%, transparent);
+      --accent-shadow:color-mix(in srgb, var(--accent) 55%, transparent);
+    }
+
+    html, body { background: var(--bg); }
+    *,*::before,*::after { transition: background-color .4s ease, border-color .4s ease, color .3s ease; }
+    .gradient-blur { position: fixed; z-index: 40; inset: 0 0 auto 0; height: 12%; pointer-events: none;
+      background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 38%, transparent 100%); }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--line-3); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ===== floating palette pill ===== */
+    .theme-pill{ position:fixed; z-index:60; left:50%; bottom:1.25rem; transform:translateX(-50%);
+      display:flex; align-items:center; gap:.85rem; padding:.5rem .9rem;
+      background:var(--surface); border:1px solid var(--line-2); border-radius:999px;
+      box-shadow:0 12px 34px -12px rgba(0,0,0,.35); backdrop-filter:saturate(1.1); }
+    .theme-pill__label{ font:600 10px/1 ui-monospace,monospace; letter-spacing:.22em; color:var(--ink-3); user-select:none; }
+    .theme-pill__dots{ display:flex; gap:.5rem; }
+    .swatch{ width:22px; height:22px; border-radius:999px; cursor:pointer; padding:0; position:relative;
+      background:var(--dot); border:2px solid transparent; box-shadow:0 1px 2px rgba(0,0,0,.25), inset 0 1px 1px rgba(255,255,255,.25);
+      transition:transform .15s ease, box-shadow .15s ease; }
+    .swatch:hover{ transform:translateY(-2px) scale(1.08); }
+    .swatch.is-active{ border-color:var(--ink); box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--dot); }
+    @media (max-width:640px){ .theme-pill__label{ display:none; } .swatch{ width:20px; height:20px; } }
+  </style>
+
+  <!-- Nav -->
+  <header class="sticky z-50 relative top-0">
+    <div class="sm:px-6 lg:px-8 max-w-7xl border-[var(--line)] mr-auto ml-auto pr-4 pl-4">
+      <div class="flex h-16 items-center justify-between">
+        <a href="#" class="inline-flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[var(--accent-link)]">
+            <iconify-icon icon="solar:code-square-linear" class="text-lg"></iconify-icon>
+          </span>
+          <span class="text-sm font-medium tracking-tight text-[var(--ink)]">Uncle Dev</span>
+        </a>
+
+        <nav class="hidden md:flex border-[var(--line)] border rounded-full pr-4 pl-4 gap-x-1 items-center">
+          <a href="#getting-started" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink-1)] pt-2 pr-3 pb-2 pl-3">Getting Started</a>
+          <a href="#user-guide" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink-1)] pt-2 pr-3 pb-2 pl-3">User Guide</a>
+          <a href="#reference" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink-1)] pt-2 pr-3 pb-2 pl-3">Reference</a>
+          <a href="#changelog" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink-1)] pt-2 pr-3 pb-2 pl-3">Changelog</a>
+          <a href="#" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink)] pt-2 pr-3 pb-2 pl-3">Docs</a>
+          <a href="#learning-paths" class="hover:text-[var(--ink)] text-sm font-medium text-[var(--ink-1)] pt-2 pr-3 pb-2 pl-3">Learning Paths</a>
+        </nav>
+
+        <div class="flex gap-2 items-center">
+          <a href="#start-here" class="hidden sm:inline-flex group cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] hover:bg-[var(--accent-deep)] active:scale-[0.98] outline-none bg-[var(--accent-link)] rounded-full pt-2 pr-5 pb-2 pl-5 relative shadow-[0_8px_20px_-8px_var(--accent-shadow)] items-center justify-center">
+            <span class="relative z-10 flex items-center gap-2 text-[var(--on-accent)] text-sm font-medium tracking-wide">
+              <iconify-icon icon="solar:download-minimalistic-linear" class="text-base"></iconify-icon>
+              <span>Install</span>
+            </span>
+          </a>
+
+          <button type="button" id="mobile-menu-btn" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-[var(--ink-1)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--accent-link)] transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden md:hidden absolute w-full left-0 top-16 bg-[var(--bg)] border-t border-[var(--line-2)] shadow-[0_14px_34px_-14px_rgba(45,38,64,0.22)] z-40">
+      <div class="space-y-1 px-4 pb-3 pt-4">
+        <a href="#getting-started" class="block px-3 py-2.5 rounded-md text-base font-medium text-[var(--ink)] bg-[var(--fill-1)]">Getting Started</a>
+        <a href="#user-guide" class="block px-3 py-2.5 rounded-md text-base font-medium text-[var(--ink-1)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors">User Guide</a>
+        <a href="#reference" class="block px-3 py-2.5 rounded-md text-base font-medium text-[var(--ink-1)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors">Reference</a>
+        <a href="#changelog" class="block px-3 py-2.5 rounded-md text-base font-medium text-[var(--ink-1)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors">Changelog</a>
+        <a href="#learning-paths" class="block px-3 py-2.5 rounded-md text-base font-medium text-[var(--ink-1)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors">Learning Paths</a>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const icon = btn?.querySelector('svg');
+        if (btn && menu && icon) {
+          btn.addEventListener('click', () => {
+            const isHidden = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            if (isHidden) { icon.innerHTML = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'; }
+            else { icon.innerHTML = '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>'; }
+          });
+        }
+      })();
+    </script>
+  </header>
+
+  <!-- Docs Hero / Search -->
+  <section class="z-10 mt-0 relative">
+    <div class="sm:px-6 lg:px-8 max-w-[1600px] mt-0 mr-auto mb-0 ml-auto pt-16 md:pt-24 pb-12 pr-4 pl-4 border-b border-[var(--line)] relative">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--accent-glow)] blur-[120px] rounded-full pointer-events-none -z-10"></div>
+
+      <div class="flex flex-col text-center mt-0 mx-auto space-y-6 items-center max-w-3xl relative z-10">
+        <div class="mb-2">
+          <span class="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent-link)] bg-[var(--accent-soft)] border border-[var(--accent-line)] rounded-full px-3 py-1 uppercase tracking-widest">
+            <iconify-icon icon="solar:book-linear" stroke-width="1.5" class="text-sm"></iconify-icon>
+            Uncle Dev Documentation
+          </span>
+        </div>
+
+        <h1 class="block bg-clip-text text-5xl md:text-6xl lg:text-7xl font-medium text-transparent tracking-tight text-center bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] pb-2">
+          Uncle Dev
+        </h1>
+        <p class="text-sm md:text-base text-[var(--ink-1)] max-w-xl mt-0 px-4 leading-relaxed">
+          Make your AI coding agent work like a disciplined senior engineer — <span class="text-[var(--ink)]">spec first, test as it goes, review before commit.</span>
+        </p>
+
+        <!-- Search Bar -->
+        <div class="w-full max-w-2xl mt-8 relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-[var(--accent-glow2)] to-[var(--accent-glow3)] rounded-[20px] blur-lg opacity-50 group-focus-within:opacity-100 transition duration-500"></div>
+          <div class="relative flex items-center bg-[var(--bg)] border border-[var(--line-2)] rounded-[16px] p-2 shadow-[0_14px_34px_-14px_rgba(45,38,64,0.22)] transition-all duration-300 group-focus-within:border-[var(--accent-line3)]">
+            <div class="pl-4 pr-2 text-[var(--ink-2)] flex items-center justify-center">
+              <iconify-icon icon="solar:magnifer-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+            </div>
+            <input type="text" placeholder="Search docs, skills, commands, or prompts..." class="w-full bg-transparent border-none outline-none text-[var(--ink)] text-sm py-3 px-2 placeholder:text-[var(--ink-4)] font-sans">
+            <div class="hidden sm:flex items-center gap-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md px-2 py-1 mr-2 text-xs text-[var(--ink-3)] font-mono">
+              <span>⌘</span><span>K</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="flex flex-wrap justify-center gap-3 mt-8 pt-4">
+          <a href="#" class="inline-flex items-center gap-2 text-xs font-normal text-[var(--ink-1)] hover:text-[var(--ink)] bg-[var(--fill-1)] border border-[var(--line-2)] hover:border-[var(--line-3)] hover:bg-[var(--fill-3)] rounded-lg px-4 py-2 transition-all">
+            <iconify-icon icon="solar:lightbulb-linear" stroke-width="1.5" class="text-[var(--accent)]"></iconify-icon> What is Uncle Dev?
+          </a>
+          <a href="#start-here" class="inline-flex items-center gap-2 text-xs font-normal text-[var(--ink-1)] hover:text-[var(--ink)] bg-[var(--fill-1)] border border-[var(--line-2)] hover:border-[var(--line-3)] hover:bg-[var(--fill-3)] rounded-lg px-4 py-2 transition-all">
+            <iconify-icon icon="solar:download-minimalistic-linear" stroke-width="1.5" class="text-[var(--accent)]"></iconify-icon> Installation
+          </a>
+          <a href="#" class="inline-flex items-center gap-2 text-xs font-normal text-[var(--ink-1)] hover:text-[var(--ink)] bg-[var(--fill-1)] border border-[var(--line-2)] hover:border-[var(--line-3)] hover:bg-[var(--fill-3)] rounded-lg px-4 py-2 transition-all">
+            <iconify-icon icon="solar:rocket-linear" stroke-width="1.5" class="text-[var(--accent)]"></iconify-icon> First Task
+          </a>
+          <a href="#reference" class="inline-flex items-center gap-2 text-xs font-normal text-[var(--ink-1)] hover:text-[var(--ink)] bg-[var(--fill-1)] border border-[var(--line-2)] hover:border-[var(--line-3)] hover:bg-[var(--fill-3)] rounded-lg px-4 py-2 transition-all">
+            <iconify-icon icon="solar:book-bookmark-linear" stroke-width="1.5" class="text-[var(--accent)]"></iconify-icon> Reference
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Docs Layout Grid -->
+  <section class="max-w-[1600px] mx-auto sm:px-6 lg:px-8 w-full relative z-10">
+    <div class="flex flex-col lg:flex-row items-start gap-8 py-12 relative">
+
+      <!-- Left Sidebar (Directory) -->
+      <aside class="w-full lg:w-64 shrink-0 hidden lg:block sticky top-24 self-start h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar pr-4">
+        <div class="space-y-8">
+
+          <!-- Getting Started -->
+          <div id="getting-started">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Getting Started</div>
+            <div class="relative border-l border-[var(--line-2)] ml-3 space-y-1">
+              <div class="relative">
+                <div class="absolute -left-[1px] top-0 bottom-0 w-[2px] bg-[var(--accent-link)] rounded-r"></div>
+                <a href="#" class="flex items-center px-4 py-1.5 text-sm font-medium text-[var(--accent-link)]">What is Uncle Dev?</a>
+              </div>
+              <a href="#start-here" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">Installation</a>
+              <a href="#" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">First task</a>
+              <a href="#" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">Common workflows</a>
+              <a href="#" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">FAQ</a>
+            </div>
+          </div>
+
+          <!-- User Guide -->
+          <div id="user-guide">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">User Guide</div>
+            <div class="relative border-l border-[var(--line-2)] ml-3 space-y-1">
+              <div class="relative">
+                <a href="#" class="flex items-center px-4 py-1.5 text-sm font-normal text-[var(--ink-1)] hover:text-[var(--ink)] transition-colors">Concepts</a>
+                <ul class="pl-4 space-y-1 mt-1 mb-2">
+                  <li><a href="#" class="block px-2 py-1 text-xs text-[var(--ink-3)] hover:text-[var(--ink)]">SDD and OpenSpec</a></li>
+                  <li><a href="#" class="block px-2 py-1 text-xs text-[var(--ink-3)] hover:text-[var(--ink)]">The .devlocal directory</a></li>
+                  <li><a href="#" class="block px-2 py-1 text-xs text-[var(--ink-3)] hover:text-[var(--ink)]">Spec annotations</a></li>
+                  <li><a href="#" class="block px-2 py-1 text-xs text-[var(--ink-3)] hover:text-[var(--ink)]">Acknowledge: decision notes</a></li>
+                  <li><a href="#" class="block px-2 py-1 text-xs text-[var(--ink-3)] hover:text-[var(--ink)]">Next-task selection</a></li>
+                </ul>
+              </div>
+              <a href="#" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">Tool setup</a>
+              <a href="#" class="block px-4 py-1.5 text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors relative before:absolute before:-left-[1px] before:top-1/2 before:-translate-y-1/2 before:w-[2px] before:h-0 hover:before:h-full before:bg-[var(--line-3)] before:transition-all">Troubleshooting</a>
+            </div>
+          </div>
+
+          <!-- Agent Guide -->
+          <div>
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Agent Guide</div>
+            <ul class="space-y-1">
+              <li>
+                <a href="#" class="group flex items-center justify-between px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors">
+                  <span class="flex items-center gap-2"><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon> Available agents</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Customization -->
+          <div>
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Customization</div>
+            <ul class="space-y-1">
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:pen-new-square-linear"></iconify-icon> Authoring skills</a></li>
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:link-linear"></iconify-icon> Implement spec annotations</a></li>
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:layers-linear"></iconify-icon> Brownfield annotations</a></li>
+            </ul>
+          </div>
+
+          <!-- Reference -->
+          <div id="reference">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Reference</div>
+            <ul class="space-y-1">
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:command-linear"></iconify-icon> Commands and skills</a></li>
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:chat-square-code-linear"></iconify-icon> Prompts by phase</a></li>
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:document-text-linear"></iconify-icon> Prompts by skill</a></li>
+            </ul>
+          </div>
+
+          <!-- Learning Paths -->
+          <div id="learning-paths">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Learning Paths</div>
+            <ul class="space-y-1">
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:user-rounded-linear"></iconify-icon> Product path</a></li>
+              <li><a href="#" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:code-linear"></iconify-icon> Developer path</a></li>
+            </ul>
+          </div>
+
+          <!-- Changelog -->
+          <div id="changelog-nav">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-3 font-medium">Changelog</div>
+            <ul class="space-y-1">
+              <li><a href="#changelog" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:history-linear"></iconify-icon> Core updates</a></li>
+              <li><a href="#changelog" class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-normal text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--fill-2)] transition-colors"><iconify-icon icon="solar:bell-linear"></iconify-icon> Release notes</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 min-w-0 max-w-4xl px-4 lg:px-8 pb-24">
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center space-x-2 text-xs text-[var(--ink-3)] mb-6 font-mono">
+          <a href="#" class="hover:text-[var(--ink-1)] transition-colors">Docs</a>
+          <iconify-icon icon="solar:alt-arrow-right-linear" class="text-[10px]"></iconify-icon>
+          <a href="#" class="hover:text-[var(--ink-1)] transition-colors">Getting Started</a>
+          <iconify-icon icon="solar:alt-arrow-right-linear" class="text-[10px]"></iconify-icon>
+          <span class="text-[var(--accent)]">Introduction</span>
+        </nav>
+
+        <!-- Doc Header -->
+        <div class="mb-10">
+          <h1 class="text-3xl md:text-4xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-4">Introduction</h1>
+          <p class="text-sm md:text-base text-[var(--ink-2)] leading-relaxed">
+            Left alone, AI coding agents take the shortest path: they skip the spec, guess the architecture, skip the tests, and hand you a large block of unreviewed code. Uncle Dev is a pack of engineering skills that overrides that behavior at every phase, so the agent <span class="text-[var(--accent-link)]">plans before it builds</span> and <span class="text-[var(--accent-link)]">verifies before it ships</span>.
+          </p>
+        </div>
+
+        <div class="space-y-12">
+
+          <!-- See it in action -->
+          <section id="see-it-in-action">
+            <h2 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-4 flex items-center gap-2">
+              <iconify-icon icon="solar:play-circle-linear" class="text-[var(--accent)]"></iconify-icon>
+              See it in action
+            </h2>
+            <p class="text-sm text-[var(--ink-2)] leading-relaxed mb-6">
+              Ask a vanilla agent to "build a login page" and it immediately writes HTML, CSS, and database queries — guessing the edge cases as it goes. With Uncle Dev, the same agent works the way a senior engineer would:
+            </p>
+
+            <!-- Pipeline diagram in a terminal-styled block -->
+            <div class="rounded-xl border border-[var(--line-2)] bg-[var(--panel)] shadow-[0_2px_10px_rgba(45,38,64,0.10)] overflow-hidden mb-8">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line)] bg-[var(--fill-0)]">
+                <div class="flex items-center gap-2 text-xs font-mono text-[var(--ink-3)]">
+                  <span class="w-2.5 h-2.5 rounded-full bg-red-500/60"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500/60"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
+                  <span class="ml-3">the lifecycle</span>
+                </div>
+                <span class="text-[10px] font-mono text-[var(--accent)] uppercase tracking-widest">6 phases</span>
+              </div>
+              <div class="p-4 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed">
+<pre class="text-[var(--panel-ink)]"><code> <span class="text-[var(--accent-link)]">DEFINE</span>          <span class="text-[var(--accent-link)]">PLAN</span>          <span class="text-[var(--accent-link)]">BUILD</span>         <span class="text-[var(--accent-link)]">VERIFY</span>        <span class="text-[var(--accent-link)]">REVIEW</span>         <span class="text-[var(--accent-link)]">SHIP</span>
+<span class="text-[var(--ink-4)]">┌──────┐     ┌──────────┐   ┌──────┐     ┌──────┐     ┌──────┐     ┌──────┐</span>
+<span class="text-[var(--ink-4)]">│</span> Spec <span class="text-[var(--ink-4)]">│ ──▶ │</span>  Break   <span class="text-[var(--ink-4)]">│ ─▶│</span> Code <span class="text-[var(--ink-4)]">│ ──▶ │</span> Test <span class="text-[var(--ink-4)]">│ ──▶ │</span>  QA  <span class="text-[var(--ink-4)]">│ ──▶ │</span>  Go  <span class="text-[var(--ink-4)]">│</span>
+<span class="text-[var(--ink-4)]">│</span> first<span class="text-[var(--ink-4)]">│     │</span> into     <span class="text-[var(--ink-4)]">│   │</span> one  <span class="text-[var(--ink-4)]">│     │</span> &amp;    <span class="text-[var(--ink-4)]">│     │</span> gate <span class="text-[var(--ink-4)]">│     │</span> live <span class="text-[var(--ink-4)]">│</span>
+<span class="text-[var(--ink-4)]">│      │     │</span> tasks    <span class="text-[var(--ink-4)]">│   │</span> slice<span class="text-[var(--ink-4)]">│     │</span> debug<span class="text-[var(--ink-4)]">│     │      │     │      │</span>
+<span class="text-[var(--ink-4)]">└──────┘     └──────────┘   └──────┘     └──────┘     └──────┘     └──────┘</span>
+ <span class="text-[var(--code-str)]">/spec</span>         <span class="text-[var(--code-str)]">/plan</span>         <span class="text-[var(--code-str)]">/build</span>       <span class="text-[var(--code-str)]">/test</span>        <span class="text-[var(--code-str)]">/review</span>      <span class="text-[var(--code-str)]">/ship</span></code></pre>
+              </div>
+            </div>
+
+            <div class="flex gap-4 p-4 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent-line)]">
+              <iconify-icon icon="solar:check-circle-linear" class="text-[var(--accent)] text-xl shrink-0 mt-0.5"></iconify-icon>
+              <div>
+                <h4 class="text-sm font-medium text-[var(--accent-deep)] mb-1">Spec first, verify before ship</h4>
+                <p class="text-xs text-[var(--accent-deep)] leading-relaxed">
+                  It writes a spec and waits for your approval, breaks the work into tasks, builds one tested slice at a time, then reviews its own diff before committing.
+                </p>
+              </div>
+            </div>
+
+            <!-- Vertical lifecycle (same timeline style as the changelog) -->
+            <div class="mt-10">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-mono text-[var(--accent)] uppercase tracking-[0.2em]">The lifecycle · vertical</span>
+                <span class="text-[10px] font-mono text-[var(--ink-3)] uppercase tracking-widest">6 phases</span>
+              </div>
+
+              <div class="relative w-full border border-[var(--line)] p-6 md:p-8 rounded-2xl bg-[var(--fill-0)]">
+                <!-- Timeline line -->
+                <div class="absolute left-6 md:left-[20%] top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-[var(--line-3)] to-transparent">
+                  <div class="absolute top-0 left-[-1px] w-[3px] h-24 bg-gradient-to-b from-transparent via-[var(--accent)] to-transparent blur-[2px] ud-data-flow"></div>
+                </div>
+
+                <div class="flex flex-col gap-8 relative">
+
+                  <!-- Phase 1 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Define</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/spec</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:document-add-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">Spec first</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Write the spec and wait for approval before any code is written.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Phase 2 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Plan</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/plan</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:checklist-minimalistic-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">Break into tasks</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Decompose the work into small, independently verifiable tasks.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Phase 3 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Build</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/build</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:code-square-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">Code one slice</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Implement one tested slice at a time instead of one big drop.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Phase 4 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Verify</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/test</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:bug-minimalistic-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">Test &amp; debug</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Run the tests and debug until the slice is green.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Phase 5 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Review</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/review</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:shield-check-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">QA gate</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Review the diff against the spec before anything is committed.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <!-- Phase 6 -->
+                  <article class="cl-item relative flex gap-6 md:gap-10 group">
+                    <div class="absolute left-0 md:left-[20%] top-3 w-3 h-3 rotate-45 border border-[var(--accent-line3)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_18px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                      <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                    </div>
+                    <div class="absolute left-[6px] md:left-[20%] top-[1.1rem] w-6 md:w-10 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="md:w-[20%] shrink-0 md:text-right md:pr-10 pl-8 md:pl-0">
+                      <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Ship</div>
+                      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] border border-[var(--accent-line2)] bg-[var(--accent-soft)] text-[11px] font-mono text-[var(--accent-link)]">/ship</span>
+                    </div>
+                    <div class="md:w-full pl-8 md:pl-0">
+                      <div class="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500">
+                        <div class="w-9 h-9 shrink-0 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)]">
+                          <iconify-icon icon="solar:rocket-linear"></iconify-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-[var(--ink)]">Go live</h4>
+                          <p class="text-xs text-[var(--ink-2)] leading-relaxed">Ship to production with the work proven at every prior phase.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Horizontal lifecycle (same timeline style, laid out left-to-right) -->
+            <div class="mt-10">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-mono text-[var(--accent)] uppercase tracking-[0.2em]">The lifecycle · horizontal</span>
+                <span class="text-[10px] font-mono text-[var(--ink-3)] uppercase tracking-widest">6 phases</span>
+              </div>
+
+              <div class="relative w-full border border-[var(--line)] p-6 md:p-8 rounded-2xl bg-[var(--fill-0)] overflow-x-auto custom-scrollbar">
+                <div class="min-w-[820px] relative">
+                  <!-- Horizontal timeline line (sits at the node row) -->
+                  <div class="absolute left-0 right-0 top-[68px] h-px bg-gradient-to-r from-transparent via-[var(--line-3)] to-transparent overflow-hidden">
+                    <div class="absolute top-[-1px] left-0 h-[3px] w-20 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent blur-[2px] ud-data-flow-x"></div>
+                  </div>
+
+                  <div class="grid grid-cols-6 gap-4 relative">
+
+                    <!-- Phase 1 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Define</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/spec</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:document-add-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">Spec first</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Write the spec and wait for approval before any code.</p>
+                      </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Plan</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/plan</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:checklist-minimalistic-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">Break into tasks</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Decompose into small, verifiable tasks.</p>
+                      </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Build</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/build</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:code-square-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">Code one slice</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Implement one tested slice at a time.</p>
+                      </div>
+                    </div>
+
+                    <!-- Phase 4 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Verify</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/test</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:bug-minimalistic-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">Test &amp; debug</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Run the tests and debug until green.</p>
+                      </div>
+                    </div>
+
+                    <!-- Phase 5 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Review</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--line-2)] bg-[var(--fill-1)] text-[11px] font-mono text-[var(--code-str)]">/review</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:shield-check-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">QA gate</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Review the diff against the spec before commit.</p>
+                      </div>
+                    </div>
+
+                    <!-- Phase 6 -->
+                    <div class="cl-item flex flex-col items-center text-center group">
+                      <div class="h-14 flex flex-col items-center justify-start">
+                        <div class="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--ink-3)] mb-2">Ship</div>
+                        <span class="px-2 py-1 rounded-[4px] border border-[var(--accent-line2)] bg-[var(--accent-soft)] text-[11px] font-mono text-[var(--accent-link)]">/ship</span>
+                      </div>
+                      <div class="relative h-6 w-full flex items-center justify-center">
+                        <div class="w-3 h-3 rotate-45 border border-[var(--accent-line3)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_18px_var(--accent-glow2)] transition-all duration-500 group-hover:scale-125">
+                          <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                        </div>
+                      </div>
+                      <div class="mt-4 w-full p-4 rounded-xl bg-[var(--surface)] border border-[var(--line-2)] hover:bg-[var(--fill-1)] transition-colors duration-500 flex flex-col items-center">
+                        <div class="w-9 h-9 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-line2)] flex items-center justify-center text-[var(--accent-link)] mb-3">
+                          <iconify-icon icon="solar:rocket-linear"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-medium text-[var(--ink)] mb-1">Go live</h4>
+                        <p class="text-xs text-[var(--ink-2)] leading-relaxed">Ship to production, proven at every phase.</p>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <hr class="border-[var(--line)]">
+
+          <!-- Start here -->
+          <section id="start-here">
+            <div class="text-[var(--accent)] text-[10px] uppercase font-medium mb-4 tracking-[0.2em] font-mono">
+              [ GET.STARTED ]
+            </div>
+            <h2 class="text-2xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-4">Start here</h2>
+            <p class="text-sm text-[var(--ink-2)] leading-relaxed mb-6">
+              Install Uncle Dev in your tool in a few minutes. Works with Claude Code, Codex, Cursor, OpenCode, GitHub Copilot, and Gemini CLI.
+            </p>
+
+            <!-- Install card -->
+            <div class="p-[1px] rounded-[24px] bg-gradient-to-b from-[var(--accent-line2)] via-[var(--line)] to-transparent shadow-[0px_18px_40px_-15px_rgba(45,38,64,0.22)] relative group">
+              <div class="relative overflow-hidden bg-[var(--surface)] rounded-[23px] p-6 sm:p-8 shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,0.7),0_1px_4px_rgba(45,38,64,0.08)]">
+                <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+                  <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent-line2)] text-[var(--accent-link)] shrink-0">
+                    <iconify-icon icon="solar:download-minimalistic-linear" class="text-2xl"></iconify-icon>
+                  </div>
+                  <div class="flex-1 text-center sm:text-left">
+                    <h3 class="text-base font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] mb-1">Install Uncle Dev</h3>
+                    <p class="text-xs text-[var(--ink-2)] leading-relaxed">Set it up in your tool in a few minutes and run your first spec-driven task.</p>
+                  </div>
+                  <a href="#" class="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-[var(--on-accent)] bg-[var(--accent-link)] hover:bg-[var(--accent-deep)] border border-[var(--accent-link)] rounded-full px-5 py-2.5 transition-colors shadow-[0_8px_20px_-8px_var(--accent-shadow)]">
+                    Get started <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                  </a>
+                </div>
+
+                <!-- Supported tools -->
+                <div class="flex flex-wrap items-center gap-2 mt-6 pt-6 border-t border-[var(--line)] relative z-10">
+                  <span class="text-[10px] uppercase tracking-widest text-[var(--ink-3)] font-mono mr-2">Works with</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">Claude Code</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">Codex</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">Cursor</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">OpenCode</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">Copilot</span>
+                  <span class="px-2.5 py-1 bg-[var(--fill-1)] border border-[var(--line-2)] rounded-md text-[11px] font-mono text-[var(--ink-1)]">Gemini CLI</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <hr class="border-[var(--line)]">
+
+          <!-- Choose your path -->
+          <section id="choose-your-path">
+            <h2 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-6 flex items-center gap-2">
+              <iconify-icon icon="solar:routing-linear" class="text-[var(--accent)]"></iconify-icon>
+              Choose your path
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <a href="#" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors mb-3">
+                    <iconify-icon icon="solar:lightbulb-linear" stroke-width="1.5"></iconify-icon>
+                  </div>
+                  <span class="text-sm font-medium text-[var(--ink)] mb-1">New to Uncle Dev?</span>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Read <span class="text-[var(--accent-link)]">What is Uncle Dev?</span> for the idea behind it.</p>
+                </div>
+              </a>
+
+              <a href="#" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors mb-3">
+                    <iconify-icon icon="solar:rocket-linear" stroke-width="1.5"></iconify-icon>
+                  </div>
+                  <span class="text-sm font-medium text-[var(--ink)] mb-1">Ready to build?</span>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Follow <span class="text-[var(--accent-link)]">your first task</span> end to end.</p>
+                </div>
+              </a>
+
+              <a href="#" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors mb-3">
+                    <iconify-icon icon="solar:book-bookmark-linear" stroke-width="1.5"></iconify-icon>
+                  </div>
+                  <span class="text-sm font-medium text-[var(--ink)] mb-1">Looking something up?</span>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Open the <span class="text-[var(--accent-link)]">commands and skills reference</span>.</p>
+                </div>
+              </a>
+
+            </div>
+          </section>
+
+          <hr class="border-[var(--line)]">
+
+          <!-- What's inside -->
+          <section id="whats-inside" class="pt-2">
+            <h2 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-2 flex items-center gap-2">
+              <iconify-icon icon="solar:box-linear" class="text-[var(--accent)]"></iconify-icon>
+              What's inside
+            </h2>
+            <p class="text-sm text-[var(--ink-2)] leading-relaxed mb-6">The docs are grouped into six areas so you can find things without reading everything.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <!-- 01 -->
+              <a href="#getting-started" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:rocket-2-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">Getting Started</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Understand it, install it, run your first task.</p>
+                </div>
+              </a>
+
+              <!-- 02 -->
+              <a href="#user-guide" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:book-2-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">User Guide</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">The concepts behind it and per-tool setup.</p>
+                </div>
+              </a>
+
+              <!-- 03 -->
+              <a href="#" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:users-group-rounded-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">Agent Guide</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">The agent personas and specialist subagents, and when to use each.</p>
+                </div>
+              </a>
+
+              <!-- 04 -->
+              <a href="#" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:tuning-2-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">Customization</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Author your own skills and wire in spec annotations.</p>
+                </div>
+              </a>
+
+              <!-- 05 -->
+              <a href="#reference" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:book-bookmark-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">Reference</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Every skill, command, and prompt template.</p>
+                </div>
+              </a>
+
+              <!-- 06 -->
+              <a href="#learning-paths" class="p-[1px] rounded-2xl bg-gradient-to-b from-[var(--line-2)] to-transparent relative group h-full hover:from-[var(--line-3)] transition-all duration-500">
+                <div class="h-full rounded-[15px] bg-[var(--surface)] p-5 shadow-[0_1px_3px_rgba(45,38,64,0.08)] flex flex-col">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--fill-1)] border border-[var(--line-2)] flex items-center justify-center text-[var(--ink-1)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-line2)] transition-colors">
+                      <iconify-icon icon="solar:map-linear" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <span class="text-sm font-medium text-[var(--ink)]">Learning Paths</span>
+                  </div>
+                  <p class="text-xs text-[var(--ink-2)] leading-relaxed">Role-based journeys for product and developer roles.</p>
+                </div>
+              </a>
+
+            </div>
+          </section>
+
+          <hr class="border-[var(--line)]">
+
+          <!-- Recommended path -->
+          <section id="recommended-path">
+            <h2 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-2 flex items-center gap-2">
+              <iconify-icon icon="solar:list-check-linear" class="text-[var(--accent)]"></iconify-icon>
+              Recommended path
+            </h2>
+            <p class="text-sm text-[var(--ink-2)] leading-relaxed mb-6">Follow these in order the first time. Each step links to one document.</p>
+
+            <ol class="relative border-l border-[var(--line-2)] ml-3 space-y-6">
+              <li class="ml-6">
+                <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[11px] font-mono text-[var(--accent-link)]">1</span>
+                <h4 class="text-sm font-medium text-[var(--ink)]">Understand the idea</h4>
+                <p class="text-xs text-[var(--ink-2)] leading-relaxed mt-1"><a href="#" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">What is Uncle Dev?</a> explains the problem it solves and why it works.</p>
+              </li>
+              <li class="ml-6">
+                <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[11px] font-mono text-[var(--accent-link)]">2</span>
+                <h4 class="text-sm font-medium text-[var(--ink)]">Install it</h4>
+                <p class="text-xs text-[var(--ink-2)] leading-relaxed mt-1"><a href="#start-here" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">Installation</a> sets up Uncle Dev in your AI coding tool.</p>
+              </li>
+              <li class="ml-6">
+                <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[11px] font-mono text-[var(--accent-link)]">3</span>
+                <h4 class="text-sm font-medium text-[var(--ink)]">Run your first task</h4>
+                <p class="text-xs text-[var(--ink-2)] leading-relaxed mt-1"><a href="#" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">First task</a> walks you through using skills end to end.</p>
+              </li>
+              <li class="ml-6">
+                <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[11px] font-mono text-[var(--accent-link)]">4</span>
+                <h4 class="text-sm font-medium text-[var(--ink)]">See common workflows</h4>
+                <p class="text-xs text-[var(--ink-2)] leading-relaxed mt-1"><a href="#" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">Common workflows</a> shows how a feature moves through every phase.</p>
+              </li>
+              <li class="ml-6">
+                <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[11px] font-mono text-[var(--accent-link)]">5</span>
+                <h4 class="text-sm font-medium text-[var(--ink)]">Keep the references handy</h4>
+                <p class="text-xs text-[var(--ink-2)] leading-relaxed mt-1"><a href="#reference" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">Commands and skills</a>, <a href="#" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">Prompts by phase</a>, and <a href="#" class="text-[var(--accent-link)] hover:text-[var(--accent-deep)]">Prompts by skill</a>.</p>
+              </li>
+            </ol>
+          </section>
+
+          <hr class="border-[var(--line)]">
+
+          <!-- Changelog -->
+          <style>
+            @keyframes ud-data-flow { 0%{transform:translateY(-100%);opacity:0;} 50%{opacity:1;} 100%{transform:translateY(100%);opacity:0;} }
+            .ud-data-flow{ animation:ud-data-flow 4s cubic-bezier(0.4,0,0.2,1) infinite; }
+            @keyframes ud-data-flow-x { 0%{transform:translateX(-100%);opacity:0;} 50%{opacity:1;} 100%{transform:translateX(900%);opacity:0;} }
+            .ud-data-flow-x{ animation:ud-data-flow-x 5s cubic-bezier(0.4,0,0.2,1) infinite; }
+            @keyframes ud-spin-slow { to{ transform:translate(-50%,-50%) rotate(360deg); } }
+            .ud-spin-slow{ animation:ud-spin-slow 14s linear infinite; }
+            @keyframes ud-pulse-ring { 0%,100%{ transform:translate(-50%,-50%) scale(0.85);opacity:.4; } 50%{ transform:translate(-50%,-50%) scale(1.1);opacity:.8; } }
+            .ud-pulse-ring{ animation:ud-pulse-ring 4s ease-in-out infinite; }
+          </style>
+          <section id="changelog">
+            <div class="text-[var(--accent)] text-[10px] uppercase font-medium mb-4 tracking-[0.2em] font-mono">
+              [ CORE.UPDATES ]
+            </div>
+            <h2 class="text-2xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-[var(--grad-from)] via-[var(--accent-link)] to-[var(--grad-to)] tracking-tight mb-4 flex items-center gap-2">
+              <iconify-icon icon="solar:history-linear" class="text-[var(--accent)]"></iconify-icon>
+              Changelog
+            </h2>
+            <p class="text-sm text-[var(--ink-2)] leading-relaxed mb-10">
+              The latest architectural evolutions, shipped one tested slice at a time. Each entry traces back to a spec, a review, and a release.
+            </p>
+
+            <!-- Framed timeline wrapper -->
+            <div class="relative w-full border border-[var(--line)] p-6 md:p-10 rounded-2xl bg-[var(--fill-0)]">
+              <!-- Global timeline line -->
+              <div class="absolute left-6 md:left-[22%] top-12 bottom-12 w-px bg-gradient-to-b from-transparent via-[var(--line-3)] to-transparent hidden md:block">
+                <div class="absolute top-0 left-[-1px] w-[3px] h-32 bg-gradient-to-b from-transparent via-[var(--accent)] to-transparent blur-[2px] ud-data-flow"></div>
+              </div>
+
+              <div class="flex flex-col gap-16 relative">
+
+                <!-- Item 1 -->
+                <article class="cl-item relative flex flex-col md:flex-row gap-6 md:gap-12 group">
+                  <div class="absolute left-0 md:left-[22%] top-6 w-3 h-3 rotate-45 border border-[var(--accent-line2)] bg-[var(--bg)] z-10 flex items-center justify-center shadow-[0_0_15px_var(--accent-glow2)] transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125">
+                    <div class="w-1 h-1 bg-[var(--accent)]"></div>
+                  </div>
+                  <div class="absolute left-[6px] md:left-[22%] top-[1.8rem] w-8 md:w-12 h-px bg-gradient-to-r from-[var(--accent-line2)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div class="md:w-[22%] shrink-0 md:text-right md:pr-12 pl-8 md:pl-0 pt-5">
+                    <time class="flex items-center md:justify-end gap-2 text-xs text-[var(--ink-4)] tracking-widest uppercase mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--line-3)]"></span>
+                      April 12, 2025
+                    </time>
+                    <h3 class="text-xl md:text-2xl font-medium text-[var(--ink)] tracking-tight leading-tight mb-4">Control Panel Metrics</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-[var(--accent-line2)] bg-[var(--accent-soft2)] text-xs text-[var(--accent-link)] tracking-widest uppercase">
+                      <iconify-icon icon="solar:star-ring-linear"></iconify-icon> v4.2.0
+                    </span>
+                  </div>
+
+                  <div class="md:w-full pl-8 md:pl-0 relative">
+                    <div class="relative p-6 md:p-7 rounded-2xl bg-[var(--surface)] border border-[var(--line-2)] shadow-[0_1px_3px_rgba(45,38,64,0.08)] hover:bg-[var(--fill-1)] transition-colors duration-500 overflow-hidden">
+                      <!-- Mockup: analytics bars -->
+                      <div class="mb-7 h-40 w-full border border-[var(--line-2)] rounded-xl bg-[var(--panel)] relative overflow-hidden flex gap-2 p-5 items-end">
+                        <div class="flex-1 bg-gradient-to-t from-[var(--accent-soft2)] to-transparent border-t border-[var(--accent-line2)] rounded-t-sm h-[40%]"></div>
+                        <div class="flex-1 bg-gradient-to-t from-[var(--accent-soft2)] to-transparent border-t border-[var(--accent-line2)] rounded-t-sm h-[70%]"></div>
+                        <div class="flex-1 bg-gradient-to-t from-[var(--accent-soft)] to-transparent border-t border-[var(--accent-line)] rounded-t-sm h-[50%]"></div>
+                        <div class="flex-1 bg-gradient-to-t from-[var(--accent-line)] to-transparent border-t border-[var(--accent-line3)] rounded-t-sm h-[90%] shadow-[0_0_20px_var(--accent-glow2)]"></div>
+                        <div class="flex-1 bg-gradient-to-t from-[var(--accent-soft2)] to-transparent border-t border-[var(--accent-line2)] rounded-t-sm h-[60%]"></div>
+                        <div class="absolute inset-0 bg-[linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_90%)]"></div>
+                      </div>
+                      <p class="text-[var(--ink-2)] leading-relaxed text-sm max-w-2xl font-light">
+                        Rolled out a refined metrics module featuring live traffic monitoring and advanced predictive algorithms optimized for large-scale data streams, built on a robust event-driven architecture.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Item 2 -->
+                <article class="cl-item relative flex flex-col md:flex-row gap-6 md:gap-12 group">
+                  <div class="absolute left-0 md:left-[22%] top-6 w-3 h-3 rotate-45 border border-[var(--line-3)] bg-[var(--bg)] z-10 flex items-center justify-center transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125 group-hover:border-[var(--accent-line2)]">
+                    <div class="w-1 h-1 bg-[var(--ink-4)] group-hover:bg-[var(--accent)] transition-colors"></div>
+                  </div>
+                  <div class="absolute left-[6px] md:left-[22%] top-[1.8rem] w-8 md:w-12 h-px bg-gradient-to-r from-[var(--line-3)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div class="md:w-[22%] shrink-0 md:text-right md:pr-12 pl-8 md:pl-0 pt-5">
+                    <time class="flex items-center md:justify-end gap-2 text-xs text-[var(--ink-4)] tracking-widest uppercase mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--line-3)]"></span>
+                      April 05, 2025
+                    </time>
+                    <h3 class="text-xl md:text-2xl font-medium text-[var(--ink)] tracking-tight leading-tight mb-4">Search Heuristics</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-[var(--line-3)] bg-[var(--fill-2)] text-xs text-[var(--ink-2)] tracking-widest uppercase">
+                      <iconify-icon icon="solar:bolt-linear"></iconify-icon> Update
+                    </span>
+                  </div>
+
+                  <div class="md:w-full pl-8 md:pl-0 relative">
+                    <div class="relative p-6 md:p-7 rounded-2xl bg-[var(--surface)] border border-[var(--line-2)] shadow-[0_1px_3px_rgba(45,38,64,0.08)] hover:bg-[var(--fill-1)] transition-colors duration-500 overflow-hidden">
+                      <!-- Mockup: search query -->
+                      <div class="mb-7 h-28 w-full border border-[var(--line-2)] rounded-xl bg-[var(--panel)] relative overflow-hidden flex items-center justify-center">
+                        <div class="px-5 py-3 rounded-full border border-[var(--accent-line2)] bg-[var(--accent-soft)] flex items-center gap-4 w-3/4 relative z-10 backdrop-blur-sm">
+                          <iconify-icon icon="solar:minimalistic-magnifer-linear" class="text-[var(--accent)] text-lg"></iconify-icon>
+                          <span class="text-[var(--accent-link)] text-sm tracking-widest opacity-90 font-mono">neural_search_index()</span>
+                        </div>
+                      </div>
+                      <p class="text-[var(--ink-2)] leading-relaxed text-sm max-w-2xl font-light">
+                        Improved underlying search heuristics with a focus on maximizing throughput and accuracy. Introduces novel filtering techniques to streamline results across massive vector spaces.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Item 3 -->
+                <article class="cl-item relative flex flex-col md:flex-row gap-6 md:gap-12 group">
+                  <div class="absolute left-0 md:left-[22%] top-6 w-3 h-3 rotate-45 border border-[var(--line-3)] bg-[var(--bg)] z-10 flex items-center justify-center transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125 group-hover:border-[var(--accent-line2)]">
+                    <div class="w-1 h-1 bg-[var(--ink-4)] group-hover:bg-[var(--accent)] transition-colors"></div>
+                  </div>
+                  <div class="absolute left-[6px] md:left-[22%] top-[1.8rem] w-8 md:w-12 h-px bg-gradient-to-r from-[var(--line-3)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div class="md:w-[22%] shrink-0 md:text-right md:pr-12 pl-8 md:pl-0 pt-5">
+                    <time class="flex items-center md:justify-end gap-2 text-xs text-[var(--ink-4)] tracking-widest uppercase mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--line-3)]"></span>
+                      March 28, 2025
+                    </time>
+                    <h3 class="text-xl md:text-2xl font-medium text-[var(--ink)] tracking-tight leading-tight mb-4">CLI Interface</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600 tracking-widest uppercase">
+                      <iconify-icon icon="solar:bug-minimalistic-linear"></iconify-icon> Patch
+                    </span>
+                  </div>
+
+                  <div class="md:w-full pl-8 md:pl-0 relative">
+                    <div class="relative p-6 md:p-7 rounded-2xl bg-[var(--surface)] border border-[var(--line-2)] shadow-[0_1px_3px_rgba(45,38,64,0.08)] hover:bg-[var(--fill-1)] transition-colors duration-500 overflow-hidden">
+                      <!-- Mockup: terminal -->
+                      <div class="mb-7 rounded-xl border border-[var(--line-2)] bg-[var(--panel)] overflow-hidden max-w-2xl shadow-[0_10px_40px_-10px_rgba(45,38,64,0.18)]">
+                        <div class="flex items-center px-4 py-2.5 bg-[var(--fill-0)] border-b border-[var(--line)] gap-2">
+                          <div class="flex gap-1.5 mr-4">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500/60"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/60"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
+                          </div>
+                          <div class="flex gap-2 text-xs font-mono">
+                            <span class="px-2 py-1 rounded bg-[var(--fill-2)] text-[var(--ink)] font-medium">Terminal</span>
+                            <span class="px-2 py-1 text-[var(--ink-4)]">Node-07</span>
+                          </div>
+                        </div>
+                        <div class="p-5 text-xs font-mono text-[var(--panel-ink)] leading-relaxed overflow-x-auto">
+                          <div><span class="text-[var(--accent-link)]">from</span> nexus <span class="text-[var(--accent-link)]">import</span> Nexus, Deployment</div>
+                          <br>
+                          <div class="text-[var(--ink-4)]"># Init secure client</div>
+                          <div>nx = Nexus(api_key=<span class="text-[var(--code-str)]">"NX_SECURE_KEY"</span>)</div>
+                          <br>
+                          <div class="text-[var(--ink-4)]"># Deploy to edge node</div>
+                          <div>nx.deploy(</div>
+                          <div class="pl-4">name=<span class="text-[var(--code-str)]">"neural_net"</span>,</div>
+                          <div class="pl-4">mode=<span class="text-[var(--code-str)]">"turbo"</span></div>
+                          <div>)</div>
+                        </div>
+                      </div>
+                      <p class="text-[var(--ink-2)] leading-relaxed text-sm max-w-2xl font-light">
+                        Boosts CLI responsiveness by streamlining command execution, significantly reducing latency under heavy workloads. Features a revamped input parser.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Item 4 -->
+                <article class="cl-item relative flex flex-col md:flex-row gap-6 md:gap-12 group">
+                  <div class="absolute left-0 md:left-[22%] top-6 w-3 h-3 rotate-45 border border-[var(--line-3)] bg-[var(--bg)] z-10 flex items-center justify-center transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125 group-hover:border-orange-400">
+                    <div class="w-1 h-1 bg-[var(--ink-4)] group-hover:bg-orange-400 transition-colors"></div>
+                  </div>
+                  <div class="absolute left-[6px] md:left-[22%] top-[1.8rem] w-8 md:w-12 h-px bg-gradient-to-r from-[var(--line-3)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div class="md:w-[22%] shrink-0 md:text-right md:pr-12 pl-8 md:pl-0 pt-5">
+                    <time class="flex items-center md:justify-end gap-2 text-xs text-[var(--ink-4)] tracking-widest uppercase mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--line-3)]"></span>
+                      March 15, 2025
+                    </time>
+                    <h3 class="text-xl md:text-2xl font-medium text-[var(--ink)] tracking-tight leading-tight mb-4">Auth Firewall Layer</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-orange-500/30 bg-orange-500/10 text-xs text-orange-600 tracking-widest uppercase">
+                      <iconify-icon icon="solar:shield-check-linear"></iconify-icon> Critical
+                    </span>
+                  </div>
+
+                  <div class="md:w-full pl-8 md:pl-0 relative">
+                    <div class="relative p-6 md:p-7 rounded-2xl bg-[var(--surface)] border border-[var(--line-2)] shadow-[0_1px_3px_rgba(45,38,64,0.08)] hover:bg-[var(--fill-1)] transition-colors duration-500 overflow-hidden">
+                      <!-- Mockup: shield core -->
+                      <div class="mb-7 rounded-xl border border-[var(--line-2)] bg-[var(--panel)] overflow-hidden max-w-2xl h-[220px] relative flex flex-col items-center justify-center">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-orange-500/15 rounded-full blur-[60px] transition-opacity duration-700 opacity-50 group-hover:opacity-90"></div>
+                        <div class="absolute top-1/2 left-1/2 w-40 h-40 border border-[var(--line-2)] rounded-full ud-pulse-ring"></div>
+                        <div class="absolute top-1/2 left-1/2 w-56 h-56 border border-dashed border-[var(--line-2)] rounded-full ud-spin-slow"></div>
+                        <div class="relative z-10 flex flex-col items-center">
+                          <iconify-icon icon="solar:shield-keyhole-linear" class="text-6xl text-orange-500 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)] mb-3"></iconify-icon>
+                          <span class="text-xs font-medium text-[var(--ink)] tracking-[0.2em] uppercase opacity-70">NexGuard™</span>
+                        </div>
+                      </div>
+                      <p class="text-[var(--ink-2)] leading-relaxed text-sm max-w-2xl font-light">
+                        Integrated next-gen firewall rules across the mesh layer, enforcing zero-trust validation for all outbound API requests and upgrading edge encryption to TLS 1.4.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Item 5 -->
+                <article class="cl-item relative flex flex-col md:flex-row gap-6 md:gap-12 group">
+                  <div class="absolute left-0 md:left-[22%] top-6 w-3 h-3 rotate-45 border border-[var(--line-3)] bg-[var(--bg)] z-10 flex items-center justify-center transform -translate-x-[6px] transition-all duration-500 group-hover:scale-125 group-hover:border-[var(--accent-line2)]">
+                    <div class="w-1 h-1 bg-[var(--ink-4)] group-hover:bg-[var(--accent)] transition-colors"></div>
+                  </div>
+                  <div class="absolute left-[6px] md:left-[22%] top-[1.8rem] w-8 md:w-12 h-px bg-gradient-to-r from-[var(--line-3)] to-transparent z-0 hidden md:block opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div class="md:w-[22%] shrink-0 md:text-right md:pr-12 pl-8 md:pl-0 pt-5">
+                    <time class="flex items-center md:justify-end gap-2 text-xs text-[var(--ink-4)] tracking-widest uppercase mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--line-3)]"></span>
+                      February 20, 2025
+                    </time>
+                    <h3 class="text-xl md:text-2xl font-medium text-[var(--ink)] tracking-tight leading-tight mb-4">Developer SDK Upgrade</h3>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] border border-[var(--accent-line2)] bg-[var(--accent-soft)] text-xs text-[var(--accent-link)] tracking-widest uppercase">
+                      <iconify-icon icon="solar:code-square-linear"></iconify-icon> SDK
+                    </span>
+                  </div>
+
+                  <div class="md:w-full pl-8 md:pl-0 relative">
+                    <div class="relative p-6 md:p-7 rounded-2xl bg-[var(--surface)] border border-[var(--line-2)] shadow-[0_1px_3px_rgba(45,38,64,0.08)] hover:bg-[var(--fill-1)] transition-colors duration-500 overflow-hidden">
+                      <!-- Mockup: toolkit core -->
+                      <div class="mb-7 rounded-xl border border-[var(--line-2)] bg-[var(--panel)] overflow-hidden max-w-2xl h-[220px] relative flex flex-col items-center justify-center">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-px bg-gradient-to-r from-transparent via-[var(--accent-line2)] to-transparent"></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[var(--accent-glow2)] rounded-full blur-[50px] transition-all duration-700 opacity-60 group-hover:scale-110"></div>
+                        <div class="relative z-10 flex flex-col items-center">
+                          <div class="w-20 h-20 bg-[var(--surface)] rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_var(--accent-glow2)] border border-[var(--accent-line2)]">
+                            <iconify-icon icon="solar:layers-linear" class="text-4xl text-[var(--accent-link)]"></iconify-icon>
+                          </div>
+                          <span class="text-xs font-medium text-[var(--ink)] tracking-[0.2em] uppercase opacity-70">Telemetry UI Kit</span>
+                        </div>
+                      </div>
+                      <p class="text-[var(--ink-2)] leading-relaxed text-sm max-w-2xl font-light">
+                        Launched a full suite of interactive telemetry components in the core SDK. These tools empower developers to build custom rendering pipelines and dynamic dashboards.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-16 pt-8 border-t border-[var(--line)]">
+          <a href="#" class="flex flex-col items-start group">
+            <span class="text-xs text-[var(--ink-3)] uppercase tracking-widest font-mono mb-1 group-hover:text-[var(--ink-2)] transition-colors">Previous</span>
+            <span class="text-sm font-medium text-[var(--ink-1)] group-hover:text-[var(--ink)] flex items-center gap-2 transition-colors">
+              <iconify-icon icon="solar:alt-arrow-left-linear"></iconify-icon> Documentation Map
+            </span>
+          </a>
+          <a href="#" class="flex flex-col items-end group">
+            <span class="text-xs text-[var(--ink-3)] uppercase tracking-widest font-mono mb-1 group-hover:text-[var(--ink-2)] transition-colors">Next</span>
+            <span class="text-sm font-medium text-[var(--accent)] group-hover:text-[var(--accent-link)] flex items-center gap-2 transition-colors">
+              What is Uncle Dev? <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>
+            </span>
+          </a>
+        </div>
+
+      </main>
+
+      <!-- Right Sidebar (On this page) -->
+      <aside class="w-48 shrink-0 hidden xl:block sticky top-24 self-start h-[calc(100vh-8rem)]">
+        <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)] mb-4 font-medium">On this page</div>
+        <ul class="space-y-2 text-xs border-l border-[var(--line-2)]">
+          <li><a href="#see-it-in-action" class="block pl-3 py-1 text-[var(--accent)] border-l border-[var(--accent-link)] -ml-[1px]">See it in action</a></li>
+          <li><a href="#start-here" class="block pl-3 py-1 text-[var(--ink-3)] hover:text-[var(--ink-1)] transition-colors">Start here</a></li>
+          <li><a href="#choose-your-path" class="block pl-3 py-1 text-[var(--ink-3)] hover:text-[var(--ink-1)] transition-colors">Choose your path</a></li>
+          <li><a href="#whats-inside" class="block pl-3 py-1 text-[var(--ink-3)] hover:text-[var(--ink-1)] transition-colors">What's inside</a></li>
+          <li><a href="#recommended-path" class="block pl-3 py-1 text-[var(--ink-3)] hover:text-[var(--ink-1)] transition-colors">Recommended path</a></li>
+          <li><a href="#changelog" class="block pl-3 py-1 text-[var(--ink-3)] hover:text-[var(--ink-1)] transition-colors">Changelog</a></li>
+        </ul>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="z-10 border-[var(--line-2)] border-t relative">
+    <div class="max-w-7xl sm:px-6 lg:px-8 mr-auto ml-auto pt-16 pr-4 pb-8 pl-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
+        <div class="col-span-2 lg:col-span-2">
+          <a href="#" class="inline-flex items-center gap-2 mb-6">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--accent-soft2)] border border-[var(--accent-line2)] text-[var(--accent-link)]">
+              <iconify-icon icon="solar:code-square-linear" class="text-lg"></iconify-icon>
+            </span>
+            <span class="text-sm font-medium tracking-tight text-[var(--ink)]">Uncle Dev</span>
+          </a>
+          <p class="text-[var(--ink-3)] text-[14px] max-w-sm font-light leading-[24px]">
+            A pack of engineering skills that makes your AI coding agent plan before it builds and verify before it ships — spec first, test as it goes, review before commit.
+          </p>
+          <div class="flex items-center gap-4 mt-6">
+            <a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-[var(--ink)] font-medium text-[14px] mb-4">Getting Started</h3>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">What is Uncle Dev?</a></li>
+            <li><a href="#start-here" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Installation</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">First task</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Common workflows</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-[var(--ink)] font-medium text-[14px] mb-4">Guides</h3>
+          <ul class="space-y-3">
+            <li><a href="#user-guide" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">User Guide</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Agent Guide</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Customization</a></li>
+            <li><a href="#learning-paths" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Learning Paths</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-[var(--ink)] font-medium text-[14px] mb-4">Reference</h3>
+          <ul class="space-y-3">
+            <li><a href="#reference" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Commands and skills</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Prompts by phase</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Prompts by skill</a></li>
+            <li><a href="#" class="text-[var(--ink-3)] hover:text-[var(--ink)] text-[14px] transition-colors font-light">Roadmap</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-[var(--line-2)]">
+        <div class="flex items-center gap-3">
+          <span class="text-[14px] font-light text-[var(--ink-3)]">© 2025 Uncle Dev. All rights reserved.</span>
+        </div>
+        <div class="flex items-center gap-4 text-[14px] text-[var(--ink-3)] font-light">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+            <a href="#" class="hover:text-[var(--ink)] transition-colors">Spec first · test as it goes · review before commit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- Palette switcher -->
+  <div class="theme-pill" role="group" aria-label="Color palette">
+    <span class="theme-pill__label">PALETTE</span>
+    <div class="theme-pill__dots">
+      <button class="swatch" data-theme=""              title="Violet · light"  style="--dot:#7c3aed"></button>
+      <button class="swatch" data-theme="violet-dark"   title="Violet · dark"   style="--dot:#a855f7"></button>
+      <button class="swatch" data-theme="coral-dark"    title="Coral · dark"    style="--dot:#ff5a5f"></button>
+      <button class="swatch" data-theme="azure-light"   title="Azure · light"   style="--dot:#2563eb"></button>
+      <button class="swatch" data-theme="teal-dark"     title="Teal · dark"     style="--dot:#2dd4bf"></button>
+      <button class="swatch" data-theme="magenta-light" title="Magenta · light" style="--dot:#db2777"></button>
+      <button class="swatch" data-theme="indigo-dark"   title="Indigo · dark"   style="--dot:#818cf8"></button>
+      <button class="swatch" data-theme="slate-mono"    title="Slate · light"   style="--dot:#475569"></button>
+      <button class="swatch" data-theme="slate-dark"    title="Slate · dark"    style="--dot:#94a3b8"></button>
+      <button class="swatch" data-theme="zinc-light"    title="Zinc · light"    style="--dot:#52525b"></button>
+      <button class="swatch" data-theme="zinc-dark"     title="Zinc · dark"     style="--dot:#a1a1aa"></button>
+      <button class="swatch" data-theme="stone-light"   title="Stone · light"   style="--dot:#57534e"></button>
+      <button class="swatch" data-theme="stone-dark"    title="Stone · dark"    style="--dot:#a8a29e"></button>
+      <button class="swatch" data-theme="terracotta-light" title="Terracotta · light" style="--dot:#c2410c"></button>
+      <button class="swatch" data-theme="terracotta-dark"  title="Terracotta · dark"  style="--dot:#f97316"></button>
+      <button class="swatch" data-theme="clay-light"     title="Clay · light"    style="--dot:#b45f52"></button>
+      <button class="swatch" data-theme="sienna-light"   title="Sienna · light"  style="--dot:#a63d2f"></button>
+      <button class="swatch" data-theme="adobe-light"    title="Adobe · light"   style="--dot:#c97b4a"></button>
+      <button class="swatch" data-theme="apricot-light"  title="Apricot · light" style="--dot:#d97757"></button>
+    </div>
+  </div>
+  <!-- Changelog scroll-reveal (matches the Nova timeline entrance animation) -->
+  <script>
+    (function(){
+      var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced || typeof gsap === 'undefined') return;
+      function init(){
+        if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+        document.querySelectorAll('.cl-item').forEach(function(item){
+          gsap.fromTo(item,
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out',
+              scrollTrigger: { trigger: item, start: 'top 85%', toggleActions: 'play none none reverse' } }
+          );
+        });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
+  </script>
+
+  <script>
+    (function(){
+      var root=document.documentElement;
+      var sw=document.querySelectorAll('.theme-pill .swatch');
+      function apply(t){
+        if(t){ root.setAttribute('data-theme',t); } else { root.removeAttribute('data-theme'); }
+        sw.forEach(function(b){ b.classList.toggle('is-active',(b.dataset.theme||'')===(t||'')); });
+        try{ localStorage.setItem('ud-theme', t||''); }catch(e){}
+      }
+      sw.forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.theme||''); }); });
+      var saved=''; try{ saved=localStorage.getItem('ud-theme')||''; }catch(e){}
+      apply(saved);
+    })();
+  </script>
+</body></html>
