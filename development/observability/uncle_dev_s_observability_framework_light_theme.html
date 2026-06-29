@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Green Dashboards to Guardrails: Uncle Dev's Observability Workshop</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border-radius: 1rem;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-brand-100 selection:text-brand-900">
+
+    <nav class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur-md px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-brand-50 p-2.5 rounded-xl border border-brand-200">
+                    <i class="fa-solid fa-shield-halved text-brand-600 text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-brand-600">Uncle Dev Series · Part 02</span>
+                    <h1 class="text-lg font-bold text-slate-900 tracking-tight">Business Observability Strategy</h1>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <a href="#gates-section" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition rounded-lg hover:bg-slate-100">The 5 Gates</a>
+                <a href="#litmus-section" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition rounded-lg hover:bg-slate-100">Litmus Test</a>
+                <a href="#interactive-workspace" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition rounded-lg hover:bg-slate-100">Interactive Lab</a>
+                <a href="#steps-section" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition rounded-lg hover:bg-slate-100">7-Step Journey</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative overflow-hidden pt-12 pb-10 px-6 border-b border-slate-200 bg-gradient-to-b from-brand-50/40 via-transparent to-transparent">
+        <div class="max-w-7xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold mb-6">
+                <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                Part 02: Architectural Guide &amp; Interactive Labs
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
+                From Green Dashboards to Guardrails: <span class="gradient-text">How Uncle Dev Builds It</span>
+            </h1>
+            <p class="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                Stop measuring everything. Build structural discipline with dynamic metric gatekeeping, outcome-based SLO plans, and automated burn-rate alarms.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Column: The Strategic Narrative -->
+            <section id="narrative" class="lg:col-span-7 space-y-12">
+                
+                <!-- Introduction Card -->
+                <div class="premium-card p-8 bg-white border border-slate-200">
+                    <p class="text-xs text-brand-600 font-extrabold tracking-widest uppercase mb-2">RECAP FROM PART ONE</p>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        In Part One, we watched a shoe store bleed money behind a beautiful 100% green dashboard. The lesson was simple: stop measuring whether servers are awake; start measuring whether customers can buy shoes.
+                    </p>
+                    <p class="text-slate-600 leading-relaxed">
+                        But now comes the execution trap. Everyone agrees with "instrumenting the journey." Then they return to their desks and instrument <span class="italic font-semibold text-slate-800">everything</span>—ending up with a bloated $40,000 monitoring bill, 300 alerts a week, and zero understanding. Uncle Dev solves this through rigorous restraint and guardrails.
+                    </p>
+                </div>
+
+                <!-- Section 1: The Default Answer is No -->
+                <div id="default-no-section" class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span class="text-brand-600 bg-brand-50 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold border border-brand-200">1</span>
+                        The Default Answer Is "No"
+                    </h2>
+                    <div class="text-slate-600 space-y-4 leading-relaxed">
+                        <p>
+                            Most observability advice is additive: here are ten more custom metrics to track. Uncle Dev inverts this completely. When you are about to add a custom metric, the default answer is <strong>No</strong>.
+                        </p>
+                        <p>
+                            Why? Because modern frameworks hand you an immense amount of telemetry for free. Endpoints, errors, latency, and pathing are already covered out of the box. A custom metric is a long-term tenant: it costs money to store, clutters dashboards, and drowns out the signals that actually protect revenue.
+                        </p>
+                        
+                        <!-- Premium Jargon Buster Widget -->
+                        <div class="p-5 rounded-xl bg-slate-100 border border-slate-200 my-6">
+                            <div class="flex items-start gap-3.5">
+                                <i class="fa-solid fa-circle-info text-brand-600 mt-1"></i>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Jargon Buster: Auto-Instrumentation</h4>
+                                    <p class="text-sm text-slate-600 mt-1.5 leading-relaxed font-normal">
+                                        Measurement your tools generate automatically, without you writing custom code. Think of it like a car recording its own speed and fuel levels natively. In tech, this is RED (Rate, Errors, Duration) per endpoint.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: The Five Gates -->
+                <div id="gates-section" class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span class="text-brand-600 bg-brand-50 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold border border-brand-200">2</span>
+                        The Five Gates of Metric Selection
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        A candidate metric must survive all five distinct filters in sequence. If it fails even one, it is cast aside. We do not use metrics to find out "why did this specific single transaction fail?" That is the job of logs and traces. Metrics are for aggregate counts and trends.
+                    </p>
+
+                    <!-- Funnel Visualization in Light Mode -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
+                        <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">The Metric Filter Funnel</p>
+                        
+                        <div class="space-y-2">
+                            <div class="w-full bg-white border border-slate-200 p-3 rounded-lg text-xs md:text-sm text-center font-medium text-slate-700 shadow-sm hover:border-brand-300 transition">
+                                <span class="font-bold text-brand-600">1. Action Gate:</span> Will a named human change a decision based on this?
+                            </div>
+                            <div class="w-[92%] mx-auto bg-white border border-slate-200 p-3 rounded-lg text-xs md:text-sm text-center font-medium text-slate-700 shadow-sm hover:border-brand-300 transition">
+                                <span class="font-bold text-brand-600">2. Coverage Gate:</span> Is this already handled by logs, traces, or auto-metrics?
+                            </div>
+                            <div class="w-[84%] mx-auto bg-white border border-slate-200 p-3 rounded-lg text-xs md:text-sm text-center font-medium text-slate-700 shadow-sm hover:border-brand-300 transition">
+                                <span class="font-bold text-brand-600">3. Aggregate Gate:</span> Is this an aggregate trend (how many/how fast) instead of a single case?
+                            </div>
+                            <div class="w-[76%] mx-auto bg-white border border-slate-200 p-3 rounded-lg text-xs md:text-sm text-center font-medium text-slate-700 shadow-sm hover:border-brand-300 transition">
+                                <span class="font-bold text-brand-600">4. Durable Gate:</span> Does this deserve a permanent, long-lived dashboard chart?
+                            </div>
+                            <div class="w-[68%] mx-auto bg-white border border-slate-200 p-3 rounded-lg text-xs md:text-sm text-center font-medium text-slate-700 shadow-sm hover:border-brand-300 transition">
+                                <span class="font-bold text-brand-600">5. Worth It Gate:</span> Does it justify the long-term cardinality storage cost?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Business vs Operational Metrics -->
+                <div id="litmus-section" class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span class="text-brand-600 bg-brand-50 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold border border-brand-200">3</span>
+                        The Metric Classification Litmus Test
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        When a metric survives the gates, Uncle Dev applies a rigorous test: <strong>If system health were flawless but this number suddenly moved, would a non-engineer care?</strong>
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-emerald-50 border border-emerald-200 p-5 rounded-xl space-y-2">
+                            <div class="inline-block bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">YES: Business Metric</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">Payments captured, user checkouts, activation rate. Product owns it. Lives on executive dashboards.</p>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 p-5 rounded-xl space-y-2">
+                            <div class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-bold">NO: Operational Metric</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">Queue sizes, memory consumption, cache hit ratios. SRE owns it. Lives on technical dashboards.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 rounded-xl bg-slate-100 border border-slate-200 my-6">
+                        <div class="flex items-start gap-3.5">
+                            <i class="fa-solid fa-circle-info text-brand-600 mt-1"></i>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Jargon Buster: Cardinality Bomb</h4>
+                                <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                                    When you add highly unique dimensions (like user emails or transaction IDs) to metrics. It forces your monitoring tool to track millions of distinct series, resulting in a devastating bill. Keep high-cardinality values inside logs and traces instead.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: The Measurement Plan -->
+                <div id="plan-section" class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span class="text-brand-600 bg-brand-50 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold border border-brand-200">4</span>
+                        Plan First, Write Code Later
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        Uncle Dev does not jump straight into typing custom code to emit traces. SRE plans should be tool-agnostic. We write a <strong>Measurement Plan</strong> specifying names, classifications, metrics instruments, and owners. The specific framework implementation (Prometheus, Datadog, etc.) is details.
+                    </p>
+                </div>
+
+            </section>
+
+            <section id="interactive-workspace" class="lg:col-span-5 space-y-8">
+                
+                <!-- Tab Controls for Tools -->
+                <div class="sticky top-24 z-30">
+                    <div class="bg-white p-2 rounded-xl border border-slate-200 flex justify-between gap-1 shadow-lg">
+                        <button onclick="switchTab('gatekeeper-tool')" id="btn-gatekeeper-tool" class="tab-btn flex-1 py-2.5 text-xs font-bold tracking-wider uppercase rounded-lg text-white bg-brand-600 transition shadow-sm">
+                            <i class="fa-solid fa-filter mr-1.5"></i> 5 Gates
+                        </button>
+                        <button onclick="switchTab('error-budget-lab')" id="btn-error-budget-lab" class="tab-btn flex-1 py-2.5 text-xs font-bold tracking-wider uppercase rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-stopwatch mr-1.5"></i> Budget Lab
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WIDGET 1: THE METRIC GATEKEEPER WIZARD -->
+                <div id="gatekeeper-tool-card" class="premium-card p-6 bg-white border border-slate-200 space-y-6">
+                    <div>
+                        <span class="text-brand-600 text-xs font-extrabold uppercase tracking-widest">UNCLE DEV WIDGET</span>
+                        <h3 class="text-xl font-bold text-slate-900 mt-1">Interactive Metric Gatekeeper</h3>
+                        <p class="text-sm text-slate-500 mt-1">Run any hypothetical custom metric through Uncle Dev's rigorous five-stage pipeline.</p>
+                    </div>
+
+                    <!-- Step 0: Metric Name Input -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Candidate Metric Name</label>
+                        <input type="text" id="wizard-metric-name" value="stripe_charge_failed" placeholder="e.g. database_active_connections" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 focus:outline-none focus:border-brand-500 transition">
+                    </div>
+
+                    <!-- Active Question Box -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span id="wizard-step-indicator" class="text-xs font-bold text-brand-600 uppercase tracking-widest">Gate 1 of 5</span>
+                            <span id="wizard-gate-title" class="text-xs text-slate-500 font-semibold uppercase">The Action Gate</span>
+                        </div>
+                        <p id="wizard-question-text" class="text-sm text-slate-800 font-semibold leading-relaxed">
+                            Will a named human change a decision based on this number?
+                        </p>
+                        
+                        <!-- Answers Buttons -->
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <button onclick="handleWizardAnswer(true)" class="py-2.5 px-4 rounded-lg bg-white border border-slate-200 text-brand-700 font-bold text-sm hover:bg-brand-50 hover:border-brand-300 transition shadow-sm">
+                                <i class="fa-solid fa-check text-brand-600 mr-1"></i> Yes
+                            </button>
+                            <button onclick="handleWizardAnswer(false)" class="py-2.5 px-4 rounded-lg bg-white border border-slate-200 text-red-700 font-bold text-sm hover:bg-red-50 hover:border-red-300 transition shadow-sm">
+                                <i class="fa-solid fa-xmark text-red-500 mr-1"></i> No
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Funnel Progress Steps Visualizer -->
+                    <div class="grid grid-cols-5 gap-1.5 pt-2">
+                        <div id="gate-step-1" class="h-2 rounded-full bg-brand-500 transition-all"></div>
+                        <div id="gate-step-2" class="h-2 rounded-full bg-slate-200 transition-all"></div>
+                        <div id="gate-step-3" class="h-2 rounded-full bg-slate-200 transition-all"></div>
+                        <div id="gate-step-4" class="h-2 rounded-full bg-slate-200 transition-all"></div>
+                        <div id="gate-step-5" class="h-2 rounded-full bg-slate-200 transition-all"></div>
+                    </div>
+
+                    <!-- Result Panel (Hidden by default) -->
+                    <div id="wizard-result-box" class="hidden p-5 rounded-xl border space-y-4 transition">
+                        <div class="flex items-start gap-3">
+                            <div id="wizard-result-icon-bg" class="p-2 rounded-lg mt-0.5">
+                                <i id="wizard-result-icon" class="text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 id="wizard-result-title" class="text-md font-bold text-slate-900">Processed</h4>
+                                <p id="wizard-result-desc" class="text-xs text-slate-600 mt-1 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <!-- Yaml Spec Section (Only if approved) -->
+                        <div id="wizard-yaml-spec" class="hidden space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Auto-Generated Spec Plan</span>
+                                <button onclick="copyYamlSpec()" class="text-xs text-brand-600 hover:text-brand-700 transition flex items-center gap-1.5 font-semibold">
+                                    <i class="fa-regular fa-copy"></i> Copy Spec
+                                </button>
+                            </div>
+                            <pre class="bg-slate-900 text-slate-100 text-xs p-3.5 rounded-lg border border-slate-800 overflow-x-auto font-mono leading-relaxed" id="yaml-code"></pre>
+                        </div>
+
+                        <button onclick="resetWizard()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold tracking-wider uppercase transition mt-2 shadow-sm">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Test Another Metric
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WIDGET 2: ERROR BUDGET & BURN RATE LAB -->
+                <div id="error-budget-lab-card" class="hidden premium-card p-6 bg-white border border-slate-200 space-y-6">
+                    <div>
+                        <span class="text-brand-600 text-xs font-extrabold uppercase tracking-widest">SRE CALCULATOR</span>
+                        <h3 class="text-xl font-bold text-slate-900 mt-1">Error Budget &amp; Burn Simulator</h3>
+                        <p class="text-sm text-slate-500 mt-1">Calculate monthly failure budgets and simulate live active burn alert states.</p>
+                    </div>
+
+                    <!-- SLO Target Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <span>Target SLO Percentage</span>
+                            <span class="text-brand-600 font-bold" id="slo-label">99.9%</span>
+                        </div>
+                        <input type="range" id="slo-range" min="95" max="99.99" step="0.01" value="99.9" class="w-full accent-brand-500 bg-slate-200 h-2 rounded-lg cursor-pointer" oninput="calculateErrorBudget()">
+                    </div>
+
+                    <!-- Allowed Downtime Display Block -->
+                    <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider font-bold text-slate-500">Allowed Downtime / Month</span>
+                            <span id="downtime-allowed" class="text-lg font-bold text-slate-950 font-mono mt-1 block">43.2 min</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider font-bold text-slate-500">Service Reliability Goal</span>
+                            <span id="reliability-summary" class="text-lg font-bold text-brand-600 font-mono mt-1 block">High Availability</span>
+                        </div>
+                    </div>
+
+                    <!-- Simulator Outage Slider -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <span>Simulate Outage Duration (Minutes)</span>
+                            <span class="text-amber-600 font-mono font-bold" id="outage-label">5 mins</span>
+                        </div>
+                        <input type="range" id="outage-range" min="1" max="120" step="1" value="5" class="w-full accent-amber-500 bg-slate-200 h-2 rounded-lg cursor-pointer" oninput="calculateErrorBudget()">
+                    </div>
+
+                    <!-- Visual Outage Status Box -->
+                    <div id="burn-status-card" class="p-5 rounded-xl border border-brand-200 bg-brand-50/50 space-y-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="relative flex h-3 w-3">
+                                <span id="burn-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                                <span id="burn-badge" class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
+                            </span>
+                            <h4 id="burn-status-title" class="text-sm font-bold text-slate-800 uppercase tracking-wider">Budget Health: Perfect</h4>
+                        </div>
+                        <p id="burn-status-desc" class="text-xs text-slate-600 leading-relaxed">
+                            No critical alerts active. Budget usage is safe and within limits.
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <section id="steps-section" class="mt-16 space-y-8 pt-12 border-t border-slate-200">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="text-brand-600 text-xs font-bold uppercase tracking-widest">End-to-End Implementation Workflow</span>
+                <h2 class="text-3xl font-extrabold text-slate-900">The Seven Steps of Uncle Dev</h2>
+                <p class="text-sm text-slate-500">Do not build partial frameworks. Wire up one checkout flow fully end-to-end, then cycle back for more.</p>
+            </div>
+
+            <!-- Steps Progress Timeline Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                
+                <!-- Step 1 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 01</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Journey Focus</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Pick a core path. Map actions clearly to targets.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 02</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">OTel Wiring</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Trace systems across elements. Don't split IDs.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 03</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Define SLO</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Define bounds. Track actual Error Budgets.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 04</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Priority Spend</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Protect conversion paths. Go light elsewhere.</p>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 05</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Dashboard</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Business indicators on top. Operations underneath.</p>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 06</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Burn Alarms</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Alert on actual budget depletion trends.</p>
+                </div>
+
+                <!-- Step 7 -->
+                <div class="premium-card p-5 bg-white border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-brand-600">STEP 07</span>
+                        <h4 class="text-sm font-bold text-slate-900 mt-1">Loop Audit</h4>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">After incident, audit metrics instantly.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="mt-16 bg-slate-100 rounded-2xl border border-slate-200 p-8 space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="bg-brand-50 p-2.5 rounded-xl border border-brand-200">
+                    <i class="fa-solid fa-list-check text-brand-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Summary Checklist: Uncle Dev's Philosophy</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-600">
+                <div class="space-y-4">
+                    <div class="flex gap-2.5 items-start">
+                        <i class="fa-solid fa-circle-check text-brand-600 mt-1 text-base"></i>
+                        <p class="leading-relaxed"><strong>Restraint is the Goal:</strong> A dashboard with 500 metrics is worse than having none. Drown out the noise and focus on what matters.</p>
+                    </div>
+                    <div class="flex gap-2.5 items-start">
+                        <i class="fa-solid fa-circle-check text-brand-600 mt-1 text-base"></i>
+                        <p class="leading-relaxed"><strong>Separation of Powers:</strong> Keep the Plan (what you want to observe) decoupled from implementation (which tool emits it).</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex gap-2.5 items-start">
+                        <i class="fa-solid fa-circle-check text-brand-600 mt-1 text-base"></i>
+                        <p class="leading-relaxed"><strong>Alert on fire, not smoke:</strong> Let engines wake up engineers when the actual budget burns too fast—never for standard localized hardware CPU peaks.</p>
+                    </div>
+                    <div class="flex gap-2.5 items-start">
+                        <i class="fa-solid fa-circle-check text-brand-600 mt-1 text-base"></i>
+                        <p class="leading-relaxed"><strong>Post-Outage Audits:</strong> Outages are real goldmines. Use every failure to identify tracing gaps or weak parameters.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 border-t border-slate-200 py-8 text-center text-sm text-slate-500 bg-white">
+        <p>© 2026 Uncle Dev Publications. Driven by outcome-centric engineering philosophies.</p>
+    </footer>
+
+    <script>
+        // Tab switching controller
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex-1 py-2.5 text-xs font-bold tracking-wider uppercase rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition";
+            });
+            
+            document.getElementById('gatekeeper-tool-card').classList.add('hidden');
+            document.getElementById('error-budget-lab-card').classList.add('hidden');
+            
+            document.getElementById(tabId + '-card').classList.remove('hidden');
+            document.getElementById('btn-' + tabId).className = "tab-btn flex-1 py-2.5 text-xs font-bold tracking-wider uppercase rounded-lg text-white bg-brand-600 transition shadow-sm";
+        }
+
+        // ================= WIZARD STATE & LOGIC =================
+        let currentGate = 1;
+        const gateQuestions = [
+            {
+                title: "The Action Gate",
+                text: "Will a named human change an active operational or strategic decision based on this metric?",
+                rejection: "Failed: Vanity Metric. If no one behaves differently based on this number, it represents pure overhead. Drop it."
+            },
+            {
+                title: "The Coverage Gate",
+                text: "Is this metric already covered by auto-instrumentation, out-of-the-box spans, or endpoint metrics?",
+                rejection: "Re-route: Coverage Exists. You already pay for this data under generic RED or infrastructure loops. Use that!"
+            },
+            {
+                title: "The Aggregate Gate",
+                text: "Is the goal to capture aggregate counts across many cases (how many/how fast), rather than single transactions?",
+                rejection: "Re-route: Use Logs / Traces. Tracking individual transaction failures inside a custom metric causes a cardinality explosion. Use high-fidelity traces."
+            },
+            {
+                title: "The Durable Gate",
+                text: "Does this require a long-term representation on a dashboard (not a temporary one-off investigation)?",
+                rejection: "Failed: Temporary Quest. Query logs manually for quick, ephemeral answers instead of adding permanent metric debt."
+            },
+            {
+                title: "The Worth-It Gate",
+                text: "Is the ongoing cloud storage and cardinality tier cost fully justified by the business outcome?",
+                rejection: "Failed: Too Costly. High cardinality fields inside custom metrics can explode your monitoring bill. Drop it."
+            }
+        ];
+
+        function handleWizardAnswer(isYes) {
+            // Evaluator gate conditional checks
+            if (currentGate === 1 && !isYes) return triggerWizardRejection(0);
+            if (currentGate === 2 && isYes) return triggerWizardRejection(1); // Coverage exists if yes
+            if (currentGate === 3 && !isYes) return triggerWizardRejection(2); // Should be aggregate
+            if (currentGate === 4 && !isYes) return triggerWizardRejection(3);
+            if (currentGate === 5 && !isYes) return triggerWizardRejection(4);
+
+            // Progress to next gate
+            if (currentGate < 5) {
+                currentGate++;
+                updateWizardUI();
+            } else {
+                triggerWizardApproval();
+            }
+        }
+
+        function updateWizardUI() {
+            // Update active indicators
+            for (let i = 1; i <= 5; i++) {
+                const bar = document.getElementById(`gate-step-${i}`);
+                if (i <= currentGate) {
+                    bar.className = "h-2 rounded-full bg-brand-500 transition-all";
+                } else {
+                    bar.className = "h-2 rounded-full bg-slate-200 transition-all";
+                }
+            }
+
+            document.getElementById('wizard-step-indicator').textContent = `Gate ${currentGate} of 5`;
+            document.getElementById('wizard-gate-title').textContent = gateQuestions[currentGate - 1].title;
+            document.getElementById('wizard-question-text').textContent = gateQuestions[currentGate - 1].text;
+        }
+
+        function triggerWizardRejection(questionIdx) {
+            const resultBox = document.getElementById('wizard-result-box');
+            const resultTitle = document.getElementById('wizard-result-title');
+            const resultDesc = document.getElementById('wizard-result-desc');
+            const resultIcon = document.getElementById('wizard-result-icon');
+            const iconBg = document.getElementById('wizard-result-icon-bg');
+            const yamlSpec = document.getElementById('wizard-yaml-spec');
+
+            resultBox.classList.remove('hidden', 'border-brand-200', 'bg-brand-50/50');
+            resultBox.classList.add('border-red-200', 'bg-red-50/50');
+            
+            resultTitle.textContent = "Metric Rejected";
+            resultTitle.className = "text-md font-bold text-red-700";
+            resultDesc.textContent = gateQuestions[questionIdx].rejection;
+
+            resultIcon.className = "fa-solid fa-circle-xmark text-red-600 text-lg";
+            iconBg.className = "p-2 rounded-lg bg-red-100 border border-red-200";
+            
+            yamlSpec.classList.add('hidden');
+        }
+
+        function triggerWizardApproval() {
+            const metricName = document.getElementById('wizard-metric-name').value || "custom_metric_name";
+            const resultBox = document.getElementById('wizard-result-box');
+            const resultTitle = document.getElementById('wizard-result-title');
+            const resultDesc = document.getElementById('wizard-result-desc');
+            const resultIcon = document.getElementById('wizard-result-icon');
+            const iconBg = document.getElementById('wizard-result-icon-bg');
+            const yamlSpec = document.getElementById('wizard-yaml-spec');
+            const yamlCode = document.getElementById('yaml-code');
+
+            resultBox.classList.remove('hidden', 'border-red-200', 'bg-red-50/50');
+            resultBox.classList.add('border-brand-200', 'bg-brand-50/50');
+            
+            resultTitle.textContent = "Metric Approved!";
+            resultTitle.className = "text-md font-bold text-brand-700";
+            resultDesc.textContent = "Congratulations! This metric successfully navigated all 5 gates. Here is your generated Measurement Plan spec:";
+
+            resultIcon.className = "fa-solid fa-square-check text-brand-600 text-lg";
+            iconBg.className = "p-2 rounded-lg bg-brand-100 border border-brand-200";
+
+            // Generate YAML Plan
+            const dynamicYaml = `metric:
+  name: ${metricName}
+  kind: business
+  instrument: counter
+  question: "How many operations occurred successfully?"
+  dimensions:
+    - { name: source_platform, reason: "compare platforms" }
+  owner: engine-team
+  dashboard_layer: executive`;
+            yamlCode.textContent = dynamicYaml;
+            yamlSpec.classList.remove('hidden');
+        }
+
+        function copyYamlSpec() {
+            const codeText = document.getElementById('yaml-code').textContent;
+            
+            // Create a temporary textarea to run execCommand copy
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            // Subtle indicator change
+            const copyBtn = document.querySelector('[onclick="copyYamlSpec()"]');
+            copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+            setTimeout(() => {
+                copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy Spec`;
+            }, 2000);
+        }
+
+        function resetWizard() {
+            currentGate = 1;
+            updateWizardUI();
+            document.getElementById('wizard-result-box').classList.add('hidden');
+        }
+
+
+        // ================= CALCULATOR & LIVE BUDGET LAB =================
+        function calculateErrorBudget() {
+            const slo = parseFloat(document.getElementById('slo-range').value);
+            const outageMinutes = parseInt(document.getElementById('outage-range').value);
+            
+            // Total minutes in a standard 30-day billing cycle (43200 minutes)
+            const cycleMinutes = 43200;
+            const allowedDowntimeMinutes = ((100 - slo) / 100) * cycleMinutes;
+            
+            document.getElementById('slo-label').textContent = `${slo}%`;
+            document.getElementById('downtime-allowed').textContent = `${allowedDowntimeMinutes.toFixed(1)} min`;
+            document.getElementById('outage-label').textContent = `${outageMinutes} min`;
+
+            // Adjust reliability label
+            const summaryLabel = document.getElementById('reliability-summary');
+            if (slo >= 99.9) {
+                summaryLabel.textContent = "High Availability";
+                summaryLabel.className = "text-lg font-bold text-brand-600 font-mono mt-1 block";
+            } else if (slo >= 99.0) {
+                summaryLabel.textContent = "Standard Production";
+                summaryLabel.className = "text-lg font-bold text-blue-600 font-mono mt-1 block";
+            } else {
+                summaryLabel.textContent = "Legacy SLA Plan";
+                summaryLabel.className = "text-lg font-bold text-amber-600 font-mono mt-1 block";
+            }
+
+            // Calculate burn rate percentage
+            const burnedPercentage = (outageMinutes / allowedDowntimeMinutes) * 100;
+            updateBurnVisuals(burnedPercentage, outageMinutes);
+        }
+
+        function updateBurnVisuals(burnedPct, outageMins) {
+            const statusCard = document.getElementById('burn-status-card');
+            const pulse = document.getElementById('burn-pulse');
+            const badge = document.getElementById('burn-badge');
+            const statusTitle = document.getElementById('burn-status-title');
+            const statusDesc = document.getElementById('burn-status-desc');
+
+            if (burnedPct <= 2.0) {
+                // Safe
+                statusCard.className = "p-5 rounded-xl border border-brand-200 bg-brand-50/50 space-y-2";
+                pulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75";
+                badge.className = "relative inline-flex rounded-full h-3 w-3 bg-brand-500";
+                statusTitle.textContent = "Budget Health: Safe";
+                statusTitle.className = "text-sm font-bold text-brand-700 uppercase tracking-wider";
+                statusDesc.textContent = `A brief ${outageMins} minute incident used only ${burnedPct.toFixed(1)}% of your allowed budget. All clean.`;
+            } else if (burnedPct <= 10.0) {
+                // Warning / Slow burn ticket
+                statusCard.className = "p-5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-2";
+                pulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75";
+                badge.className = "relative inline-flex rounded-full h-3 w-3 bg-amber-500";
+                statusTitle.textContent = "Warning: Slow Burn Alert";
+                statusTitle.className = "text-sm font-bold text-amber-700 uppercase tracking-wider";
+                statusDesc.textContent = `Alert fired. A ${outageMins} minute incident depleted ${burnedPct.toFixed(1)}% of your error budget. Automated system generates a standard ticket.`;
+            } else {
+                // Fast burn wake-up page
+                statusCard.className = "p-5 rounded-xl border border-red-200 bg-red-50/50 space-y-2 animate-pulse";
+                pulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75";
+                badge.className = "relative inline-flex rounded-full h-3 w-3 bg-red-500";
+                statusTitle.textContent = "CRITICAL: FAST BURN PAGE!";
+                statusTitle.className = "text-sm font-bold text-red-700 uppercase tracking-wider";
+                statusDesc.textContent = `EMERGENCY. A ${outageMins} minute incident consumed ${burnedPct.toFixed(0)}% of your monthly budget. Immediate 3 AM page sent to on-call SRE.`;
+            }
+        }
+
+        // Initialize state on page load
+        window.onload = function() {
+            calculateErrorBudget();
+        }
+    </script>
+</body>
+</html>
