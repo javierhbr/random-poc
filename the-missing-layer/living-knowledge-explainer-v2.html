@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Documents to Living Knowledge — an explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe3;
+    --paper-2:#fbf7ef;
+    --card:#fffdf8;
+    --ink:#1d1a15;
+    --ink-soft:#544e44;
+    --ink-faint:#8a8272;
+    --line:#e0d7c5;
+    --line-strong:#cabfa8;
+    --balance:#1f6d4e;
+    --balance-soft:#e4f0e7;
+    --ledger:#3c4257;
+    --ledger-soft:#e7e9ef;
+    --gold:#b3812a;
+    --gold-soft:#f6ecd4;
+    --red:#b0432d;
+    --red-soft:#f6e3dc;
+    --shadow:0 1px 2px rgba(29,26,21,.05),0 10px 30px -12px rgba(29,26,21,.18);
+    --shadow-lg:0 2px 4px rgba(29,26,21,.06),0 24px 60px -22px rgba(29,26,21,.28);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fbf6ea 0%, rgba(251,246,234,0) 60%),
+      radial-gradient(900px 500px at -10% 20%, #f3ecdc 0%, rgba(243,236,220,0) 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:19px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px}
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:600;line-height:1.1;letter-spacing:-.01em}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+  /* ---------- top ribbon ---------- */
+  .ribbon{
+    border-bottom:1px solid var(--line);
+    background:rgba(251,247,239,.85);
+    backdrop-filter:blur(8px);
+    position:sticky;top:0;z-index:20;
+  }
+  .ribbon .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .ribbon .brand{font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .ribbon .brand b{color:var(--balance)}
+  .ribbon nav{display:flex;gap:22px}
+  .ribbon nav a{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.06em;text-decoration:none;color:var(--ink-faint);text-transform:uppercase}
+  .ribbon nav a:hover{color:var(--ink)}
+  @media(max-width:720px){.ribbon nav{display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:82px 0 40px;position:relative}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:22px}
+  .hero h1{font-size:clamp(40px,7vw,74px);margin:0 0 22px;font-weight:600}
+  .hero h1 em{font-style:italic;color:var(--balance)}
+  .lede{font-size:clamp(20px,2.6vw,25px);color:var(--ink-soft);max-width:40ch;margin:0}
+  .hero-meta{margin-top:34px;display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-soft);background:var(--card)}
+
+  /* ---------- sections ---------- */
+  section{padding:56px 0}
+  .num{font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+  section h2{font-size:clamp(27px,4vw,40px);margin:0 0 18px;max-width:22ch}
+  section p{max-width:64ch;color:var(--ink-soft)}
+  section p strong{color:var(--ink);font-weight:600}
+  .balance-word{color:var(--balance);font-weight:600}
+  .ledger-word{color:var(--ledger);font-weight:600}
+
+  hr.rule{border:none;border-top:1px solid var(--line);margin:0}
+  .kicker{font-style:italic;color:var(--ink);font-size:22px;max-width:60ch;margin:0 0 4px}
+
+  /* ---------- cards / diagrams ---------- */
+  .fig{margin:34px 0 8px}
+  .fig-cap{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.03em;color:var(--ink-faint);margin-top:14px;text-align:center}
+
+  .compare{display:grid;grid-template-columns:1fr 88px 1fr;gap:0;align-items:stretch}
+  @media(max-width:720px){.compare{grid-template-columns:1fr;gap:16px}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .panel h3{font-size:15px;font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin:0 0 4px}
+  .panel .sub{font-size:14px;color:var(--ink-faint);margin:0 0 16px}
+  .panel.ledger h3{color:var(--ledger)}
+  .panel.balance{border-color:#bfe0cd;background:linear-gradient(180deg,#fbfef9,#f2f9f3)}
+  .panel.balance h3{color:var(--balance)}
+  .txn{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line);color:var(--ink-soft)}
+  .txn:last-child{border-bottom:none}
+  .txn .amt.neg{color:var(--red)}
+  .txn .amt.pos{color:var(--balance)}
+  .txn.faded{opacity:.45;text-decoration:line-through}
+  .bignum{font-family:"Fraunces",serif;font-size:clamp(38px,7vw,58px);font-weight:600;color:var(--balance);line-height:1;margin:10px 0 6px}
+  .balance-note{font-size:14px;color:var(--ink-soft);margin:0}
+  .arrowcol{display:flex;align-items:center;justify-content:center;position:relative}
+  .arrowcol .fold{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;position:absolute;top:calc(50% - 40px);white-space:nowrap}
+  @media(max-width:720px){.arrowcol{transform:rotate(90deg);height:40px}.arrowcol .fold{top:-26px}}
+
+  /* two-up generic */
+  .twoup{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.twoup{grid-template-columns:1fr}}
+  .mini{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  .mini .tag{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:inline-block;padding:4px 10px;border-radius:999px;margin-bottom:14px}
+  .tag.human{background:var(--gold-soft);color:var(--gold)}
+  .tag.agent{background:var(--balance-soft);color:var(--balance)}
+  .mini h3{font-size:22px;margin:0 0 8px}
+  .mini p{font-size:16px;margin:0;color:var(--ink-soft)}
+  .mini .stat{font-family:"Fraunces",serif;font-size:15px;color:var(--ink-faint);margin-top:14px;display:block}
+  .dots{display:flex;gap:5px;margin-top:16px;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+  .dot.on{background:var(--balance)}
+  .dot.hot{background:var(--gold)}
+
+  /* ---------- OKF file tree ---------- */
+  .okf{background:#1d1a15;border-radius:16px;padding:26px 26px 22px;box-shadow:var(--shadow-lg);font-family:"JetBrains Mono",monospace;font-size:14px;color:#e9e2d3;overflow-x:auto}
+  .okf .bar{display:flex;gap:7px;margin-bottom:18px}
+  .okf .bar i{width:11px;height:11px;border-radius:50%;background:#48423a;display:block}
+  .okf .row{white-space:pre;line-height:1.9}
+  .okf .dir{color:#d8b25a}
+  .okf .bal{color:#67c398}
+  .okf .led{color:#8fa1d6}
+  .okf .map{color:#e0c06a}
+  .okf .cmt{color:#7d766a}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:20px;justify-content:center}
+  .legend span{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink-soft);display:flex;align-items:center;gap:8px}
+  .legend b{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* ---------- artifacts table ---------- */
+  .tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .tbl th,.tbl td{text-align:left;padding:16px 18px;border-bottom:1px solid var(--line);font-size:16px}
+  .tbl th{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);background:var(--paper-2)}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td:first-child{font-family:"JetBrains Mono",monospace;font-weight:600;font-size:14px}
+  .tbl .q{color:var(--ink);font-style:italic}
+  .tbl tr.okfrow{background:linear-gradient(90deg,#f2f9f3,#fbfef9)}
+  .tbl tr.okfrow td:first-child{color:var(--balance)}
+  .tbl .tense{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-faint)}
+  @media(max-width:720px){.tbl th:nth-child(4),.tbl td:nth-child(4){display:none}}
+
+  /* ---------- lifecycle svg ---------- */
+  .loopwrap{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow);overflow:hidden}
+  .loopwrap svg{width:100%;height:auto;display:block}
+
+  /* ---------- format vs heartbeat ---------- */
+  .heart{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+  @media(max-width:720px){.heart{grid-template-columns:1fr}}
+  .heart>div{padding:26px}
+  .heart .shape{border-right:1px solid var(--line)}
+  @media(max-width:720px){.heart .shape{border-right:none;border-bottom:1px solid var(--line)}}
+  .heart h3{font-size:20px;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+  .heart .lab{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+  .heart .shape .lab{background:var(--ledger-soft);color:var(--ledger)}
+  .heart .beat .lab{background:var(--red-soft);color:var(--red)}
+  .heart p{font-size:16px;margin:0;color:var(--ink-soft)}
+
+  /* ---------- takeaway ---------- */
+  .takeaway{background:linear-gradient(160deg,#20342a,#16241d);border-radius:22px;padding:48px 40px;color:#eef3ee;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+  .takeaway::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(103,195,152,.28),transparent 70%)}
+  .takeaway .num{color:#8fd8b0}
+  .takeaway h2{color:#fff;max-width:20ch}
+  .takeaway p{color:#cfe0d4;max-width:60ch;position:relative}
+  .takeaway .punch{font-family:"Fraunces",serif;font-style:italic;font-size:clamp(21px,3vw,27px);color:#fff;margin-top:24px;max-width:44ch}
+
+  .steps{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:12px;position:relative}
+  .steps li{display:flex;gap:14px;align-items:flex-start;font-size:16.5px;color:#dce8df}
+  .steps .n{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(143,216,176,.16);color:#8fd8b0;font-family:"JetBrains Mono",monospace;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:3px;border:1px solid rgba(143,216,176,.3)}
+
+  footer{padding:52px 0 70px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:14px}
+  footer a{color:var(--balance);text-decoration:none}
+  footer .mono{font-size:12px;letter-spacing:.04em}
+
+  /* ---------- TL;DR ---------- */
+  .tldr{background:var(--card);border:1px solid var(--line-strong);border-left:5px solid var(--gold);border-radius:16px;padding:30px 32px;box-shadow:var(--shadow);position:relative}
+  .tldr .badge{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:block}
+  .tldr p{max-width:66ch;color:var(--ink-soft);margin:0 0 14px}
+  .tldr p:last-child{margin-bottom:0}
+  .tldr b{color:var(--ink)}
+  .tldr .oneline{font-family:"Fraunces",serif;font-size:clamp(20px,2.7vw,26px);font-weight:500;color:var(--ink);font-style:italic;line-height:1.3;margin:0 0 18px}
+
+  /* ---------- failing fixes ---------- */
+  .fixes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:820px){.fixes{grid-template-columns:1fr}}
+  .fix{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow);position:relative}
+  .fix .x{width:30px;height:30px;border-radius:8px;background:var(--red-soft);color:var(--red);display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-weight:600;margin-bottom:14px}
+  .fix h3{font-size:19px;margin:0 0 8px;line-height:1.2}
+  .fix p{font-size:15px;margin:0;color:var(--ink-soft)}
+  .fix .why{display:block;margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.03em;color:var(--red)}
+
+  /* ---------- risks ---------- */
+  .risks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.risks{grid-template-columns:1fr}}
+  .risk{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .risk h3{font-size:16px;margin:0 0 5px;font-family:"Newsreader",serif;font-weight:600}
+  .risk p{font-size:14.5px;margin:0;color:var(--ink-soft)}
+  .risk .mit{color:var(--balance);font-weight:600}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<div class="ribbon">
+  <div class="wrap">
+    <div class="brand"><b>◆</b> The Balance, Not the Ledger — Part II</div>
+    <nav>
+      <a href="#story">Story</a>
+      <a href="#okf">OKF</a>
+      <a href="#loop">Lifecycle</a>
+      <a href="#do">Do this</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow reveal">An explainer · AI-native product development</div>
+    <h1 class="reveal">From documents<br>to <em>living knowledge</em></h1>
+    <p class="lede reveal">Your bank shows you a balance, not ten thousand transactions to add up. Your platform's documentation should work the same way.</p>
+    <div class="hero-meta reveal">
+      <span class="chip">Balance vs. ledger</span>
+      <span class="chip">Open Knowledge Format</span>
+      <span class="chip">Knowledge as a deliverable</span>
+    </div>
+  </div>
+</header>
+
+<!-- TL;DR -->
+<section style="padding-top:8px">
+  <div class="wrap reveal">
+    <div class="tldr">
+      <span class="badge">TL;DR</span>
+      <p class="oneline">Your bank shows you a balance, not ten thousand transactions to add up. Your platform's documentation should work the same way.</p>
+      <p>A platform's PRDs and specs are the <b>transactions</b> — the ledger. “How does this work today?” is the <b>balance</b>, and most organizations never materialize it, so every engineer — and now every AI agent — has to reconstruct it by hand. Agents make this worse: they read constantly and take stale documents literally.</p>
+      <p>The fix is a living <b>representation of reality</b>: one current, shared, capability-organized description of what's true now, kept beside the code. In June 2026 Google Cloud published the <b>Open Knowledge Format (OKF)</b>, effectively naming and standardizing that source of truth — a vendor-neutral bundle of small markdown <b>concept</b> files (the balance) with a built-in <b>log.md</b> (the ledger).</p>
+      <p>Treat each <b>PRD as a transaction</b> — a delta against the balance — and <b>fold it back</b> as part of the definition of done. But a format is only a <b>shape</b>; standardized deltas and an enforced lifecycle are the <b>heartbeat</b> that keeps it true. Do this and knowledge stops being development's exhaust and becomes a first-class deliverable — the company's digital memory, read the same way by every human and every agent.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 1. THE EVERYDAY TRUTH -->
+<section id="story">
+  <div class="wrap">
+    <div class="num reveal">01 · The everyday truth</div>
+    <h2 class="reveal">You already understand this, because you have a bank account</h2>
+    <p class="reveal">Your account keeps a <span class="ledger-word">ledger</span> — every transaction since it opened, in order, never edited. And it shows you a <span class="balance-word">balance</span> — one number that says what you have <em>right now</em>. The balance is simply the ledger, added up. You could recompute it from the full history every time… but you never do. The bank keeps it computed and shows it first.</p>
+
+    <div class="fig reveal">
+      <div class="compare">
+        <div class="panel ledger">
+          <h3>The Ledger</h3>
+          <p class="sub">history · append-only · grows forever</p>
+          <div class="txn"><span>2024 · opening deposit</span><span class="amt pos">+1,200.00</span></div>
+          <div class="txn"><span>2024 · card payment</span><span class="amt neg">−84.20</span></div>
+          <div class="txn faded"><span>2024 · fee (reversed)</span><span class="amt neg">−12.00</span></div>
+          <div class="txn"><span>2025 · refund</span><span class="amt pos">+12.00</span></div>
+          <div class="txn"><span>2025 · transfer in</span><span class="amt pos">+540.00</span></div>
+          <div class="txn"><span>… 9,994 more rows</span><span class="amt">⋯</span></div>
+        </div>
+        <div class="arrowcol">
+          <span class="fold">fold ⟶</span>
+          <svg width="60" height="30" viewBox="0 0 60 30" fill="none" aria-hidden="true">
+            <path d="M2 15 H50" stroke="#b3812a" stroke-width="2.4"/>
+            <path d="M44 7 L54 15 L44 23" stroke="#b3812a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="panel balance">
+          <h3>The Balance</h3>
+          <p class="sub">reality · overwritten · what's true now</p>
+          <div class="bignum">$1,655.80</div>
+          <p class="balance-note">One glance. No archaeology. The bank folded the ledger for you the instant each transaction cleared.</p>
+        </div>
+      </div>
+      <p class="fig-cap">The balance is a projection over the ledger — computed once, at write time, and shown first.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 2. THE PROBLEM -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">02 · The problem</div>
+    <h2 class="reveal">Software makes you add up the transactions yourself</h2>
+    <p class="kicker reveal">“How does Customer Authentication actually work <span class="balance-word">today</span>?”</p>
+    <p class="reveal">It's the most reasonable question in the world — and there is nowhere to read the answer. Instead there is an archive, and the truth is smeared across years of changes, most of them partly undone, none of them labelled <em>“superseded, don't trust me.”</em> To answer, an engineer must find every document that ever touched authentication and merge them in their head. That isn't engineering. It's archaeology.</p>
+
+    <div class="fig reveal">
+      <div class="panel" style="background:var(--paper-2)">
+        <div style="display:flex;flex-wrap:wrap;gap:26px;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:20px;flex-wrap:wrap">
+            <div style="text-align:center"><div class="mono" style="font-size:30px;color:var(--ledger)">2,000</div><div class="mono" style="font-size:11px;color:var(--ink-faint);letter-spacing:.08em">PRDs</div></div>
+            <div style="text-align:center"><div class="mono" style="font-size:30px;color:var(--ledger)">800</div><div class="mono" style="font-size:11px;color:var(--ink-faint);letter-spacing:.08em">RFCs</div></div>
+            <div style="text-align:center"><div class="mono" style="font-size:30px;color:var(--ledger)">300</div><div class="mono" style="font-size:11px;color:var(--ink-faint);letter-spacing:.08em">ADRs</div></div>
+            <div style="text-align:center"><div class="mono" style="font-size:30px;color:var(--ledger)">40k+</div><div class="mono" style="font-size:11px;color:var(--ink-faint);letter-spacing:.08em">tickets</div></div>
+          </div>
+          <svg width="46" height="30" viewBox="0 0 46 30" aria-hidden="true"><path d="M2 15 H36" stroke="var(--line-strong)" stroke-width="2.2"/><path d="M30 8 L40 15 L30 22" stroke="var(--line-strong)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="text-align:center">
+            <div style="font-family:'Fraunces',serif;font-size:52px;color:var(--red);line-height:1">?</div>
+            <div class="mono" style="font-size:11px;color:var(--red);letter-spacing:.06em">no single answer</div>
+          </div>
+        </div>
+      </div>
+      <p class="fig-cap">Abundant documentation, and still no <span class="balance-word">balance</span>. A pile of transactions is not a representation of reality.</p>
+    </div>
+
+    <p class="reveal">The mistake has a name from Part I: a <span class="ledger-word">ledger</span> — a history of decisions — is being used as a <span class="balance-word">balance</span> — a representation of reality. Most teams think they lack documentation. They don't. They're drowning in it. What they lack is one current place that says: <em>this is how it works now.</em></p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 3. THE READER CHANGED -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">03 · What changed</div>
+    <h2 class="reveal">The heaviest reader is no longer human</h2>
+    <p class="reveal">The archaeology used to be survivable because the archaeologist was a person — who skims, infers, and knows which old doc to distrust. That reader is now outnumbered. The main consumer of organizational knowledge is an <strong>AI agent</strong>, and it reads on every task and takes stale documents literally.</p>
+
+    <div class="fig reveal">
+      <div class="twoup">
+        <div class="mini">
+          <span class="tag human">Yesterday's reader</span>
+          <h3>A human, occasionally</h3>
+          <p>Reads now and then. Fills gaps from experience. Tolerates a little rot.</p>
+          <div class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <span class="stat">Sparse reads · forgiving</span>
+        </div>
+        <div class="mini" style="border-color:#bfe0cd">
+          <span class="tag agent">Today's reader</span>
+          <h3>Agents, constantly</h3>
+          <p>Reads on every change, review, and test. Takes what it's given literally — then writes code on it, at speed.</p>
+          <div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot hot"></span><span class="dot on"></span><span class="dot on"></span><span class="dot hot"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot hot"></span><span class="dot on"></span></div>
+          <span class="stat">Constant reads · literal</span>
+        </div>
+      </div>
+      <p class="fig-cap">Agents reason best on knowledge that is consistent, structured, current, and small — the properties of a balance, not a ledger.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 3b. WHY THE OBVIOUS FIXES FAIL -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">04 · Why the obvious fixes fail</div>
+    <h2 class="reveal">Every team reaches for the same three, and each one mistakes navigating the ledger for materializing the balance</h2>
+    <div class="fig reveal">
+      <div class="fixes">
+        <div class="fix">
+          <div class="x">✕</div>
+          <h3>“Just point the AI at all the PRDs”</h3>
+          <p>Feed the model the whole corpus and let retrieval find the relevant history per question.</p>
+          <span class="why">Recompute-from-ledger in an ML coat. Retrieval makes the archive searchable, not current — it hands the model a superseded proposal next to the change that killed it and lets it guess.</span>
+        </div>
+        <div class="fix">
+          <div class="x">✕</div>
+          <h3>“Hand-tune a prompt per assistant”</h3>
+          <p>One system prompt for the coder, another for the reviewer, another for the tester.</p>
+          <span class="why">The balance, forked N ways. Each prompt is a private, drifting photocopy of the same truth — the exact divergence, reintroduced one layer up.</span>
+        </div>
+        <div class="fix">
+          <div class="x">✕</div>
+          <h3>“Let knowledge fall out of the work”</h3>
+          <p>Whatever docs happen to drop out of shipping a feature become the record.</p>
+          <span class="why">The balance as exhaust. Nobody owns it, so nobody keeps it current, so it rots — and an agent acting on rot with confidence is worse than one reading nothing.</span>
+        </div>
+      </div>
+      <p class="fig-cap">Cross-referencing the ledger, however richly, never produces the balance. Reference is not aggregation.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 5. OKF -->
+<section id="okf">
+  <div class="wrap">
+    <div class="num reveal">05 · The named source of truth</div>
+    <h2 class="reveal">Google gave the balance an official shape: OKF</h2>
+    <p class="reveal">For as long as spec-driven development has been standard practice, teams still improvised <em>where</em> current truth lived — a wiki here, a docs folder there, a prompt pasted into each assistant. In June 2026, Google Cloud published the <strong>Open Knowledge Format (OKF)</strong>, effectively naming and standardizing that source of truth: a vendor-neutral bundle of small markdown <span class="balance-word">concept</span> files that humans and agents read the same way.</p>
+    <p class="reveal">The quietly remarkable part, for a reader of Part I: <strong>OKF already ships the balance-and-ledger split.</strong> Concept files are the balance. A built-in <span class="ledger-word">log.md</span> is the ledger. An <span style="color:var(--gold);font-weight:600">index.md</span> is the map you read before the territory.</p>
+
+    <div class="fig reveal">
+      <div class="okf">
+        <div class="bar"><i></i><i></i><i></i></div>
+<div class="row"><span class="dir">/knowledge/</span>                       <span class="cmt"># the balance — living reality (OKF bundle)</span></div>
+<div class="row">├─ <span class="map">index.md</span>                     <span class="cmt"># the map: capabilities &amp; entry points</span></div>
+<div class="row">├─ <span class="dir">auth/</span></div>
+<div class="row">│   ├─ <span class="bal">customer-authentication.md</span>  <span class="cmt"># concept — how it works NOW</span></div>
+<div class="row">│   ├─ <span class="bal">session-management.md</span></div>
+<div class="row">│   └─ <span class="led">log.md</span>                  <span class="cmt"># local change history (the ledger)</span></div>
+<div class="row">├─ <span class="dir">payments/</span></div>
+<div class="row">│   ├─ <span class="bal">payment-intent.md</span>          <span class="cmt"># + YAML front matter: owner, links</span></div>
+<div class="row">│   └─ <span class="bal">settlement.md</span></div>
+<div class="row">└─ <span class="dir">domain/</span></div>
+<div class="row">    ├─ <span class="bal">account.md</span>                 <span class="cmt"># entity + invariants</span></div>
+<div class="row">    └─ <span class="bal">customer.md</span></div>
+      </div>
+      <div class="legend">
+        <span><b style="background:#67c398"></b> concept file = the balance</span>
+        <span><b style="background:#8fa1d6"></b> log.md = the ledger</span>
+        <span><b style="background:#e0c06a"></b> index.md = the map</span>
+      </div>
+      <p class="fig-cap">Just files. No runtime, no SDK, no lock-in — and it lives beside the code, where the balance belongs.</p>
+    </div>
+
+    <div class="fig reveal">
+      <div class="risks">
+        <div class="risk"><h3>Just files</h3><p>No runtime, no SDK, no proprietary account. Renders on GitHub, ships as a tarball, mounts on any filesystem.</p></div>
+        <div class="risk"><h3>Vendor-neutral</h3><p>Not chained to a cloud, database, or model. The same bundle feeds a coding agent, a reviewer, a test generator, and a human.</p></div>
+        <div class="risk"><h3>Legible to both</h3><p>Markdown for the person; YAML front matter and links for the machine. One artifact, two readers, no translation layer.</p></div>
+        <div class="risk"><h3>Ships the split</h3><p>Concept files are the balance, <b>log.md</b> is the ledger, <b>index.md</b> is the map — Part I's architecture, built in.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 6. FOUR ARTIFACTS -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">06 · The missing seat at the table</div>
+    <h2 class="reveal">Four artifacts, four tenses</h2>
+    <p class="reveal">Line the artifacts up by the question each answers and the gap appears on its own. Three of these rows exist in every shop. The fourth — the one whose only job is to state <em>what is true now</em> — keeps going missing.</p>
+
+    <div class="fig reveal">
+      <table class="tbl">
+        <thead><tr><th>Artifact</th><th>The question it answers</th><th>Tense</th><th>How it lives</th></tr></thead>
+        <tbody>
+          <tr><td>PRD</td><td class="q">What are we trying to change?</td><td class="tense">future / intent</td><td>a transaction — written once, archived</td></tr>
+          <tr><td>Code</td><td class="q">How did we implement it?</td><td class="tense">present mechanism</td><td>overwritten in place; authoritative</td></tr>
+          <tr><td>Tests</td><td class="q">How do we verify it?</td><td class="tense">present guarantee</td><td>overwritten in place; enforce it</td></tr>
+          <tr class="okfrow"><td>OKF</td><td class="q">What is true now?</td><td class="tense">present reality</td><td>the balance both humans &amp; agents read</td></tr>
+        </tbody>
+      </table>
+      <p class="fig-cap">OKF fills the empty seat: the representation of reality, in the present tense.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 7. LIFECYCLE LOOP -->
+<section id="loop">
+  <div class="wrap">
+    <div class="num reveal">07 · The mechanism</div>
+    <h2 class="reveal">Every PRD is a transaction, folded back into the balance</h2>
+    <p class="reveal">Stop treating a PRD as a destination; treat it as a <strong>delta</strong> against the balance. A change starts from the living representation of reality — which already holds the domain, the APIs, the rules — and expresses only what changes. When it ships, the change is <strong>folded back</strong>: the affected concepts are edited to their new truth. The fold is paid <em>once</em>, by the person with context — not by every future reader, forever.</p>
+
+    <div class="fig reveal loopwrap">
+      <svg viewBox="0 0 820 470" role="img" aria-label="Knowledge lifecycle loop">
+        <defs>
+          <marker id="ah" markerWidth="11" markerHeight="11" refX="7" refY="5" orient="auto">
+            <path d="M1 1 L9 5 L1 9" fill="none" stroke="#b3812a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- arcs (clockwise) -->
+        <path d="M300 92 Q470 60 620 132" fill="none" stroke="#d8cfbe" stroke-width="2.4" marker-end="url(#ah)"/>
+        <path d="M690 200 Q720 300 560 372" fill="none" stroke="#d8cfbe" stroke-width="2.4" marker-end="url(#ah)"/>
+        <path d="M470 400 Q300 430 210 350" fill="none" stroke="#d8cfbe" stroke-width="2.4" marker-end="url(#ah)"/>
+        <path d="M132 300 Q92 190 220 118" fill="none" stroke="#d8cfbe" stroke-width="2.4" marker-end="url(#ah)"/>
+
+        <!-- center -->
+        <text x="410" y="228" text-anchor="middle" font-family="Fraunces,serif" font-size="21" fill="#1d1a15" font-weight="600">Knowledge</text>
+        <text x="410" y="256" text-anchor="middle" font-family="Fraunces,serif" font-size="21" fill="#1d1a15" font-weight="600">lifecycle</text>
+        <text x="410" y="282" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="2" fill="#b3812a">CONVERGES ON REALITY</text>
+
+        <!-- Node: TOP (PRD) -->
+        <g>
+          <rect x="150" y="34" width="240" height="76" rx="15" fill="#fffdf8" stroke="#cabfa8"/>
+          <text x="270" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="1.5" fill="#b3812a">STEP 1 · PRD</text>
+          <text x="270" y="86" text-anchor="middle" font-family="Newsreader,serif" font-size="16" fill="#1d1a15">The transaction — a delta</text>
+        </g>
+        <!-- Node: RIGHT (Implement) -->
+        <g>
+          <rect x="560" y="120" width="235" height="76" rx="15" fill="#fffdf8" stroke="#cabfa8"/>
+          <text x="677" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="1.5" fill="#3c4257">STEP 2 · IMPLEMENT</text>
+          <text x="677" y="172" text-anchor="middle" font-family="Newsreader,serif" font-size="16" fill="#1d1a15">Code + tests ship</text>
+        </g>
+        <!-- Node: BOTTOM (Fold back) -->
+        <g>
+          <rect x="300" y="384" width="255" height="76" rx="15" fill="#f2f9f3" stroke="#bfe0cd"/>
+          <text x="427" y="412" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="1.5" fill="#1f6d4e">STEP 3 · FOLD BACK</text>
+          <text x="427" y="436" text-anchor="middle" font-family="Newsreader,serif" font-size="16" fill="#1d1a15">Update the balance</text>
+        </g>
+        <!-- Node: LEFT (Living balance) -->
+        <g>
+          <rect x="18" y="292" width="240" height="76" rx="15" fill="#f2f9f3" stroke="#bfe0cd"/>
+          <text x="138" y="320" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" letter-spacing="1.5" fill="#1f6d4e">STEP 4 · BASELINE</text>
+          <text x="138" y="344" text-anchor="middle" font-family="Newsreader,serif" font-size="16" fill="#1d1a15">A better next start</text>
+        </g>
+      </svg>
+      <p class="fig-cap">Pay the fold once, at write time — the way a bank updates your balance the instant money moves.</p>
+    </div>
+
+    <p class="reveal" style="margin-top:26px">A change isn't <em>done</em> until the balance reflects it. A practical definition of done binds the two together:</p>
+    <div class="fig reveal">
+      <div class="risks">
+        <div class="risk"><h3>1 · Code merged</h3><p>The behavior actually ships.</p></div>
+        <div class="risk"><h3>2 · Concepts edited</h3><p>The affected OKF nodes are overwritten to their new truth.</p></div>
+        <div class="risk"><h3>3 · Decisions & history filed</h3><p>Significant “why” goes to an ADR; the PRD is archived and noted in <b>log.md</b>.</p></div>
+        <div class="risk"><h3>4 · Enforcement passes</h3><p>A contract test or fitness function <span class="mit">breaks when the balance and the system disagree.</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 8. FORMAT VS HEARTBEAT -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">08 · The catch</div>
+    <h2 class="reveal">A format is a shape, not a heartbeat</h2>
+    <p class="reveal">A perfectly valid OKF bundle can be perfectly out of date. The format guarantees portability and structure — it guarantees nothing about truth. Truth is a property of <em>process</em>.</p>
+
+    <div class="fig reveal">
+      <div class="heart">
+        <div class="shape">
+          <h3><span class="lab">OKF</span> The shape</h3>
+          <p>A vendor-neutral form for the balance. Portable, structured, readable by human and machine. Necessary — but inert on its own.</p>
+        </div>
+        <div class="beat">
+          <h3><span class="lab">Process</span> The heartbeat</h3>
+          <p>Standardized deltas + an enforced delivery lifecycle. The fold-back is part of the definition of done, bound to a signal — so skipping it <strong>breaks something</strong> instead of silently rotting the truth.</p>
+        </div>
+      </div>
+      <p class="fig-cap">The bank has both: a standard for the balance, and machinery that updates it when money moves.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 9. COSTS & RISKS -->
+<section>
+  <div class="wrap">
+    <div class="num reveal">09 · What it costs</div>
+    <h2 class="reveal">Honest trade-offs — none of this is free</h2>
+    <p class="reveal">The story would be dishonest if it pretended the balance maintains itself. Each risk has a mitigation, but each needs deliberate attention.</p>
+    <div class="fig reveal">
+      <div class="risks">
+        <div class="risk"><h3>Keeping the graph current is real work</h3><p>More moving parts than one big doc. <span class="mit">Mitigate:</span> derive everything derivable from code; make the fold-back part of <em>done</em>.</p></div>
+        <div class="risk"><h3>The balance is a contended, shared artifact</h3><p>Many teams editing one representation of reality creates coupling. <span class="mit">Mitigate:</span> clear ownership per concept, recorded in front matter.</p></div>
+        <div class="risk"><h3>Enforcement is the crux</h3><p>It all collapses without a signal when balance and system disagree — harder for prose than for generated contracts. <span class="mit">Mitigate:</span> be honest about which nodes are enforced.</p></div>
+        <div class="risk"><h3>Writing good deltas is a skill</h3><p>It only pays off once the balance is trustworthy to diff against — a chicken-and-egg. <span class="mit">Mitigate:</span> bootstrap the baseline on purpose.</p></div>
+        <div class="risk"><h3>OKF v0.1 will change</h3><p>An early spec, still moving. <span class="mit">Mitigate:</span> bet on the idea — a neutral, file-based balance beside the code — and keep coupling loose.</p></div>
+        <div class="risk"><h3>The boundaries are judgment</h3><p>Where balance ends and mere history begins is a matter of taste. <span class="mit">Mitigate:</span> a light convention (concept vs. log.md), not a formula.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- 10. TAKEAWAY -->
+<section id="do">
+  <div class="wrap reveal">
+    <div class="takeaway">
+      <div class="num">10 · Do this</div>
+      <h2>Give the balance a place to live, and a pulse</h2>
+      <p>Adopt the balance-not-ledger model, and turn knowledge from development's exhaust into a first-class deliverable — the company's digital memory, read the same way by every person and every agent.</p>
+      <ul class="steps">
+        <li><span class="n">1</span><span><strong>Materialize the representation of reality</strong> as a living knowledge graph — small, connected concept files, beside the code, in a neutral shape like OKF.</span></li>
+        <li><span class="n">2</span><span><strong>Make every PRD a transaction</strong> against the balance, and fold it back as part of the definition of done.</span></li>
+        <li><span class="n">3</span><span><strong>Derive from code where you can, enforce the rest in CI</strong> — so the balance can't drift in silence.</span></li>
+        <li><span class="n">4</span><span><strong>Evict, don't delete, the ledger</strong> — keep history indexed and one link away.</span></li>
+        <li><span class="n">5</span><span><strong>Represent once, consume everywhere</strong> — one graph, retiring the drawer full of per-assistant prompts.</span></li>
+      </ul>
+      <p class="punch">The engineer deserves to type her question and read one current file — one link from its history. The same way every bank in the world already shows you your money.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>An explainer for <em>“From Documents to Living Knowledge”</em> — Part II of <em>The Balance, Not the Ledger</em>.</p>
+    <p class="mono">Sources · Google Cloud, Open Knowledge Format (OKF v0.1, June 2026) · GoogleCloudPlatform/knowledge-catalog</p>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        e.target.style.transitionDelay = (e.target.dataset.d || 0) + 'ms';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+
+  document.querySelectorAll('.reveal').forEach((el,i)=>{
+    // stagger siblings a touch
+    const sameParent = el.parentElement;
+    io.observe(el);
+  });
+  // hero stagger
+  document.querySelectorAll('.hero .reveal').forEach((el,i)=>{ el.dataset.d = i*110; });
+</script>
+</body>
+</html>
