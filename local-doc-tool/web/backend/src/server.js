@@ -1,6 +1,8 @@
 import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
+import { handleRepos } from './repos.js';
+import { handleQuery, handleStream } from './query.js';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -51,6 +53,32 @@ export function createServer({ staticDir, registry, deps } = {}) {
 
     if (req.method === 'GET' && pathname === '/api/health') {
       return sendJson(res, 200, { ok: true });
+    }
+
+    // GET /api/repos
+    if (req.method === 'GET' && pathname === '/api/repos') {
+      return handleRepos(req, res, deps);
+    }
+
+    // POST /api/query
+    if (req.method === 'POST' && pathname === '/api/query') {
+      return handleQuery(req, res, { registry, deps });
+    }
+
+    // /api/session/:id/{stream,reply,cancel}
+    const sessionMatch = pathname.match(/^\/api\/session\/([^/]+)\/(stream|reply|cancel)$/);
+    if (sessionMatch) {
+      const [, id, action] = sessionMatch;
+      if (action === 'stream' && req.method === 'GET') {
+        return handleStream(req, res, { registry, id });
+      }
+      // story 8.2 / 9.3 — reply/cancel implemented in later stories.
+      if (action === 'reply' && req.method === 'POST') {
+        return sendJson(res, 501, { error: 'not_implemented', message: 'reply not yet implemented' });
+      }
+      if (action === 'cancel' && req.method === 'POST') {
+        return sendJson(res, 501, { error: 'not_implemented', message: 'cancel not yet implemented' });
+      }
     }
 
     if (req.method === 'GET' || req.method === 'HEAD') {

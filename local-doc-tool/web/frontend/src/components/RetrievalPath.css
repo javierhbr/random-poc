@@ -1,0 +1,58 @@
+.retrieval-path {
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+.retrieval-path-title {
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+.retrieval-path-stages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.retrieval-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.retrieval-stage-box {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #b8c4d0;
+  background: #f4f7fa;
+  border-radius: 4px;
+  padding: 0.35rem 0.55rem;
+  min-width: 6rem;
+}
+
+.retrieval-stage-label {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.retrieval-stage-note {
+  font-size: 0.7rem;
+  color: #5a6672;
+}
+
+.retrieval-stage-connector {
+  color: #8a97a4;
+  font-size: 1rem;
+}
+
+.retrieval-path-caption {
+  margin: 0.6rem 0 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #6a7480;
+}
