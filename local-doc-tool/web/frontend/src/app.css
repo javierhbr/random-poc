@@ -1,0 +1,55 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.app-header h1 {
+  font-size: 1.4rem;
+  margin: 0 0 1rem;
+}
+
+.repo-picker,
+.query-box,
+.region {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.region-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+  margin: 0 0 0.5rem;
+}
+
+.query-input {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.region-empty,
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.regions {
+  display: grid;
+  gap: 1rem;
+}
