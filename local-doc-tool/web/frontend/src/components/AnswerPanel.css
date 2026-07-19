@@ -1,0 +1,29 @@
+.answer-panel {
+  padding: 0.5rem 0;
+}
+
+.answer-running {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.answer-running-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #4a7;
+  animation: answer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes answer-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.answer-none {
+  color: #999;
+  font-style: italic;
+}

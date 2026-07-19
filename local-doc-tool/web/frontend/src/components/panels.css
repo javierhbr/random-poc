@@ -1,0 +1,53 @@
+.panel {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+}
+
+.panel-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.source-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.source-row:last-child {
+  border-bottom: none;
+}
+
+.source-title {
+  font-weight: 600;
+}
+
+.source-meta {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.source-tags {
+  font-size: 0.75rem;
+}
+
+.source-tag {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0 0.35rem;
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.prov-scope-item,
+.prov-missing,
+.prov-unreached {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.prov-unreached {
+  color: #a00;
+}

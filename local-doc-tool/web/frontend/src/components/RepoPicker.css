@@ -1,0 +1,45 @@
+.repo-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.repo-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 0.35rem;
+  cursor: pointer;
+}
+
+.repo-entry.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.repo-entry-name {
+  font-weight: 600;
+}
+
+.repo-entry-spec-count,
+.repo-entry-graph {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+.repo-entry-graph {
+  background: #dcfce7;
+}
+
+.repo-picker-error {
+  color: #b91c1c;
+}
+
+.repo-picker-empty {
+  color: #64748b;
+}
