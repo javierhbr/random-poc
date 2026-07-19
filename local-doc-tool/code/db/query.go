@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"local-search/embed"
 )
 
 // ── Search ────────────────────────────────────────────────────────────────────
@@ -71,6 +74,117 @@ func Search(db *sql.DB, query, repoFilter, directoryFilter string) ([]SearchResu
 	}
 	return results, rows.Err()
 }
+
+// SemanticSearch runs FTS5 BM25 first, then re-ranks the candidates by fusing
+// BM25 rank with cosine similarity of a deterministic feature-hash embedding
+// via Reciprocal Rank Fusion. Opt-in; default Search() behavior is unchanged.
+// k <= 0 returns all candidates. Falls back to FTS-only order when the query
+// embeds to a zero vector or no vectors are stored yet.
+func SemanticSearch(db *sql.DB, query, repoFilter, directoryFilter string, k int) ([]SearchResult, error) {
+	ftsResults, err := Search(db, query, repoFilter, directoryFilter)
+	if err != nil {
+		return nil, err
+	}
+	if len(ftsResults) == 0 {
+		return nil, nil
+	}
+
+	qv := embed.Embed(query)
+	if isZeroVector(qv) {
+		// No usable semantic signal; fall back to FTS-only ordering.
+		if k > 0 && len(ftsResults) > k {
+			ftsResults = ftsResults[:k]
+		}
+		return ftsResults, nil
+	}
+
+	// Load candidate vectors within the same filtered scope as Search.
+	vecSQL := `
+		SELECT s.repo, s.path, v.vec
+		FROM specs s
+		JOIN spec_vectors v ON v.spec_id = s.id`
+	var vecArgs []interface{}
+	if repoFilter != "" {
+		vecSQL += " WHERE s.repo=?"
+		vecArgs = append(vecArgs, repoFilter)
+		if directoryFilter != "" {
+			vecSQL += " AND s.path LIKE ?"
+			vecArgs = append(vecArgs, directoryFilter+"%")
+		}
+	} else if directoryFilter != "" {
+		vecSQL += " WHERE s.path LIKE ?"
+		vecArgs = append(vecArgs, directoryFilter+"%")
+	}
+
+	rows, err := db.Query(vecSQL, vecArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	vecByKey := make(map[string][]float32)
+	for rows.Next() {
+		var repo, path string
+		var blob []byte
+		if err := rows.Scan(&repo, &path, &blob); err != nil {
+			return nil, err
+		}
+		vecByKey[vecKey(repo, path)] = embed.Decode(blob)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Rank candidates that have a stored vector by cosine similarity descending.
+	type cand struct {
+		key    string
+		cosine float32
+	}
+	var scored []cand
+	for _, r := range ftsResults {
+		key := vecKey(r.Repo, r.Path)
+		if vec, ok := vecByKey[key]; ok {
+			scored = append(scored, cand{key: key, cosine: embed.Cosine(qv, vec)})
+		}
+	}
+	sort.SliceStable(scored, func(i, j int) bool {
+		return scored[i].cosine > scored[j].cosine
+	})
+	cosineRank := make(map[string]int, len(scored))
+	for rank, c := range scored {
+		cosineRank[c.key] = rank
+	}
+
+	// Fuse BM25 rank with cosine rank via Reciprocal Rank Fusion.
+	for i := range ftsResults {
+		score := rrf(i)
+		if rank, ok := cosineRank[vecKey(ftsResults[i].Repo, ftsResults[i].Path)]; ok {
+			score += rrf(rank)
+		}
+		ftsResults[i].Relevance = score
+	}
+	sort.SliceStable(ftsResults, func(i, j int) bool {
+		return ftsResults[i].Relevance > ftsResults[j].Relevance
+	})
+
+	if k > 0 && len(ftsResults) > k {
+		ftsResults = ftsResults[:k]
+	}
+	return ftsResults, nil
+}
+
+func isZeroVector(v []float32) bool {
+	for _, x := range v {
+		if x != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func rrf(rank int) float64 { return 1.0 / (60.0 + float64(rank)) }
+
+func vecKey(repo, path string) string { return repo + "\x00" + path }
 
 // SearchInRepos performs the same FTS5 query as Search but restricts results
 // to a specific set of repo names. Empty repos slice returns no results (use
@@ -448,7 +562,7 @@ func Recent(db *sql.DB, n int) ([]RecentRow, error) {
 		n = 10
 	}
 	rows, err := db.Query(
-		"SELECT repo, project, name, title, modified FROM specs ORDER BY modified DESC LIMIT ?", n,
+		"SELECT repo, project, name, title, modified FROM specs ORDER BY modified_unix DESC LIMIT ?", n,
 	)
 	if err != nil {
 		return nil, err
@@ -659,7 +773,7 @@ func Repos(db *sql.DB) ([]RepoRow, error) {
 
 // Kinds an external graph can be tagged with.
 const (
-	GraphKindGraphify       = "graphify"
+	GraphKindGraphify        = "graphify"
 	GraphKindCodeReviewGraph = "code-review-graph"
 )
 

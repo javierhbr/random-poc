@@ -56,6 +56,8 @@ func main() {
 		cmdRepo(args)
 	case "graphs":
 		cmdGraphs(args)
+	case "graph", "vgraph":
+		cmdVectorGraph(args)
 	case "scan", "rebuild", "index":
 		target := "all"
 		if len(args) > 0 {
@@ -590,7 +592,7 @@ func ensureDB() *sql.DB {
 		// no-op when there's nothing to do, so the order is harmless.
 		if !knownNames[r.Name] {
 			fmt.Fprintf(os.Stderr, "(%s: new repo — running first scan…)\n", r.Name)
-			if _, err := localdb.FullScan(db, r.Name, r.Path); err != nil {
+			if _, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: scan of %s failed: %v\n", r.Name, err)
 				continue
 			}
@@ -657,17 +659,18 @@ func filterByLocation(results []localdb.SearchResult, patterns []string) []local
 
 func cmdSearch(args []string) {
 	fs := flag.NewFlagSet("search", flag.ExitOnError)
-<<<<<<< HEAD
-	repoFlag := fs.String("repo", "", "Filter results to this repo")
-	directoryFlag := fs.String("directory", "", "Filter results to paths starting with this directory")
-=======
 	repoFlag := fs.String("repo", "", "Filter results to this repo (legacy; prefer --repos)")
 	reposFlag := fs.String("repos", "all", "Which repos to search: all | graph-only | name1,name2")
 	sourceFlag := fs.String("source", "auto", "Where results come from: auto | fts | graph | both")
 	rankFlag := fs.String("rank", "auto", "Ranking strategy: auto | bm25 | graph-aware")
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
+	semanticFlag := fs.Bool("semantic", false, "Hybrid FTS+vector re-ranking (RRF fusion)")
+	hybridFlag := fs.Bool("hybrid", false, "Alias for --semantic")
 	var excludeLocations stringSliceFlag
 	fs.Var(&excludeLocations, "exclude-location", "Exclude results whose path contains this string (repeatable)")
+
+	// Bool flags take no value; they must not swallow the following positional
+	// token (otherwise `search --semantic "query"` would eat the query).
+	boolFlags := map[string]bool{"--semantic": true, "-semantic": true, "--hybrid": true, "-hybrid": true}
 
 	// Go's flag package stops at the first non-flag argument, so flags after
 	// the query term are silently ignored. Split positional args from flags
@@ -679,8 +682,9 @@ func cmdSearch(args []string) {
 			flagArgs = append(flagArgs, a)
 			// Consume the next token if the flag uses "= value" or separate value.
 			// flag.Parse handles "--flag value" by consuming the next arg itself,
-			// but we must keep them together in flagArgs.
-			if !strings.Contains(a, "=") && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+			// but we must keep them together in flagArgs. Bool flags never
+			// consume the next token.
+			if !strings.Contains(a, "=") && !boolFlags[a] && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
 				i++
 				flagArgs = append(flagArgs, args[i])
 			}
@@ -689,13 +693,10 @@ func cmdSearch(args []string) {
 		}
 	}
 	fs.Parse(flagArgs) //nolint:errcheck
+	semantic := *semanticFlag || *hybridFlag
 
 	if len(positional) == 0 {
-<<<<<<< HEAD
-		die("Usage: local-search search <query> [--repo <name>] [--directory <path>] [--exclude-location <pattern>]...")
-=======
 		die("Usage: local-search search <query> [--repos <spec>] [--source <fts|graph|both>] [--rank <bm25|graph-aware>] [--exclude-location <pattern>]...")
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
 	}
 	query := positional[0]
 
@@ -711,38 +712,53 @@ func cmdSearch(args []string) {
 	db := ensureDB()
 	defer db.Close()
 
-<<<<<<< HEAD
-	results, err := localdb.Search(db, query, repo, *directoryFlag)
-=======
 	allRepos, err := localdb.Repos(db)
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
 	if err != nil {
 		die(err.Error())
 	}
 
 	// Resolve the three flags (auto → concrete) given the repos available now.
 	plan := resolveSearchPlan(allRepos, legacyRepo, *reposFlag, *sourceFlag, *rankFlag)
+	if semantic {
+		plan.autoNotes = append(plan.autoNotes, "semantic=on")
+	}
 
 	// Print the status header so the user always knows what backend ran.
 	printSearchHeader(plan)
 
-	// Run FTS if the plan asks for it.
+	// Run FTS (or hybrid semantic) search if the plan asks for it.
 	var ftsResults []localdb.SearchResult
 	if plan.runFTS {
-		// One Search() call per repo when plan.repos is a subset; one call with
+		// One call per repo when plan.repos is a subset; one call with
 		// repoFilter="" when plan.repos covers every registered repo.
 		if plan.allRepos {
-			ftsResults, err = localdb.Search(db, query, "")
+			if semantic {
+				ftsResults, err = localdb.SemanticSearch(db, query, "", "", 50)
+			} else {
+				ftsResults, err = localdb.Search(db, query, "", "")
+			}
 			if err != nil {
 				die(err.Error())
 			}
 		} else {
 			for _, name := range plan.repos {
-				rs, err := localdb.Search(db, query, name)
+				var rs []localdb.SearchResult
+				if semantic {
+					rs, err = localdb.SemanticSearch(db, query, name, "", 50)
+				} else {
+					rs, err = localdb.Search(db, query, name, "")
+				}
 				if err != nil {
 					die(err.Error())
 				}
 				ftsResults = append(ftsResults, rs...)
+			}
+			// Semantic Relevance is higher-is-better; merge the per-repo lists
+			// into one best-first order. Plain FTS keeps its native order.
+			if semantic {
+				sort.Slice(ftsResults, func(i, j int) bool {
+					return ftsResults[i].Relevance > ftsResults[j].Relevance
+				})
 			}
 		}
 		ftsResults = filterByLocation(ftsResults, excludeLocations)
@@ -754,12 +770,60 @@ func cmdSearch(args []string) {
 		graphHits = collectGraphHits(query, plan.repos, allRepos)
 	}
 
-	// Apply graph-aware re-ranking to FTS results if requested.
-	if plan.rank == "graph-aware" && len(ftsResults) > 0 {
+	// Apply graph-aware re-ranking to FTS results if requested. Skipped in
+	// semantic mode: RRF fusion already ordered the results best-first, and the
+	// graph-aware pass assumes lower-is-better FTS5 rank semantics.
+	if plan.rank == "graph-aware" && len(ftsResults) > 0 && !semantic {
 		applyGraphAwareRanking(ftsResults, allRepos)
 	}
 
 	printSearchResults(ftsResults, graphHits, query, plan)
+}
+
+// cmdVectorGraph emits a kNN vector graph as NetworkX node-link JSON, either
+// over the specs carrying a tag ("graph tag <tag>") or as an ego graph seeded
+// by a semantic query ("graph search <query> [--repo <name>]").
+func cmdVectorGraph(args []string) {
+	const usage = "Usage: local-search graph <tag <tag> | search <query> [--repo <name>]>"
+	if len(args) == 0 {
+		die(usage)
+	}
+
+	db := ensureDB()
+	defer db.Close()
+
+	switch args[0] {
+	case "tag":
+		if len(args) < 2 || args[1] == "" {
+			die(usage)
+		}
+		g, err := localdb.VectorGraphByTag(db, args[1], 0.3, 8)
+		if err != nil {
+			die(err.Error())
+		}
+		localdb.PrintJSON(g)
+
+	case "search":
+		if len(args) < 2 || args[1] == "" {
+			die(usage)
+		}
+		query := args[1]
+		repo := ""
+		for i := 2; i < len(args); i++ {
+			if (args[i] == "--repo" || args[i] == "-repo") && i+1 < len(args) {
+				repo = args[i+1]
+				i++
+			}
+		}
+		g, err := localdb.VectorGraphBySearch(db, query, repo, 10, 8, 0.3)
+		if err != nil {
+			die(err.Error())
+		}
+		localdb.PrintJSON(g)
+
+	default:
+		die(usage)
+	}
 }
 
 // ── Search-plan resolution & helpers ──────────────────────────────────────────
@@ -1178,14 +1242,31 @@ func cmdJSON(args []string) {
 
 	switch sub {
 	case "search":
-		if len(rest) == 0 {
-			die("Usage: local-search json search <query> [repo]")
+		// Strip an optional --semantic/--hybrid flag from anywhere in rest.
+		semantic := false
+		var pos []string
+		for _, a := range rest {
+			switch a {
+			case "--semantic", "-semantic", "--hybrid", "-hybrid":
+				semantic = true
+			default:
+				pos = append(pos, a)
+			}
+		}
+		if len(pos) == 0 {
+			die("Usage: local-search json search <query> [repo] [--semantic]")
 		}
 		repo := ""
-		if len(rest) > 1 {
-			repo = rest[1]
+		if len(pos) > 1 {
+			repo = pos[1]
 		}
-		results, err := localdb.Search(db, rest[0], repo, "")
+		var results []localdb.SearchResult
+		var err error
+		if semantic {
+			results, err = localdb.SemanticSearch(db, pos[0], repo, "", 50)
+		} else {
+			results, err = localdb.Search(db, pos[0], repo, "")
+		}
 		if err != nil {
 			die(err.Error())
 		}
@@ -1397,8 +1478,8 @@ func resolveScope(flagValue string) (scope.Scope, []localdb.RepoRow, *sql.DB) {
 		CWD:            cwd,
 		ExternalGraphs: externalNames,
 		FlagValue:      flagValue,
-		Repos:     scopeRepos,
-		HomeDir:   homeDir(),
+		Repos:          scopeRepos,
+		HomeDir:        homeDir(),
 	}
 	sc, err := res.Resolve()
 	if err == nil {
@@ -1551,7 +1632,7 @@ func runIncrementalUpdates(db *sql.DB, repos []localdb.RepoRow) {
 		// so their row appears with code_graph_* metadata.
 		if !knownNames[r.Name] {
 			fmt.Fprintf(os.Stderr, "(%s: new repo — running first scan…)\n", r.Name)
-			if _, err := localdb.FullScan(db, r.Name, r.Path); err != nil {
+			if _, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: scan of %s failed: %v\n", r.Name, err)
 				continue
 			}
@@ -1571,7 +1652,7 @@ func runIncrementalUpdates(db *sql.DB, repos []localdb.RepoRow) {
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit)
+		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit, r.SkipDirectories)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
 			continue
@@ -2038,16 +2119,6 @@ Usage:
   local-search scan                       Scan all repos
   local-search scan <repo-name>           Scan one repo
 
-<<<<<<< HEAD
-  local-search search <query>                                                        Search all repos
-  local-search search <query> --repo <name>                                          Search one repo (named flag)
-  local-search search <query> <repo>                                                 Search one repo (positional, legacy)
-  local-search search <query> --directory <path>                                     Focus to paths starting with <path>
-  local-search search <query> --exclude-location <pattern>                           Exclude paths containing pattern
-  local-search read <name>                                                           Read a spec
-  local-search read <name> <repo>                                                    Read from specific repo
-  local-search read <name> <repo> --directory <path>                                 Read from specific repo and directory
-=======
   local-search search <query>                                Search all repos (auto-routes to FTS+graph)
   local-search search <query> --repos all                    Every registered repo (default)
   local-search search <query> --repos graph-only             Only repos with graphify-out/
@@ -2056,6 +2127,7 @@ Usage:
   local-search search <query> --rank auto|bm25|graph-aware   Ranking strategy (default auto)
   local-search search <query> --repo <name>                  Single repo (legacy; prefer --repos)
   local-search search <query> --exclude-location <pattern>   Exclude paths containing pattern
+  local-search search <query> --semantic                     Hybrid FTS + vector re-ranking (RRF fusion)
 
   Auto rules:
     --source auto → both when any selected repo has graphify-out/, else fts
@@ -2063,7 +2135,6 @@ Usage:
     The status line in [brackets] above results shows the resolved values.
   local-search read <name>                                   Read a spec
   local-search read <name> <repo>                            Read from specific repo
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
   local-search related <name>             Find related specs
 
   local-search list                       All specs, all repos
@@ -2073,6 +2144,9 @@ Usage:
   local-search tags <tag>                 Specs with a tag
   local-search recent [n]                 Recently modified (default 10)
 
+  local-search graph tag <tag>                               kNN vector graph over specs with a tag (NetworkX JSON)
+  local-search graph search <query> [--repo <name>]          Ego vector graph seeded by a query (NetworkX JSON)
+
   local-search stats                      Index statistics
   local-search db                         Print database file path
   local-search inspect                    Dump full index
@@ -2081,7 +2155,7 @@ Usage:
   local-search -v, --version             Print version and exit
 
 JSON output (for agents):
-  local-search json search <query> [repo]
+  local-search json search <query> [repo] [--semantic]
   local-search json read <name>
   local-search json list [repo-or-project]
   local-search json repos

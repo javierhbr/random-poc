@@ -25,18 +25,19 @@ var TextExts = map[string]bool{
 
 // Spec holds all extracted metadata for a single file to be indexed.
 type Spec struct {
-	Repo     string
-	Path     string // relative to repo root
-	Project  string
-	Name     string
-	Title    string
-	Tags     string
-	Summary  string
-	FullPath string
-	Modified string // unix timestamp as string
-	Size     int64
-	Ext      string
-	Content  string
+	Repo         string
+	Path         string // relative to repo root
+	Project      string
+	Name         string
+	Title        string
+	Tags         string
+	Summary      string
+	FullPath     string
+	Modified     string // unix timestamp as string
+	ModifiedUnix int64  // mtime as unix seconds
+	Size         int64
+	Ext          string
+	Content      string
 }
 
 var frontmatterRe = regexp.MustCompile(`(?s)^---\s*\n(.*?)\n---\s*\n`)
@@ -82,18 +83,19 @@ func fromFileInfo(repoName, repoRoot, absPath string, info os.FileInfo) (*Spec, 
 	project := projectFromRel(rel)
 
 	return &Spec{
-		Repo:     repoName,
-		Path:     filepath.ToSlash(rel),
-		Project:  project,
-		Name:     stem,
-		Title:    extractTitle(content, stem),
-		Tags:     extractTags(content),
-		Summary:  extractSummary(content),
-		FullPath: absPath,
-		Modified: formatMtime(info),
-		Size:     info.Size(),
-		Ext:      strings.TrimPrefix(ext, "."),
-		Content:  content,
+		Repo:         repoName,
+		Path:         filepath.ToSlash(rel),
+		Project:      project,
+		Name:         stem,
+		Title:        extractTitle(content, stem),
+		Tags:         extractTags(content),
+		Summary:      extractSummary(content),
+		FullPath:     absPath,
+		Modified:     formatMtime(info),
+		ModifiedUnix: info.ModTime().Unix(),
+		Size:         info.Size(),
+		Ext:          strings.TrimPrefix(ext, "."),
+		Content:      content,
 	}, nil
 }
 
@@ -143,18 +145,19 @@ func fromCompanionInfo(repoName, repoRoot, mediaAbsPath string, mediaInfo os.Fil
 	project := projectFromRel(rel)
 
 	return &Spec{
-		Repo:     repoName,
-		Path:     filepath.ToSlash(rel),
-		Project:  project,
-		Name:     stem,
-		Title:    extractTitle(companionContent, stem),
-		Tags:     extractTags(companionContent),
-		Summary:  extractSummary(companionContent),
-		FullPath: mediaAbsPath,
-		Modified: formatMtime(mediaInfo),
-		Size:     mediaInfo.Size(),
-		Ext:      strings.TrimPrefix(ext, "."),
-		Content:  companionContent,
+		Repo:         repoName,
+		Path:         filepath.ToSlash(rel),
+		Project:      project,
+		Name:         stem,
+		Title:        extractTitle(companionContent, stem),
+		Tags:         extractTags(companionContent),
+		Summary:      extractSummary(companionContent),
+		FullPath:     mediaAbsPath,
+		Modified:     formatMtime(mediaInfo),
+		ModifiedUnix: mediaInfo.ModTime().Unix(),
+		Size:         mediaInfo.Size(),
+		Ext:          strings.TrimPrefix(ext, "."),
+		Content:      companionContent,
 	}, nil
 }
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"local-search/codegraph"
+	"local-search/embed"
 	"local-search/extract"
 	"local-search/git"
 	"local-search/graph"
@@ -96,8 +97,8 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 
 	stmt, err := tx.Prepare(
 		"INSERT OR REPLACE INTO specs " +
-			"(repo,path,project,name,title,tags,summary,fullpath,modified,size,ext,content) " +
-			"VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+			"(repo,path,project,name,title,tags,summary,fullpath,modified,modified_unix,size,ext,content) " +
+			"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	)
 	if err != nil {
 		return 0, err
@@ -112,7 +113,7 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 		sp := r.sp
 		if _, err := stmt.Exec(
 			sp.Repo, sp.Path, sp.Project, sp.Name, sp.Title,
-			sp.Tags, sp.Summary, sp.FullPath, sp.Modified, sp.Size, sp.Ext, sp.Content,
+			sp.Tags, sp.Summary, sp.FullPath, sp.Modified, sp.ModifiedUnix, sp.Size, sp.Ext, sp.Content,
 		); err != nil {
 			return 0, err
 		}
@@ -128,6 +129,9 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 		return 0, err
 	}
 	if err := batchInsertTags(tx, repoName); err != nil {
+		return 0, err
+	}
+	if err := batchInsertVectors(tx, repoName); err != nil {
 		return 0, err
 	}
 
@@ -169,6 +173,9 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 	); err != nil {
 		return 0, err
 	}
+
+	// Best-effort ANALYZE so the planner uses the new indexes. Never fail the scan on it.
+	_, _ = tx.Exec("ANALYZE")
 
 	if err := tx.Commit(); err != nil {
 		return 0, err
@@ -309,8 +316,8 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string, skipDire
 
 	insertStmt, err := tx.Prepare(
 		"INSERT OR REPLACE INTO specs " +
-			"(repo,path,project,name,title,tags,summary,fullpath,modified,size,ext,content) " +
-			"VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+			"(repo,path,project,name,title,tags,summary,fullpath,modified,modified_unix,size,ext,content) " +
+			"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	)
 	if err != nil {
 		return 0, lastCommit, err
@@ -321,7 +328,7 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string, skipDire
 		sp := p.sp
 		if _, err := insertStmt.Exec(
 			sp.Repo, sp.Path, sp.Project, sp.Name, sp.Title,
-			sp.Tags, sp.Summary, sp.FullPath, sp.Modified, sp.Size, sp.Ext, sp.Content,
+			sp.Tags, sp.Summary, sp.FullPath, sp.Modified, sp.ModifiedUnix, sp.Size, sp.Ext, sp.Content,
 		); err != nil {
 			return 0, lastCommit, err
 		}
@@ -336,6 +343,9 @@ func IncrementalScan(db *sql.DB, repoName, repoRoot, lastCommit string, skipDire
 		return 0, lastCommit, err
 	}
 	if err := batchInsertTagsPaths(tx, repoName, insertedPaths); err != nil {
+		return 0, lastCommit, err
+	}
+	if err := batchInsertVectorsPaths(tx, repoName, insertedPaths); err != nil {
 		return 0, lastCommit, err
 	}
 
@@ -548,6 +558,15 @@ func deleteRepoEntries(tx *sql.Tx, repoName string) error {
 	); err != nil {
 		return err
 	}
+	if _, err := tx.Exec("DELETE FROM spec_vectors WHERE repo=?", repoName); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(
+		"DELETE FROM spec_edges WHERE src_spec_id IN (SELECT id FROM specs WHERE repo=?) "+
+			"OR dst_spec_id IN (SELECT id FROM specs WHERE repo=?)", repoName, repoName,
+	); err != nil {
+		return err
+	}
 	if _, err := tx.Exec("DELETE FROM specs WHERE repo=?", repoName); err != nil {
 		return err
 	}
@@ -659,6 +678,128 @@ func batchInsertTags(tx *sql.Tx, repoName string) error {
 	return rows.Err()
 }
 
+// batchInsertVectors embeds every spec in the repo and stores an L2-normalized
+// feature-hash vector in spec_vectors. Zero-vector embeddings (empty content)
+// are skipped. Embedding is pure-CPU hashing, so running it in-transaction is fine.
+func batchInsertVectors(tx *sql.Tx, repoName string) error {
+	rows, err := tx.Query(
+		"SELECT id, title, summary, content FROM specs WHERE repo=?", repoName,
+	)
+	if err != nil {
+		return err
+	}
+	// Materialize rows before issuing writes on the same connection (modernc.org/sqlite
+	// can serialize/deadlock if a read cursor is open during writes).
+	type vrow struct {
+		id   int64
+		text string
+	}
+	var toEmbed []vrow
+	for rows.Next() {
+		var id int64
+		var title, summary, content string
+		if err := rows.Scan(&id, &title, &summary, &content); err != nil {
+			rows.Close()
+			return err
+		}
+		toEmbed = append(toEmbed, vrow{id, title + "\n" + summary + "\n" + content})
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare(
+		"INSERT OR REPLACE INTO spec_vectors(spec_id,repo,dim,vec) VALUES (?,?,?,?)",
+	)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, r := range toEmbed {
+		v := embed.Embed(r.text)
+		if isZeroVec(v) {
+			continue
+		} // skip empty-content specs
+		if _, err := stmt.Exec(r.id, repoName, embed.Dim, embed.Encode(v)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func isZeroVec(v []float32) bool {
+	for _, x := range v {
+		if x != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// batchInsertVectorsPaths embeds specs restricted to a set of paths within a repo
+// and stores their L2-normalized vectors in spec_vectors. Zero-vector embeddings
+// are skipped. Paths are chunked into batches of ≤998 to stay within SQLite's
+// variable limit.
+func batchInsertVectorsPaths(tx *sql.Tx, repoName string, paths []string) error {
+	stmt, err := tx.Prepare(
+		"INSERT OR REPLACE INTO spec_vectors(spec_id,repo,dim,vec) VALUES (?,?,?,?)",
+	)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	return chunkPaths(paths, func(chunk []string) error {
+		placeholders := strings.Repeat("?,", len(chunk))
+		placeholders = placeholders[:len(placeholders)-1]
+		args := make([]any, 0, len(chunk)+1)
+		args = append(args, repoName)
+		for _, p := range chunk {
+			args = append(args, p)
+		}
+		rows, err := tx.Query(
+			"SELECT id, title, summary, content FROM specs WHERE repo=? AND path IN ("+placeholders+")",
+			args...,
+		)
+		if err != nil {
+			return err
+		}
+		// Materialize rows before issuing writes on the same connection (modernc.org/sqlite
+		// can serialize/deadlock if a read cursor is open during writes).
+		type vrow struct {
+			id   int64
+			text string
+		}
+		var toEmbed []vrow
+		for rows.Next() {
+			var id int64
+			var title, summary, content string
+			if err := rows.Scan(&id, &title, &summary, &content); err != nil {
+				rows.Close()
+				return err
+			}
+			toEmbed = append(toEmbed, vrow{id, title + "\n" + summary + "\n" + content})
+		}
+		rows.Close()
+		if err := rows.Err(); err != nil {
+			return err
+		}
+
+		for _, r := range toEmbed {
+			v := embed.Embed(r.text)
+			if isZeroVec(v) {
+				continue
+			} // skip empty-content specs
+			if _, err := stmt.Exec(r.id, repoName, embed.Dim, embed.Encode(v)); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // ── single-file incremental helpers ─────────────────────────────────────────
 
 func deleteSpecEntry(tx *sql.Tx, repoName, relPath string) error {
@@ -684,6 +825,12 @@ func deleteSpecEntry(tx *sql.Tx, repoName, relPath string) error {
 		return err
 	}
 	if _, err := tx.Exec("DELETE FROM spec_tags WHERE spec_id=?", id); err != nil {
+		return err
+	}
+	if _, err := tx.Exec("DELETE FROM spec_vectors WHERE spec_id=?", id); err != nil {
+		return err
+	}
+	if _, err := tx.Exec("DELETE FROM spec_edges WHERE src_spec_id=? OR dst_spec_id=?", id, id); err != nil {
 		return err
 	}
 	if _, err := tx.Exec("DELETE FROM specs WHERE id=?", id); err != nil {
