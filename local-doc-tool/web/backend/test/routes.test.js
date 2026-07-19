@@ -177,19 +177,13 @@ test('R-1.2: GET /api/repos with fake runRepos -> 200 rows', async () => {
   assert.deepEqual(await res.json(), [{ repo: 'a', spec_count: 2 }]);
 });
 
-test('reply and cancel are 501 stubs (story 8.2 / 9.3)', async () => {
-  const r1 = await fetch(`${base}/api/query`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ q: 'hi', repos: ['a'] }),
-  });
-  const { sessionId } = await r1.json();
-  const reply = await fetch(`${base}/api/session/${sessionId}/reply`, {
+test('reply on unknown session -> 404; cancel on unknown session -> 404', async () => {
+  const reply = await fetch(`${base}/api/session/nope/reply`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ text: 'x' }),
   });
-  assert.equal(reply.status, 501);
-  const cancel = await fetch(`${base}/api/session/${sessionId}/cancel`, { method: 'POST' });
-  assert.equal(cancel.status, 501);
+  assert.equal(reply.status, 404);
+  const cancel = await fetch(`${base}/api/session/nope/cancel`, { method: 'POST' });
+  assert.equal(cancel.status, 404);
 });

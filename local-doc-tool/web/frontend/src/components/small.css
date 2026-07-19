@@ -1,0 +1,51 @@
+/* Shared minimal styles for the small presentational components:
+   ReplyInput, ElapsedTimer, RankedSources. */
+
+.reply-input {
+  margin: 0.5rem 0;
+}
+
+.reply-question {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.reply-textarea {
+  width: 100%;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+.reply-send {
+  margin-top: 0.35rem;
+}
+
+.elapsed-timer {
+  font-variant-numeric: tabular-nums;
+}
+
+.elapsed-activity {
+  margin-left: 0.5rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.ranked-source {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.ranked-position {
+  font-weight: 600;
+  margin-right: 0.35rem;
+}
+
+.ranked-relevance {
+  margin-left: 0.35rem;
+  color: #666;
+}
+
+.ranked-empty {
+  color: #666;
+  font-size: 0.85rem;
+}

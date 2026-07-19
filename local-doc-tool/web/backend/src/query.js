@@ -1,6 +1,7 @@
 import { buildPrompt } from './prompt.js';
 import { spawnClaude as realSpawnClaude, killTree } from './claude.js';
 import { createNormalizer } from './normalize.js';
+import { pipeChild, broadcast } from './stream.js';
 
 function sendJson(res, status, obj) {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -64,34 +65,27 @@ export async function handleQuery(req, res, { registry, deps = {} } = {}) {
   }
 
   const normalizer = createNormalizer();
-  const session = registry.create({ child, normalizer, phase: 'running' });
+  const session = registry.create({ child, normalizer, phase: 'running', deps });
 
   // R-2.6 (async): spawn errors that surface after creation (async ENOENT) end the session.
   child.on('error', (err) => {
     session.phase = 'done';
     const missing = err?.code === 'ENOENT';
-    for (const client of session.sseClients) {
-      writeSse(client, 'error', {
-        message: missing ? 'the `claude` binary is not on PATH' : err?.message ?? String(err),
-        kind: 'spawn',
-      });
-    }
+    broadcast(session, 'error', {
+      message: missing ? 'the `claude` binary is not on PATH' : err?.message ?? String(err),
+      kind: 'spawn',
+    });
   });
 
   return sendJson(res, 200, { sessionId: session.id });
 }
 
-/** Write one SSE frame: event:<type>\ndata:<json>\n\n */
-function writeSse(res, type, data) {
-  res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
-}
-
 /**
  * handleStream(req, res, { registry, id }) — GET /api/session/:id/stream (SSE).
- * R-2.3: set SSE headers, register res in session.sseClients, read the child's stdout
- *   line-by-line (NDJSON), run each line through the normalizer, and flush each
- *   normalized event as an SSE frame — never buffer the whole run.
- * R-2.5: on child close with no answer -> error.
+ * R-2.3: set SSE headers, register res in session.sseClients, and pipe the child's
+ *   stdout through the session normalizer to sseClients via the shared pipeChild
+ *   helper (R-8.4: same set is reused across resumed turns).
+ * R-2.5: on child close with no answer -> error (inside pipeChild).
  * Captures claudeSessionId from the init status onto the session.
  */
 export function handleStream(req, res, { registry, id } = {}) {
@@ -108,61 +102,87 @@ export function handleStream(req, res, { registry, id } = {}) {
 
   session.sseClients.add(res);
 
-  const { child, normalizer } = session;
-  let sawAnswer = false;
-  let sawQuestion = false;
-  let buffer = '';
+  pipeChild({ session, child: session.child, normalizer: session.normalizer, deps: session.deps ?? {} });
 
-  const onData = (chunk) => {
-    buffer += chunk;
-    let nl;
-    while ((nl = buffer.indexOf('\n')) !== -1) {
-      const line = buffer.slice(0, nl).trim();
-      buffer = buffer.slice(nl + 1);
-      if (!line) continue;
-      let obj;
-      try {
-        obj = JSON.parse(line);
-      } catch {
-        continue; // ignore non-JSON stdout noise
-      }
-      for (const ev of normalizer.push(obj)) {
-        if (ev.type === 'status' && ev.data?.sessionId) {
-          session.claudeSessionId = ev.data.sessionId;
-        }
-        if (ev.type === 'answer') sawAnswer = true;
-        if (ev.type === 'question') {
-          sawQuestion = true;
-          session.phase = 'awaiting-reply';
-        }
-        writeSse(res, ev.type, ev.data);
-      }
-    }
+  // End this SSE response once the session is truly done. A turn that ended with a
+  // question stays awaiting-reply, so the stream is left open for the resumed turn (R-8.4).
+  const endIfDone = () => {
+    if (session.phase === 'done') res.end();
   };
+  session.child.on('close', endIfDone);
 
-  const onClose = () => {
-    // R-8.1/R-8.3: a turn that ended with a question is not a failure; keep it
-    // awaiting a reply and do NOT emit an error.
-    if (sawQuestion) {
-      res.end();
-      return;
-    }
-    session.phase = 'done';
-    // R-2.5: closed with no usable answer -> explicit error.
-    if (!sawAnswer) {
-      writeSse(res, 'error', { message: 'the run ended without producing an answer', kind: 'exit' });
-    }
-    res.end();
-  };
-
-  child.stdout?.on('data', onData);
-  child.on('close', onClose);
-
-  // R-9.5: if the SSE client disconnects, kill the child's process group.
+  // R-9.5: if the SSE client disconnects, kill the child's process group (unless the
+  // session is done or paused awaiting a reply, which must survive — R-8.3).
   req.on('close', () => {
     session.sseClients.delete(res);
     if (session.phase !== 'done' && session.phase !== 'awaiting-reply') {
-      killTree(child);
+      killTree(session.child);
     }
   });
+}
+
+/**
+ * handleReply(req, res, { registry, id }) — POST /api/session/:id/reply {text}.
+ * R-8.2: 404 unknown, 409 if no captured claudeSessionId, 400 if text missing/empty.
+ *   Spawn a NEW child with --resume <claudeSessionId> and the reply as the prompt,
+ *   set session.child + phase='running', and pipe it to the EXISTING sseClients so the
+ *   resumed turn continues on the same stream (R-8.4).
+ * R-8.5: emit a `reply` event so the user's reply lands in the activity feed.
+ */
+export async function handleReply(req, res, { registry, id } = {}) {
+  const session = registry.get(id);
+  if (!session) {
+    return sendJson(res, 404, { error: 'no_session', message: 'unknown session' });
+  }
+  if (!session.claudeSessionId) {
+    return sendJson(res, 409, { error: 'not_resumable', message: 'session has no claude session to resume' });
+  }
+
+  const body = await readJsonBody(req);
+  if (body === null) {
+    return sendJson(res, 400, { error: 'bad_json', message: 'invalid JSON body' });
+  }
+  const text = typeof body.text === 'string' ? body.text.trim() : '';
+  if (!text) {
+    return sendJson(res, 400, { error: 'text_required', message: 'reply text is required' });
+  }
+
+  const deps = session.deps ?? {};
+  const spawnClaude = deps.spawnClaude ?? realSpawnClaude;
+
+  let child;
+  try {
+    child = spawnClaude({ prompt: text, resumeSessionId: session.claudeSessionId });
+  } catch (err) {
+    return sendJson(res, 500, { error: 'spawn_failed', message: err?.message ?? String(err) });
+  }
+
+  session.child = child;
+  session.phase = 'running';
+
+  // R-8.5: record the user's reply in the feed so it renders alongside the prior question.
+  broadcast(session, 'reply', { text });
+
+  // R-8.4: resumed turn continues on the already-connected sseClients with a fresh normalizer.
+  pipeChild({ session, child, normalizer: createNormalizer(), deps });
+
+  return sendJson(res, 200, { ok: true });
+}
+
+/**
+ * handleCancel(req, res, { registry, id }) — POST /api/session/:id/cancel.
+ * R-9.3: 404 unknown; otherwise killTree the child (R-9.5), broadcast a `done`
+ *   {cancelled:true} frame, set phase='done', respond 200 {ok:true}.
+ */
+export function handleCancel(req, res, { registry, id } = {}) {
+  const session = registry.get(id);
+  if (!session) {
+    return sendJson(res, 404, { error: 'no_session', message: 'unknown session' });
+  }
+
+  killTree(session.child);
+  session.phase = 'done';
+  broadcast(session, 'done', { cancelled: true });
+
+  return sendJson(res, 200, { ok: true });
 }

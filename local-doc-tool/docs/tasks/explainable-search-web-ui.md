@@ -195,7 +195,7 @@ Greenfield web layer only — **zero changes to Go `code/`** (LLD constraint).
   - acceptance: R-6.1 — present the pipeline as a static ordered-stage diagram (query → FTS/BM25 → embed 256-d → cosine → RRF fusion → ranked sources → answer), labeled as the fixed architecture, not claimed reconstructed per-run.
   - verify: the diagram renders the labeled ordered stages.
 
-- [ ] 6.2 Illustrate fused ranking from per-hit relevance (deps: 6.1, 5.1, est: ~15m)
+- [x] 6.2 Illustrate fused ranking from per-hit relevance (deps: 6.1, 5.1, est: ~15m)
   - why: grounding the static diagram in this run's actual `relevance` values makes the ranking concrete.
   - acceptance: R-6.2 — WHERE per-hit `relevance` is available in `sources[]`, use it to illustrate the fused ranking in the retrieval-path view.
   - verify: the ranked-sources stage reflects the current run's `relevance` ordering.
@@ -229,54 +229,54 @@ Greenfield web layer only — **zero changes to Go `code/`** (LLD constraint).
 
 ## Unit 8: Interactive clarification loop (`--resume`)
 
-- [ ] 8.1 Detect end-with-question from turn `result` (deps: 2.3, est: ~25m)
+- [x] 8.1 Detect end-with-question from turn `result` (deps: 2.3, est: ~25m)
   - why: in headless `-p` a persistent child can't be reliably detected as awaiting input, so the question signal is read from the turn's `result`.
   - acceptance: R-8.1 — WHEN a turn's `result` carries a question and no answer, treat the turn as ended-with-question, emit a `question` event, and present a reply input.
   - verify: a fake turn that ends with a question yields a `question` event and a reply box.
 
-- [ ] 8.2 Reply spawns a `--resume` child (deps: 8.1, 2.1, est: ~30m)
+- [x] 8.2 Reply spawns a `--resume` child (deps: 8.1, 2.1, est: ~30m)
   - why: conversational continuity across turns comes from resuming the captured Claude `session_id`, not from stdin.
   - acceptance: R-8.2 — WHEN the user submits a reply, `POST /api/session/:id/reply {text}` spawns a new `claude -p --resume <claudeSessionId> --output-format stream-json --verbose` child whose prompt is the reply.
   - verify: posting a reply spawns a child whose argv includes `--resume <claudeSessionId>` and the reply as prompt.
 
-- [ ] 8.3 Keep logical session alive while awaiting reply (deps: 8.1, est: ~15m)
+- [x] 8.3 Keep logical session alive while awaiting reply (deps: 8.1, est: ~15m)
   - why: an awaiting-reply session must not be reaped as an idle failure.
   - acceptance: R-8.3 — WHILE awaiting a user reply, keep the logical session record (incl. the Claude `session_id`) alive and do not time it out as idle.
   - verify: a session paused on a question survives past the idle window and still resumes.
 
-- [ ] 8.4 Resumed turn continues on the same SSE stream (deps: 8.2, 2.3, est: ~20m)
+- [x] 8.4 Resumed turn continues on the same SSE stream (deps: 8.2, 2.3, est: ~20m)
   - why: the user experiences one continuous session, not a new stream per turn.
   - acceptance: R-8.4 — WHEN a reply resumes the session, continue emitting activity/answer events for the resumed turn on the existing SSE stream without the frontend opening a new stream.
   - verify: after a reply, new events arrive on the original SSE connection.
 
-- [ ] 8.5 Record question + reply in the feed (deps: 8.1, 7.1, est: ~10m)
+- [x] 8.5 Record question + reply in the feed (deps: 8.1, 7.1, est: ~10m)
   - why: the clarification dialogue is part of the auditable activity log.
   - acceptance: R-8.5 — record each question and the user's reply in the activity feed.
   - verify: question and reply both appear as ordered feed entries.
 
 ## Unit 9: Long-wait handling
 
-- [ ] 9.1 Heartbeat frames (~15s) (deps: 2.3, est: ~15m)
+- [x] 9.1 Heartbeat frames (~15s) (deps: 2.3, est: ~15m)
   - why: idle SSE connections and proxies drop without periodic traffic during a multi-minute run.
   - acceptance: R-9.1 — WHILE a session is running, emit `heartbeat` events (~every 15s) so the SSE connection and proxies stay alive.
   - verify: with no tool activity, `heartbeat` frames arrive ~15s apart.
 
-- [ ] 9.2 Elapsed time + current activity (deps: 7.1, est: ~10m)
+- [x] 9.2 Elapsed time + current activity (deps: 7.1, est: ~10m)
   - why: the UI must never look frozen during long waits.
   - acceptance: R-9.2 — WHILE running, display elapsed time and the current activity so the UI never appears frozen.
   - verify: elapsed timer advances and current activity is shown during a run.
 
-- [ ] 9.3 Cancel kills the child (deps: 2.1, est: ~15m)
+- [x] 9.3 Cancel kills the child (deps: 2.1, est: ~15m)
   - why: the user must be able to abort a long or wrong run.
   - acceptance: R-9.3 — WHEN the user cancels, `POST /api/session/:id/cancel`, kill the Claude child, and emit `done{cancelled:true}`.
   - verify: cancel terminates the child and emits `done{cancelled:true}`.
 
-- [ ] 9.4 Generous tunable safety timeout → explicit error (deps: 2.1, est: ~15m)
+- [x] 9.4 Generous tunable safety timeout → explicit error (deps: 2.1, est: ~15m)
   - why: an unbounded run must eventually fail loudly, but a short hard timeout would kill legitimate multi-minute runs; the value is an unvalidated tunable.
   - acceptance: R-9.4 — apply only a generous safety timeout (default 5 min, configurable) and, on hitting it, emit an explicit `error` rather than a silent drop.
   - verify: with a short test-configured timeout, an over-running child produces an `error` event.
 
-- [ ] 9.5 Process-group reaping on disconnect/cancel (deps: 2.1, 9.3, est: ~20m)
+- [x] 9.5 Process-group reaping on disconnect/cancel (deps: 2.1, 9.3, est: ~20m)
   - why: killing only the `claude` child would orphan the `local-search` grandchildren it spawned.
   - acceptance: R-9.5 — IF the SSE client disconnects or the session is cancelled, kill the child's whole process group (child + `local-search` grandchildren) so nothing is orphaned.
   - verify: after disconnect/cancel, no `claude` or `local-search` processes from the session remain.

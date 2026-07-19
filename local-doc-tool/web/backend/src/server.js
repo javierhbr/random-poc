@@ -2,7 +2,7 @@ import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
 import { handleRepos } from './repos.js';
-import { handleQuery, handleStream } from './query.js';
+import { handleQuery, handleStream, handleReply, handleCancel } from './query.js';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -72,12 +72,11 @@ export function createServer({ staticDir, registry, deps } = {}) {
       if (action === 'stream' && req.method === 'GET') {
         return handleStream(req, res, { registry, id });
       }
-      // story 8.2 / 9.3 — reply/cancel implemented in later stories.
       if (action === 'reply' && req.method === 'POST') {
-        return sendJson(res, 501, { error: 'not_implemented', message: 'reply not yet implemented' });
+        return handleReply(req, res, { registry, id });
       }
       if (action === 'cancel' && req.method === 'POST') {
-        return sendJson(res, 501, { error: 'not_implemented', message: 'cancel not yet implemented' });
+        return handleCancel(req, res, { registry, id });
       }
     }
 
