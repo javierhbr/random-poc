@@ -5,6 +5,9 @@
 
 # Go
 bin/
+# ...but keep the Node server entrypoint (the bin/ rule above is for Go build output)
+!local-doc-tool/web/backend/bin/
+!local-doc-tool/web/backend/bin/serve.js
 dist/
 *.o
 *.a
