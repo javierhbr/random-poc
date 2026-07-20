@@ -131,7 +131,7 @@ they unblock the rest.
     user lines survive and are runnable; re-install → no duplication; uninstall →
     user content intact, managed block gone; non-git dir → skipped with message.
 
-- [ ] 5.3 Shell-hook mechanism: snippet + source directive (deps: 5.1, est: ~30m)
+- [x] 5.3 Shell-hook mechanism: snippet + source directive (deps: 5.1, est: ~30m)
   - why: A `cd`-into-repo trigger is editor-agnostic and catches non-git spec
     edits, but we must not silently edit the user's rc files.
   - acceptance: R-5.6 (write `~/.local-search/shell-hook.sh`, print the exact

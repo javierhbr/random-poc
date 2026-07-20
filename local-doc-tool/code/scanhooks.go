@@ -508,18 +508,86 @@ func singleQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
-// installShellHook writes ~/.local-search/shell-hook.sh and prints the exact
-// `source` line for the user's shell rc (never edits rc files directly).
-//
-// TODO(5.3): real shell-hook install (R-5.6, R-5.9).
-func installShellHook(repo repoEntry) error {
+// ── shell mechanism (R-5.6, R-5.8, R-5.9) ────────────────────────────────────
+
+// Marker wrapping the managed snippet, mirroring the git-hook sentinels. It also
+// serves as the recognizable signature that identifies our snippet file.
+const (
+	shellHookSentinelBegin = "# >>> local-search scan-hooks (shell mechanism, managed) >>>"
+	shellHookSentinelEnd   = "# <<< local-search scan-hooks (shell mechanism, managed) <<<"
+)
+
+// shellHookPath is the single shared snippet file all repos use. It lives under
+// appDir (the resolved ~/.local-search) so tests overriding appDir write into a
+// temp dir rather than the real home.
+func shellHookPath() string {
+	return filepath.Join(appDir, "shell-hook.sh")
+}
+
+// shellHookSnippet is the sourced shell function that fires a surgical scan when
+// the user cd's into a registered repo. It is repo-set-agnostic: `local-search
+// scan` with no args resolves the CWD to its enclosing repo and is surgical +
+// non-destructive, no-op'ing/erroring harmlessly outside any repo — so a single
+// shared snippet covers every registered repo without baking repo paths in.
+// Registered for zsh (chpwd) and bash (PROMPT_COMMAND); PowerShell is out of
+// scope (documented, best-effort — see the LLD note alongside ui_windows.go).
+func shellHookSnippet() string {
+	return strings.Join([]string{
+		shellHookSentinelBegin,
+		"# Managed by `local-search scan-hooks` — do not edit between the markers.",
+		"# On entering a registered repo directory this runs a surgical scan for it.",
+		"# `local-search scan` (no args) resolves CWD->repo and is surgical; outside",
+		"# any repo it no-ops/errors harmlessly, so this snippet needs no repo baking.",
+		"# TODO(5.4): change-gate + per-repo lock + non-blocking (detached) dispatch.",
+		"__local_search_scan_hook() {",
+		"    local-search scan >/dev/null 2>&1 || true",
+		"}",
+		"if [ -n \"${ZSH_VERSION:-}\" ]; then",
+		"    autoload -Uz add-zsh-hook 2>/dev/null && add-zsh-hook chpwd __local_search_scan_hook",
+		"elif [ -n \"${BASH_VERSION:-}\" ]; then",
+		"    case \":${PROMPT_COMMAND:-}:\" in",
+		"        *__local_search_scan_hook*) ;;",
+		"        *) PROMPT_COMMAND=\"__local_search_scan_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}\" ;;",
+		"    esac",
+		"fi",
+		"# Windows/PowerShell is not supported by this snippet (best-effort/documented).",
+		shellHookSentinelEnd,
+		"",
+	}, "\n")
+}
+
+// installShellHook writes the shared shell-hook snippet to appDir/shell-hook.sh
+// and prints the exact `source` line for the user's shell rc (R-5.6). It never
+// edits rc files. Writing the whole file is naturally idempotent — re-installing
+// overwrites with byte-identical content, so there is never any duplication
+// (R-5.9). repo is unused: the snippet is CWD-resolving and repo-set-agnostic.
+func installShellHook(_ repoEntry) error {
+	if err := os.MkdirAll(appDir, 0o755); err != nil {
+		return fmt.Errorf("creating app dir: %w", err)
+	}
+	path := shellHookPath()
+	if err := os.WriteFile(path, []byte(shellHookSnippet()), 0o644); err != nil {
+		return fmt.Errorf("writing shell hook: %w", err)
+	}
+	fmt.Printf("  shell: wrote %s\n", path)
+	fmt.Println("  Add this line to your shell rc (~/.zshrc or ~/.bashrc), then restart your shell:")
+	fmt.Printf("      source %s\n", path)
 	return nil
 }
 
-// uninstallShellHook removes the shell-hook snippet file and prints the line to
-// delete from the rc.
-//
-// TODO(5.3): real shell-hook uninstall (R-5.8).
-func uninstallShellHook(repo repoEntry) error {
+// uninstallShellHook removes the shared snippet file and prints the exact
+// `source` line for the user to delete from their rc (R-5.8). It never edits rc
+// files. A missing file is a clean no-op — a second uninstall does not error.
+func uninstallShellHook(_ repoEntry) error {
+	path := shellHookPath()
+	if err := os.Remove(path); err != nil {
+		if os.IsNotExist(err) {
+			return nil // already gone: clean no-op
+		}
+		return fmt.Errorf("removing shell hook: %w", err)
+	}
+	fmt.Printf("  shell: removed %s\n", path)
+	fmt.Println("  Remove this line from your shell rc (~/.zshrc or ~/.bashrc):")
+	fmt.Printf("      source %s\n", path)
 	return nil
 }

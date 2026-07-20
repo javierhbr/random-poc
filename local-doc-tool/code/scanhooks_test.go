@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -173,6 +174,155 @@ func TestRunScanHooks_InsideRepoUsesPromptSeam(t *testing.T) {
 	}
 	if len(gotMechs) != 1 || gotMechs[0] != mechShell {
 		t.Fatalf("dispatched mechanisms %v, want [shell]", gotMechs)
+	}
+}
+
+// ── shell mechanism (story 5.3) ─────────────────────────────────────────────
+
+// withTempAppDir points the package-global appDir at a fresh temp dir so shell
+// tests write into it instead of the real ~/.local-search, and restores it after.
+func withTempAppDir(t *testing.T) string {
+	t.Helper()
+	orig := appDir
+	dir := t.TempDir()
+	appDir = dir
+	t.Cleanup(func() { appDir = orig })
+	return dir
+}
+
+// captureStdout runs fn with os.Stdout redirected to a pipe and returns what was
+// printed, so tests can assert on the source directive the install/uninstall
+// functions emit.
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+	old := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = w
+	fn()
+	_ = w.Close()
+	os.Stdout = old
+	data, _ := io.ReadAll(r)
+	return string(data)
+}
+
+// R-5.6: installing the shell mechanism writes <appdir>/shell-hook.sh containing
+// a recognizable managed snippet that runs `local-search scan`, prints the exact
+// `source <abspath>` line, and touches NOTHING else (no rc file, no other file).
+func TestInstallShellHook_WritesSnippetAndPrintsSource(t *testing.T) {
+	dir := withTempAppDir(t)
+	repo := repoEntry{Name: "docs", Path: t.TempDir()}
+	snippet := filepath.Join(dir, "shell-hook.sh")
+
+	out := captureStdout(t, func() {
+		if err := installShellHook(repo); err != nil {
+			t.Fatalf("installShellHook: %v", err)
+		}
+	})
+
+	data, err := os.ReadFile(snippet)
+	if err != nil {
+		t.Fatalf("reading shell-hook.sh: %v", err)
+	}
+	got := string(data)
+	if !strings.Contains(got, shellHookSentinelBegin) {
+		t.Fatalf("managed marker missing from snippet:\n%s", got)
+	}
+	if !strings.Contains(got, "local-search scan") {
+		t.Fatalf("surgical scan command missing from snippet:\n%s", got)
+	}
+
+	// Printed a `source <abspath>` line for the user to add to their rc.
+	if !strings.Contains(out, "source "+snippet) {
+		t.Fatalf("expected printed output to contain `source %s`, got:\n%s", snippet, out)
+	}
+
+	// R-5.6: nothing outside the snippet file is created — appDir holds only it.
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "shell-hook.sh" {
+		var names []string
+		for _, e := range entries {
+			names = append(names, e.Name())
+		}
+		t.Fatalf("appDir should contain only shell-hook.sh, found: %v", names)
+	}
+}
+
+// R-5.9: re-installing is idempotent — identical content, no duplication, and
+// still exactly one file; the source line is printed again.
+func TestInstallShellHook_Idempotent(t *testing.T) {
+	dir := withTempAppDir(t)
+	repo := repoEntry{Name: "docs", Path: t.TempDir()}
+	snippet := filepath.Join(dir, "shell-hook.sh")
+
+	if err := installShellHook(repo); err != nil {
+		t.Fatalf("install #1: %v", err)
+	}
+	first, err := os.ReadFile(snippet)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	out := captureStdout(t, func() {
+		if err := installShellHook(repo); err != nil {
+			t.Fatalf("install #2: %v", err)
+		}
+	})
+	second, err := os.ReadFile(snippet)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(first) != string(second) {
+		t.Fatalf("re-install changed snippet content:\nfirst:\n%s\nsecond:\n%s", first, second)
+	}
+	if n := strings.Count(string(second), shellHookSentinelBegin); n != 1 {
+		t.Fatalf("expected exactly one managed marker, found %d", n)
+	}
+	if !strings.Contains(out, "source "+snippet) {
+		t.Fatalf("re-install should still print the source line, got:\n%s", out)
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("expected exactly one file in appDir after re-install, found %d", len(entries))
+	}
+}
+
+// R-5.8: uninstall removes the snippet file and prints the source line to delete;
+// a second uninstall with the file already gone is a clean no-op (no error).
+func TestUninstallShellHook_RemovesFileAndNoOp(t *testing.T) {
+	dir := withTempAppDir(t)
+	repo := repoEntry{Name: "docs", Path: t.TempDir()}
+	snippet := filepath.Join(dir, "shell-hook.sh")
+
+	if err := installShellHook(repo); err != nil {
+		t.Fatalf("install: %v", err)
+	}
+
+	out := captureStdout(t, func() {
+		if err := uninstallShellHook(repo); err != nil {
+			t.Fatalf("uninstall: %v", err)
+		}
+	})
+	if _, err := os.Stat(snippet); !os.IsNotExist(err) {
+		t.Fatalf("snippet should be removed after uninstall (stat err = %v)", err)
+	}
+	if !strings.Contains(out, "source "+snippet) {
+		t.Fatalf("uninstall should print the source line to delete, got:\n%s", out)
+	}
+
+	// Second uninstall with the file absent → clean no-op, no error.
+	if err := uninstallShellHook(repo); err != nil {
+		t.Fatalf("second uninstall should be a clean no-op: %v", err)
 	}
 }
 
