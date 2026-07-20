@@ -105,6 +105,11 @@ func Open(dbPath string) (*sql.DB, error) {
 	db.SetMaxOpenConns(1)
 
 	for _, pragma := range []string{
+		// busy_timeout makes a connection wait (up to the bound) for a lock to
+		// clear instead of failing immediately with SQLITE_BUSY. Combined with WAL
+		// below, this lets a concurrent scan (writer) and query (reader) contend
+		// on the same DB without the read failing or the index corrupting (R-2.7).
+		"PRAGMA busy_timeout=5000",
 		"PRAGMA journal_mode=WAL",
 		"PRAGMA synchronous=NORMAL",
 		"PRAGMA cache_size=-32000", // 32 MB page cache

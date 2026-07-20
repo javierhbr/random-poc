@@ -50,7 +50,7 @@ they unblock the rest.
     only the target.
   - mutex: cmdscan
 
-- [ ] 2.2 Open DB with concurrency-tolerant pragmas (deps: —, est: ~20m)
+- [x] 2.2 Open DB with concurrency-tolerant pragmas (deps: —, est: ~20m)
   - why: Automation makes a second writer routine while a foreground `search` may
     also write; without this, a hook-triggered scan racing a query hard-fails.
   - acceptance: R-2.7 (bounded `busy_timeout` and/or WAL so a scan contending with
