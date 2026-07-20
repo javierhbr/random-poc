@@ -268,7 +268,9 @@ func repoRemove(args []string) {
 		return
 	}
 
-	// Remove entries from DB and repopulate
+	// R-6.4: surgically delete only this repo's rows. Best-effort — if the DB
+	// file is absent there is nothing to purge, so we just return. No DB-file
+	// deletion and no re-scan of the other repos.
 	if _, err := os.Stat(dbFile); err == nil {
 		db := openDB()
 		defer db.Close()
@@ -276,10 +278,6 @@ func repoRemove(args []string) {
 			fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 		}
 	}
-	fmt.Println("Rebuilding index…")
-	// TODO(6.3): the DeleteRepo above already purged this repo surgically; the
-	// full rebuild is retained here to keep `repo remove` behavior unchanged.
-	cmdScan([]string{"all"})
 }
 
 func repoList() {

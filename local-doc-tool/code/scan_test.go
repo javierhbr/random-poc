@@ -237,6 +237,51 @@ func TestCmdScan_All_WritesPerRepoLastScanAndGlobal(t *testing.T) {
 	}
 }
 
+// R-6.4: `repo remove B` (with A/B/C registered and indexed) surgically deletes
+// only B's rows — A and C stay queryable — drops B from the flat repos file, and
+// does NOT delete/recreate the DB file (os.SameFile identity is preserved).
+func TestRepoRemove_Surgical_PreservesOthersAndDBFile(t *testing.T) {
+	setupScanEnv(t)
+	a, b, c := makeScanRepo(t, "a"), makeScanRepo(t, "b"), makeScanRepo(t, "c")
+	saveRepos([]repoEntry{a, b, c})
+
+	cmdScan([]string{"all"}) // index all three
+	before, err := os.Stat(dbFile)
+	if err != nil {
+		t.Fatalf("stat db before remove: %v", err)
+	}
+
+	repoRemove([]string{"b"}) // surgical remove of B
+
+	after, err := os.Stat(dbFile)
+	if err != nil {
+		t.Fatalf("db file missing after repo remove: %v", err)
+	}
+	if !os.SameFile(before, after) {
+		t.Fatalf("repo remove replaced the DB file (identity changed)")
+	}
+
+	db, err := localdb.Open(dbFile)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+	for _, name := range []string{"a", "c"} {
+		if countSpecs(t, db, name) == 0 {
+			t.Fatalf("repo %q has no rows after removing b", name)
+		}
+	}
+	if n := countSpecs(t, db, "b"); n != 0 {
+		t.Fatalf("removed repo b still has %d rows", n)
+	}
+
+	for _, r := range loadRepos() {
+		if r.Name == "b" {
+			t.Fatalf("b is still in the flat repos file after remove")
+		}
+	}
+}
+
 // R-2.6: `scan all` deletes the DB file and rebuilds from scratch. Proven
 // deterministically: a repo indexed then deregistered is purged only if the DB
 // was deleted and re-indexed from the (now shorter) repos file.

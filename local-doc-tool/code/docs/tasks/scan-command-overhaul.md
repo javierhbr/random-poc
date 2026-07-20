@@ -181,7 +181,7 @@ they unblock the rest.
   - verify: `repo add` a new repo; assert its line has an added_at, other repos'
     `last_scan_<name>` timestamps are unchanged, and the new repo is queryable.
 
-- [ ] 6.3 `repo remove` becomes surgical (deps: 2.1, est: ~15m)
+- [x] 6.3 `repo remove` becomes surgical (deps: 2.1, est: ~15m)
   - why: Removing one repo shouldn't rebuild the world; the surgical delete
     primitive already exists.
   - acceptance: R-6.4 (delete only that repo's rows via `localdb.DeleteRepo` and
