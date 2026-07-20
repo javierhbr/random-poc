@@ -1,8 +1,14 @@
 package main
 
 import (
+	"errors"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"local-search/git"
 )
 
 // R-5.1: --mechanism comma list parses to exactly the listed mechanisms;
@@ -167,5 +173,176 @@ func TestRunScanHooks_InsideRepoUsesPromptSeam(t *testing.T) {
 	}
 	if len(gotMechs) != 1 || gotMechs[0] != mechShell {
 		t.Fatalf("dispatched mechanisms %v, want [shell]", gotMechs)
+	}
+}
+
+// ── git-hooks mechanism (story 5.2) ─────────────────────────────────────────
+
+// initGitRepo makes a real git repo in a temp dir so git.IsRepo (which shells
+// out) returns true. Skips the test when the git binary is unavailable.
+func initGitRepo(t *testing.T) string {
+	t.Helper()
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git binary not available")
+	}
+	dir := t.TempDir()
+	if out, err := exec.Command("git", "-C", dir, "init").CombinedOutput(); err != nil {
+		t.Fatalf("git init failed: %v\n%s", err, out)
+	}
+	return dir
+}
+
+func hooksDir(repoPath string) string {
+	return filepath.Join(repoPath, ".git", "hooks")
+}
+
+// R-5.4/R-5.5: installing into a hook that already has user content inserts the
+// managed block WITHOUT discarding the user's lines; the file is executable.
+func TestInstallGitHooks_PreservesUserContent(t *testing.T) {
+	dir := initGitRepo(t)
+	repo := repoEntry{Name: "docs", Path: dir}
+
+	pm := filepath.Join(hooksDir(dir), "post-merge")
+	if err := os.MkdirAll(hooksDir(dir), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	const userLine = "echo custom-user-hook-line"
+	if err := os.WriteFile(pm, []byte("#!/bin/sh\n"+userLine+"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := installGitHooks(repo, false); err != nil {
+		t.Fatalf("installGitHooks: %v", err)
+	}
+
+	data, err := os.ReadFile(pm)
+	if err != nil {
+		t.Fatalf("reading post-merge: %v", err)
+	}
+	got := string(data)
+	if !strings.Contains(got, userLine) {
+		t.Fatalf("user content lost; file:\n%s", got)
+	}
+	if !strings.Contains(got, gitHookSentinelBegin) || !strings.Contains(got, gitHookSentinelEnd) {
+		t.Fatalf("managed sentinels missing; file:\n%s", got)
+	}
+	if !strings.Contains(got, "local-search scan 'docs'") {
+		t.Fatalf("surgical scan command with baked repo name missing; file:\n%s", got)
+	}
+	if n := strings.Count(got, gitHookSentinelBegin); n != 1 {
+		t.Fatalf("expected exactly one managed block, found %d begin sentinels", n)
+	}
+
+	info, err := os.Stat(pm)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o755 {
+		t.Fatalf("hook mode = %v, want 0755", info.Mode().Perm())
+	}
+}
+
+// R-5.9: re-installing does not duplicate the managed block; R-5.4: post-commit
+// is never created.
+func TestInstallGitHooks_IdempotentNoPostCommit(t *testing.T) {
+	dir := initGitRepo(t)
+	repo := repoEntry{Name: "docs", Path: dir}
+
+	for i := 0; i < 2; i++ {
+		if err := installGitHooks(repo, false); err != nil {
+			t.Fatalf("install #%d: %v", i, err)
+		}
+	}
+
+	for _, hook := range gitManagedHooks {
+		data, err := os.ReadFile(filepath.Join(hooksDir(dir), hook))
+		if err != nil {
+			t.Fatalf("reading %s: %v", hook, err)
+		}
+		if n := strings.Count(string(data), gitHookSentinelBegin); n != 1 {
+			t.Fatalf("%s: expected 1 managed block after re-install, found %d", hook, n)
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(hooksDir(dir), "post-commit")); !os.IsNotExist(err) {
+		t.Fatalf("post-commit must never be created (stat err = %v)", err)
+	}
+}
+
+// R-5.8: uninstall removes only the managed block. A file that held ONLY the
+// managed block (freshly created) is deleted; a file with user content is kept
+// with its user lines intact.
+func TestUninstallGitHooks_RemovesBlockAndCleansUp(t *testing.T) {
+	dir := initGitRepo(t)
+	repo := repoEntry{Name: "docs", Path: dir}
+
+	// post-checkout has pre-existing user content; post-merge/post-rewrite are
+	// created fresh by install (managed block + shebang only).
+	if err := os.MkdirAll(hooksDir(dir), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pc := filepath.Join(hooksDir(dir), "post-checkout")
+	const userLine = "echo keep-me"
+	if err := os.WriteFile(pc, []byte("#!/bin/sh\n"+userLine+"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := installGitHooks(repo, false); err != nil {
+		t.Fatalf("install: %v", err)
+	}
+	if err := uninstallGitHooks(repo); err != nil {
+		t.Fatalf("uninstall: %v", err)
+	}
+
+	// Fresh-created hook (only managed content) → deleted.
+	if _, err := os.Stat(filepath.Join(hooksDir(dir), "post-merge")); !os.IsNotExist(err) {
+		t.Fatalf("post-merge should be deleted after uninstall (stat err = %v)", err)
+	}
+
+	// User-content hook → kept, block gone, user line intact.
+	data, err := os.ReadFile(pc)
+	if err != nil {
+		t.Fatalf("post-checkout should be kept: %v", err)
+	}
+	got := string(data)
+	if strings.Contains(got, gitHookSentinelBegin) || strings.Contains(got, gitHookSentinelEnd) {
+		t.Fatalf("managed block not removed from post-checkout:\n%s", got)
+	}
+	if !strings.Contains(got, userLine) {
+		t.Fatalf("user content lost from post-checkout:\n%s", got)
+	}
+
+	// R-5.9: second uninstall is a clean no-op.
+	if err := uninstallGitHooks(repo); err != nil {
+		t.Fatalf("second uninstall should be a no-op: %v", err)
+	}
+}
+
+// R-5.4a: for a non-git dir, installGitHooks skips (sentinel error, no files) and
+// the caller still installs other mechanisms (shell stub) without aborting.
+func TestInstallGitHooks_NonGitSkipsAndCallerContinues(t *testing.T) {
+	dir := t.TempDir()
+	if git.IsRepo(dir) {
+		t.Skip("temp dir unexpectedly inside a git repo")
+	}
+	repo := repoEntry{Name: "docs", Path: dir}
+
+	err := installGitHooks(repo, false)
+	if !errors.Is(err, errGitHooksSkipped) {
+		t.Fatalf("expected errGitHooksSkipped for non-git repo, got %v", err)
+	}
+	// No hook files written.
+	for _, hook := range gitManagedHooks {
+		if _, statErr := os.Stat(filepath.Join(hooksDir(dir), hook)); !os.IsNotExist(statErr) {
+			t.Fatalf("%s should not exist for a non-git repo (err = %v)", hook, statErr)
+		}
+	}
+
+	// Caller path: git-hooks skipped, shell still proceeds → no error overall.
+	if err := installScanHooks(repo, []string{mechGitHooks, mechShell}, false); err != nil {
+		t.Fatalf("installScanHooks must continue past a skipped git-hooks: %v", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(hooksDir(dir), "post-merge")); !os.IsNotExist(statErr) {
+		t.Fatal("git hooks must not be written when the repo is non-git")
 	}
 }

@@ -117,7 +117,7 @@ they unblock the rest.
   - verify: `scan-hooks install --mechanism shell` outside a repo errors and writes
     nothing; inside a repo with no flag, the interactive selector is presented.
 
-- [ ] 5.2 Git-hooks mechanism: managed sentinel blocks, safe install/uninstall (deps: 5.1, est: ~45m)
+- [x] 5.2 Git-hooks mechanism: managed sentinel blocks, safe install/uninstall (deps: 5.1, est: ~45m)
   - why: History-movement events (pull/merge/rebase/checkout) are what the
     query-time path is slowest to surface; hooks must add this without ever
     destroying a user's existing hook content.
