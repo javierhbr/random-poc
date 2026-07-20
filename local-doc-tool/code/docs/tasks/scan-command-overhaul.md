@@ -108,7 +108,7 @@ they unblock the rest.
 
 ## Unit 5 — Configurable scan automation (`scan-hooks`)
 
-- [ ] 5.1 `scan-hooks install/uninstall` scaffold: CWD guard + mechanism selection (deps: 1.1, est: ~35m)
+- [x] 5.1 `scan-hooks install/uninstall` scaffold: CWD guard + mechanism selection (deps: 1.1, est: ~35m)
   - why: Users want scans to keep up with git activity but must choose which
     mechanism gets installed and be able to remove it — mirroring `install-skill`.
   - acceptance: R-5.1 (`--mechanism git-hooks,shell` installs exactly those),

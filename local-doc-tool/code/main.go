@@ -96,6 +96,8 @@ func main() {
 		cmdReset()
 	case "install-skill":
 		cmdInstallSkill(args)
+	case "scan-hooks":
+		cmdScanHooks(args)
 	case "-v", "--version":
 		fmt.Println("local-search version " + Version)
 		return
