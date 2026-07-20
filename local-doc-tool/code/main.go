@@ -2194,16 +2194,24 @@ type repoEntry struct {
 	Name            string
 	Path            string
 	SkipDirectories []string
+	AddedAt         string // RFC3339; empty = unknown (legacy lines)
 }
 
 func parseRepoEntryLine(line string) (repoEntry, bool) {
-	parts := strings.SplitN(line, "|", 3)
+	parts := strings.SplitN(line, "|", 4)
 	if len(parts) < 2 {
 		return repoEntry{}, false
 	}
 	r := repoEntry{Name: parts[0], Path: parts[1]}
-	if len(parts) == 3 && strings.TrimSpace(parts[2]) != "" {
+	if len(parts) >= 3 && strings.TrimSpace(parts[2]) != "" {
 		r.SkipDirectories = strings.Split(parts[2], ",")
+	}
+	if len(parts) == 4 {
+		if ts := strings.TrimSpace(parts[3]); ts != "" {
+			if _, err := time.Parse(time.RFC3339, ts); err == nil {
+				r.AddedAt = ts
+			}
+		}
 	}
 	norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
 	if err != nil {
@@ -2215,11 +2223,20 @@ func parseRepoEntryLine(line string) (repoEntry, bool) {
 
 func formatRepoEntryLine(r repoEntry) string {
 	line := r.Name + "|" + r.Path
+	var skip string
 	if len(r.SkipDirectories) > 0 {
-		norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
-		if err == nil && len(norm) > 0 {
-			line += "|" + strings.Join(norm, ",")
+		if norm, err := normalizeSkipDirectoryNames(r.SkipDirectories); err == nil {
+			skip = strings.Join(norm, ",")
 		}
+	}
+	// added_at is positional (4th field). When it is present we MUST emit the
+	// (possibly empty) 3rd skip-dirs field as a placeholder so the timestamp
+	// stays in the 4th position — otherwise it lands in the skip-dirs field and
+	// the line is dropped on the next load (R-6.6).
+	if r.AddedAt != "" {
+		line += "|" + skip + "|" + r.AddedAt
+	} else if skip != "" {
+		line += "|" + skip
 	}
 	return line
 }

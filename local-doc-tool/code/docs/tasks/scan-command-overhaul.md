@@ -159,7 +159,7 @@ they unblock the rest.
 
 ## Unit 6 — Backward compatibility & internal callers
 
-- [ ] 6.1 Extend flat repos-file format with positional `added_at` (deps: —, est: ~40m)
+- [x] 6.1 Extend flat repos-file format with positional `added_at` (deps: —, est: ~40m)
   - why: Date-added must survive a full `scan all` (which deletes the DB), so it
     lives in the flat file — and the positional 4th-field encoding is the single
     highest-risk spot in this change (a wrong write silently drops the repo).
