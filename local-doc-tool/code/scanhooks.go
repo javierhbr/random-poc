@@ -373,14 +373,19 @@ func gitHooksDir(repoPath string) (string, error) {
 }
 
 // gitHookManagedBlock is the sentinel-wrapped content written into each hook.
-// The invoked command is the surgical default (`scan <name>`) with the resolved
-// repo name baked in so it is unambiguous regardless of where the hook runs.
+// It invokes the internal `scan-hook-run` trigger (which owns the change-gate,
+// per-repo lock and surgical scan) with the resolved repo name baked in so it is
+// unambiguous regardless of where the hook runs. The trigger is dispatched
+// detached (`&`) and the hook `exit 0`s unconditionally, so a slow or failing
+// scan can never block or fail the git operation (R-5.10).
 func gitHookManagedBlock(repoName string) []string {
 	return []string{
 		gitHookSentinelBegin,
 		"# Managed by `local-search scan-hooks` — do not edit between the markers.",
-		"# TODO(5.4): change-gate + detached dispatch + per-repo lock.",
-		"local-search scan " + singleQuote(repoName),
+		"# Change-gate + per-repo lock + surgical scan all live in `scan-hook-run`.",
+		"# Dispatch it detached and return success so git is never blocked (R-5.10).",
+		"local-search scan-hook-run " + singleQuote(repoName) + " >/dev/null 2>&1 &",
+		"exit 0",
 		gitHookSentinelEnd,
 	}
 }
@@ -536,11 +541,12 @@ func shellHookSnippet() string {
 		shellHookSentinelBegin,
 		"# Managed by `local-search scan-hooks` — do not edit between the markers.",
 		"# On entering a registered repo directory this runs a surgical scan for it.",
-		"# `local-search scan` (no args) resolves CWD->repo and is surgical; outside",
-		"# any repo it no-ops/errors harmlessly, so this snippet needs no repo baking.",
-		"# TODO(5.4): change-gate + per-repo lock + non-blocking (detached) dispatch.",
+		"# `scan-hook-run` (no args) resolves CWD->repo and owns the change-gate,",
+		"# per-repo lock and surgical scan, so this snippet needs no repo baking.",
+		"# Dispatched detached (&) with errors swallowed so navigation never blocks",
+		"# (R-5.10/R-5.11/R-5.12); outside any repo it no-ops harmlessly.",
 		"__local_search_scan_hook() {",
-		"    local-search scan >/dev/null 2>&1 || true",
+		"    local-search scan-hook-run >/dev/null 2>&1 &",
 		"}",
 		"if [ -n \"${ZSH_VERSION:-}\" ]; then",
 		"    autoload -Uz add-zsh-hook 2>/dev/null && add-zsh-hook chpwd __local_search_scan_hook",

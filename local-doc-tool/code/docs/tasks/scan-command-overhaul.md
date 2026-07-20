@@ -140,7 +140,7 @@ they unblock the rest.
   - verify: install writes the snippet file and prints a `source ...` line; no rc
     file is modified; uninstall removes the file.
 
-- [ ] 5.4 Trigger behavior: surgical action, non-blocking, change-gate, safe lock (deps: 5.2, 5.3, 2.1, est: ~45m)
+- [x] 5.4 Trigger behavior: surgical action, non-blocking, change-gate, safe lock (deps: 5.2, 5.3, 2.1, est: ~45m)
   - why: Automation firing a full re-walk on every `cd`/checkout is a scan-storm,
     a slow/failed scan blocking `git commit` is unacceptable, and a crashed
     detached scan holding a lock would silently kill automation forever.

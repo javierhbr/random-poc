@@ -376,8 +376,8 @@ func TestInstallGitHooks_PreservesUserContent(t *testing.T) {
 	if !strings.Contains(got, gitHookSentinelBegin) || !strings.Contains(got, gitHookSentinelEnd) {
 		t.Fatalf("managed sentinels missing; file:\n%s", got)
 	}
-	if !strings.Contains(got, "local-search scan 'docs'") {
-		t.Fatalf("surgical scan command with baked repo name missing; file:\n%s", got)
+	if !strings.Contains(got, "local-search scan-hook-run 'docs'") {
+		t.Fatalf("surgical scan trigger with baked repo name missing; file:\n%s", got)
 	}
 	if n := strings.Count(got, gitHookSentinelBegin); n != 1 {
 		t.Fatalf("expected exactly one managed block, found %d begin sentinels", n)

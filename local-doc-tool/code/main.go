@@ -98,6 +98,10 @@ func main() {
 		cmdInstallSkill(args)
 	case "scan-hooks":
 		cmdScanHooks(args)
+	case "scan-hook-run":
+		// Internal (undocumented) trigger entry the generated git hooks / shell
+		// snippet invoke: change-gated, per-repo-locked, surgical single-repo scan.
+		cmdScanHookRun(args)
 	case "-v", "--version":
 		fmt.Println("local-search version " + Version)
 		return
