@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	localdb "local-search/db"
 )
@@ -174,6 +175,65 @@ func TestRunScan_UnknownName_NoMutation(t *testing.T) {
 	}
 	if !bytes.Equal(before, after) {
 		t.Fatalf("DB mutated on unknown-name error: %d bytes before, %d after", len(before), len(after))
+	}
+}
+
+// R-3.3: a surgical `scan A` records that repo's per-repo last-scan timestamp
+// (`last_scan_A`, parseable RFC3339) and does NOT write one for the untouched
+// repos. Run on a fresh DB so only A is indexed — B must have no last_scan_B.
+func TestCmdScan_Surgical_WritesPerRepoLastScan(t *testing.T) {
+	setupScanEnv(t)
+	a, b := makeScanRepo(t, "a"), makeScanRepo(t, "b")
+	saveRepos([]repoEntry{a, b})
+
+	cmdScan([]string{"a"}) // surgical scan of A only (bootstraps schema + indexes A)
+
+	db, err := localdb.Open(dbFile)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+
+	got := localdb.GetMeta(db, "last_scan_a")
+	if got == "" {
+		t.Fatalf("expected last_scan_a to be set after surgical scan of a")
+	}
+	if _, err := time.Parse(time.RFC3339, got); err != nil {
+		t.Fatalf("last_scan_a is not RFC3339: %q (%v)", got, err)
+	}
+	if other := localdb.GetMeta(db, "last_scan_b"); other != "" {
+		t.Fatalf("untouched repo b should have no last_scan_b, got %q", other)
+	}
+}
+
+// R-3.3 + R-3.7: a full `scan all` writes a per-repo `last_scan_<name>` for EVERY
+// registered repo (not only the global value), AND retains the global
+// `meta["last_scan"]` consumed by `stats`.
+func TestCmdScan_All_WritesPerRepoLastScanAndGlobal(t *testing.T) {
+	setupScanEnv(t)
+	a, b := makeScanRepo(t, "a"), makeScanRepo(t, "b")
+	saveRepos([]repoEntry{a, b})
+
+	cmdScan([]string{"all"})
+
+	db, err := localdb.Open(dbFile)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+
+	for _, name := range []string{"a", "b"} {
+		got := localdb.GetMeta(db, "last_scan_"+name)
+		if got == "" {
+			t.Fatalf("expected last_scan_%s after scan all", name)
+		}
+		if _, err := time.Parse(time.RFC3339, got); err != nil {
+			t.Fatalf("last_scan_%s is not RFC3339: %q (%v)", name, got, err)
+		}
+	}
+
+	if global := localdb.GetMeta(db, "last_scan"); global == "" {
+		t.Fatalf("global last_scan must be retained after scan all (R-3.7)")
 	}
 }
 

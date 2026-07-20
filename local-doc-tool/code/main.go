@@ -569,6 +569,9 @@ func scanFullRebuild(repos []repoEntry) {
 	defer db.Close()
 
 	fmt.Println("Scanning repos…")
+	// One coherent timestamp for the whole rebuild, shared by the global value
+	// and every per-repo last_scan_<name> written below (R-3.3).
+	now := time.Now().UTC().Format(time.RFC3339)
 	total := 0
 	for _, r := range repos {
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
@@ -586,9 +589,15 @@ func scanFullRebuild(repos []repoEntry) {
 				localdb.SetMeta(db, "git_commit_"+r.Name, commit) //nolint:errcheck
 			}
 		}
+
+		// R-3.3: record the per-repo last-scan timestamp for every repo indexed
+		// in full-rebuild mode, so a just-rebuilt repo shows a real time rather
+		// than a placeholder — not only the global value written below.
+		localdb.SetMeta(db, "last_scan_"+r.Name, now) //nolint:errcheck
 	}
 
-	localdb.SetMeta(db, "last_scan", time.Now().UTC().Format(time.RFC3339)) //nolint:errcheck
+	// R-3.7: retain the global last_scan value consumed by `stats`.
+	localdb.SetMeta(db, "last_scan", now) //nolint:errcheck
 	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)
 }
 
@@ -600,6 +609,8 @@ func scanSurgical(targets []repoEntry) {
 	db := openDB()
 	defer db.Close()
 
+	// One coherent timestamp for this scan invocation, shared by all targets.
+	now := time.Now().UTC().Format(time.RFC3339)
 	total := 0
 	for _, r := range targets {
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
@@ -618,12 +629,18 @@ func scanSurgical(targets []repoEntry) {
 		fmt.Printf("  %s: %d files indexed\n", r.Name, n)
 		total += n
 
-		// R-2.5: record HEAD for git repos so incremental detection has a baseline.
+		// R-2.5 + R-3.5: record HEAD for git repos so incremental detection has a
+		// baseline, and so the recorded git_commit_<name> stays consistent with the
+		// HEAD that ReplaceRepo just indexed above.
 		if git.IsRepo(r.Path) {
 			if commit := git.CurrentCommit(r.Path); commit != "" {
 				localdb.SetMeta(db, "git_commit_"+r.Name, commit) //nolint:errcheck
 			}
 		}
+
+		// R-3.3: record this repo's per-repo last-scan timestamp after it was
+		// successfully re-indexed.
+		localdb.SetMeta(db, "last_scan_"+r.Name, now) //nolint:errcheck
 	}
 
 	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)

@@ -71,7 +71,7 @@ they unblock the rest.
 
 ## Unit 3 — Per-repo state tracking
 
-- [ ] 3.1 Record per-repo last-scan timestamp on surgical + full scans (deps: 2.1, est: ~20m)
+- [x] 3.1 Record per-repo last-scan timestamp on surgical + full scans (deps: 2.1, est: ~20m)
   - why: Users need to know when each repo was last indexed; today only a single
     global `last_scan` exists.
   - acceptance: R-3.3 (write `last_scan_<name>` per repo in both surgical and
