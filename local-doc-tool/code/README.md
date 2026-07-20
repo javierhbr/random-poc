@@ -45,7 +45,7 @@ local-search repo add ./docs docs --skip-directory .skills
 local-search search refund
 ```
 
-The index auto-rebuilds when you add/remove repos and auto-detects file changes on git repos at query time.
+Adding or removing a repo re-indexes only that repo (surgical — other repos are untouched, the DB is never wiped), and the index auto-detects file changes on git repos at query time.
 
 ## Commands
 
@@ -56,18 +56,64 @@ local-search repo add <folder> [name] [--skip-directory <folder-name>]   # Regis
   # Example: local-search repo add /path/to/specs product
   # Example: local-search repo add ./docs docs --skip-directory .skills
   # Example: local-search repo add ~/code backend --skip-directory vendor --skip-directory .git
-local-search repo remove <name>                                          # Unregister a repo (auto-rebuilds)
+local-search repo remove <name>                                          # Unregister a repo (surgical: drops only its rows + flat-file entry)
   # Example: local-search repo remove product
-local-search repo list                                                   # Show all registered repos
+local-search repo list                                                   # Show all repos with per-repo status columns
 ```
+
+`repo list` prints a column per repo: name, date added, last-scan age,
+last-index-update age, short (7-char) latest indexed commit, and path. Missing
+values render as `—`. It tolerates an absent/unreadable DB (still lists
+name/path/date-added, exits 0).
 
 ### Scanning
 
 ```bash
-local-search scan                       # Full rebuild of all repos
-local-search scan <repo-name>           # Full rebuild of one repo
+local-search scan                       # Surgical re-index of the repo the current directory is inside
+local-search scan <repo-name>           # Surgical re-index of one repo (other repos untouched)
   # Example: local-search scan platform
+local-search scan all                   # Full rebuild: delete the DB, recreate schema, re-index every repo
 ```
+
+`scan` with no argument resolves the one registered repo your current directory
+is inside (deepest match if nested) and re-indexes only that repo. If you are
+not inside any registered repo it exits non-zero and tells you to `cd` into one
+or run `scan all`. Surgical scans are atomic and never delete the database or
+touch other repos' rows; `scan all` is the only full-rebuild path. `rebuild` and
+`index` are exact aliases of `scan` (identical target resolution).
+
+### Scan automation (scan-hooks)
+
+Keep a repo's index fresh automatically as git activity happens. Operates on the
+repo your current directory is inside (same resolution as `scan`; errors the
+same way when outside any registered repo).
+
+```bash
+local-search scan-hooks install                                  # Prompt for which mechanism(s) to install
+local-search scan-hooks install --mechanism git-hooks            # Install git hooks only
+local-search scan-hooks install --mechanism git-hooks,shell      # Install both mechanisms
+local-search scan-hooks install --mechanism git-hooks --force    # Refresh a stale managed hook block
+local-search scan-hooks uninstall --mechanism shell              # Remove one mechanism's managed content
+```
+
+- `--mechanism <list>` — comma-separated, any of `git-hooks`,`shell`. Omit it to
+  be prompted interactively for which to install.
+- `--force` — replace a stale managed git-hook block in place.
+- **git-hooks** — writes managed (sentinel-delimited) `post-merge`,
+  `post-checkout`, and `post-rewrite` hooks under `.git/hooks/` (`post-commit`
+  is intentionally excluded). Pre-existing user hook content is preserved; a
+  non-git repo skips this mechanism with a message but still installs the others.
+- **shell** — writes `~/.local-search/shell-hook.sh` and prints the exact
+  `source <path>` line to add to your shell rc (it never edits rc files); the
+  snippet triggers a scan when you `cd` into a registered repo.
+
+When automation fires it runs a **surgical** scan of that repo. It is
+non-blocking (the git hook always exits 0 and dispatches the scan detached),
+change-gated (skips when no spec files changed since the last indexed commit;
+non-git repos always scan), and guarded by a self-healing per-repo lock so
+overlapping triggers are a no-op. `uninstall` removes only that mechanism's
+managed content (deleting a hook file only if it becomes empty), and install is
+idempotent.
 
 ### Searching
 
@@ -151,6 +197,7 @@ local-search json stats                        # Index statistics
 
 | Alias | Command |
 |---|---|
+| `rebuild`, `index` | `scan` |
 | `s`, `find`, `f` | `search` |
 | `r`, `get`, `show` | `read` |
 | `ls` | `list` |
@@ -215,8 +262,15 @@ Customers may request a refund within 30 days of purchase...
 
 | Path | Contents |
 |---|---|
-| `~/.local-search/repos` | Registered repo list (`name\|path` per line) |
+| `~/.local-search/repos` | Registered repo list (one repo per line, see format below) |
 | `~/.local-search/specs.db` | SQLite database (disposable cache — source files are truth) |
+
+Each `repos` line is pipe-delimited with an optional 3rd skip-dirs field and an
+optional 4th date-added field: `name\|path\|<skip-dirs>\|<added_at>`. When a repo
+has a date-added but no skip-dirs, the 3rd field is left empty so the date stays
+positional: `name\|path\|\|<added_at>`. Legacy 2- and 3-field lines
+(`name\|path` and `name\|path\|skip1,skip2`) still parse — their date-added is
+treated as unknown.
 
 The database can be deleted at any time and will be rebuilt on the next command.
 
@@ -229,7 +283,8 @@ repos(id, name, path)
 specs(id, repo, path, project, name, title, tags, summary, fullpath, modified, size, ext, content)
 specs_fts            -- contentless FTS5, porter unicode61 tokenizer
 spec_tags(spec_id, tag)
-meta(key, value)     -- stores git_commit_<repo> and last_scan
+meta(key, value)     -- per-repo git_commit_<name>, last_scan_<name>,
+                     -- last_index_update_<name>; plus a global last_scan (stats)
 ```
 
 ## Git-based change detection
