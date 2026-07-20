@@ -94,7 +94,7 @@ they unblock the rest.
 
 ## Unit 4 — `repo list` display
 
-- [ ] 4.1 Columnar `repo list` with tracked state + placeholders (deps: 6.1, 3.1, 3.2, est: ~35m)
+- [x] 4.1 Columnar `repo list` with tracked state + placeholders (deps: 6.1, 3.1, 3.2, est: ~35m)
   - why: The tracked state is only useful if it's visible; today `repo list` shows
     name + path only.
   - acceptance: R-4.1 (name, path, added, last-scan, last-update, short commit),

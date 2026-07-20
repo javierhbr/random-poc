@@ -294,9 +294,64 @@ func repoList() {
 		fmt.Println("No repos registered. Use: local-search repo add /path/to/specs")
 		return
 	}
-	for _, r := range repos {
-		fmt.Printf("  %-20s  %s\n", r.Name, r.Path)
+	// R-4.4: open the DB best-effort/read-only. If it is absent we skip opening
+	// entirely (so a plain list never recreates it); if it is present but fails
+	// to open we fall back to a nil handle. Either way DB-derived columns render
+	// as "—" and we still list name/path/added, exiting zero.
+	var db *sql.DB
+	if _, err := os.Stat(dbFile); err == nil {
+		if d, err := localdb.Open(dbFile); err == nil {
+			db = d
+			defer db.Close()
+		}
 	}
+	fmt.Print(formatRepoList(repos, db))
+}
+
+// formatRepoList renders the columnar `repo list` table (R-4.1). db may be nil
+// (absent/unreadable); in that case every DB-derived column (last-scan,
+// last-update, commit) renders as "—" (R-4.4). Timestamps are shown as
+// human-relative ages via humanAge (R-4.3); missing values as "—" (R-4.2).
+func formatRepoList(repos []repoEntry, db *sql.DB) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "%-20s  %-10s  %-11s  %-11s  %-8s  %s\n",
+		"NAME", "ADDED", "LAST SCAN", "LAST UPDATE", "COMMIT", "PATH")
+	for _, r := range repos {
+		lastScan, lastUpdate, commit := "—", "—", "—"
+		if db != nil {
+			lastScan = ageOrDash(localdb.GetMeta(db, "last_scan_"+r.Name))
+			lastUpdate = ageOrDash(localdb.GetMeta(db, "last_index_update_"+r.Name))
+			commit = shortCommitOrDash(localdb.GetMeta(db, "git_commit_"+r.Name))
+		}
+		fmt.Fprintf(&b, "%-20s  %-10s  %-11s  %-11s  %-8s  %s\n",
+			r.Name, ageOrDash(r.AddedAt), lastScan, lastUpdate, commit, r.Path)
+	}
+	return b.String()
+}
+
+// ageOrDash parses an RFC3339 timestamp and renders it as a human-relative age;
+// empty or unparseable input renders as "—" (R-4.2/4.3/3.6).
+func ageOrDash(rfc3339 string) string {
+	if rfc3339 == "" {
+		return "—"
+	}
+	t, err := time.Parse(time.RFC3339, rfc3339)
+	if err != nil {
+		return "—"
+	}
+	return humanAge(time.Now().Unix() - t.Unix())
+}
+
+// shortCommitOrDash renders a commit hash in short 7-char form; empty renders
+// as "—" (R-4.2/4.3).
+func shortCommitOrDash(commit string) string {
+	if commit == "" {
+		return "—"
+	}
+	if len(commit) >= 7 {
+		return commit[:7]
+	}
+	return commit
 }
 
 // ── Graphs (graphify integration) ─────────────────────────────────────────────
