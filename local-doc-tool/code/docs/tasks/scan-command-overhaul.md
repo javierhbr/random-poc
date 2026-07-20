@@ -37,7 +37,7 @@ they unblock the rest.
 
 ## Unit 2 — Surgical single-repo scan
 
-- [ ] 2.1 Rewrite `cmdScan` for surgical vs full-rebuild modes (deps: 1.1, est: ~50m)
+- [x] 2.1 Rewrite `cmdScan` for surgical vs full-rebuild modes (deps: 1.1, est: ~50m)
   - why: A single-repo scan must be cheap and non-destructive; today even
     `scan <name>` wipes the whole DB and drops every other repo's index.
   - acceptance: R-2.1 (delete only target repo's rows via `localdb.DeleteRepo` +

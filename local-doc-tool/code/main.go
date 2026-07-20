@@ -59,11 +59,9 @@ func main() {
 	case "graph", "vgraph":
 		cmdVectorGraph(args)
 	case "scan", "rebuild", "index":
-		target := "all"
-		if len(args) > 0 {
-			target = args[0]
-		}
-		cmdScan(target)
+		// `rebuild`/`index` are exact aliases of `scan`; all pass identical raw
+		// args so target resolution is uniform (R-1.7).
+		cmdScan(args)
 	case "search", "s":
 		cmdSearch(args)
 	case "find", "f":
@@ -169,7 +167,9 @@ func repoAdd(args []string) {
 		fmt.Printf("Skipping directories by name: %s\n", strings.Join(skipDirs, ", "))
 	}
 	fmt.Println("Scanning…")
-	cmdScan("all")
+	// TODO(6.2): surgical scan of only the newly added repo. For now, retain the
+	// pre-overhaul full rebuild to keep `repo add` behavior unchanged.
+	cmdScan([]string{"all"})
 }
 
 func parseRepoAddArgs(args []string) (dir, name string, skipDirs []string, err error) {
@@ -277,7 +277,9 @@ func repoRemove(args []string) {
 		}
 	}
 	fmt.Println("Rebuilding index…")
-	cmdScan("all")
+	// TODO(6.3): the DeleteRepo above already purged this repo surgically; the
+	// full rebuild is retained here to keep `repo remove` behavior unchanged.
+	cmdScan([]string{"all"})
 }
 
 func repoList() {
@@ -522,25 +524,44 @@ func humanAge(secs int64) string {
 
 // ── Scan ──────────────────────────────────────────────────────────────────────
 
-func cmdScan(target string) {
+// cmdScan resolves the invocation to a mode + target(s) BEFORE mutating anything,
+// then dispatches to a full rebuild (`scan all`) or a surgical single-repo scan
+// (default / `scan <name>`). Resolving first means an error (outside any repo,
+// unknown name) returns without deleting the DB or touching any file.
+func cmdScan(args []string) {
 	repos := loadReposOrDie()
 
+	cwd, _ := os.Getwd()
+	mode, targets, err := resolveScanTarget(args, cwd, repos)
+	if err != nil {
+		// Resolve failed → mutate nothing (no os.Remove, no DB write). We return
+		// before opening or deleting the DB; the full no-mutation guarantee and
+		// its dedicated test are story 1.2.
+		die(err.Error())
+	}
+
+	switch mode {
+	case modeFullRebuild:
+		scanFullRebuild(targets) // targets == every repo (R-2.6)
+	case modeSurgical:
+		scanSurgical(targets) // single target repo (R-2.1–R-2.5)
+	}
+}
+
+// scanFullRebuild is the ONLY DB-file-deleting path (R-2.6): remove the DB,
+// recreate the schema, re-index every repo, record each repo's HEAD commit, and
+// write the global last_scan value consumed by `stats`. Behavior is unchanged
+// from the pre-overhaul `scan all`.
+func scanFullRebuild(repos []repoEntry) {
 	// Remove old DB
 	os.Remove(dbFile)
 
 	db := openDB()
 	defer db.Close()
 
-	if err := localdb.CreateSchema(db); err != nil {
-		die(err.Error())
-	}
-
 	fmt.Println("Scanning repos…")
 	total := 0
 	for _, r := range repos {
-		if target != "all" && r.Name != target {
-			continue
-		}
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
 		n, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories)
 		if err != nil {
@@ -562,6 +583,44 @@ func cmdScan(target string) {
 	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)
 }
 
+// scanSurgical re-indexes only the target repo(s) without deleting the DB file
+// (R-2.2) and without touching any other repo's rows (R-2.3). openDB bootstraps
+// the schema when the DB file is absent, so a fresh surgical scan creates the
+// schema and indexes only the target — it never fans out to all repos (R-2.4).
+func scanSurgical(targets []repoEntry) {
+	db := openDB()
+	defer db.Close()
+
+	total := 0
+	for _, r := range targets {
+		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
+
+		// TODO(2.3): make delete+reindex atomic (R-2.8). These are two separate
+		// transactions today, so a concurrent reader can observe the empty window
+		// between DeleteRepo and FullScan.
+		if err := localdb.DeleteRepo(db, r.Name); err != nil { // R-2.1
+			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
+			continue
+		}
+		n, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories) // R-2.1
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
+			continue
+		}
+		fmt.Printf("  %s: %d files indexed\n", r.Name, n)
+		total += n
+
+		// R-2.5: record HEAD for git repos so incremental detection has a baseline.
+		if git.IsRepo(r.Path) {
+			if commit := git.CurrentCommit(r.Path); commit != "" {
+				localdb.SetMeta(db, "git_commit_"+r.Name, commit) //nolint:errcheck
+			}
+		}
+	}
+
+	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)
+}
+
 // ensureDB opens the DB (creating it if needed) and reconciles three states:
 //
 //  1. DB file missing → cmdScan("all") builds it from scratch.
@@ -574,7 +633,7 @@ func cmdScan(target string) {
 //     the changes.
 func ensureDB() *sql.DB {
 	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
-		cmdScan("all")
+		cmdScan([]string{"all"})
 	}
 
 	db := openDB()
