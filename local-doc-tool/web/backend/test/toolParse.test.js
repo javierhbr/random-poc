@@ -2,17 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyCommand, stripAndParse, deriveEvents } from '../src/toolParse.js';
 
-test('R-2b.1: classifyCommand maps command strings to subcommands', () => {
+test('R-2b.1: classifyCommand maps command strings to the real subcommands', () => {
   const cases = [
-    ['local-search json search --scope a,b "auth"', 'json search'],
-    ['local-search json context --scope a "x"', 'json context'],
+    ['local-search json search "auth" foyer-platform', 'json search'],
+    ['local-search json read billing foyer-platform', 'json read'],
+    ['local-search json related billing', 'json related'],
     ['local-search json repos', 'json repos'],
-    ['local-search graph search --scope a "x"', 'graph search'],
     ['/usr/local/bin/local-search json search "q"', 'json search'],
-    ['local-search.sh graph search "q"', 'graph search'],
     ['  local-search   json   search   "q"  ', 'json search'],
     ['ls -la', 'other'],
     ['local-search json help', 'other'],
+    // `graph`/`context` are not real subcommands -> other.
+    ['local-search graph search "q"', 'other'],
+    ['local-search json context "q"', 'other'],
     ['echo hi', 'other'],
   ];
   for (const [cmd, expected] of cases) {
@@ -21,8 +23,8 @@ test('R-2b.1: classifyCommand maps command strings to subcommands', () => {
 });
 
 test('R-2b.2: stripAndParse strips progress prefix/suffix and parses object', () => {
-  const stdout = 'Searching...\nfound 2 candidates\n{"scope":["a"],"missing":[]}\nDone.\n';
-  assert.deepEqual(stripAndParse(stdout), { scope: ['a'], missing: [] });
+  const stdout = 'Searching...\nfound 2 candidates\n{"content":"hello"}\nDone.\n';
+  assert.deepEqual(stripAndParse(stdout), { content: 'hello' });
 });
 
 test('R-2b.2: stripAndParse parses a top-level array with noise around it', () => {
@@ -35,28 +37,48 @@ test('stripAndParse returns null when there is no JSON', () => {
   assert.equal(stripAndParse('{ not valid'), null);
 });
 
-test('R-2b.3: json search result -> sources + activity', () => {
-  const stdout = 'progress\n[{"name":"a","relevance":0.9}]\n';
-  const evs = deriveEvents({ command: 'local-search json search "q"', stdout });
-  const types = evs.map((e) => e.type);
-  assert.deepEqual(types, ['sources', 'activity']);
-  assert.deepEqual(evs[0].data, [{ name: 'a', relevance: 0.9 }]);
-});
-
-test('R-2b.3: json context with {scope,missing} -> sources + provenance + activity', () => {
-  const stdout = '{"sources":[{"name":"a"}],"scope":["a"],"missing":[{"repo":"b","reason":"x","fix":"y"}]}';
-  const evs = deriveEvents({ command: 'local-search json context --scope a,b "q"', stdout });
+test('R-2b.3: json search with a repo -> sources + provenance(scope=[repo]) + activity', () => {
+  const stdout = 'progress\n[{"repo":"foyer-platform","name":"billing","relevance":-8.9}]\n';
+  const evs = deriveEvents({
+    command: 'local-search json search "billing" foyer-platform',
+    stdout,
+  });
   const types = evs.map((e) => e.type);
   assert.deepEqual(types, ['sources', 'provenance', 'activity']);
-  assert.deepEqual(evs[1].data, { scope: ['a'], missing: [{ repo: 'b', reason: 'x', fix: 'y' }] });
+  assert.deepEqual(evs[0].data, [
+    { repo: 'foyer-platform', name: 'billing', relevance: -8.9 },
+  ]);
+  assert.deepEqual(evs[1].data, { scope: ['foyer-platform'], missing: [] });
 });
 
-test('R-2b.3: graph search result -> graph + activity', () => {
-  const stdout = 'building graph\n{"directed":false,"nodes":[{"id":"n1"}],"links":[]}\n';
-  const evs = deriveEvents({ command: 'local-search graph search "q"', stdout });
+test('R-2b.3: json search without a repo -> scope derived from result rows', () => {
+  const stdout = '[{"repo":"a","name":"x"},{"repo":"b","name":"y"},{"repo":"a","name":"z"}]';
+  const evs = deriveEvents({ command: 'local-search json search "q"', stdout });
+  const prov = evs.find((e) => e.type === 'provenance');
+  assert.deepEqual(prov.data, { scope: ['a', 'b'], missing: [] });
+});
+
+test('R-2b.3: json related -> synthesized graph + activity', () => {
+  const stdout = 'building\n[{"repo":"foyer-platform","name":"auth","path":"arrows/auth","relevance":-7.4}]\n';
+  const evs = deriveEvents({ command: 'local-search json related billing', stdout });
   const types = evs.map((e) => e.type);
   assert.deepEqual(types, ['graph', 'activity']);
-  assert.deepEqual(evs[0].data.nodes, [{ id: 'n1' }]);
+  const graph = evs[0].data;
+  // Center node is the queried spec; each related row is a satellite with a link.
+  assert.equal(graph.nodes[0].id, 'billing');
+  assert.equal(graph.nodes[0].relevance, 1);
+  assert.equal(graph.nodes.length, 2);
+  assert.equal(graph.links.length, 1);
+  assert.equal(graph.links[0].source, 'billing');
+  assert.equal(graph.links[0].target, 'foyer-platform/auth');
+});
+
+test('R-2b.3: json read -> activity only (no sources/graph)', () => {
+  const evs = deriveEvents({
+    command: 'local-search json read billing foyer-platform',
+    stdout: '{"content":"# Billing\\n..."}',
+  });
+  assert.deepEqual(evs.map((e) => e.type), ['activity']);
 });
 
 test('R-2b.4: recognized command with unparseable result -> activity only, no throw', () => {

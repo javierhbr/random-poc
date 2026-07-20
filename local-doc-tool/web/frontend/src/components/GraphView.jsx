@@ -17,19 +17,32 @@ export const GRAPH_STYLE = [
       width: 'mapData(relevance, 0, 1, 12, 48)',
       height: 'mapData(relevance, 0, 1, 12, 48)',
       label: 'data(label)',
-      'background-color': '#8899aa',
-      'font-size': 8,
-      color: '#333',
+      'background-color': '#94a3b8',
+      'font-family': 'Fira Code, monospace',
+      'font-size': 9,
+      color: '#0f172a',
+      'text-margin-y': 3,
+      'min-zoomed-font-size': 6,
     },
   },
-  { selector: 'node[tag = "code"]', style: { 'background-color': '#4c78a8' } },
-  { selector: 'node[tag = "doc"]', style: { 'background-color': '#59a14f' } },
-  { selector: 'node[tag = "test"]', style: { 'background-color': '#e15759' } },
+  {
+    // The synthesized center node ("your query") in the sources-fallback graph.
+    selector: 'node[tag = "query"]',
+    style: {
+      'background-color': '#8b5cf6',
+      'border-width': 2,
+      'border-color': '#7c3aed',
+      'font-weight': 'bold',
+    },
+  },
+  { selector: 'node[tag = "code"]', style: { 'background-color': '#2563eb' } },
+  { selector: 'node[tag = "doc"]', style: { 'background-color': '#16a34a' } },
+  { selector: 'node[tag = "test"]', style: { 'background-color': '#dc2626' } },
   {
     selector: '[isSource]',
     style: {
       'border-width': 3,
-      'border-color': '#f28e2b',
+      'border-color': '#16a34a',
     },
   },
   {
@@ -37,10 +50,11 @@ export const GRAPH_STYLE = [
     style: {
       'curve-style': 'bezier',
       width: 'mapData(weight, 0, 1, 1, 5)',
-      'line-color': '#ccc',
+      'line-color': '#cbd5e1',
       label: 'lexical similarity (cosine)',
+      'font-family': 'Fira Code, monospace',
       'font-size': 6,
-      color: '#999',
+      color: '#94a3b8',
     },
   },
 ];

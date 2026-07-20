@@ -16,6 +16,44 @@ function sourceKeys(sources) {
   return keys;
 }
 
+// Coarse doc-vs-code tag from a file path, so fallback graph nodes still pick
+// up the {doc,code} colors in GRAPH_STYLE (test detection is intentionally left
+// out — it is too noisy to infer reliably from a path alone).
+function tagFromPath(path) {
+  const p = typeof path === 'string' ? path.toLowerCase() : '';
+  return /\.(md|mdx|markdown|txt|rst|adoc)$/.test(p) ? 'doc' : 'code';
+}
+
+// graphFromSources(sources) → a NetworkX-style {nodes, links} star around the
+// query, synthesized from the retrieved sources. Used as a fallback for the
+// Neighborhood Map when the run never issued `json related` (so no explicit
+// `graph` event arrived). Relevance is rank-normalized to 0..1 because raw
+// source relevance is negative BM25, which the 0..1 size scale can't use.
+// Returns null when there are no sources yet (GraphView shows its empty state).
+export function graphFromSources(sources) {
+  if (!Array.isArray(sources) || sources.length === 0) return null;
+
+  const centerId = '__query__';
+  const nodes = [{ id: centerId, label: 'your query', tag: 'query', relevance: 1 }];
+  const links = [];
+
+  sources.forEach((s, idx) => {
+    if (!s) return;
+    const id = s.fullpath || s.path || s.name || s.title || `source-${idx}`;
+    const relevance = Math.max(0.2, 0.9 - idx * 0.08);
+    nodes.push({
+      id,
+      label: s.title || s.name || s.path || id,
+      path: s.path,
+      tag: tagFromPath(s.path),
+      relevance,
+    });
+    links.push({ source: centerId, target: id, weight: relevance });
+  });
+
+  return { nodes, links };
+}
+
 // buildElements(graph, sources) → Cytoscape elements array.
 // Tolerates missing fields; returns [] when there are no nodes.
 export function buildElements(graph, sources) {

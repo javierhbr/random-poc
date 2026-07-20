@@ -13,23 +13,35 @@ async function readError(res) {
 }
 
 // GET /api/repos -> RepoRow[]. Throws on non-200 so the UI shows R-1.6.
+// The CLI (`local-search json repos`) names each repo under `repo`; the picker
+// keys off `name`. Normalize so `name` is always populated without dropping the
+// other fields.
 export async function fetchRepos() {
   const res = await fetch('/api/repos');
   if (!res.ok) {
     throw new Error(await readError(res));
   }
-  return res.json();
+  const rows = await res.json();
+  if (!Array.isArray(rows)) return [];
+  return rows.map((r) => ({ ...r, name: r.name ?? r.repo }));
 }
 
 // POST /api/query -> { sessionId }. Throws carrying the server message on 400/409/500.
-export async function postQuery({ q, repos }) {
+// `mode` is 'ai' (default, spawns claude) or 'graph' (no-AI, direct graph DB search).
+export async function postQuery({ q, repos, mode }) {
   const res = await fetch('/api/query', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ q, repos }),
+    body: JSON.stringify({ q, repos, mode }),
   });
   if (!res.ok) {
-    throw new Error(await readError(res));
+    // Preserve the structured body so the UI can react to a 409 `session_active`
+    // (surfacing the blocking session's id so the user can kill it).
+    const body = await res.json().catch(() => ({}));
+    const err = new Error(body?.message || body?.error || `request failed (${res.status})`);
+    err.code = body?.error;
+    err.activeSessionId = body?.activeSessionId;
+    throw err;
   }
   return res.json();
 }

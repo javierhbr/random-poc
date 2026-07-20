@@ -2,6 +2,7 @@ import { buildPrompt } from './prompt.js';
 import { spawnClaude as realSpawnClaude, killTree } from './claude.js';
 import { createNormalizer } from './normalize.js';
 import { pipeChild, broadcast } from './stream.js';
+import { runGraphSearch } from './graphSearch.js';
 
 function sendJson(res, status, obj) {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -44,10 +45,27 @@ export async function handleQuery(req, res, { registry, deps = {} } = {}) {
     return sendJson(res, 400, { error: 'repos_required', message: 'at least one repo is required' });
   }
 
-  // R-2.9: single active session — reject a second concurrent query.
-  const active = registry.list().find((s) => s.child && s.phase !== 'done');
+  // R-2.9: single active session — reject a second concurrent query. A graph
+  // (no-AI) session has no child until its stream connects, so also treat any
+  // non-done session as active.
+  const active = registry.list().find((s) => s.phase !== 'done' && (s.child || s.mode === 'graph'));
   if (active) {
-    return sendJson(res, 409, { error: 'session_active', message: 'a session is already active' });
+    // Return the blocking session's id so the client can surface + kill it
+    // (an orphaned session — e.g. a graph run whose stream never finished —
+    // would otherwise block every new query with no way to recover from the UI).
+    return sendJson(res, 409, {
+      error: 'session_active',
+      message: 'a session is already active',
+      activeSessionId: active.id,
+    });
+  }
+
+  // No-AI ("graph only") path: skip claude entirely and run the local-search
+  // graph DB search directly when the stream connects. Returns in CLI time.
+  if (body.mode === 'graph') {
+    const session = registry.create({ mode: 'graph', phase: 'running', deps, query: q, repos });
+    session.runGraph = () => runGraphSearch({ query: q ?? '', repos, session, deps });
+    return sendJson(res, 200, { sessionId: session.id });
   }
 
   const prompt = buildPrompt({ query: q, repos });
@@ -101,6 +119,34 @@ export function handleStream(req, res, { registry, id } = {}) {
   });
 
   session.sseClients.add(res);
+
+  // No-AI path: no claude child to pipe. Kick off the graph search once (on the
+  // first stream connect) so its events broadcast to this now-registered client,
+  // and end the response when it finishes.
+  if (session.mode === 'graph') {
+    const endIfDone = () => {
+      if (session.phase === 'done') res.end();
+    };
+    req.on('close', () => {
+      session.sseClients.delete(res);
+      if (session.phase !== 'done') {
+        session.cancelled = true;
+        killTree(session.child);
+      }
+    });
+    if (!session.graphStarted && typeof session.runGraph === 'function') {
+      session.graphStarted = true;
+      Promise.resolve()
+        .then(() => session.runGraph())
+        .catch((err) =>
+          broadcast(session, 'error', { message: err?.message ?? String(err), kind: 'graph' })
+        )
+        .finally(endIfDone);
+    } else {
+      endIfDone();
+    }
+    return;
+  }
 
   pipeChild({ session, child: session.child, normalizer: session.normalizer, deps: session.deps ?? {} });
 
@@ -180,8 +226,11 @@ export function handleCancel(req, res, { registry, id } = {}) {
     return sendJson(res, 404, { error: 'no_session', message: 'unknown session' });
   }
 
-  killTree(session.child);
+  // Flag first so an in-flight graph loop stops between repos, then kill the
+  // current child (claude, or the live local-search search) and end the turn.
+  session.cancelled = true;
   session.phase = 'done';
+  killTree(session.child);
   broadcast(session, 'done', { cancelled: true });
 
   return sendJson(res, 200, { ok: true });

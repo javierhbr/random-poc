@@ -7,15 +7,20 @@ import { spawn as nodeSpawn } from 'node:child_process';
  * allowedTools grant for `Bash(local-search:*)`; MUST NOT include
  * `--dangerously-skip-permissions`.
  * R-8.2: when `resumeSessionId` is provided, prepend `--resume <id>`.
+ *
+ * `--allowedTools` is variadic, so it MUST NOT be the last flag before the
+ * prompt positional — otherwise it swallows the prompt and `claude` reports
+ * "Input must be provided". Keep a non-variadic flag (`--verbose`) between it
+ * and the appended prompt.
  */
 export function buildClaudeArgs({ resumeSessionId } = {}) {
   const args = [
     '-p',
     '--output-format',
     'stream-json',
-    '--verbose',
     '--allowedTools',
     'Bash(local-search:*)',
+    '--verbose',
   ];
   if (resumeSessionId) {
     return ['--resume', resumeSessionId, ...args];

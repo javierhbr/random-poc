@@ -17,7 +17,11 @@ import { stripAndParse } from './toolParse.js';
 export async function probeJsonContext({ run, repo } = {}) {
   let result;
   try {
-    result = await run(['json', 'context', '--scope', repo]);
+    // `local-search json context` requires a <query> positional before --scope
+    // (usage: `json context <query> [--scope repo1,repo2]`). Omitting it exits 1,
+    // so the probe would always report "degraded". A neutral probe query is enough
+    // to exercise the provenance contract.
+    result = await run(['json', 'context', 'probe', '--scope', repo]);
   } catch (err) {
     return { available: false, reason: err?.message ?? String(err) };
   }

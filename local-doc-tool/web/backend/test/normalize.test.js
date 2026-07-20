@@ -8,7 +8,7 @@ function feed(n, objs) {
   return out;
 }
 
-test('full turn: init -> tool_use/result search -> tool_use/result graph -> answer', () => {
+test('full turn: init -> tool_use/result search -> tool_use/result related -> answer', () => {
   const n = createNormalizer();
   const events = feed(n, [
     { type: 'system', subtype: 'init', session_id: 'sid-123', model: 'claude-x' },
@@ -16,7 +16,7 @@ test('full turn: init -> tool_use/result search -> tool_use/result graph -> answ
       type: 'assistant',
       message: {
         content: [
-          { type: 'tool_use', id: 't1', name: 'Bash', input: { command: 'local-search json search "q"' } },
+          { type: 'tool_use', id: 't1', name: 'Bash', input: { command: 'local-search json search "q" foyer-platform' } },
         ],
       },
     },
@@ -24,7 +24,7 @@ test('full turn: init -> tool_use/result search -> tool_use/result graph -> answ
       type: 'user',
       message: {
         content: [
-          { type: 'tool_result', tool_use_id: 't1', content: 'progress\n[{"name":"a","relevance":0.9}]\n' },
+          { type: 'tool_result', tool_use_id: 't1', content: 'progress\n[{"repo":"foyer-platform","name":"a","relevance":0.9}]\n' },
         ],
       },
     },
@@ -32,7 +32,7 @@ test('full turn: init -> tool_use/result search -> tool_use/result graph -> answ
       type: 'assistant',
       message: {
         content: [
-          { type: 'tool_use', id: 't2', name: 'Bash', input: { command: 'local-search graph search "q"' } },
+          { type: 'tool_use', id: 't2', name: 'Bash', input: { command: 'local-search json related a' } },
         ],
       },
     },
@@ -40,7 +40,7 @@ test('full turn: init -> tool_use/result search -> tool_use/result graph -> answ
       type: 'user',
       message: {
         content: [
-          { type: 'tool_result', tool_use_id: 't2', content: '{"nodes":[{"id":"n1"}],"links":[]}' },
+          { type: 'tool_result', tool_use_id: 't2', content: '[{"repo":"foyer-platform","name":"b","path":"x/b","relevance":-7.4}]' },
         ],
       },
     },
@@ -48,12 +48,13 @@ test('full turn: init -> tool_use/result search -> tool_use/result graph -> answ
   ]);
 
   const types = events.map((e) => e.type);
-  assert.deepEqual(types, ['status', 'sources', 'activity', 'graph', 'activity', 'answer', 'done']);
+  assert.deepEqual(types, ['status', 'sources', 'provenance', 'activity', 'graph', 'activity', 'answer', 'done']);
   assert.equal(events[0].data.phase, 'started');
   assert.equal(events[0].data.model, 'claude-x');
   assert.equal(n.sessionId, 'sid-123'); // captured for the registry
-  assert.deepEqual(events[1].data, [{ name: 'a', relevance: 0.9 }]);
-  assert.deepEqual(events[3].data.nodes, [{ id: 'n1' }]);
+  assert.deepEqual(events[1].data, [{ repo: 'foyer-platform', name: 'a', relevance: 0.9 }]);
+  assert.deepEqual(events[2].data, { scope: ['foyer-platform'], missing: [] });
+  assert.equal(events[4].data.nodes[0].id, 'a'); // synthesized graph center
   assert.equal(events.at(-2).data.markdown, 'The answer is 42.');
 });
 

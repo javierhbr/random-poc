@@ -30,14 +30,14 @@ const SCRIPT = [
     type: 'assistant',
     message: {
       content: [
-        { type: 'tool_use', id: 't2', name: 'Bash', input: { command: 'local-search graph search "q"' } },
+        { type: 'tool_use', id: 't2', name: 'Bash', input: { command: 'local-search json related a' } },
       ],
     },
   },
   {
     type: 'user',
     message: {
-      content: [{ type: 'tool_result', tool_use_id: 't2', content: '{"nodes":[{"id":"n1"}],"links":[]}' }],
+      content: [{ type: 'tool_result', tool_use_id: 't2', content: '[{"repo":"a","name":"n1","path":"x/n1"}]' }],
     },
   },
   { type: 'result', subtype: 'success', is_error: false, result: 'Final answer.' },

@@ -472,6 +472,46 @@ local-search --version                  # Print version
 | `rebuild`, `index` | `scan` |
 | `dump`, `debug` | `inspect` |
 
+## Web UI
+
+An optional browser UI for explainable search. `local-search ui` starts the web
+server as a background daemon and opens your browser; `ui stop` kills it.
+
+```bash
+local-search ui                         # Start daemon (port 8787) and open the browser
+local-search ui --port 9000             # Start on a specific port
+local-search ui status                  # Show whether the UI is running
+local-search ui stop                    # Stop the daemon
+```
+
+**Prerequisites:**
+
+- [Node.js](https://nodejs.org) on your `PATH` (the server is Node; the CLI only launches it).
+- The frontend must be built once:
+  ```bash
+  cd web/frontend && npm install && npm run build
+  ```
+
+**How it works:**
+
+- The command finds the repo's `web/` folder by walking up from the binary and
+  the current directory looking for `web/backend/bin/serve.js`. Run it from
+  inside the repo, or set `LOCAL_SEARCH_WEB_DIR` to the path of the `web/` folder
+  if you launch the installed binary from elsewhere.
+- The server is spawned detached (its own process group) so it survives the
+  command exiting. `ui start` waits for `GET /api/health` before opening the
+  browser; if the server isn't healthy within 6s it prints the log path instead.
+- `ui stop` kills the whole process group, so the Node server and any
+  `local-search` subprocesses it spawned are terminated together.
+- Running `ui` again while it's already up just re-opens the browser.
+
+**Runtime files:**
+
+| File | Purpose |
+|---|---|
+| `~/.local-search/ui.pid` | PID + port of the running daemon (removed on stop) |
+| `~/.local-search/ui.log` | Server stdout/stderr (truncated on each start) |
+
 ## Search features
 
 | Feature | Example | Description |
@@ -768,8 +808,13 @@ references/
 ~/.local-search/
   repos          # Text file: repo_name|/absolute/path (one per line)
   specs.db       # SQLite database (disposable cache)
+  ui.pid         # PID + port of the running web UI daemon (see `local-search ui`)
+  ui.log         # Web UI server log
 
 local-doc-tool/
+  web/
+    backend/     # Node server (bin/serve.js) — started by `local-search ui`
+    frontend/    # Preact UI; `npm run build` outputs to frontend/dist/
   code/
     main.go                     # CLI entry point + repo management
     db/

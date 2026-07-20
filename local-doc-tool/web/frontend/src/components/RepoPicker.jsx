@@ -42,6 +42,7 @@ export function RepoPicker({ repos = [], error = null, selected = [], onToggle }
             <li
               class={isSelected ? 'repo-entry selected' : 'repo-entry'}
               data-testid={`repo-entry-${repo.name}`}
+              title={repo.path || repo.name}
               role="option"
               aria-selected={isSelected ? 'true' : 'false'}
               onClick={() => onToggle(repo.name)}

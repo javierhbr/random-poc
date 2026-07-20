@@ -8,10 +8,19 @@ test('R-2.1/R-2.8: base args carry stream-json, verbose, narrow allowedTools', (
     '-p',
     '--output-format',
     'stream-json',
-    '--verbose',
     '--allowedTools',
     'Bash(local-search:*)',
+    '--verbose',
   ]);
+});
+
+test('variadic --allowedTools is not the last flag, so the appended prompt is not swallowed', () => {
+  const args = buildClaudeArgs();
+  const i = args.indexOf('--allowedTools');
+  // A non-variadic flag must sit between --allowedTools value and the prompt.
+  assert.notEqual(args.at(-1), 'Bash(local-search:*)');
+  assert.equal(args.at(-1), '--verbose');
+  assert.equal(args[i + 1], 'Bash(local-search:*)');
 });
 
 test('R-2.8: base args never include --dangerously-skip-permissions', () => {

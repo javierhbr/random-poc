@@ -116,6 +116,23 @@ local-search reset                      # Delete everything and start over
 local-search help                       # Full help text
 ```
 
+### Web UI
+
+Starts the explainable-search web UI as a background daemon. Requires Node.js on
+`PATH` and a built frontend (`cd web/frontend && npm install && npm run build`).
+
+```bash
+local-search ui                         # Start daemon (port 8787) and open the browser
+local-search ui --port <n>              # Start on a specific port
+local-search ui status                  # Show whether the UI is running
+local-search ui stop                    # Stop the daemon
+```
+
+The Node server is spawned detached and its PID/port are recorded in
+`~/.local-search/ui.pid` (logs in `~/.local-search/ui.log`). The web/ folder is
+located by walking up from the binary and the CWD; set `LOCAL_SEARCH_WEB_DIR` to
+override. See the top-level README's **Web UI** section for details.
+
 ### JSON output (for agent pipelines)
 
 ```bash

@@ -25,7 +25,7 @@ import (
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const Version = "0.2.1"
+const Version = "0.3.0"
 
 var (
 	appDir    = filepath.Join(homeDir(), ".local-search")
@@ -72,6 +72,8 @@ func main() {
 		cmdCode(args)
 	case "scope":
 		cmdScope(args)
+	case "ui":
+		cmdUI(args)
 	case "read", "r", "get", "show":
 		cmdRead(args)
 	case "list", "ls":
@@ -2146,6 +2148,11 @@ Usage:
 
   local-search graph tag <tag>                               kNN vector graph over specs with a tag (NetworkX JSON)
   local-search graph search <query> [--repo <name>]          Ego vector graph seeded by a query (NetworkX JSON)
+
+  local-search ui                         Start the web UI daemon and open the browser
+  local-search ui --port <n>              Start on a specific port (default 8787)
+  local-search ui stop                    Stop the web UI daemon
+  local-search ui status                  Show whether the web UI is running
 
   local-search stats                      Index statistics
   local-search db                         Print database file path

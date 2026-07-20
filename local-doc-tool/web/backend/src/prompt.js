@@ -1,34 +1,41 @@
 /**
  * buildPrompt({ query, repos }) -> a self-contained, scope-pinned prompt string.
  *
- * R-2.4: instruct Claude to attach the scope flag appropriate to EACH command
- * (`json search --scope <repos>`, `json context --scope <repos>`, and
- * `graph search` per its own scoping) and NOT rely on server-CWD scope
- * resolution. The prompt embeds the search->read->reason instructions, tells
- * Claude to run `graph search` for the graph, and to ask a clarifying question
- * if it lacks what it needs.
+ * R-2.4: the scope must be explicit, never resolved from the server CWD or a
+ * .local-search.toml. The real `local-search` CLI scopes by a single positional
+ * repo argument (it has no `--scope` flag and no `context`/`graph` subcommands),
+ * so the prompt instructs Claude to search EACH selected repo by name, read the
+ * best specs, and optionally pull related specs — then reason and answer, or ask
+ * ONE clarifying question when it lacks what it needs.
  */
 export function buildPrompt({ query, repos } = {}) {
   const repoList = Array.isArray(repos) ? repos : [];
-  const scope = repoList.join(',');
+  const scope = repoList.join(', ');
+  const perRepo = repoList
+    .map((r) => `   local-search json search "<terms>" ${r}`)
+    .join('\n');
 
   return [
-    'You are answering a question about indexed code/spec repositories using the',
+    'You are answering a question about indexed spec/doc repositories using the',
     '`local-search` CLI, invoked through the Bash tool. Follow a search -> read -> reason loop.',
     '',
     `Scope: the ONLY repos in scope are: ${scope}`,
-    'Always pass scope explicitly on every command. Do NOT rely on the current working',
-    'directory or any .local-search.toml to resolve scope.',
+    'The CLI scopes by a single positional repo argument — there is NO `--scope` flag,',
+    'and NO `context` or `graph` subcommands. Search each repo by name; do not invent flags,',
+    'and do not rely on the current working directory or any .local-search.toml.',
     '',
-    'Commands (attach the scope flag appropriate to EACH command):',
-    `- Lexical/semantic search: local-search json search --scope ${scope} "<terms>"`,
-    `- Context/provenance:       local-search json context --scope ${scope} "<terms>"`,
-    `- Knowledge graph:          local-search graph search --scope ${scope} "<terms>"`,
+    'Commands (all emit JSON for machine parsing):',
+    '- Search one repo:   local-search json search "<terms>" <repo>',
+    '- Read a spec:       local-search json read <name> <repo>',
+    '- Related specs:     local-search json related <name>',
     '',
     'Steps:',
-    '1. Run `json search` (scoped) to find candidate specs, then read the most relevant files.',
-    '2. Run `graph search` (scoped) to retrieve the similarity graph for the answer.',
-    '3. Reason over what you read and produce a clear natural-language answer in markdown.',
+    '1. Search EACH repo in scope for candidate specs (results are ranked; a lower/more',
+    '   negative relevance means a better BM25 match):',
+    perRepo || '   (no repos in scope)',
+    '2. Read the most relevant specs with `json read <name> <repo>`.',
+    '3. Optionally run `json related <name>` on the top spec to surface related specs.',
+    '4. Reason over what you read and produce a clear natural-language answer in markdown.',
     'If you lack what you need to answer well, ask ONE concise clarifying question instead of guessing.',
     '',
     `Question: ${query ?? ''}`,
