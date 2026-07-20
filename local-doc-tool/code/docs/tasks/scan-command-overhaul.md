@@ -58,7 +58,7 @@ they unblock the rest.
   - verify: concurrent test — spawn a scan and a query against the same DB; both
     complete without `SQLITE_BUSY` error; index intact afterward.
 
-- [ ] 2.3 Make surgical delete+reindex atomic to concurrent readers (deps: 2.1, est: ~40m)
+- [x] 2.3 Make surgical delete+reindex atomic to concurrent readers (deps: 2.1, est: ~40m)
   - why: `DeleteRepo` then `FullScan` in two transactions lets a concurrent
     `search` observe the repo with zero specs — automation fires this on every git
     event, exactly when the user is likely querying, so the empty window is frequent.

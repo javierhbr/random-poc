@@ -184,6 +184,25 @@ func FullScan(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (
 	return count, nil
 }
 
+// ReplaceRepo atomically replaces one repo's index: it clears the repo's existing
+// rows and re-indexes the repo as a single all-or-nothing unit, committing once.
+//
+// R-2.8: a concurrent reader on another connection observes — under WAL (R-2.7) —
+// either the pre-scan snapshot or the post-scan snapshot for the repo, never the
+// empty window between delete and re-insert. This holds because FullScan already
+// performs the delete (deleteRepoEntries) and the re-insert inside ONE *sql.Tx
+// and commits exactly once; the deletion is not visible to other connections
+// until that single commit. ReplaceRepo is a thin, named delegate to FullScan so
+// the atomic-replace contract is explicit at the call site.
+//
+// IMPORTANT: callers MUST NOT call DeleteRepo before ReplaceRepo/FullScan. That
+// pairing was the original defect — DeleteRepo commits its own transaction first,
+// exposing exactly the empty intermediate state R-2.8 forbids. FullScan's single
+// transaction is the atomic boundary; a separate pre-delete breaks it.
+func ReplaceRepo(db *sql.DB, repoName, repoRoot string, skipDirectories []string) (int, error) {
+	return FullScan(db, repoName, repoRoot, skipDirectories)
+}
+
 // IncrementalScan updates only changed files for a git repo.
 // lastCommit is the previously stored HEAD hash (empty string = first scan).
 // Returns the number of files updated and the new HEAD commit hash.

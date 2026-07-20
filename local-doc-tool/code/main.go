@@ -595,14 +595,13 @@ func scanSurgical(targets []repoEntry) {
 	for _, r := range targets {
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
 
-		// TODO(2.3): make delete+reindex atomic (R-2.8). These are two separate
-		// transactions today, so a concurrent reader can observe the empty window
-		// between DeleteRepo and FullScan.
-		if err := localdb.DeleteRepo(db, r.Name); err != nil { // R-2.1
-			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
-			continue
-		}
-		n, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories) // R-2.1
+		// R-2.1 + R-2.8: delete this repo's rows and re-index it as one atomic
+		// unit. ReplaceRepo commits the delete and the re-insert in a single
+		// transaction, so a concurrent reader (a racing `search`/`find`, which
+		// automation makes frequent) sees either the pre- or post-scan index for
+		// this repo, never the empty window. A prior DeleteRepo here would commit
+		// an empty state first and reintroduce that window — hence it is gone.
+		n, err := localdb.ReplaceRepo(db, r.Name, r.Path, r.SkipDirectories)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
 			continue
