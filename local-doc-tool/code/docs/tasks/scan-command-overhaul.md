@@ -80,7 +80,7 @@ they unblock the rest.
   - verify: after `scan A`, `meta` has `last_scan_A`; after `scan all`, every repo
     has its own `last_scan_<name>`; `stats` still prints a global value.
 
-- [ ] 3.2 Shared incremental helper writing per-repo last-index-update at every incremental site (deps: —, est: ~35m)
+- [x] 3.2 Shared incremental helper writing per-repo last-index-update at every incremental site (deps: —, est: ~35m)
   - why: The incremental logic is duplicated in `ensureDB` and
     `runIncrementalUpdates`; a per-repo "last update" timestamp must be written the
     same way in both or it silently drifts.

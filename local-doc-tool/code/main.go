@@ -608,25 +608,8 @@ func ensureDB() *sql.DB {
 			continue
 		}
 
-		if !git.IsRepo(r.Path) {
-			continue
-		}
-		lastCommit := localdb.GetMeta(db, "git_commit_"+r.Name)
-		changed, err := git.ChangedFiles(r.Path, lastCommit)
-		if err != nil || len(changed) == 0 {
-			continue
-		}
-		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit, r.SkipDirectories)
-		if err != nil {
+		if _, err := applyIncrementalUpdate(db, r); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
-			continue
-		}
-		if n > 0 {
-			fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", r.Name, n)
-		}
-		if newCommit != "" {
-			localdb.SetMeta(db, "git_commit_"+r.Name, newCommit) //nolint:errcheck
 		}
 	}
 	return db
@@ -1647,27 +1630,47 @@ func runIncrementalUpdates(db *sql.DB, repos []localdb.RepoRow) {
 			}
 			continue
 		}
-		if !git.IsRepo(r.Path) {
-			continue
-		}
-		lastCommit := localdb.GetMeta(db, "git_commit_"+r.Name)
-		changed, err := git.ChangedFiles(r.Path, lastCommit)
-		if err != nil || len(changed) == 0 {
-			continue
-		}
-		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit, r.SkipDirectories)
-		if err != nil {
+		if _, err := applyIncrementalUpdate(db, r); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
-			continue
-		}
-		if n > 0 {
-			fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", r.Name, n)
-		}
-		if newCommit != "" {
-			localdb.SetMeta(db, "git_commit_"+r.Name, newCommit) //nolint:errcheck
 		}
 	}
+}
+
+// applyIncrementalUpdate runs an incremental index update for a single already-
+// known repo. It is the shared body previously duplicated in ensureDB and
+// runIncrementalUpdates, so both incremental sites behave identically.
+//
+// Behavior (unchanged from the old inline code): non-git repos and git repos
+// with no new/changed spec files are no-ops. When files actually change it runs
+// localdb.IncrementalScan, rewrites git_commit_<name> to the new HEAD (R-6.5),
+// and additionally stamps last_index_update_<name> with the current UTC time
+// (R-3.4). The timestamp is written ONLY when an update changed files — never on
+// a no-op query. Returns whether any files changed.
+func applyIncrementalUpdate(db *sql.DB, repo repoEntry) (changed bool, err error) {
+	if !git.IsRepo(repo.Path) {
+		return false, nil
+	}
+	lastCommit := localdb.GetMeta(db, "git_commit_"+repo.Name)
+	changedFiles, err := git.ChangedFiles(repo.Path, lastCommit)
+	if err != nil || len(changedFiles) == 0 {
+		// Preserve the original silent skip on ChangedFiles errors.
+		return false, nil
+	}
+	fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", repo.Name)
+	n, newCommit, err := localdb.IncrementalScan(db, repo.Name, repo.Path, lastCommit, repo.SkipDirectories)
+	if err != nil {
+		return false, err
+	}
+	if n > 0 {
+		fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", repo.Name, n)
+	}
+	if newCommit != "" {
+		localdb.SetMeta(db, "git_commit_"+repo.Name, newCommit) //nolint:errcheck
+	}
+	if n > 0 {
+		localdb.SetMeta(db, "last_index_update_"+repo.Name, time.Now().UTC().Format(time.RFC3339)) //nolint:errcheck
+	}
+	return n > 0, nil
 }
 
 // autoInitLocalConfig writes .local-search.toml in cwd. Seeding precedence:
