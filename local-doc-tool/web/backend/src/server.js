@@ -41,12 +41,12 @@ function resolveStatic(staticDir, pathname) {
 }
 
 /**
- * createServer({ staticDir, registry, deps }) -> unstarted http.Server.
- * The caller is responsible for calling .listen(). Serves static assets from
- * staticDir and exposes a placeholder GET /api/health. No retrieval/claude
- * logic — later stories add routes and wire in `registry`/`deps`.
+ * createServer({ staticDir, registry, deps, assetHandler }) -> unstarted http.Server.
+ * The caller is responsible for calling .listen(). API routes match first; for
+ * GET/HEAD, an optional `assetHandler` (e.g. Vite dev middleware) takes over
+ * asset serving, otherwise assets are served statically from staticDir.
  */
-export function createServer({ staticDir, registry, deps } = {}) {
+export function createServer({ staticDir, registry, deps, assetHandler } = {}) {
   const handler = (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     const { pathname } = url;
@@ -81,6 +81,10 @@ export function createServer({ staticDir, registry, deps } = {}) {
     }
 
     if (req.method === 'GET' || req.method === 'HEAD') {
+      // In dev, hand asset serving to the injected handler (Vite middleware).
+      if (assetHandler) {
+        return assetHandler(req, res);
+      }
       const filePath = resolveStatic(staticDir, pathname);
       if (filePath === null) {
         res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' });

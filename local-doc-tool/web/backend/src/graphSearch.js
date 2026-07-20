@@ -1,6 +1,7 @@
 import { spawn as nodeSpawn } from 'node:child_process';
 import { deriveEvents } from './toolParse.js';
 import { broadcast } from './stream.js';
+import { tapChild } from './cliLog.js';
 
 /**
  * No-AI ("graph only") retrieval path. Instead of spawning `claude` and waiting
@@ -18,12 +19,20 @@ import { broadcast } from './stream.js';
  * live child on `session` so cancel/disconnect can killTree it. `spawn` is
  * injected for tests.
  */
-export function defaultSpawnSearch({ query, repo, session, spawn = nodeSpawn } = {}) {
+export function defaultSpawnSearch({ query, repo, session, spawn = nodeSpawn, cliLog } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn('local-search', ['json', 'search', query, repo], {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     if (session) session.child = child;
+    // Log the interaction (no-op when cliLog is absent). tapChild adds extra
+    // listeners; it does not disturb the accumulation/resolve logic below.
+    const h = cliLog?.record({
+      cli: 'local-search',
+      command: `local-search json search "${query}" ${repo}`,
+      sessionId: session?.id,
+    });
+    if (h) tapChild(h, child);
     let out = '';
     let err = '';
     child.stdout.on('data', (d) => (out += d));
@@ -62,7 +71,7 @@ export async function runGraphSearch({ query, repos, session, deps = {} } = {}) 
     const command = commandFor(query, repo);
     let stdout;
     try {
-      stdout = await spawnSearch({ query: query ?? '', repo, session });
+      stdout = await spawnSearch({ query: query ?? '', repo, session, cliLog: deps.cliLog });
     } catch (err) {
       broadcast(session, 'activity', {
         command,

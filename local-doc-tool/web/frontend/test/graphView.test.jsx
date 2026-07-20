@@ -77,8 +77,14 @@ describe('GraphView stylesheet honesty (R-4.3 / R-4.4)', () => {
   });
 
   it('labels edges lexical/cosine, never semantic', () => {
-    const edgeStyle = GRAPH_STYLE.find((s) => s.selector === 'edge');
-    const label = String(edgeStyle.style.label).toLowerCase();
+    // The static edge label was removed to declutter the map; the honest
+    // relationship now surfaces on hover (edge.hover). The invariant — the
+    // wording is lexical/cosine and never "semantic" — still holds there.
+    const base = GRAPH_STYLE.find((s) => s.selector === 'edge');
+    expect(String(base.style.label)).toBe('');
+
+    const hoverStyle = GRAPH_STYLE.find((s) => s.selector === 'edge.hover');
+    const label = String(hoverStyle.style.label).toLowerCase();
     expect(label).toContain('lexical');
     expect(label).toContain('cosine');
     expect(label).not.toContain('semantic');

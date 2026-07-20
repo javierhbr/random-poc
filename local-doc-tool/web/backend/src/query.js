@@ -1,8 +1,9 @@
 import { buildPrompt } from './prompt.js';
-import { spawnClaude as realSpawnClaude, killTree } from './claude.js';
+import { spawnClaude as realSpawnClaude, killTree, buildClaudeArgs } from './claude.js';
 import { createNormalizer } from './normalize.js';
 import { pipeChild, broadcast } from './stream.js';
 import { runGraphSearch } from './graphSearch.js';
+import { tapChild } from './cliLog.js';
 
 function sendJson(res, status, obj) {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -84,6 +85,17 @@ export async function handleQuery(req, res, { registry, deps = {} } = {}) {
 
   const normalizer = createNormalizer();
   const session = registry.create({ child, normalizer, phase: 'running', deps });
+
+  // Log the claude interaction (no-op when deps.cliLog is absent). Recorded after
+  // session creation so session.id is available; tapChild adds a SECOND stdout
+  // 'data' listener alongside pipeChild's, which does not disturb the pipe.
+  const h = deps.cliLog?.record({
+    cli: 'claude',
+    command: 'claude ' + buildClaudeArgs({}).join(' ') + ' <prompt>',
+    prompt,
+    sessionId: session.id,
+  });
+  if (h) tapChild(h, child);
 
   // R-2.6 (async): spawn errors that surface after creation (async ENOENT) end the session.
   child.on('error', (err) => {
@@ -205,6 +217,16 @@ export async function handleReply(req, res, { registry, id } = {}) {
 
   session.child = child;
   session.phase = 'running';
+
+  // Log the resumed claude interaction (no-op when deps.cliLog is absent).
+  const h = deps.cliLog?.record({
+    cli: 'claude',
+    command:
+      'claude ' + buildClaudeArgs({ resumeSessionId: session.claudeSessionId }).join(' ') + ' <prompt>',
+    prompt: text,
+    sessionId: session.id,
+  });
+  if (h) tapChild(h, child);
 
   // R-8.5: record the user's reply in the feed so it renders alongside the prior question.
   broadcast(session, 'reply', { text });

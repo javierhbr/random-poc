@@ -48,8 +48,25 @@ function sourceKey(s) {
   return s?.fullpath || `${s?.repo ?? ''}/${s?.name ?? s?.path ?? ''}`;
 }
 
+// Normalize a source's `tags` to a string array. The graph-DB (no-AI) path emits
+// `tags` as a string — either "" or a bracketed list like "[a, b, c]" — while
+// consumers (facets, filters, render) all expect an array. Coerce here so the
+// whole app sees one shape.
+export function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags.filter((t) => t != null).map(String);
+  if (typeof tags === 'string') {
+    return tags
+      .replace(/^\[|\]$/g, '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 // Append new source rows, de-duplicating by identity (later repos don't clobber
-// earlier ones, and a re-emitted row is not duplicated).
+// earlier ones, and a re-emitted row is not duplicated). Tags are normalized to
+// an array on the way in.
 function mergeSources(prev, rows) {
   const seen = new Set(prev.map(sourceKey));
   const merged = prev.slice();
@@ -57,7 +74,7 @@ function mergeSources(prev, rows) {
     const k = sourceKey(r);
     if (seen.has(k)) continue;
     seen.add(k);
-    merged.push(r);
+    merged.push({ ...r, tags: normalizeTags(r?.tags) });
   }
   return merged;
 }
@@ -384,7 +401,7 @@ export function App() {
       setQ(run.query || '');
       setSelected(Array.isArray(run.repos) ? run.repos : []);
       setAnswerMarkdown(run.answerMarkdown || '');
-      setSources(Array.isArray(run.sources) ? run.sources : []);
+      setSources(mergeSources([], Array.isArray(run.sources) ? run.sources : []));
       setProvenance(run.provenance || {});
       setGraph(run.graph || null);
       setDone(true);

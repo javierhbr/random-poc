@@ -3,6 +3,7 @@
 .env.local
 .env.*.local
 
+graphify-out/
 # Go
 bin/
 # ...but keep the Node server entrypoint (the bin/ rule above is for Go build output)

@@ -58,7 +58,7 @@ func Search(db *sql.DB, query, repoFilter, directoryFilter string) ([]SearchResu
 	baseSQL += " ORDER BY f.rank LIMIT ?"
 	args = append(args, searchLimit)
 
-	rows, err = db.Query(baseSQL, args...)
+	rows, err = runFTSMatch(db, baseSQL, args, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -203,15 +203,14 @@ func SearchInRepos(db *sql.DB, query string, repos []string) ([]SearchResult, er
 	}
 	args = append(args, searchLimit)
 
-	rows, err := db.Query(`
+	sqlText := `
 		SELECT s.repo, s.project, s.name, s.title, s.tags,
 		       s.path, s.ext, f.rank
 		FROM specs_fts f
 		JOIN specs s ON s.id = f.rowid
-		WHERE specs_fts MATCH ? AND s.repo IN (`+placeholders+`)
-		ORDER BY f.rank LIMIT ?`,
-		args...,
-	)
+		WHERE specs_fts MATCH ? AND s.repo IN (` + placeholders + `)
+		ORDER BY f.rank LIMIT ?`
+	rows, err := runFTSMatch(db, sqlText, args, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -535,8 +534,11 @@ func buildRelatedQuery(tags, title, exclude string) string {
 	}
 	for _, w := range strings.Fields(title) {
 		w = strings.Trim(w, `"':.,!?`)
+		// Quote as a literal: a title word may still contain FTS5 operator
+		// characters (e.g. "install/upgrade", "(for") that would otherwise
+		// make the MATCH expression a syntax error.
 		if len(w) > 3 && !strings.EqualFold(w, exclude) {
-			terms = append(terms, w)
+			terms = append(terms, `"`+strings.ReplaceAll(w, `"`, "")+`"`)
 		}
 	}
 	if len(terms) == 0 {
