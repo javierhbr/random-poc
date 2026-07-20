@@ -158,8 +158,16 @@ func repoAdd(args []string) {
 		die(fmt.Sprintf("Repo %q already registered", name))
 	}
 
+	// R-3.1: stamp the registration time; it flows through formatRepoEntryLine's
+	// 4th positional field when saveRepos persists the repos file below.
+	newEntry := repoEntry{
+		Name:            name,
+		Path:            dir,
+		SkipDirectories: skipDirs,
+		AddedAt:         time.Now().UTC().Format(time.RFC3339),
+	}
 	repos := loadRepos()
-	repos = append(repos, repoEntry{Name: name, Path: dir, SkipDirectories: skipDirs})
+	repos = append(repos, newEntry)
 	saveRepos(repos)
 
 	fmt.Printf("Added repo %q (%s)\n", name, dir)
@@ -167,9 +175,9 @@ func repoAdd(args []string) {
 		fmt.Printf("Skipping directories by name: %s\n", strings.Join(skipDirs, ", "))
 	}
 	fmt.Println("Scanning…")
-	// TODO(6.2): surgical scan of only the newly added repo. For now, retain the
-	// pre-overhaul full rebuild to keep `repo add` behavior unchanged.
-	cmdScan([]string{"all"})
+	// R-6.3: surgically index ONLY the newly added repo — no DB deletion and no
+	// re-scan of the other registered repos.
+	scanSurgical([]repoEntry{newEntry})
 }
 
 func parseRepoAddArgs(args []string) (dir, name string, skipDirs []string, err error) {

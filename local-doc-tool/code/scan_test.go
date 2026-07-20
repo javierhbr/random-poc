@@ -306,3 +306,76 @@ func TestCmdScan_All_RebuildsFromScratch(t *testing.T) {
 		t.Fatalf("scan all did not purge deregistered repo b: %d rows", n)
 	}
 }
+
+// R-3.1 + R-6.3: `repo add` stamps a non-empty RFC3339 added_at on the new repo,
+// then surgically indexes ONLY that repo. The pre-existing repo A is neither
+// re-scanned (its last_scan_a is unchanged) nor dropped, and the DB file is not
+// deleted/recreated (os.SameFile identity is preserved) — the old full-rebuild
+// path would have failed all three.
+func TestRepoAdd_StampsAddedAtAndSurgicallyIndexesOnlyNew(t *testing.T) {
+	setupScanEnv(t)
+	a := makeScanRepo(t, "a")
+	saveRepos([]repoEntry{a})
+	cmdScan([]string{"all"}) // index A and create the DB
+
+	db0, err := localdb.Open(dbFile)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	lastScanA := localdb.GetMeta(db0, "last_scan_a")
+	if lastScanA == "" {
+		t.Fatalf("expected last_scan_a after scan all")
+	}
+	db0.Close()
+
+	before, err := os.Stat(dbFile)
+	if err != nil {
+		t.Fatalf("stat db before repo add: %v", err)
+	}
+
+	n := makeScanRepo(t, "n")
+	repoAdd([]string{n.Path, "n"}) // surgical add of the new repo N
+
+	// R-6.3: the DB file was not deleted/recreated.
+	after, err := os.Stat(dbFile)
+	if err != nil {
+		t.Fatalf("db file missing after repo add: %v", err)
+	}
+	if !os.SameFile(before, after) {
+		t.Fatalf("repo add replaced the DB file (identity changed)")
+	}
+
+	// R-3.1: N's flat-file line carries a non-empty, parseable RFC3339 added_at.
+	var found bool
+	for _, r := range loadRepos() {
+		if r.Name == "n" {
+			found = true
+			if r.AddedAt == "" {
+				t.Fatalf("repo add did not stamp added_at on n")
+			}
+			if _, err := time.Parse(time.RFC3339, r.AddedAt); err != nil {
+				t.Fatalf("n added_at is not RFC3339: %q (%v)", r.AddedAt, err)
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("repo n missing from flat repos file after add")
+	}
+
+	db, err := localdb.Open(dbFile)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+
+	// R-6.3: N is queryable; A was not re-scanned but is still queryable.
+	if countSpecs(t, db, "n") == 0 {
+		t.Fatalf("repo n has no rows after add")
+	}
+	if countSpecs(t, db, "a") == 0 {
+		t.Fatalf("repo a should stay queryable after adding n")
+	}
+	if got := localdb.GetMeta(db, "last_scan_a"); got != lastScanA {
+		t.Fatalf("last_scan_a changed (a was re-scanned): before %q, after %q", lastScanA, got)
+	}
+}

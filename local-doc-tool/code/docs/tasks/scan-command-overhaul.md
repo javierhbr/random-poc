@@ -173,7 +173,7 @@ they unblock the rest.
     skip-dirs survives a save/load cycle without being dropped.
   - mutex: repos-file
 
-- [ ] 6.2 `repo add` records added_at and scans only the new repo (deps: 6.1, 2.1, est: ~25m)
+- [x] 6.2 `repo add` records added_at and scans only the new repo (deps: 6.1, 2.1, est: ~25m)
   - why: Registration should not wipe and rebuild the whole DB, and it's the moment
     to stamp the date-added.
   - acceptance: R-3.1 (record current UTC added_at on `repo add`), R-6.3 (index
