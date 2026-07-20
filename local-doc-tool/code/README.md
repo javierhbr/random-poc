@@ -4,6 +4,21 @@ A fast, offline spec registry with full-text search across multiple repos. Singl
 
 This is a full rewrite of `local-search.sh` in Go, addressing the core performance bottlenecks in the original bash script (N+1 sqlite3 subprocess spawns, no transactions, sequential file I/O).
 
+## Contents
+
+- [Why Go](#why-go)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Commands](#commands) — [repos](#repo-management), [scanning](#scanning), [scan automation](#scan-automation-scan-hooks), [searching](#searching), [browsing](#browsing), [maintenance](#maintenance), [web UI](#web-ui), [JSON](#json-output-for-agent-pipelines), [aliases](#command-aliases)
+- [Search syntax](#search-syntax)
+- [Supported file types](#supported-file-types)
+- [Spec format](#spec-format)
+- [File locations](#file-locations)
+- [Database schema](#database-schema)
+- [Git-based change detection](#git-based-change-detection)
+- [Project structure](#project-structure)
+- [SQLite driver](#sqlite-driver)
+
 ## Why Go
 
 The bash script launched a new `sqlite3` process for every SQL statement — ~20ms per spawn, 500+ spawns for a typical repo scan. The Go binary eliminates this entirely:
@@ -31,7 +46,7 @@ go build -o local-search .
 cp local-search /usr/local/bin/local-search
 ```
 
-**Requirements:** Go 1.21+ to build. No runtime dependencies — SQLite is compiled in via `modernc.org/sqlite` (pure Go, no CGO, no C toolchain needed).
+**Requirements:** Go 1.25+ to build. No runtime dependencies — SQLite is compiled in via `modernc.org/sqlite` (pure Go, no CGO, no C toolchain needed).
 
 ## Quick start
 
@@ -303,16 +318,25 @@ Only changed files are re-indexed. For non-git repos, falls back to filesystem m
 ```
 code/
 ├── go.mod                  # Module: local-search, requires modernc.org/sqlite
-├── main.go                 # CLI dispatch + repo file management
+├── main.go                 # CLI dispatch + repo file management (surgical add/remove)
+├── scan_resolve.go         # resolveScanTarget(): CWD/name → surgical vs full-rebuild mode
+├── scanhooks.go            # scan-hooks install/uninstall (git-hooks + shell mechanisms)
+├── triggers.go             # scan-hook-run: change-gate + locked, detached surgical trigger
+├── lock_unix.go            # Per-repo re-entrancy lock (flock); self-healing on crash
+├── lock_windows.go         # Windows fallback lock (PID-file)
+├── skill.go                # install-skill: embed + write the Claude skill
+├── ui.go / ui_unix.go / ui_windows.go   # `ui` daemon lifecycle (spawn/status/stop)
 ├── extract/
 │   └── extract.go          # Metadata parsing: title, tags, summary, content
 │                           # Companion sidecar logic for media files
 ├── git/
 │   └── git.go              # Git change detection and repo detection
 └── db/
-    ├── schema.go           # DDL, Open(), CreateSchema(), GetMeta(), SetMeta()
-    ├── index.go            # FullScan(), IncrementalScan(), DeleteRepo()
+    ├── schema.go           # DDL, Open() (WAL + busy_timeout), GetMeta(), SetMeta()
+    ├── index.go            # FullScan(), ReplaceRepo() (atomic surgical), IncrementalScan(), DeleteRepo()
     │                       # Worker pool for parallel file I/O
+    ├── ftsquery.go         # FTS5 query construction/sanitization
+    ├── vgraph.go           # Vector/graph search support
     └── query.go            # Search(), Read(), List(), Tags(), Stats(), etc.
 ```
 
@@ -324,7 +348,14 @@ Performance pragmas applied on every connection:
 
 ```sql
 PRAGMA journal_mode=WAL
+PRAGMA busy_timeout=5000    -- wait up to 5s for a lock instead of failing (concurrent scan + query)
 PRAGMA synchronous=NORMAL
 PRAGMA temp_store=MEMORY
 PRAGMA cache_size=-32000   -- 32 MB page cache
 ```
+
+WAL plus a bounded `busy_timeout` let a scan and a read contend on the same
+database without the read failing or the index corrupting; surgical scans apply
+their delete-and-reindex as a single atomic transaction, so a concurrent reader
+sees either the pre-scan or post-scan index for that repo, never an empty
+intermediate.
