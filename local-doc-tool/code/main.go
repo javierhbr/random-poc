@@ -530,14 +530,22 @@ func humanAge(secs int64) string {
 // unknown name) returns without deleting the DB or touching any file.
 func cmdScan(args []string) {
 	repos := loadReposOrDie()
-
 	cwd, _ := os.Getwd()
+	if err := runScan(args, cwd, repos); err != nil {
+		die(err.Error())
+	}
+}
+
+// runScan is the testable seam for the resolve-before-mutate guarantee. It
+// resolves the scan target (pure: args+cwd+repos, no DB/FS) BEFORE any mutation
+// and returns the error on failure having touched nothing — no os.Remove, no DB
+// open/create, no schema write (R-1.3 outside any repo; R-1.5 unknown name). Only
+// after resolution succeeds does it dispatch to a mutating scan. cmdScan is a
+// thin wrapper that die()s on the returned error.
+func runScan(args []string, cwd string, repos []repoEntry) error {
 	mode, targets, err := resolveScanTarget(args, cwd, repos)
 	if err != nil {
-		// Resolve failed → mutate nothing (no os.Remove, no DB write). We return
-		// before opening or deleting the DB; the full no-mutation guarantee and
-		// its dedicated test are story 1.2.
-		die(err.Error())
+		return err
 	}
 
 	switch mode {
@@ -546,6 +554,7 @@ func cmdScan(args []string) {
 	case modeSurgical:
 		scanSurgical(targets) // single target repo (R-2.1–R-2.5)
 	}
+	return nil
 }
 
 // scanFullRebuild is the ONLY DB-file-deleting path (R-2.6): remove the DB,

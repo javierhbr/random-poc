@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"os"
 	"path/filepath"
@@ -111,6 +112,68 @@ func TestCmdScan_Surgical_FreshDBIndexesOnlyTarget(t *testing.T) {
 	}
 	if n := countSpecs(t, db, "b"); n != 0 {
 		t.Fatalf("non-target repo b was indexed on a fresh surgical scan (fan-out): %d rows", n)
+	}
+}
+
+// R-1.3: a no-arg scan from a directory OUTSIDE every registered repo must fail
+// with a non-zero (error) result and mutate NOTHING — the seeded DB's bytes are
+// byte-for-byte identical afterward. Exercised through runScan (the testable seam
+// under cmdScan) with an explicit cwd so the outcome does not depend on the test
+// process's actual working directory.
+func TestRunScan_OutsideAnyRepo_NoMutation(t *testing.T) {
+	setupScanEnv(t)
+	a, b := makeScanRepo(t, "a"), makeScanRepo(t, "b")
+	repos := []repoEntry{a, b}
+	saveRepos(repos)
+
+	cmdScan([]string{"all"}) // seed a valid DB with real content
+
+	before, err := os.ReadFile(dbFile)
+	if err != nil {
+		t.Fatalf("read seeded db: %v", err)
+	}
+
+	outside := t.TempDir() // not enclosed by any registered repo
+	err = runScan(nil, outside, repos)
+
+	if err == nil {
+		t.Fatalf("expected non-nil error scanning from outside any repo")
+	}
+	after, rerr := os.ReadFile(dbFile)
+	if rerr != nil {
+		t.Fatalf("db file missing/unreadable after erroring scan: %v", rerr)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatalf("DB mutated on outside-any-repo error: %d bytes before, %d after", len(before), len(after))
+	}
+}
+
+// R-1.5 (no-mutation clause): `scan <bogus-name>` must fail and leave the seeded
+// DB's bytes unchanged — an unknown name changes nothing.
+func TestRunScan_UnknownName_NoMutation(t *testing.T) {
+	setupScanEnv(t)
+	a, b := makeScanRepo(t, "a"), makeScanRepo(t, "b")
+	repos := []repoEntry{a, b}
+	saveRepos(repos)
+
+	cmdScan([]string{"all"}) // seed a valid DB with real content
+
+	before, err := os.ReadFile(dbFile)
+	if err != nil {
+		t.Fatalf("read seeded db: %v", err)
+	}
+
+	err = runScan([]string{"bogus-name"}, a.Path, repos)
+
+	if err == nil {
+		t.Fatalf("expected non-nil error scanning an unknown repo name")
+	}
+	after, rerr := os.ReadFile(dbFile)
+	if rerr != nil {
+		t.Fatalf("db file missing/unreadable after erroring scan: %v", rerr)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatalf("DB mutated on unknown-name error: %d bytes before, %d after", len(before), len(after))
 	}
 }
 

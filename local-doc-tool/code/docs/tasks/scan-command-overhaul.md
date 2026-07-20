@@ -24,7 +24,7 @@ they unblock the rest.
     name, unknown name (err), `all`, empty repo set. No DB or FS access in the
     function.
 
-- [ ] 1.2 Wire `cmdScan` to resolve-before-mutate; guarantee no mutation on error (deps: 1.1, 2.1, est: ~30m)
+- [x] 1.2 Wire `cmdScan` to resolve-before-mutate; guarantee no mutation on error (deps: 1.1, 2.1, est: ~30m)
   - why: Today `cmdScan` deletes the DB *first* then filters; inverting that
     ordering is what prevents a user outside any repo (or naming a bad repo) from
     losing their index.
