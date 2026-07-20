@@ -3,7 +3,7 @@
 #
 # Produces dist/local-search-bundle.tar.gz containing:
 #   bundle/bin/      all cross-compiled CLI binaries (make -C code build-all)
-#   bundle/skills/   the Claude skill
+#                    each binary embeds the Claude skill (code/skilldata)
 #   bundle/web/      the web UI with a prebuilt frontend/dist, minus node_modules
 #   bundle/install.sh
 #
@@ -28,10 +28,8 @@ cp "$ROOT/code/dist/"* "$STAGE/bin/"
 info "Building frontend…"
 ( cd "$ROOT/web" && npm ci && npm run build )
 
-info "Staging skill…"
-mkdir -p "$STAGE/skills"
-( cd "$ROOT/skills" && tar --exclude=.DS_Store -cf - . ) \
-  | ( tar -xf - -C "$STAGE/skills" )
+# No separate skill staging: the skill is embedded in each CLI binary
+# (code/skilldata) and installed via `local-search install-skill`.
 
 info "Staging web UI (excluding node_modules/logs)…"
 mkdir -p "$STAGE/web"

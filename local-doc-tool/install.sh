@@ -106,8 +106,8 @@ download_bundle() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo "$PWD")"
 
 resolve_source() {
-  # A checkout or unpacked bundle has skills/ and web/ next to this script.
-  if [[ -d "$SCRIPT_DIR/skills" && -d "$SCRIPT_DIR/web" ]]; then
+  # A checkout has web/ + code/; an unpacked bundle has web/ + bin/.
+  if [[ -d "$SCRIPT_DIR/web" && ( -d "$SCRIPT_DIR/bin" || -d "$SCRIPT_DIR/code" ) ]]; then
     echo "$SCRIPT_DIR"
   else
     local tmp
@@ -139,14 +139,26 @@ install_cli() {
   green "  installed $("$dest" --version 2>/dev/null || echo "$TOOL_NAME")"
 }
 
+# The skill is embedded in the CLI binary, so install it via the binary itself
+# (`local-search install-skill`) rather than copying a loose directory.
 install_skills() {
-  local src="$1" from="$1/skills/local-search" dest="$SKILLS_DIR/local-search"
-  [[ -d "$from" ]] || { warn "skills/local-search not found — skipping skill install"; return; }
-  info "Skill:  $dest"
-  mkdir -p "$SKILLS_DIR"
-  rm -rf "$dest"
-  cp -R "$from" "$dest"
-  green "  installed local-search skill"
+  local src="$1" cli="$INSTALL_DIR/$TOOL_NAME"
+  if [[ ! -x "$cli" ]]; then
+    # CLI not installed this run — fall back to the bundle binary, then PATH.
+    cli="$(resolve_binary "$src" "$(binary_name "$(detect_platform)")")"
+    [[ -n "$cli" ]] || cli="$(command -v "$TOOL_NAME" 2>/dev/null || true)"
+    [[ -n "$cli" ]] && chmod +x "$cli" 2>/dev/null || true
+  fi
+  if [[ -z "$cli" || ! -x "$cli" ]]; then
+    warn "CLI unavailable — cannot install the embedded skill. Install the CLI, then run: $TOOL_NAME install-skill"
+    return
+  fi
+  info "Skill:  $SKILLS_DIR/local-search"
+  if "$cli" install-skill --dir "$SKILLS_DIR" --force >/dev/null; then
+    green "  installed local-search skill"
+  else
+    warn "skill install failed"
+  fi
 }
 
 install_web() {

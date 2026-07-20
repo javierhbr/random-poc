@@ -96,6 +96,8 @@ func main() {
 		cmdJSON(args)
 	case "reset":
 		cmdReset()
+	case "install-skill":
+		cmdInstallSkill(args)
 	case "-v", "--version":
 		fmt.Println("local-search version " + Version)
 		return
@@ -2158,6 +2160,12 @@ Usage:
   local-search db                         Print database file path
   local-search inspect                    Dump full index
   local-search reset                      Delete everything and start over
+
+  local-search install-skill              Install the bundled Claude skill globally (~/.claude/skills)
+  local-search install-skill --local      Install into this project (./.claude/skills)
+  local-search install-skill --dir <path> Install into a specific skills directory
+  local-search install-skill --force      Overwrite an existing install
+
   local-search help                       This help
   local-search -v, --version             Print version and exit
 
