@@ -98,6 +98,49 @@ body {
   padding: 0 clamp(1rem, 3vw, 2rem) 2.5rem;
 }
 
+/* ------------------------------------------------------------------ Footer */
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  padding: 1rem 0.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink-400);
+  font-size: 0.8rem;
+}
+
+.app-footer a {
+  color: var(--ink-400);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.app-footer a:hover {
+  color: var(--ink-700, #334155);
+}
+
+.app-footer-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+
+.app-footer-coffee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.app-footer-coffee:hover {
+  color: #d97706;
+}
+
 /* ------------------------------------------------------------------ Topbar */
 
 .topbar {

@@ -37,6 +37,39 @@ test('stripAndParse returns null when there is no JSON', () => {
   assert.equal(stripAndParse('{ not valid'), null);
 });
 
+test('stripAndParse recovers complete objects from a truncated array (stray | head)', () => {
+  // A `json search` array cut mid-object: no closing `]`, last object incomplete.
+  const stdout =
+    '[\n  {"repo":"squirrel","name":"a","path":"docs/hld/a.md","relevance":-2.84},\n' +
+    '  {"repo":"squirrel","name":"b","path":"docs/lld/b.md","relevance":-2.83},\n' +
+    '  {\n    "repo":"squirrel",\n    "name":"c",\n    "relevance":-2.76';
+  const parsed = stripAndParse(stdout);
+  assert.deepEqual(parsed, [
+    { repo: 'squirrel', name: 'a', path: 'docs/hld/a.md', relevance: -2.84 },
+    { repo: 'squirrel', name: 'b', path: 'docs/lld/b.md', relevance: -2.83 },
+  ]);
+});
+
+test('stripAndParse is not fooled by braces inside strings when recovering', () => {
+  const stdout =
+    '[{"title":"a } { ]","name":"x"},{"title":"only { open","name":"y"},{"name":"cut';
+  assert.deepEqual(stripAndParse(stdout), [
+    { title: 'a } { ]', name: 'x' },
+    { title: 'only { open', name: 'y' },
+  ]);
+});
+
+test('R-2b.3: truncated json search still yields sources + provenance + activity', () => {
+  const stdout = '[{"repo":"squirrel","name":"a","relevance":-2.8},{"repo":"squirrel","name":"cut';
+  const evs = deriveEvents({
+    command: 'local-search json search "task notification" squirrel 2>&1 | head -60',
+    stdout,
+  });
+  assert.deepEqual(evs.map((e) => e.type), ['sources', 'provenance', 'activity']);
+  assert.deepEqual(evs[0].data, [{ repo: 'squirrel', name: 'a', relevance: -2.8 }]);
+  assert.deepEqual(evs[1].data, { scope: ['squirrel'], missing: [] });
+});
+
 test('R-2b.3: json search with a repo -> sources + provenance(scope=[repo]) + activity', () => {
   const stdout = 'progress\n[{"repo":"foyer-platform","name":"billing","relevance":-8.9}]\n';
   const evs = deriveEvents({

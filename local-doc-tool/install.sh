@@ -6,14 +6,16 @@
 #   or from a checkout / unpacked bundle:  bash install.sh
 #
 # What it installs:
-#   1. local-search            -> $INSTALL_DIR (default /usr/local/bin)        [CLI]
+#   1. local-search            -> $INSTALL_DIR (default ~/.local/bin)          [CLI]
 #   2. local-search skill      -> $SKILLS_DIR/local-search (default ~/.claude/skills)
-#   3. web UI + `local-search-web` launcher -> $WEB_DIR (default ~/.local/share/local-search/web)
+#   3. web UI + `explainable-search` global launcher -> $WEB_DIR (default ~/.local/share/local-search/web)
+#                                 `explainable-search` lands in $INSTALL_DIR so the web UI
+#                                 runs from anywhere (like `npm install -g explainable-search`).
 #                                 The web UI needs Node >= 18; it is skipped (with a
 #                                 warning) if `node` is not found — the CLI + skill still install.
 #
 # Options (env):
-#   INSTALL_DIR=/custom/bin        binary + launcher location   (default /usr/local/bin)
+#   INSTALL_DIR=/custom/bin        binary + launcher location   (default ~/.local/bin)
 #   SKILLS_DIR=~/.claude/skills    Claude skills location
 #   WEB_DIR=~/.local/share/...     web app location
 #   BUNDLE_URL=https://...tar.gz   remote bundle, fetched when not run from a checkout
@@ -24,7 +26,7 @@ set -euo pipefail
 # ── Config ────────────────────────────────────────────────────────────────────
 
 TOOL_NAME="local-search"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 SKILLS_DIR="${SKILLS_DIR:-$HOME/.claude/skills}"
 WEB_DIR="${WEB_DIR:-$HOME/.local/share/local-search/web}"
 BUNDLE_URL="${BUNDLE_URL:-https://raw.githubusercontent.com/javierhbr/random-poc/main/local-doc-tool/dist/local-search-bundle.tar.gz}"
@@ -42,6 +44,17 @@ info()  { printf '  %s\n' "$*"; }
 warn()  { printf '\033[33m  %s\033[0m\n' "$*"; }
 
 die() { red "Error: $*" >&2; exit 1; }
+
+# ensure_on_path <dir> — warn + print how to add <dir> to PATH if it is missing.
+ensure_on_path() {
+  local dir="$1"
+  case ":${PATH}:" in
+    *":${dir}:"*) return 0 ;;
+  esac
+  warn "$dir is not on your PATH — installed commands won't be found until you add it."
+  info "zsh:  echo 'export PATH=\"$dir:\$PATH\"' >> ~/.zshrc  && source ~/.zshrc"
+  info "bash: echo 'export PATH=\"$dir:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
+}
 
 # install_file <src> <dest> — copy with +x, elevating to sudo if the dir is unwritable.
 install_file() {
@@ -162,7 +175,7 @@ install_skills() {
 }
 
 install_web() {
-  local src="$1" from="$1/web" launcher="$INSTALL_DIR/${TOOL_NAME}-web"
+  local src="$1" from="$1/web" launcher="$INSTALL_DIR/explainable-search"
   [[ -d "$from" ]] || { warn "web/ not found — skipping web UI install"; return; }
   if ! command -v node &>/dev/null; then
     warn "Node not found — skipping web UI. Install Node >= 18, then re-run with INSTALL_CLI=0 INSTALL_SKILLS=0."
@@ -176,18 +189,23 @@ install_web() {
   if [[ ! -f "$WEB_DIR/frontend/dist/index.html" ]]; then
     warn "frontend/dist missing — the UI will 404 until built (cd web && npm ci && npm run build)."
   fi
-  # Launcher: production mode, served by Node's built-ins only (no npm install needed).
+  # Global launcher: production mode, served by Node's built-ins only (no npm
+  # install needed). Placed in $INSTALL_DIR so `explainable-search` runs from
+  # anywhere, like `npm install -g explainable-search`. Prefers the packaged
+  # bin/ entrypoint, falling back to server.js for older bundles.
+  local entry="$WEB_DIR/bin/explainable-search.js"
+  [[ -f "$from/bin/explainable-search.js" ]] || entry="$WEB_DIR/server.js"
   local tmp; tmp="$(mktemp)"
   cat > "$tmp" <<EOF
 #!/usr/bin/env bash
-# local-search-web — launch the local-search web UI (installed by install.sh)
+# explainable-search — launch the explainable-search web UI (installed by install.sh)
 export NODE_ENV="\${NODE_ENV:-production}"
-exec node "$WEB_DIR/server.js" "\$@"
+exec node "$entry" "\$@"
 EOF
   info "Launch: $launcher"
   install_file "$tmp" "$launcher"
   rm -f "$tmp"
-  green "  installed web UI + local-search-web launcher"
+  green "  installed web UI + explainable-search launcher"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -203,10 +221,12 @@ main() {
   if [[ "$INSTALL_SKILLS" == "1" ]]; then install_skills "$src"; else info "Skill:  skipped"; fi
   if [[ "$INSTALL_WEB"    == "1" ]]; then install_web    "$src"; else info "Web:    skipped"; fi
 
+  ensure_on_path "$INSTALL_DIR"
+
   printf '\n'
   green "Done."
   info "CLI:   local-search help"
-  info "Web:   local-search-web        # then open http://localhost:8787"
+  info "Web:   explainable-search      # runs from anywhere, then open http://localhost:8787"
   info "Skill: available to Claude Code from $SKILLS_DIR/local-search"
 }
 

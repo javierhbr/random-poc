@@ -55,10 +55,53 @@ export function classifyCommand(cmdString) {
 }
 
 /**
+ * Recover the complete leading elements of a JSON array whose tail was cut off
+ * (e.g. a stray `| head` truncated `json search` output mid-object, leaving no
+ * closing `]`). Scans element objects from just after the opening `[`, tracking
+ * string/escape state so braces inside strings don't miscount, JSON.parses each
+ * balanced top-level `{...}`, and returns those that parsed. Returns null if
+ * none complete.
+ */
+function recoverTruncatedArray(stdout, start) {
+  const objs = [];
+  let depth = 0; // brace depth within the current element object
+  let inStr = false;
+  let esc = false;
+  let objStart = -1;
+  for (let i = start + 1; i < stdout.length; i++) {
+    const ch = stdout[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') {
+      inStr = true;
+    } else if (ch === '{') {
+      if (depth === 0) objStart = i;
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0 && objStart !== -1) {
+        try {
+          objs.push(JSON.parse(stdout.slice(objStart, i + 1)));
+        } catch {
+          break; // stop at the first unparseable (truncated) element
+        }
+        objStart = -1;
+      }
+    }
+  }
+  return objs.length > 0 ? objs : null;
+}
+
+/**
  * stripAndParse(stdout) -> parsed object/array, or null if no JSON found.
  * R-2b.2: strip leading/trailing non-JSON progress lines, then JSON.parse the
  * remaining payload. Finds the first `{`/`[` that begins valid JSON through the
- * last matching `}`/`]`.
+ * last matching `}`/`]`. If that fails for an array whose tail was truncated,
+ * recover the complete leading element objects rather than dropping everything.
  */
 export function stripAndParse(stdout) {
   if (typeof stdout !== 'string') return null;
@@ -71,14 +114,18 @@ export function stripAndParse(stdout) {
   const opener = stdout[start];
   const closer = opener === '{' ? '}' : ']';
   const end = stdout.lastIndexOf(closer);
-  if (end <= start) return null;
 
-  const slice = stdout.slice(start, end + 1);
-  try {
-    return JSON.parse(slice);
-  } catch {
-    return null;
+  if (end > start) {
+    const slice = stdout.slice(start, end + 1);
+    try {
+      return JSON.parse(slice);
+    } catch {
+      // Fall through to truncated-array recovery below.
+    }
   }
+
+  if (opener === '[') return recoverTruncatedArray(stdout, start);
+  return null;
 }
 
 // Rows shaped like `json search`/`json related` output ([{repo,name,...}]).

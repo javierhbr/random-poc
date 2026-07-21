@@ -14,6 +14,9 @@ import { GraphView } from './components/GraphView.jsx';
 import { graphFromSources } from './components/graphElements.js';
 import { loadHistory, saveRun, clearHistory } from './history.js';
 
+// Shown in the site footer. Bump alongside the project version.
+const APP_VERSION = '0.1.0';
+
 // Compact relative timestamp ("2m ago") for the recent-searches list.
 function relTime(ts) {
   const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
@@ -918,6 +921,44 @@ export function App() {
           </div>
         </aside>
       </div>
+
+      {/* ---------------------------------------------------------- Site footer */}
+      <footer class="app-footer" data-testid="app-footer">
+        <span class="app-footer-credit">
+          © 2026 local-search v{APP_VERSION} · made by{' '}
+          <a href="https://x.com/javierhbr" target="_blank" rel="noopener noreferrer">
+            @javierhbr
+          </a>
+        </span>
+        <span class="app-footer-links">
+          <a
+            href="https://github.com/javierhbr"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GitHub"
+            aria-label="GitHub"
+          >
+            <i class="fa-brands fa-github" />
+          </a>
+          <a
+            href="https://x.com/javierhbr"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="X"
+            aria-label="X"
+          >
+            <i class="fa-brands fa-x-twitter" />
+          </a>
+          <a
+            class="app-footer-coffee"
+            href="https://www.buymeacoffee.com/javierhbr"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-solid fa-mug-hot" /> Buy me a coffee
+          </a>
+        </span>
+      </footer>
     </div>
   );
 }
