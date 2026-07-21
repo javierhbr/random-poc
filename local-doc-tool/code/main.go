@@ -25,7 +25,7 @@ import (
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const Version = "0.2.1"
+const Version = "0.3.0"
 
 var (
 	appDir    = filepath.Join(homeDir(), ".local-search")
@@ -56,12 +56,12 @@ func main() {
 		cmdRepo(args)
 	case "graphs":
 		cmdGraphs(args)
+	case "graph", "vgraph":
+		cmdVectorGraph(args)
 	case "scan", "rebuild", "index":
-		target := "all"
-		if len(args) > 0 {
-			target = args[0]
-		}
-		cmdScan(target)
+		// `rebuild`/`index` are exact aliases of `scan`; all pass identical raw
+		// args so target resolution is uniform (R-1.7).
+		cmdScan(args)
 	case "search", "s":
 		cmdSearch(args)
 	case "find", "f":
@@ -70,6 +70,8 @@ func main() {
 		cmdCode(args)
 	case "scope":
 		cmdScope(args)
+	case "ui":
+		cmdUI(args)
 	case "read", "r", "get", "show":
 		cmdRead(args)
 	case "list", "ls":
@@ -92,6 +94,14 @@ func main() {
 		cmdJSON(args)
 	case "reset":
 		cmdReset()
+	case "install-skill":
+		cmdInstallSkill(args)
+	case "scan-hooks":
+		cmdScanHooks(args)
+	case "scan-hook-run":
+		// Internal (undocumented) trigger entry the generated git hooks / shell
+		// snippet invoke: change-gated, per-repo-locked, surgical single-repo scan.
+		cmdScanHookRun(args)
 	case "-v", "--version":
 		fmt.Println("local-search version " + Version)
 		return
@@ -154,8 +164,16 @@ func repoAdd(args []string) {
 		die(fmt.Sprintf("Repo %q already registered", name))
 	}
 
+	// R-3.1: stamp the registration time; it flows through formatRepoEntryLine's
+	// 4th positional field when saveRepos persists the repos file below.
+	newEntry := repoEntry{
+		Name:            name,
+		Path:            dir,
+		SkipDirectories: skipDirs,
+		AddedAt:         time.Now().UTC().Format(time.RFC3339),
+	}
 	repos := loadRepos()
-	repos = append(repos, repoEntry{Name: name, Path: dir, SkipDirectories: skipDirs})
+	repos = append(repos, newEntry)
 	saveRepos(repos)
 
 	fmt.Printf("Added repo %q (%s)\n", name, dir)
@@ -163,7 +181,9 @@ func repoAdd(args []string) {
 		fmt.Printf("Skipping directories by name: %s\n", strings.Join(skipDirs, ", "))
 	}
 	fmt.Println("Scanning…")
-	cmdScan("all")
+	// R-6.3: surgically index ONLY the newly added repo — no DB deletion and no
+	// re-scan of the other registered repos.
+	scanSurgical([]repoEntry{newEntry})
 }
 
 func parseRepoAddArgs(args []string) (dir, name string, skipDirs []string, err error) {
@@ -262,7 +282,9 @@ func repoRemove(args []string) {
 		return
 	}
 
-	// Remove entries from DB and repopulate
+	// R-6.4: surgically delete only this repo's rows. Best-effort — if the DB
+	// file is absent there is nothing to purge, so we just return. No DB-file
+	// deletion and no re-scan of the other repos.
 	if _, err := os.Stat(dbFile); err == nil {
 		db := openDB()
 		defer db.Close()
@@ -270,8 +292,6 @@ func repoRemove(args []string) {
 			fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 		}
 	}
-	fmt.Println("Rebuilding index…")
-	cmdScan("all")
 }
 
 func repoList() {
@@ -280,9 +300,64 @@ func repoList() {
 		fmt.Println("No repos registered. Use: local-search repo add /path/to/specs")
 		return
 	}
-	for _, r := range repos {
-		fmt.Printf("  %-20s  %s\n", r.Name, r.Path)
+	// R-4.4: open the DB best-effort/read-only. If it is absent we skip opening
+	// entirely (so a plain list never recreates it); if it is present but fails
+	// to open we fall back to a nil handle. Either way DB-derived columns render
+	// as "—" and we still list name/path/added, exiting zero.
+	var db *sql.DB
+	if _, err := os.Stat(dbFile); err == nil {
+		if d, err := localdb.Open(dbFile); err == nil {
+			db = d
+			defer db.Close()
+		}
 	}
+	fmt.Print(formatRepoList(repos, db))
+}
+
+// formatRepoList renders the columnar `repo list` table (R-4.1). db may be nil
+// (absent/unreadable); in that case every DB-derived column (last-scan,
+// last-update, commit) renders as "—" (R-4.4). Timestamps are shown as
+// human-relative ages via humanAge (R-4.3); missing values as "—" (R-4.2).
+func formatRepoList(repos []repoEntry, db *sql.DB) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "%-20s  %-10s  %-11s  %-11s  %-8s  %s\n",
+		"NAME", "ADDED", "LAST SCAN", "LAST UPDATE", "COMMIT", "PATH")
+	for _, r := range repos {
+		lastScan, lastUpdate, commit := "—", "—", "—"
+		if db != nil {
+			lastScan = ageOrDash(localdb.GetMeta(db, "last_scan_"+r.Name))
+			lastUpdate = ageOrDash(localdb.GetMeta(db, "last_index_update_"+r.Name))
+			commit = shortCommitOrDash(localdb.GetMeta(db, "git_commit_"+r.Name))
+		}
+		fmt.Fprintf(&b, "%-20s  %-10s  %-11s  %-11s  %-8s  %s\n",
+			r.Name, ageOrDash(r.AddedAt), lastScan, lastUpdate, commit, r.Path)
+	}
+	return b.String()
+}
+
+// ageOrDash parses an RFC3339 timestamp and renders it as a human-relative age;
+// empty or unparseable input renders as "—" (R-4.2/4.3/3.6).
+func ageOrDash(rfc3339 string) string {
+	if rfc3339 == "" {
+		return "—"
+	}
+	t, err := time.Parse(time.RFC3339, rfc3339)
+	if err != nil {
+		return "—"
+	}
+	return humanAge(time.Now().Unix() - t.Unix())
+}
+
+// shortCommitOrDash renders a commit hash in short 7-char form; empty renders
+// as "—" (R-4.2/4.3).
+func shortCommitOrDash(commit string) string {
+	if commit == "" {
+		return "—"
+	}
+	if len(commit) >= 7 {
+		return commit[:7]
+	}
+	return commit
 }
 
 // ── Graphs (graphify integration) ─────────────────────────────────────────────
@@ -516,25 +591,56 @@ func humanAge(secs int64) string {
 
 // ── Scan ──────────────────────────────────────────────────────────────────────
 
-func cmdScan(target string) {
+// cmdScan resolves the invocation to a mode + target(s) BEFORE mutating anything,
+// then dispatches to a full rebuild (`scan all`) or a surgical single-repo scan
+// (default / `scan <name>`). Resolving first means an error (outside any repo,
+// unknown name) returns without deleting the DB or touching any file.
+func cmdScan(args []string) {
 	repos := loadReposOrDie()
+	cwd, _ := os.Getwd()
+	if err := runScan(args, cwd, repos); err != nil {
+		die(err.Error())
+	}
+}
 
+// runScan is the testable seam for the resolve-before-mutate guarantee. It
+// resolves the scan target (pure: args+cwd+repos, no DB/FS) BEFORE any mutation
+// and returns the error on failure having touched nothing — no os.Remove, no DB
+// open/create, no schema write (R-1.3 outside any repo; R-1.5 unknown name). Only
+// after resolution succeeds does it dispatch to a mutating scan. cmdScan is a
+// thin wrapper that die()s on the returned error.
+func runScan(args []string, cwd string, repos []repoEntry) error {
+	mode, targets, err := resolveScanTarget(args, cwd, repos)
+	if err != nil {
+		return err
+	}
+
+	switch mode {
+	case modeFullRebuild:
+		scanFullRebuild(targets) // targets == every repo (R-2.6)
+	case modeSurgical:
+		scanSurgical(targets) // single target repo (R-2.1–R-2.5)
+	}
+	return nil
+}
+
+// scanFullRebuild is the ONLY DB-file-deleting path (R-2.6): remove the DB,
+// recreate the schema, re-index every repo, record each repo's HEAD commit, and
+// write the global last_scan value consumed by `stats`. Behavior is unchanged
+// from the pre-overhaul `scan all`.
+func scanFullRebuild(repos []repoEntry) {
 	// Remove old DB
 	os.Remove(dbFile)
 
 	db := openDB()
 	defer db.Close()
 
-	if err := localdb.CreateSchema(db); err != nil {
-		die(err.Error())
-	}
-
 	fmt.Println("Scanning repos…")
+	// One coherent timestamp for the whole rebuild, shared by the global value
+	// and every per-repo last_scan_<name> written below (R-3.3).
+	now := time.Now().UTC().Format(time.RFC3339)
 	total := 0
 	for _, r := range repos {
-		if target != "all" && r.Name != target {
-			continue
-		}
 		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
 		n, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories)
 		if err != nil {
@@ -550,9 +656,60 @@ func cmdScan(target string) {
 				localdb.SetMeta(db, "git_commit_"+r.Name, commit) //nolint:errcheck
 			}
 		}
+
+		// R-3.3: record the per-repo last-scan timestamp for every repo indexed
+		// in full-rebuild mode, so a just-rebuilt repo shows a real time rather
+		// than a placeholder — not only the global value written below.
+		localdb.SetMeta(db, "last_scan_"+r.Name, now) //nolint:errcheck
 	}
 
-	localdb.SetMeta(db, "last_scan", time.Now().UTC().Format(time.RFC3339)) //nolint:errcheck
+	// R-3.7: retain the global last_scan value consumed by `stats`.
+	localdb.SetMeta(db, "last_scan", now) //nolint:errcheck
+	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)
+}
+
+// scanSurgical re-indexes only the target repo(s) without deleting the DB file
+// (R-2.2) and without touching any other repo's rows (R-2.3). openDB bootstraps
+// the schema when the DB file is absent, so a fresh surgical scan creates the
+// schema and indexes only the target — it never fans out to all repos (R-2.4).
+func scanSurgical(targets []repoEntry) {
+	db := openDB()
+	defer db.Close()
+
+	// One coherent timestamp for this scan invocation, shared by all targets.
+	now := time.Now().UTC().Format(time.RFC3339)
+	total := 0
+	for _, r := range targets {
+		fmt.Printf("  %s: indexing %s…\n", r.Name, r.Path)
+
+		// R-2.1 + R-2.8: delete this repo's rows and re-index it as one atomic
+		// unit. ReplaceRepo commits the delete and the re-insert in a single
+		// transaction, so a concurrent reader (a racing `search`/`find`, which
+		// automation makes frequent) sees either the pre- or post-scan index for
+		// this repo, never the empty window. A prior DeleteRepo here would commit
+		// an empty state first and reintroduce that window — hence it is gone.
+		n, err := localdb.ReplaceRepo(db, r.Name, r.Path, r.SkipDirectories)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  %s: error — %v\n", r.Name, err)
+			continue
+		}
+		fmt.Printf("  %s: %d files indexed\n", r.Name, n)
+		total += n
+
+		// R-2.5 + R-3.5: record HEAD for git repos so incremental detection has a
+		// baseline, and so the recorded git_commit_<name> stays consistent with the
+		// HEAD that ReplaceRepo just indexed above.
+		if git.IsRepo(r.Path) {
+			if commit := git.CurrentCommit(r.Path); commit != "" {
+				localdb.SetMeta(db, "git_commit_"+r.Name, commit) //nolint:errcheck
+			}
+		}
+
+		// R-3.3: record this repo's per-repo last-scan timestamp after it was
+		// successfully re-indexed.
+		localdb.SetMeta(db, "last_scan_"+r.Name, now) //nolint:errcheck
+	}
+
 	fmt.Printf("\nDone. %d specs indexed. Run 'local-search search <keyword>' to find specs.\n", total)
 }
 
@@ -568,7 +725,7 @@ func cmdScan(target string) {
 //     the changes.
 func ensureDB() *sql.DB {
 	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
-		cmdScan("all")
+		cmdScan([]string{"all"})
 	}
 
 	db := openDB()
@@ -590,7 +747,7 @@ func ensureDB() *sql.DB {
 		// no-op when there's nothing to do, so the order is harmless.
 		if !knownNames[r.Name] {
 			fmt.Fprintf(os.Stderr, "(%s: new repo — running first scan…)\n", r.Name)
-			if _, err := localdb.FullScan(db, r.Name, r.Path); err != nil {
+			if _, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: scan of %s failed: %v\n", r.Name, err)
 				continue
 			}
@@ -602,25 +759,8 @@ func ensureDB() *sql.DB {
 			continue
 		}
 
-		if !git.IsRepo(r.Path) {
-			continue
-		}
-		lastCommit := localdb.GetMeta(db, "git_commit_"+r.Name)
-		changed, err := git.ChangedFiles(r.Path, lastCommit)
-		if err != nil || len(changed) == 0 {
-			continue
-		}
-		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit, r.SkipDirectories)
-		if err != nil {
+		if _, err := applyIncrementalUpdate(db, r); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
-			continue
-		}
-		if n > 0 {
-			fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", r.Name, n)
-		}
-		if newCommit != "" {
-			localdb.SetMeta(db, "git_commit_"+r.Name, newCommit) //nolint:errcheck
 		}
 	}
 	return db
@@ -657,17 +797,18 @@ func filterByLocation(results []localdb.SearchResult, patterns []string) []local
 
 func cmdSearch(args []string) {
 	fs := flag.NewFlagSet("search", flag.ExitOnError)
-<<<<<<< HEAD
-	repoFlag := fs.String("repo", "", "Filter results to this repo")
-	directoryFlag := fs.String("directory", "", "Filter results to paths starting with this directory")
-=======
 	repoFlag := fs.String("repo", "", "Filter results to this repo (legacy; prefer --repos)")
 	reposFlag := fs.String("repos", "all", "Which repos to search: all | graph-only | name1,name2")
 	sourceFlag := fs.String("source", "auto", "Where results come from: auto | fts | graph | both")
 	rankFlag := fs.String("rank", "auto", "Ranking strategy: auto | bm25 | graph-aware")
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
+	semanticFlag := fs.Bool("semantic", false, "Hybrid FTS+vector re-ranking (RRF fusion)")
+	hybridFlag := fs.Bool("hybrid", false, "Alias for --semantic")
 	var excludeLocations stringSliceFlag
 	fs.Var(&excludeLocations, "exclude-location", "Exclude results whose path contains this string (repeatable)")
+
+	// Bool flags take no value; they must not swallow the following positional
+	// token (otherwise `search --semantic "query"` would eat the query).
+	boolFlags := map[string]bool{"--semantic": true, "-semantic": true, "--hybrid": true, "-hybrid": true}
 
 	// Go's flag package stops at the first non-flag argument, so flags after
 	// the query term are silently ignored. Split positional args from flags
@@ -679,8 +820,9 @@ func cmdSearch(args []string) {
 			flagArgs = append(flagArgs, a)
 			// Consume the next token if the flag uses "= value" or separate value.
 			// flag.Parse handles "--flag value" by consuming the next arg itself,
-			// but we must keep them together in flagArgs.
-			if !strings.Contains(a, "=") && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+			// but we must keep them together in flagArgs. Bool flags never
+			// consume the next token.
+			if !strings.Contains(a, "=") && !boolFlags[a] && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
 				i++
 				flagArgs = append(flagArgs, args[i])
 			}
@@ -689,13 +831,10 @@ func cmdSearch(args []string) {
 		}
 	}
 	fs.Parse(flagArgs) //nolint:errcheck
+	semantic := *semanticFlag || *hybridFlag
 
 	if len(positional) == 0 {
-<<<<<<< HEAD
-		die("Usage: local-search search <query> [--repo <name>] [--directory <path>] [--exclude-location <pattern>]...")
-=======
 		die("Usage: local-search search <query> [--repos <spec>] [--source <fts|graph|both>] [--rank <bm25|graph-aware>] [--exclude-location <pattern>]...")
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
 	}
 	query := positional[0]
 
@@ -711,38 +850,53 @@ func cmdSearch(args []string) {
 	db := ensureDB()
 	defer db.Close()
 
-<<<<<<< HEAD
-	results, err := localdb.Search(db, query, repo, *directoryFlag)
-=======
 	allRepos, err := localdb.Repos(db)
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
 	if err != nil {
 		die(err.Error())
 	}
 
 	// Resolve the three flags (auto → concrete) given the repos available now.
 	plan := resolveSearchPlan(allRepos, legacyRepo, *reposFlag, *sourceFlag, *rankFlag)
+	if semantic {
+		plan.autoNotes = append(plan.autoNotes, "semantic=on")
+	}
 
 	// Print the status header so the user always knows what backend ran.
 	printSearchHeader(plan)
 
-	// Run FTS if the plan asks for it.
+	// Run FTS (or hybrid semantic) search if the plan asks for it.
 	var ftsResults []localdb.SearchResult
 	if plan.runFTS {
-		// One Search() call per repo when plan.repos is a subset; one call with
+		// One call per repo when plan.repos is a subset; one call with
 		// repoFilter="" when plan.repos covers every registered repo.
 		if plan.allRepos {
-			ftsResults, err = localdb.Search(db, query, "")
+			if semantic {
+				ftsResults, err = localdb.SemanticSearch(db, query, "", "", 50)
+			} else {
+				ftsResults, err = localdb.Search(db, query, "", "")
+			}
 			if err != nil {
 				die(err.Error())
 			}
 		} else {
 			for _, name := range plan.repos {
-				rs, err := localdb.Search(db, query, name)
+				var rs []localdb.SearchResult
+				if semantic {
+					rs, err = localdb.SemanticSearch(db, query, name, "", 50)
+				} else {
+					rs, err = localdb.Search(db, query, name, "")
+				}
 				if err != nil {
 					die(err.Error())
 				}
 				ftsResults = append(ftsResults, rs...)
+			}
+			// Semantic Relevance is higher-is-better; merge the per-repo lists
+			// into one best-first order. Plain FTS keeps its native order.
+			if semantic {
+				sort.Slice(ftsResults, func(i, j int) bool {
+					return ftsResults[i].Relevance > ftsResults[j].Relevance
+				})
 			}
 		}
 		ftsResults = filterByLocation(ftsResults, excludeLocations)
@@ -754,12 +908,60 @@ func cmdSearch(args []string) {
 		graphHits = collectGraphHits(query, plan.repos, allRepos)
 	}
 
-	// Apply graph-aware re-ranking to FTS results if requested.
-	if plan.rank == "graph-aware" && len(ftsResults) > 0 {
+	// Apply graph-aware re-ranking to FTS results if requested. Skipped in
+	// semantic mode: RRF fusion already ordered the results best-first, and the
+	// graph-aware pass assumes lower-is-better FTS5 rank semantics.
+	if plan.rank == "graph-aware" && len(ftsResults) > 0 && !semantic {
 		applyGraphAwareRanking(ftsResults, allRepos)
 	}
 
 	printSearchResults(ftsResults, graphHits, query, plan)
+}
+
+// cmdVectorGraph emits a kNN vector graph as NetworkX node-link JSON, either
+// over the specs carrying a tag ("graph tag <tag>") or as an ego graph seeded
+// by a semantic query ("graph search <query> [--repo <name>]").
+func cmdVectorGraph(args []string) {
+	const usage = "Usage: local-search graph <tag <tag> | search <query> [--repo <name>]>"
+	if len(args) == 0 {
+		die(usage)
+	}
+
+	db := ensureDB()
+	defer db.Close()
+
+	switch args[0] {
+	case "tag":
+		if len(args) < 2 || args[1] == "" {
+			die(usage)
+		}
+		g, err := localdb.VectorGraphByTag(db, args[1], 0.3, 8)
+		if err != nil {
+			die(err.Error())
+		}
+		localdb.PrintJSON(g)
+
+	case "search":
+		if len(args) < 2 || args[1] == "" {
+			die(usage)
+		}
+		query := args[1]
+		repo := ""
+		for i := 2; i < len(args); i++ {
+			if (args[i] == "--repo" || args[i] == "-repo") && i+1 < len(args) {
+				repo = args[i+1]
+				i++
+			}
+		}
+		g, err := localdb.VectorGraphBySearch(db, query, repo, 10, 8, 0.3)
+		if err != nil {
+			die(err.Error())
+		}
+		localdb.PrintJSON(g)
+
+	default:
+		die(usage)
+	}
 }
 
 // ── Search-plan resolution & helpers ──────────────────────────────────────────
@@ -1178,14 +1380,31 @@ func cmdJSON(args []string) {
 
 	switch sub {
 	case "search":
-		if len(rest) == 0 {
-			die("Usage: local-search json search <query> [repo]")
+		// Strip an optional --semantic/--hybrid flag from anywhere in rest.
+		semantic := false
+		var pos []string
+		for _, a := range rest {
+			switch a {
+			case "--semantic", "-semantic", "--hybrid", "-hybrid":
+				semantic = true
+			default:
+				pos = append(pos, a)
+			}
+		}
+		if len(pos) == 0 {
+			die("Usage: local-search json search <query> [repo] [--semantic]")
 		}
 		repo := ""
-		if len(rest) > 1 {
-			repo = rest[1]
+		if len(pos) > 1 {
+			repo = pos[1]
 		}
-		results, err := localdb.Search(db, rest[0], repo, "")
+		var results []localdb.SearchResult
+		var err error
+		if semantic {
+			results, err = localdb.SemanticSearch(db, pos[0], repo, "", 50)
+		} else {
+			results, err = localdb.Search(db, pos[0], repo, "")
+		}
 		if err != nil {
 			die(err.Error())
 		}
@@ -1397,8 +1616,8 @@ func resolveScope(flagValue string) (scope.Scope, []localdb.RepoRow, *sql.DB) {
 		CWD:            cwd,
 		ExternalGraphs: externalNames,
 		FlagValue:      flagValue,
-		Repos:     scopeRepos,
-		HomeDir:   homeDir(),
+		Repos:          scopeRepos,
+		HomeDir:        homeDir(),
 	}
 	sc, err := res.Resolve()
 	if err == nil {
@@ -1551,7 +1770,7 @@ func runIncrementalUpdates(db *sql.DB, repos []localdb.RepoRow) {
 		// so their row appears with code_graph_* metadata.
 		if !knownNames[r.Name] {
 			fmt.Fprintf(os.Stderr, "(%s: new repo — running first scan…)\n", r.Name)
-			if _, err := localdb.FullScan(db, r.Name, r.Path); err != nil {
+			if _, err := localdb.FullScan(db, r.Name, r.Path, r.SkipDirectories); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: scan of %s failed: %v\n", r.Name, err)
 				continue
 			}
@@ -1562,27 +1781,47 @@ func runIncrementalUpdates(db *sql.DB, repos []localdb.RepoRow) {
 			}
 			continue
 		}
-		if !git.IsRepo(r.Path) {
-			continue
-		}
-		lastCommit := localdb.GetMeta(db, "git_commit_"+r.Name)
-		changed, err := git.ChangedFiles(r.Path, lastCommit)
-		if err != nil || len(changed) == 0 {
-			continue
-		}
-		fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", r.Name)
-		n, newCommit, err := localdb.IncrementalScan(db, r.Name, r.Path, lastCommit)
-		if err != nil {
+		if _, err := applyIncrementalUpdate(db, r); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: incremental scan failed: %v\n", err)
-			continue
-		}
-		if n > 0 {
-			fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", r.Name, n)
-		}
-		if newCommit != "" {
-			localdb.SetMeta(db, "git_commit_"+r.Name, newCommit) //nolint:errcheck
 		}
 	}
+}
+
+// applyIncrementalUpdate runs an incremental index update for a single already-
+// known repo. It is the shared body previously duplicated in ensureDB and
+// runIncrementalUpdates, so both incremental sites behave identically.
+//
+// Behavior (unchanged from the old inline code): non-git repos and git repos
+// with no new/changed spec files are no-ops. When files actually change it runs
+// localdb.IncrementalScan, rewrites git_commit_<name> to the new HEAD (R-6.5),
+// and additionally stamps last_index_update_<name> with the current UTC time
+// (R-3.4). The timestamp is written ONLY when an update changed files — never on
+// a no-op query. Returns whether any files changed.
+func applyIncrementalUpdate(db *sql.DB, repo repoEntry) (changed bool, err error) {
+	if !git.IsRepo(repo.Path) {
+		return false, nil
+	}
+	lastCommit := localdb.GetMeta(db, "git_commit_"+repo.Name)
+	changedFiles, err := git.ChangedFiles(repo.Path, lastCommit)
+	if err != nil || len(changedFiles) == 0 {
+		// Preserve the original silent skip on ChangedFiles errors.
+		return false, nil
+	}
+	fmt.Fprintf(os.Stderr, "(%s: git changes detected — incremental update…)\n\n", repo.Name)
+	n, newCommit, err := localdb.IncrementalScan(db, repo.Name, repo.Path, lastCommit, repo.SkipDirectories)
+	if err != nil {
+		return false, err
+	}
+	if n > 0 {
+		fmt.Fprintf(os.Stderr, "(%s: %d file(s) updated)\n\n", repo.Name, n)
+	}
+	if newCommit != "" {
+		localdb.SetMeta(db, "git_commit_"+repo.Name, newCommit) //nolint:errcheck
+	}
+	if n > 0 {
+		localdb.SetMeta(db, "last_index_update_"+repo.Name, time.Now().UTC().Format(time.RFC3339)) //nolint:errcheck
+	}
+	return n > 0, nil
 }
 
 // autoInitLocalConfig writes .local-search.toml in cwd. Seeding precedence:
@@ -2038,16 +2277,6 @@ Usage:
   local-search scan                       Scan all repos
   local-search scan <repo-name>           Scan one repo
 
-<<<<<<< HEAD
-  local-search search <query>                                                        Search all repos
-  local-search search <query> --repo <name>                                          Search one repo (named flag)
-  local-search search <query> <repo>                                                 Search one repo (positional, legacy)
-  local-search search <query> --directory <path>                                     Focus to paths starting with <path>
-  local-search search <query> --exclude-location <pattern>                           Exclude paths containing pattern
-  local-search read <name>                                                           Read a spec
-  local-search read <name> <repo>                                                    Read from specific repo
-  local-search read <name> <repo> --directory <path>                                 Read from specific repo and directory
-=======
   local-search search <query>                                Search all repos (auto-routes to FTS+graph)
   local-search search <query> --repos all                    Every registered repo (default)
   local-search search <query> --repos graph-only             Only repos with graphify-out/
@@ -2056,6 +2285,7 @@ Usage:
   local-search search <query> --rank auto|bm25|graph-aware   Ranking strategy (default auto)
   local-search search <query> --repo <name>                  Single repo (legacy; prefer --repos)
   local-search search <query> --exclude-location <pattern>   Exclude paths containing pattern
+  local-search search <query> --semantic                     Hybrid FTS + vector re-ranking (RRF fusion)
 
   Auto rules:
     --source auto → both when any selected repo has graphify-out/, else fts
@@ -2063,7 +2293,6 @@ Usage:
     The status line in [brackets] above results shows the resolved values.
   local-search read <name>                                   Read a spec
   local-search read <name> <repo>                            Read from specific repo
->>>>>>> ed5f3da (Add graph and scope packages with associated tests)
   local-search related <name>             Find related specs
 
   local-search list                       All specs, all repos
@@ -2073,15 +2302,29 @@ Usage:
   local-search tags <tag>                 Specs with a tag
   local-search recent [n]                 Recently modified (default 10)
 
+  local-search graph tag <tag>                               kNN vector graph over specs with a tag (NetworkX JSON)
+  local-search graph search <query> [--repo <name>]          Ego vector graph seeded by a query (NetworkX JSON)
+
+  local-search ui                         Start the web UI daemon and open the browser
+  local-search ui --port <n>              Start on a specific port (default 8787)
+  local-search ui stop                    Stop the web UI daemon
+  local-search ui status                  Show whether the web UI is running
+
   local-search stats                      Index statistics
   local-search db                         Print database file path
   local-search inspect                    Dump full index
   local-search reset                      Delete everything and start over
+
+  local-search install-skill              Install the bundled Claude skill globally (~/.claude/skills)
+  local-search install-skill --local      Install into this project (./.claude/skills)
+  local-search install-skill --dir <path> Install into a specific skills directory
+  local-search install-skill --force      Overwrite an existing install
+
   local-search help                       This help
   local-search -v, --version             Print version and exit
 
 JSON output (for agents):
-  local-search json search <query> [repo]
+  local-search json search <query> [repo] [--semantic]
   local-search json read <name>
   local-search json list [repo-or-project]
   local-search json repos
@@ -2105,16 +2348,24 @@ type repoEntry struct {
 	Name            string
 	Path            string
 	SkipDirectories []string
+	AddedAt         string // RFC3339; empty = unknown (legacy lines)
 }
 
 func parseRepoEntryLine(line string) (repoEntry, bool) {
-	parts := strings.SplitN(line, "|", 3)
+	parts := strings.SplitN(line, "|", 4)
 	if len(parts) < 2 {
 		return repoEntry{}, false
 	}
 	r := repoEntry{Name: parts[0], Path: parts[1]}
-	if len(parts) == 3 && strings.TrimSpace(parts[2]) != "" {
+	if len(parts) >= 3 && strings.TrimSpace(parts[2]) != "" {
 		r.SkipDirectories = strings.Split(parts[2], ",")
+	}
+	if len(parts) == 4 {
+		if ts := strings.TrimSpace(parts[3]); ts != "" {
+			if _, err := time.Parse(time.RFC3339, ts); err == nil {
+				r.AddedAt = ts
+			}
+		}
 	}
 	norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
 	if err != nil {
@@ -2126,11 +2377,20 @@ func parseRepoEntryLine(line string) (repoEntry, bool) {
 
 func formatRepoEntryLine(r repoEntry) string {
 	line := r.Name + "|" + r.Path
+	var skip string
 	if len(r.SkipDirectories) > 0 {
-		norm, err := normalizeSkipDirectoryNames(r.SkipDirectories)
-		if err == nil && len(norm) > 0 {
-			line += "|" + strings.Join(norm, ",")
+		if norm, err := normalizeSkipDirectoryNames(r.SkipDirectories); err == nil {
+			skip = strings.Join(norm, ",")
 		}
+	}
+	// added_at is positional (4th field). When it is present we MUST emit the
+	// (possibly empty) 3rd skip-dirs field as a placeholder so the timestamp
+	// stays in the 4th position — otherwise it lands in the skip-dirs field and
+	// the line is dropped on the next load (R-6.6).
+	if r.AddedAt != "" {
+		line += "|" + skip + "|" + r.AddedAt
+	} else if skip != "" {
+		line += "|" + skip
 	}
 	return line
 }
