@@ -7,7 +7,11 @@ description: >
   requirements for Y', 'look up the docs on Z'), analytical questions where specs
   contain the answer ('what is the impact of changing X', 'how does our Y flow work',
   'what happens if Z'), and setup tasks (adding repos, scanning, troubleshooting the
-  index). Trigger this skill even if the user doesn't say "spec" explicitly — if their
+  index). Also trigger when the user wants to configure, initialize, or set up which
+  repositories this project searches ('set up local search', 'init local search scope',
+  'which repos does this project search', 'add/remove a repo from my search scope') —
+  managed via `local-search init`/`setup` and the `.agent/localsearch-config.yaml` file.
+  Trigger this skill even if the user doesn't say "spec" explicitly — if their
   question touches a domain that might be documented in spec files (.md, .mdx, .txt),
   search first. Also use when the user says 'what do our docs say about', 'is there
   a spec for', 'check the requirements', 'look up', or asks about any business process,
@@ -31,6 +35,44 @@ cp local-search /usr/local/bin/local-search
 ```
 
 Requires Go 1.21+ to build. No runtime dependencies — SQLite is compiled in.
+
+## Project search scope (`.agent/localsearch-config.yaml`)
+
+Each project declares which registered repositories LocalSearch includes, via
+`<project>/.agent/localsearch-config.yaml`. **Before searching from a project,
+read its scope from this file and pass it to every search** so results stay inside
+the project's boundary:
+
+1. Read scope: `local-search init --json` (creates the file if missing) → returns
+   `{ path, exists, empty, repositories, available, unknown }`.
+2. If `repositories` is non-empty, pass them to every search — note the flag differs
+   per command:
+   - `local-search search "auth" --repos repoA,repoB`
+   - `local-search find "auth" --scope repoA,repoB` (also `code`)
+   Both take a comma-separated list.
+3. If the file is missing or `empty`, offer to set it up (below), or fall back to a
+   one-off unscoped `local-search search "..."`.
+
+### Configuring scope interactively (`local-search init` / `setup`)
+
+`init` and `setup` are identical. **You (the skill) run the conversation** — the CLI
+only exposes non-interactive primitives. Drive it with `AskUserQuestion`:
+
+1. `local-search init --json` — read current state (creates the file if absent).
+2. Branch on the state:
+   - **Empty / just created** → show `available` repos, ask which to include, then
+     `local-search init --set repoA,repoB`.
+   - **Has repositories** → show the current list and offer:
+     - **Add** → `local-search init --add repoC`
+     - **Remove** → `local-search init --remove repoA`
+     - **Modify** an entry → `local-search init --remove old` then `--add new`
+       (or `--set` the whole new list)
+     - **Review** → re-run `local-search init --json` and show the list
+     - **Done** → stop
+3. Only registered repos are accepted — `--add`/`--set` reject unknown names and list
+   the valid ones. Add an external graph as a `graph:<name>` entry.
+
+Never hand-edit the YAML for the user — always go through `local-search init`.
 
 ## Core workflow: search, read, reason
 
