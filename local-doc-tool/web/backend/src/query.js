@@ -160,6 +160,15 @@ export function handleStream(req, res, { registry, id } = {}) {
     return;
   }
 
+  // Reconnect after a finished turn: the previous child has already exited (the
+  // client closed its stream on `answer`/`done`), so there is nothing to pipe.
+  // Just hold this SSE connection open and registered so a follow-up reply
+  // (`--resume`, via handleReply) can stream its new turn to it (R-8.4).
+  if (session.phase === 'done') {
+    req.on('close', () => session.sseClients.delete(res));
+    return;
+  }
+
   pipeChild({ session, child: session.child, normalizer: session.normalizer, deps: session.deps ?? {} });
 
   // End this SSE response once the session is truly done. A turn that ended with a

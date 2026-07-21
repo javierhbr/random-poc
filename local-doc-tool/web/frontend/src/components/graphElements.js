@@ -24,6 +24,47 @@ function tagFromPath(path) {
   return /\.(md|mdx|markdown|txt|rst|adoc)$/.test(p) ? 'doc' : 'code';
 }
 
+// The document-type taxonomy that drives node color + the graph legend. Specs
+// live under `docs/<type>/...`, so the type is the real semantic axis worth
+// showing — not a uniform "doc" green. Keys double as the `kind` node-data
+// value; `query` is the synthesized anchor (the spec/query the star centers on).
+// Order here is the legend's display order.
+export const KIND_META = {
+  hld: { label: 'High-level design', color: '#2563eb' },
+  lld: { label: 'Low-level design', color: '#0891b2' },
+  ears: { label: 'Requirements (EARS)', color: '#d97706' },
+  tasks: { label: 'Tasks', color: '#16a34a' },
+  research: { label: 'Research', color: '#7c3aed' },
+  adr: { label: 'Decisions (ADR)', color: '#db2777' },
+  doc: { label: 'Doc', color: '#64748b' },
+  code: { label: 'Code', color: '#0f766e' },
+  query: { label: 'Your query / anchor', color: '#111827' },
+};
+
+// Classify a spec path into a KIND_META key. Reads the `docs/<type>/` segment
+// first (the authoritative signal); falls back to doc-vs-code by extension.
+export function kindFromPath(path) {
+  const p = typeof path === 'string' ? path.toLowerCase() : '';
+  const seg = (p.match(/(?:^|\/)docs\/([^/]+)\//) || [])[1] || '';
+  if (seg === 'hld') return 'hld';
+  if (seg === 'lld') return 'lld';
+  if (seg === 'ears') return 'ears';
+  if (seg === 'tasks') return 'tasks';
+  if (seg === 'research') return 'research';
+  if (seg === 'adr' || seg === 'adrs' || seg === 'decisions') return 'adr';
+  return /\.(md|mdx|markdown|txt|rst|adoc)$/.test(p) ? 'doc' : 'code';
+}
+
+// The distinct KIND_META keys present in a graph, in legend order. Used to
+// render only the swatches that actually appear on the current map.
+export function graphKinds(graph) {
+  if (!graph || !Array.isArray(graph.nodes)) return [];
+  const present = new Set(
+    graph.nodes.map((n) => (n && n.tag === 'query' ? 'query' : kindFromPath(n && n.path))),
+  );
+  return Object.keys(KIND_META).filter((k) => present.has(k));
+}
+
 // graphFromSources(sources) → a NetworkX-style {nodes, links} star around the
 // query, synthesized from the retrieved sources. Used as a fallback for the
 // Neighborhood Map when the run never issued `json related` (so no explicit
@@ -67,13 +108,21 @@ export function buildElements(graph, sources) {
   for (const node of graph.nodes) {
     if (!node || node.id == null) continue;
     const isSource = keys.has(node.id) || (node.path != null && keys.has(node.path));
+    // The star's center is the anchor (a synthesized query node, or the spec a
+    // `json related` graph fans out from); everything else is colored by its
+    // document type so the map reads as a typed neighborhood, not a green blob.
+    const isAnchor = node.tag === 'query';
+    const kind = isAnchor ? 'query' : kindFromPath(node.path);
     elements.push({
       data: {
         id: node.id,
         label: node.label != null ? node.label : node.path != null ? node.path : node.id,
         relevance: node.relevance,
         tag: node.tag,
+        kind,
+        path: node.path,
         isSource,
+        isAnchor,
       },
     });
   }

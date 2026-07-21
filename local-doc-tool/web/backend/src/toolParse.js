@@ -147,8 +147,10 @@ function rankRelevance(idx) {
 // spec, from `json related` rows. `centerName` is the spec passed to `related`.
 function synthesizeGraph(centerName, rows) {
   const centerId = centerName || 'query';
+  // tag 'query' marks this as the star's anchor so the view styles it distinctly
+  // (larger, bordered, always labeled) instead of as one more green doc node.
   const nodes = [
-    { id: centerId, label: centerName || 'query', tag: 'doc', relevance: 1 },
+    { id: centerId, label: centerName || 'query', tag: 'query', relevance: 1 },
   ];
   const links = [];
   rows.forEach((row, idx) => {

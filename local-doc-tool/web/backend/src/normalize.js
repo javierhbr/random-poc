@@ -120,8 +120,22 @@ function extractToolResultText(content) {
   return '';
 }
 
-/** True when the assistant's final message reads as a clarifying question and no answer. */
+/** True when the assistant's final message reads as a clarifying question and no answer.
+ *
+ * A genuine clarification is short and unstructured (e.g. "Which repo?"). A
+ * substantive answer that merely closes with a question mark — "…and calls the
+ * poller. Want the specifics?" — is NOT a clarification: classifying it as one
+ * strands the session awaiting a reply that never comes and leaves the UI
+ * spinning forever. So beyond the trailing '?', require the text to look like a
+ * bare question: short, single-paragraph, and free of markdown structure. */
 function endsWithQuestion(text) {
   const trimmed = text.trimEnd();
-  return trimmed.endsWith('?');
+  if (!trimmed.endsWith('?')) return false;
+  if (trimmed.length > 300) return false; // long -> an answer, not a prompt
+  if (/\n\s*\n/.test(trimmed)) return false; // multiple paragraphs
+  if (/```/.test(trimmed)) return false; // fenced code
+  if (/(^|\n)\s{0,3}#{1,6}\s/.test(trimmed)) return false; // heading
+  if (/(^|\n)\s{0,3}([-*+]|\d+[.)])\s/.test(trimmed)) return false; // list item
+  if (/(^|\n)\s*\|.*\|/.test(trimmed)) return false; // table row
+  return true;
 }

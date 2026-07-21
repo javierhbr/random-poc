@@ -4,8 +4,18 @@
 
 import { useEffect, useRef, useState } from 'preact/hooks';
 import cytoscape from 'cytoscape';
-import { buildElements } from './graphElements.js';
+import { buildElements, KIND_META, graphKinds } from './graphElements.js';
 import './GraphView.css';
+
+// One background-color rule per document type, generated from KIND_META so the
+// palette stays in a single place (shared with the legend). The `query` anchor
+// is styled separately below.
+const KIND_COLOR_RULES = Object.entries(KIND_META)
+  .filter(([kind]) => kind !== 'query')
+  .map(([kind, meta]) => ({
+    selector: `node[kind = "${kind}"]`,
+    style: { 'background-color': meta.color },
+  }));
 
 // Exported so tests can assert the stylesheet directly without a full mount
 // (R-4.3 / R-4.4). Node size is driven by `relevance`, color by `tag`, source
@@ -31,9 +41,9 @@ export const GRAPH_STYLE = [
       'text-halign': 'center',
       'text-margin-y': 4,
       'text-wrap': 'ellipsis',
-      // Shorter cap so neighboring labels stop stacking into one another; a
+      // Cap wide enough to read a spec name without stacking into neighbors; a
       // readable white pill keeps the text legible where it sits over an edge.
-      'text-max-width': 90,
+      'text-max-width': 140,
       'text-background-color': '#ffffff',
       'text-background-opacity': 0.85,
       'text-background-padding': 2,
@@ -58,25 +68,29 @@ export const GRAPH_STYLE = [
     selector: 'node.show-label',
     style: { label: 'data(label)', 'min-zoomed-font-size': 0 },
   },
+  // Color every node by its document type (hld / lld / ears / tasks / …).
+  ...KIND_COLOR_RULES,
+  // Retrieved sources get a dark ring so "this was retrieved" reads regardless
+  // of the node's type color (placed after the color rules; borders don't
+  // conflict with fills).
   {
-    // The synthesized center node ("your query") in the sources-fallback graph.
-    selector: 'node[tag = "query"]',
+    selector: 'node[?isSource]',
+    style: { 'border-width': 3, 'border-color': '#111827' },
+  },
+  // The star's anchor (the query, or the spec a `json related` graph fans out
+  // from): biggest, dark fill, gold ring, always labeled — unmistakably "the
+  // thing this neighborhood is centered on".
+  {
+    selector: 'node[?isAnchor]',
     style: {
       label: 'data(label)',
-      'background-color': '#8b5cf6',
-      'border-width': 2,
-      'border-color': '#7c3aed',
-      'font-weight': 'bold',
-    },
-  },
-  { selector: 'node[tag = "code"]', style: { 'background-color': '#2563eb' } },
-  { selector: 'node[tag = "doc"]', style: { 'background-color': '#16a34a' } },
-  { selector: 'node[tag = "test"]', style: { 'background-color': '#dc2626' } },
-  {
-    selector: '[isSource]',
-    style: {
+      'background-color': KIND_META.query.color,
+      width: 'mapData(relevance, 0, 1, 22, 58)',
+      height: 'mapData(relevance, 0, 1, 22, 58)',
       'border-width': 3,
-      'border-color': '#16a34a',
+      'border-color': '#facc15',
+      'font-weight': 'bold',
+      'font-size': 11,
     },
   },
   // "None" label mode: blank every node's label for an uncluttered structural
@@ -132,16 +146,32 @@ function applyLabelMode(cy, mode) {
   });
 }
 
-export function GraphView({ graph, sources }) {
+export function GraphView({ graph, sources, active = true }) {
   const containerRef = useRef(null);
   const cyRef = useRef(null);
+  const tooltipRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [labelMode, setLabelMode] = useState('sources');
 
   const hasNodes = !!(graph && Array.isArray(graph.nodes) && graph.nodes.length > 0);
+  // Document types present on the current map — drives the legend swatches.
+  const kinds = graphKinds(graph);
+
+  // Pick a sensible default label density per graph: a small star (the common
+  // sources/related view) reads best fully labeled; a dense `json related`
+  // graph would be an unreadable wall of text, so fall back to sources-only.
+  // Resets on each new graph; the user can still override via the toolbar.
+  useEffect(() => {
+    const n = hasNodes ? graph.nodes.length : 0;
+    if (n > 0) setLabelMode(n <= 40 ? 'all' : 'sources');
+  }, [graph, hasNodes]);
 
   useEffect(() => {
-    if (!hasNodes || !containerRef.current) return;
+    // Only build/relayout while the graph pane is actually visible. The pane is
+    // always mounted (tabs toggle `hidden`), so without this the expensive `cose`
+    // layout would rebuild on every `sources` event during a run — thrashing the
+    // main thread and making the whole UI flicker while the user is on another tab.
+    if (!hasNodes || !containerRef.current || !active) return;
 
     cyRef.current = cytoscape({
       container: containerRef.current,
@@ -182,6 +212,38 @@ export function GraphView({ graph, sources }) {
     cy.on('mouseover', 'node, edge', (e) => e.target.addClass('hover'));
     cy.on('mouseout', 'node, edge', (e) => e.target.removeClass('hover'));
 
+    // Node tooltip: reveal the full file path (which the on-canvas label
+    // truncates) in an HTML overlay pinned near the hovered node. The path is
+    // the whole point — labels are ellipsized, so hovering is how you read the
+    // full name. Positioned in the node's rendered (canvas) coordinates, which
+    // map 1:1 onto the tooltip's absolutely-positioned parent (.graph-view).
+    const showTip = (e) => {
+      const tip = tooltipRef.current;
+      if (!tip) return;
+      const full = e.target.data('path') || e.target.data('label') || e.target.data('id');
+      if (!full) return;
+      tip.textContent = full;
+      tip.classList.add('is-visible');
+      moveTip(e);
+    };
+    const moveTip = (e) => {
+      const tip = tooltipRef.current;
+      if (!tip || !tip.classList.contains('is-visible')) return;
+      const { x, y } = e.target.renderedPosition();
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    };
+    const hideTip = () => {
+      const tip = tooltipRef.current;
+      if (tip) tip.classList.remove('is-visible');
+    };
+    cy.on('mouseover', 'node', showTip);
+    cy.on('mousemove', 'node', moveTip);
+    cy.on('mouseout', 'node', hideTip);
+    // Panning/zooming moves nodes out from under the tooltip — hide it so it
+    // never lingers over empty canvas.
+    cy.on('pan zoom', hideTip);
+
     // Apply the current label mode to freshly-built nodes (the graph may be
     // rebuilt while the user is in "All"/"None").
     applyLabelMode(cy, labelMode);
@@ -195,7 +257,7 @@ export function GraphView({ graph, sources }) {
     // labelMode is intentionally omitted: the dedicated effect below re-applies
     // it on change, and re-listing it here would needlessly rebuild the graph.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graph, sources, hasNodes]);
+  }, [graph, sources, hasNodes, active]);
 
   // Re-apply the label mode when the segmented control changes.
   useEffect(() => {
@@ -345,6 +407,29 @@ export function GraphView({ graph, sources }) {
         </button>
       </div>
       <div class="graph-canvas" ref={containerRef} />
+
+      {/* Full-file-name tooltip: shown on node hover (labels are truncated). */}
+      <div class="graph-tooltip" ref={tooltipRef} data-testid="graph-tooltip" />
+
+      {/* Legend: what the colors and rings mean. Only the document types present
+          on the current map are shown, plus the retrieved-source ring marker. */}
+      {kinds.length > 0 && (
+        <div class="graph-legend" data-testid="graph-legend">
+          {kinds.map((k) => (
+            <span class="graph-legend-item" key={k}>
+              <span
+                class={`graph-legend-swatch${k === 'query' ? ' graph-legend-swatch--anchor' : ''}`}
+                style={{ background: KIND_META[k].color }}
+              />
+              {KIND_META[k].label}
+            </span>
+          ))}
+          <span class="graph-legend-item">
+            <span class="graph-legend-swatch graph-legend-swatch--source" />
+            retrieved source
+          </span>
+        </div>
+      )}
     </div>
   );
 }

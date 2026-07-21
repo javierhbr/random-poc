@@ -7,6 +7,7 @@
 // client-side; the strategy toggle is a display-only control.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import { fetchRepos, postQuery, openStream, postReply, postCancel } from './api.js';
 import { RepoPicker, canSubmit } from './components/RepoPicker.jsx';
 import { AnswerPanel } from './components/AnswerPanel.jsx';
@@ -92,6 +93,29 @@ function mergeProvenance(prev, next) {
   return { scope, missing: [...missingByRepo.values()] };
 }
 
+// Each follow-up produces a new answer "version". We keep only the most recent
+// MAX_ANSWER_VERSIONS answers in the transcript; older exchanges roll off.
+const MAX_ANSWER_VERSIONS = 3;
+
+// Count the assistant answers (versions) currently in a flat turn list.
+function assistantCount(turns) {
+  return turns.reduce((n, t) => (t.role === 'assistant' ? n + 1 : n), 0);
+}
+
+// Trim a flat turn list to the last `max` answers, keeping the user question
+// that each retained answer came with. Older exchanges are dropped.
+function capTurns(turns, max = MAX_ANSWER_VERSIONS) {
+  const answerIdx = [];
+  turns.forEach((t, i) => {
+    if (t.role === 'assistant') answerIdx.push(i);
+  });
+  if (answerIdx.length <= max) return turns;
+  let start = answerIdx[answerIdx.length - max];
+  // Keep the user question immediately preceding the oldest retained answer.
+  if (start > 0 && turns[start - 1].role === 'user') start -= 1;
+  return turns.slice(start);
+}
+
 export function App() {
   const [repos, setRepos] = useState([]);
   const [reposError, setReposError] = useState(null);
@@ -116,6 +140,16 @@ export function App() {
   const [model, setModel] = useState(null);
   const [activityEvents, setActivityEvents] = useState([]);
   const [answerMarkdown, setAnswerMarkdown] = useState('');
+  // Threaded transcript of the AI conversation: the original answer plus each
+  // follow-up the user sends and Claude's grounded reply. `answerMarkdown`
+  // holds the latest answer (for copy/save); `turns` holds the whole thread.
+  const [turns, setTurns] = useState([]);
+  // Monotonic answer-version counter (survives roll-off) and the one-time
+  // "oldest answer will roll off" warning gate; `rolloverText` holds the
+  // pending follow-up while that alert is shown.
+  const versionRef = useRef(0);
+  const rolloverWarnedRef = useRef(false);
+  const [rolloverText, setRolloverText] = useState(null);
   const [graph, setGraph] = useState(null);
   const [sources, setSources] = useState([]);
   const [provenance, setProvenance] = useState({});
@@ -174,12 +208,72 @@ export function App() {
     }
   }, []);
 
+  // Stream event handlers, shared by the initial query and any follow-up turn so
+  // a resumed turn continues into the same UI state. `mode` tailors the `done`
+  // event (graph runs surface sources instead of an answer pane).
+  const buildHandlers = useCallback(
+    (mode) => ({
+      status: (d) => {
+        if (d.phase) setPhase(d.phase);
+        if (d.model) setModel(d.model);
+      },
+      activity: (d) => appendActivity('activity', d),
+      assistant: (d) => appendActivity('assistant', d),
+      question: (d) => {
+        setQuestion(d.text || '');
+        appendActivity('question', d);
+        // The turn is paused awaiting the user's clarification — stop the
+        // "working" spinner so the UI doesn't look like it's still searching.
+        setRunning(false);
+      },
+      // The real CLI scopes one repo per call, so a run emits one `sources`
+      // and one `provenance` event PER searched repo — accumulate rather than
+      // replace so multi-repo results and reached-scope both stay complete.
+      sources: (rows) =>
+        setSources((prev) => mergeSources(prev, Array.isArray(rows) ? rows : [])),
+      provenance: (d) => setProvenance((prev) => mergeProvenance(prev, d || {})),
+      graph: (d) => setGraph(d || null),
+      answer: (d) => {
+        const md = d.markdown || '';
+        setAnswerMarkdown(md);
+        // Append this answer as a versioned assistant turn, capping the
+        // transcript to the last MAX_ANSWER_VERSIONS answers (older roll off).
+        versionRef.current += 1;
+        const version = versionRef.current;
+        setTurns((prev) => capTurns([...prev, { role: 'assistant', markdown: md, version }]));
+        setRunning(false);
+        setDone(true);
+        setInspectorTab('ai');
+        closeStream();
+      },
+      reply: (d) => appendActivity('reply', d),
+      error: (d) => {
+        setErrorMsg(d.message || 'stream error');
+        setRunning(false);
+        closeStream();
+      },
+      done: (d) => {
+        setRunning(false);
+        setDone(true);
+        if (d && d.cancelled) setCancelled(true);
+        // No-AI runs produce no answer pane — surface the sources instead.
+        if (mode === 'graph' && !(d && d.cancelled)) setInspectorTab('sources');
+        closeStream();
+      },
+    }),
+    [appendActivity, closeStream]
+  );
+
   const onSubmit = useCallback(async () => {
     if (!canSubmit(selected) || running) return;
 
     // Reset run-scoped state for a fresh query.
     setActivityEvents([]);
     setAnswerMarkdown('');
+    setTurns([]);
+    versionRef.current = 0;
+    rolloverWarnedRef.current = false;
+    setRolloverText(null);
     setGraph(null);
     setSources([]);
     setProvenance({});
@@ -213,49 +307,8 @@ export function App() {
     setRunning(true);
     setStartedAt(Date.now());
 
-    const handlers = {
-      status: (d) => {
-        if (d.phase) setPhase(d.phase);
-        if (d.model) setModel(d.model);
-      },
-      activity: (d) => appendActivity('activity', d),
-      assistant: (d) => appendActivity('assistant', d),
-      question: (d) => {
-        setQuestion(d.text || '');
-        appendActivity('question', d);
-      },
-      // The real CLI scopes one repo per call, so a run emits one `sources`
-      // and one `provenance` event PER searched repo — accumulate rather than
-      // replace so multi-repo results and reached-scope both stay complete.
-      sources: (rows) =>
-        setSources((prev) => mergeSources(prev, Array.isArray(rows) ? rows : [])),
-      provenance: (d) => setProvenance((prev) => mergeProvenance(prev, d || {})),
-      graph: (d) => setGraph(d || null),
-      answer: (d) => {
-        setAnswerMarkdown(d.markdown || '');
-        setRunning(false);
-        setDone(true);
-        setInspectorTab('ai');
-        closeStream();
-      },
-      reply: (d) => appendActivity('reply', d),
-      error: (d) => {
-        setErrorMsg(d.message || 'stream error');
-        setRunning(false);
-        closeStream();
-      },
-      done: (d) => {
-        setRunning(false);
-        setDone(true);
-        if (d && d.cancelled) setCancelled(true);
-        // No-AI runs produce no answer pane — surface the sources instead.
-        if (mode === 'graph' && !(d && d.cancelled)) setInspectorTab('sources');
-        closeStream();
-      },
-    };
-
-    streamRef.current = openStream(id, handlers);
-  }, [selected, running, q, searchMode, appendActivity, closeStream]);
+    streamRef.current = openStream(id, buildHandlers(mode));
+  }, [selected, running, q, searchMode, buildHandlers]);
 
   const onReply = useCallback(
     (text) => {
@@ -272,6 +325,56 @@ export function App() {
     },
     [sessionId, appendActivity]
   );
+
+  // User-initiated follow-up ("comment the result with Claude"): resume the same
+  // Claude session with a new prompt and stream its grounded reply into the
+  // transcript. The backend closed the stream after the last answer, so we
+  // reconnect first (handleStream holds a `done` session's stream open), then reply.
+  const runFollowUp = useCallback(
+    (t) => {
+      setTurns((prev) => [...prev, { role: 'user', markdown: t }]);
+      appendActivity('reply', { text: t });
+      setQuestion('');
+      setRunning(true);
+      setDone(false);
+      // Allow the resumed turn's updated answer to replace the saved entry.
+      savedIdsRef.current.delete(sessionId);
+      streamRef.current = openStream(sessionId, buildHandlers(ranMode));
+      postReply(sessionId, t).catch((err) => {
+        setErrorMsg(err?.message ?? String(err));
+        setRunning(false);
+        setDone(true);
+        closeStream();
+      });
+    },
+    [sessionId, ranMode, appendActivity, buildHandlers, closeStream]
+  );
+
+  // Gate the follow-up: the first time a new answer would push past the
+  // 3-version window, surface an alert explaining the oldest answer rolls off.
+  // Once acknowledged we don't ask again for this run.
+  const onFollowUp = useCallback(
+    (text) => {
+      const t = (text || '').trim();
+      if (!sessionId || !t || running) return;
+      if (assistantCount(turns) >= MAX_ANSWER_VERSIONS && !rolloverWarnedRef.current) {
+        setRolloverText(t);
+        return;
+      }
+      runFollowUp(t);
+    },
+    [sessionId, running, turns, runFollowUp]
+  );
+
+  // Rollover alert actions: proceed (and never warn again this run) or dismiss.
+  const confirmRollover = useCallback(() => {
+    rolloverWarnedRef.current = true;
+    const t = rolloverText;
+    setRolloverText(null);
+    if (t) runFollowUp(t);
+  }, [rolloverText, runFollowUp]);
+
+  const cancelRollover = useCallback(() => setRolloverText(null), []);
 
   const onCancel = useCallback(() => {
     if (!sessionId) return;
@@ -372,6 +475,23 @@ export function App() {
     [graph, sources]
   );
 
+  // Top 10 tags across the retrieved sources, by frequency. Drives the "Top
+  // Tags" inspector tab — a quick read on what themes the results cluster on.
+  // Ties break alphabetically so the order is stable across renders.
+  const topTags = useMemo(() => {
+    const counts = new Map();
+    for (const s of sources) {
+      for (const t of s?.tags || []) {
+        if (t == null || t === '') continue;
+        counts.set(t, (counts.get(t) || 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 10)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [sources]);
+
   // Persist a completed, successful run to local history (once per session id).
   useEffect(() => {
     if (!done || !sessionId || cancelled || errorMsg) return;
@@ -404,6 +524,16 @@ export function App() {
       setQ(run.query || '');
       setSelected(Array.isArray(run.repos) ? run.repos : []);
       setAnswerMarkdown(run.answerMarkdown || '');
+      // Restored history is view-only: seed the transcript from the saved answer
+      // but null the live session so follow-up (which resumes a live session) is
+      // disabled until a fresh query runs.
+      setTurns(
+        run.answerMarkdown ? [{ role: 'assistant', markdown: run.answerMarkdown, version: 1 }] : []
+      );
+      versionRef.current = run.answerMarkdown ? 1 : 0;
+      rolloverWarnedRef.current = false;
+      setRolloverText(null);
+      setSessionId(null);
       setSources(mergeSources([], Array.isArray(run.sources) ? run.sources : []));
       setProvenance(run.provenance || {});
       setGraph(run.graph || null);
@@ -799,13 +929,22 @@ export function App() {
               >
                 <i class="fa-solid fa-circle-nodes" /> Neighborhood Map
               </button>
+              <button
+                type="button"
+                class={`inspector-tab${inspectorTab === 'tags' ? ' is-active' : ''}`}
+                onClick={() => setInspectorTab('tags')}
+              >
+                <i class="fa-solid fa-tags" /> Top Tags
+              </button>
             </div>
             <span class="inspector-ext">
               {inspectorTab === 'ai'
                 ? 'AI Synthesis'
                 : inspectorTab === 'sources'
                   ? `${sources.length} sources`
-                  : 'Graph'}
+                  : inspectorTab === 'tags'
+                    ? `${topTags.length} tags`
+                    : 'Graph'}
             </span>
           </div>
 
@@ -856,10 +995,18 @@ export function App() {
             {ranMode !== 'graph' && (
               <AnswerPanel
                 markdown={answerMarkdown}
+                turns={turns}
                 running={running}
                 done={done}
                 phase={phase}
                 activity={currentActivity}
+                onFollowUp={onFollowUp}
+                canFollowUp={
+                  ranMode !== 'graph' &&
+                  !!sessionId &&
+                  !running &&
+                  turns.some((t) => t.role === 'assistant')
+                }
               />
             )}
           </div>
@@ -911,8 +1058,54 @@ export function App() {
               <p>Retrieved sources are outlined; node size tracks relevance.</p>
             </div>
             <div class="graph-frame">
-              <GraphView graph={graphForView} sources={sources} />
+              <GraphView
+                graph={graphForView}
+                sources={sources}
+                active={inspectorTab === 'graph'}
+              />
             </div>
+          </div>
+
+          {/* Pane 4: top tags across the retrieved sources */}
+          <div
+            class="inspector-pane"
+            data-testid="region-tags"
+            hidden={inspectorTab !== 'tags'}
+          >
+            <div class="graph-intro">
+              <h3>
+                <i class="fa-solid fa-tags" /> Top tags
+              </h3>
+              <p>The 10 most frequent tags across the retrieved sources.</p>
+            </div>
+            {topTags.length === 0 ? (
+              <p class="tag-rank-empty" data-testid="tag-rank-empty">
+                No tags on the current results.
+              </p>
+            ) : (
+              <ol class="tag-rank" data-testid="tag-rank">
+                {topTags.map(({ tag, count }) => (
+                  <li class="tag-rank-item" key={tag}>
+                    <button
+                      type="button"
+                      class="tag-rank-label"
+                      onClick={() => {
+                        setTagFilter(tag);
+                        setInspectorTab('sources');
+                      }}
+                      title={`Filter sources by #${tag}`}
+                    >
+                      #{tag}
+                    </button>
+                    <span
+                      class="tag-rank-bar"
+                      style={{ width: `${(count / topTags[0].count) * 100}%` }}
+                    />
+                    <span class="tag-rank-count">{count}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
 
           <div class="inspector-footer">
@@ -959,6 +1152,44 @@ export function App() {
           </a>
         </span>
       </footer>
+
+      {/* Rollover alert — shown the first time a follow-up would push past the
+          3-version window, explaining that the oldest answer is dropped. */}
+      {rolloverText != null &&
+        createPortal(
+          <div
+            class="alert-modal"
+            data-testid="rollover-modal"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) cancelRollover();
+            }}
+          >
+            <div class="alert-modal-panel" role="alertdialog" aria-modal="true">
+              <h3 class="alert-modal-title">
+                <i class="fa-solid fa-clock-rotate-left" /> Keeping the last {MAX_ANSWER_VERSIONS} answers
+              </h3>
+              <p class="alert-modal-text">
+                You already have {MAX_ANSWER_VERSIONS} saved answer versions. Continuing keeps only
+                the most recent {MAX_ANSWER_VERSIONS} — the <strong>oldest</strong> answer and its
+                question will roll off the transcript.
+              </p>
+              <div class="alert-modal-actions">
+                <button type="button" class="btn-ghost" onClick={cancelRollover}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  data-testid="rollover-continue"
+                  onClick={confirmRollover}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

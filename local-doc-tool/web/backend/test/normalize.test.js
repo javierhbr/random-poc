@@ -68,6 +68,22 @@ test('R-8.1: a result that ends with a question -> question, no answer', () => {
   assert.equal(events[0].data.text, 'Which repo did you mean?');
 });
 
+test('a substantive answer that ends with "?" -> answer + done, not a question', () => {
+  const n = createNormalizer();
+  const answer =
+    '## How notifications work\n\n' +
+    'The vault is the source of truth and a poller scans it.\n\n' +
+    '- `reminder_scanner.py` produces the pressing list\n' +
+    '- the backend exposes it on port 3939\n\n' +
+    'Want me to trace a specific path?';
+  const events = feed(n, [{ type: 'result', subtype: 'success', is_error: false, result: answer }]);
+  assert.deepEqual(
+    events.map((e) => e.type),
+    ['answer', 'done']
+  );
+  assert.equal(events[0].data.markdown, answer);
+});
+
 test('R-2.5: is_error result -> error event, never an answer', () => {
   const n = createNormalizer();
   const events = feed(n, [
