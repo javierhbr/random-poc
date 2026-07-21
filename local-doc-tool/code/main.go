@@ -94,6 +94,10 @@ func main() {
 		cmdJSON(args)
 	case "reset":
 		cmdReset()
+	case "init", "setup":
+		// Manage the per-project search-scope file (.agent/localsearch-config.yaml).
+		// `setup` is an exact alias.
+		cmdInit(args)
 	case "install-skill":
 		cmdInstallSkill(args)
 	case "scan-hooks":
@@ -2273,6 +2277,9 @@ Usage:
   local-search scope set repo1,repo2                  Write .local-search.toml in CWD
   local-search scope clear                            Remove .local-search.toml from CWD
   local-search scope init                             Auto-detect nearest enclosing repo as scope
+
+  local-search init | setup                           Show/create the project scope file (.agent/localsearch-config.yaml)
+  local-search init --add a,b | --remove a | --set a,b   Edit the project scope; --json prints machine state
 
   local-search scan                       Scan all repos
   local-search scan <repo-name>           Scan one repo

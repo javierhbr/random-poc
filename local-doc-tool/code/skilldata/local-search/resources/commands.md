@@ -13,6 +13,7 @@ Prints the current version and exits.
 
 ## Table of contents
 
+0. Project scope (init / setup)
 1. Repo management
 2. Scanning
 3. Searching
@@ -20,6 +21,42 @@ Prints the current version and exits.
 5. Browsing
 6. JSON output (agents)
 7. Maintenance
+
+---
+
+## 0. Project scope (init / setup)
+
+Manages the per-project scope file `<project>/.agent/localsearch-config.yaml`, which
+declares the registered repositories searched from that project. `init` and `setup`
+are exact aliases. The command is non-interactive — the LocalSearch skill drives the
+interactive add/remove/modify/review flow and calls these primitives.
+
+```bash
+local-search init                     # show current scope + available repos; create file if missing
+local-search setup                    # exact alias of init
+local-search init --json              # machine state: {path, exists, empty, repositories, available, unknown}
+local-search init --add repoA,repoB   # add repos to the scope (comma-separated)
+local-search init --remove repoA      # remove repos from the scope
+local-search init --set repoA,repoB   # replace the whole scope list ("" clears it)
+local-search init --dir <path>        # operate on a project dir other than CWD
+```
+
+- Only registered repos are accepted; `--add`/`--set` reject unknown names and list
+  the valid ones. External graphs are added as `graph:<name>` entries.
+- Any invocation creates `.agent/localsearch-config.yaml` if it does not exist.
+- To scope a search from the file (read the list with `local-search init --json`):
+  - `local-search search "<query>" --repos repoA,repoB`
+  - `local-search find "<query>" --scope repoA,repoB` (also `code`)
+
+File shape:
+
+```yaml
+# LocalSearch project scope — repositories searched when running from this project.
+# Names must match `local-search repo list`. Managed by `local-search init`.
+repositories:
+  - platform
+  - docs
+```
 
 ---
 
@@ -317,5 +354,6 @@ deletes and recreates the DB on its own, so the explicit `rm` is optional.)
 
 | Path | Contents |
 |---|---|
+| `<project>/.agent/localsearch-config.yaml` | Per-project search scope (`repositories:` list). Managed by `local-search init`/`setup`; read by the skill, which passes `--scope` to searches. |
 | `~/.local-search/repos` | Registered repo list, pipe-delimited per line: `name\|path`, `name\|path\|skip1,skip2`, or with a 4th date-added field `name\|path\|<skip-dirs>\|<added_at>` (empty 3rd field when there are no skip-dirs: `name\|path\|\|<added_at>`). Legacy 2- and 3-field lines still parse. |
 | `~/.local-search/specs.db` | SQLite database (disposable cache — source files are the truth) |

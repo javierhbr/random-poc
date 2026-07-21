@@ -11,6 +11,7 @@ This is a full rewrite of `local-search.sh` in Go, addressing the core performan
 - [Quick start](#quick-start)
 - [Commands](#commands) — [repos](#repo-management), [scanning](#scanning), [scan automation](#scan-automation-scan-hooks), [searching](#searching), [browsing](#browsing), [maintenance](#maintenance), [web UI](#web-ui), [JSON](#json-output-for-agent-pipelines), [aliases](#command-aliases)
 - [Search syntax](#search-syntax)
+- [How graphify powers search](#how-graphify-powers-search)
 - [Supported file types](#supported-file-types)
 - [Spec format](#spec-format)
 - [File locations](#file-locations)
@@ -237,6 +238,75 @@ local-search search "webhook" --directory billing/           # focus to director
 local-search search "event" --repo backend --directory integrations/  # combine repo and directory
 local-search search "What Triggers a Checkpoint" --directory reference/  # multi-word search
 ```
+
+## How graphify powers search
+
+When a searched repo contains a graphify knowledge graph (`graphify-out/graph.json`,
+auto-detected at scan via `graph.Detect` and stored as the repo's `graph_path`),
+`local-search` folds that graph into results in two ways — and auto-enables it, no
+flags required.
+
+```mermaid
+flowchart TD
+    Q["CLI: local-search search &quot;query&quot;<br/>[--repos --source --rank]"] --> PARSE["cmdSearch — parse flags"]
+    PARSE --> REPOS["localdb.Repos(db)<br/>each repo row carries graph_path<br/>= graphify-out/graph.json<br/>(set at scan via graph.Detect)"]
+    REPOS --> PICK["pick repos<br/>--repos all | graph-only | a,b"]
+    PICK --> COUNT["count graphInPicked<br/>repos where graph_path is set"]
+    COUNT --> AUTO{"resolve auto rules"}
+    AUTO -->|"--source auto → both if any graph,<br/>else fts"| SRC["source = fts | graph | both"]
+    AUTO -->|"--rank auto → graph-aware if any graph,<br/>else bm25"| RNK["rank = bm25 | graph-aware"]
+
+    SRC --> FTS["FTS path — SQLite FTS5<br/>BM25 over spec text → ftsResults"]
+    SRC -->|"source = graph or both"| GH["Graph path<br/>collectGraphHits(query, pickedRepos)"]
+
+    FTS --> BOOST
+    RNK -->|graph-aware| BOOST["applyGraphAwareRanking<br/>per result: graph.Load(repo)<br/>CentralityBoost(specName)<br/>= 1 + log(1+deg)/8, capped 1.5×<br/>adjust BM25 rank, re-sort"]
+
+    GH --> LOAD["graph.Load(name, graph_path, mtime)<br/>parse nodes+links, compute degree<br/>cache by (path, mtime)"]
+    GJSON[("graphify-out/graph.json<br/>nodes + links")] --> LOAD
+    LOAD --> SL["SearchLabels(query, 20)<br/>lowercase SUBSTRING match on node labels<br/>sort by degree desc (centrality)"]
+    SL --> HITS["LabelMatch[] — graph node hits"]
+
+    BOOST --> MERGE["printSearchResults"]
+    HITS --> MERGE
+    MERGE --> OUT["stdout / --json<br/>status: [source · rank · repos N (M with graphs)]<br/>• Spec results (graph-boosted BM25)<br/>• Graph nodes block"]
+```
+
+**Two mechanisms**
+
+1. **Graph node hits** — `collectGraphHits` → `graph.SearchLabels` (`graph/graph.go`): a
+   lowercase **substring match on node labels**, sorted by node degree (centrality).
+   Surfaced as a separate `Graph nodes (N):` block in the output.
+2. **Graph-aware re-ranking** — `applyGraphAwareRanking` → `graph.CentralityBoost`
+   (`main.go`): a spec whose name matches a graph node has its BM25 rank boosted by
+   `1 + log(1+degree)/8` (capped at 1.5×), so graph-central specs edge above near-ties.
+   BM25 stays dominant.
+
+**Auto-routing** — `resolvePlan` (`main.go`) counts graph-enabled repos in the picked
+set and flips the defaults:
+
+| Flag | `auto` behavior |
+|---|---|
+| `--source` | `both` (FTS + graph) if any picked repo has a graph, else `fts` |
+| `--rank` | `graph-aware` if any picked repo has a graph, else `bm25` |
+
+The `[source=… · rank=… · repos=N (M with graphs)]` status line above results shows the
+resolved values.
+
+**Explicit controls**
+
+```bash
+local-search search "notification" --repos graph-only       # only repos with graphify-out/
+local-search search "notification" --source both|graph|fts  # force retrieval source
+local-search search "notification" --rank graph-aware|bm25  # force ranking strategy
+local-search graphs                                         # per-repo graphify status
+local-search graphs add <name> <graph.json> --kind graphify # register a standalone graph
+```
+
+Matching against the graph is **lexical** (substring on labels), not semantic — vector
+re-ranking is the separate `--semantic` path. `find` and `code` blend graphify with the
+code-review-graph and specs using scope weights (specs `1.0`, graphify `0.7`, codegraph
+`0.8`; see `scope/scope.go`).
 
 ## Supported file types
 
