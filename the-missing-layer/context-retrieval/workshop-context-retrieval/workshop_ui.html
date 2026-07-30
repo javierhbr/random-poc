@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased text-slate-800 bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Architecture Workshop</title>
+    
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a premium light feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Smooth transitions */
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms ease-out, transform 300ms ease-out;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-4 shadow-sm">
+        <div class="flex items-center gap-2">
+            <i class="ph-fill ph-book-bookmark text-brand-600 text-2xl"></i>
+            <span class="font-semibold text-slate-900">Workshop</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-900 p-2 transition-colors">
+            <i class="ph ph-list text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-slate-50 border-r border-slate-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col md:relative md:flex-shrink-0 pt-16 md:pt-0">
+        <div class="hidden md:flex p-6 items-center gap-3 border-b border-slate-200 bg-white">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md shadow-brand-500/20">
+                <i class="ph-fill ph-rocket-launch text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-900 leading-tight">Context Strategy</h1>
+                <p class="text-xs text-slate-500 font-medium">Architecture Workshop</p>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-6 px-4">
+            <h2 class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-4 px-2">Modules</h2>
+            <nav id="nav-container" class="space-y-1">
+                <!-- Navigation items injected via JS -->
+            </nav>
+        </div>
+        
+        <div class="p-4 border-t border-slate-200 bg-white text-xs text-slate-500 flex justify-between items-center">
+            <span class="font-medium">Uncle Dev Ecosystem</span>
+            <i class="ph-fill ph-shield-check text-brand-500 text-lg"></i>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/20 z-30 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-y-auto bg-slate-50/50 pt-16 md:pt-0">
+        <div class="max-w-4xl w-full mx-auto p-6 md:p-10 lg:p-12 pb-24">
+            <div id="content-container" class="fade-enter-active">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Workshop Data Model (Updated for Light Mode)
+        const workshopData = [
+            {
+                id: "module-0",
+                title: "Intro: The Big Picture",
+                icon: "ph-presentation-chart",
+                objective: "Understand the fundamental differences between strategy, process, and tools to frame the entire workshop correctly.",
+                diagram: `
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-6">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+                                    <th class="p-4 font-bold">Concept</th>
+                                    <th class="p-4 font-bold">Question it answers</th>
+                                    <th class="p-4 font-bold">Artifact</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm md:text-base divide-y divide-slate-100">
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900">Local Context Strategy</td>
+                                    <td class="p-4 text-slate-600 italic">Where does the truth physically live, and is my copy still valid?</td>
+                                    <td class="p-4 text-slate-700 font-medium font-mono text-sm">local copies + validity metadata</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900">Context Retrieval Process</td>
+                                    <td class="p-4 text-slate-600 italic">How do I go from a task to the right context?</td>
+                                    <td class="p-4 text-slate-700 font-medium">the workflow itself — not a tool</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900">Local Search</td>
+                                    <td class="p-4 text-slate-600 italic">What does the platform do, and why?</td>
+                                    <td class="p-4 text-slate-700 font-medium">specs, PRDs, reality docs, ADRs</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900">Graphify</td>
+                                    <td class="p-4 text-slate-600 italic">How is it implemented, and what does it touch?</td>
+                                    <td class="p-4 text-slate-700 font-medium font-mono text-sm">code graph, EXTRACTED + INFERRED edges</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 font-bold text-slate-900">Company OS / Team OS</td>
+                                    <td class="p-4 text-slate-600 italic">Who owns it, what governs it, is it current?</td>
+                                    <td class="p-4 text-slate-700 font-medium">governance, ownership, lifecycle</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. The Core Philosophy",
+                        content: `<p class="mb-3 text-slate-700 italic border-l-4 border-brand-500 pl-4 py-1 text-lg">"The Context Retrieval Process describes the complete flow rather than a specific technology. Local Search and Graphify are <strong>complementary</strong>, not alternatives — Graphify does not replace Local Search, it grounds it."</p>
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-900 flex gap-3 items-start shadow-sm mt-4">
+                            <i class="ph-fill ph-warning-circle text-amber-600 mt-1 text-lg"></i>
+                            <div>
+                                <strong>Facilitator note:</strong> 
+                                <p class="mt-1 text-sm">If participants leave believing "Graphify is a better grep" or "Local Search is a worse RAG", the workshop failed. The point is the <em>order</em> of the four moves.</p>
+                            </div>
+                        </div>`
+                    }
+                ],
+                demo: `
+                <strong>Pre-flight Checklist (10 min):</strong><br>
+                <code class="block bg-slate-800 text-slate-200 p-3 rounded-lg mt-2 text-sm">
+                # 1. Check Tools<br>
+                local-search version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# expect: >= 0.3.14<br>
+                graphify --version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# expect: >= 0.9.26<br><br>
+                # 2. Install missing<br>
+                curl -fsSL https://raw.githubusercontent.com/metuur-ai/local-search/main/install.sh | bash<br><br>
+                # 3. Pre-build Graphify demo graph (NOT on stage)<br>
+                cd &lt;demo-repo&gt; && graphify .
+                </code>`
+            },
+            {
+                id: "module-1",
+                title: "Module 1: Local Context Strategy",
+                icon: "ph-hard-drives",
+                objective: "Understand why MCP is an acquisition mechanism (not a query mechanism), recognize the 8 benefits of local context, and identify the risks of staleness.",
+                diagram: `
+                    <!-- The Context Acquisition Flow -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm mb-6">
+                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-8 text-center">The Context Acquisition Flow</h3>
+                        
+                        <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-2 lg:gap-4">
+                            <!-- 1. Remote Source -->
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl p-5 w-full md:w-1/3 flex flex-col items-center justify-center text-center shadow-sm">
+                                <div class="bg-slate-400/20 p-2 rounded-full text-slate-500 mb-3"><i class="ph-fill ph-cloud-arrow-down text-2xl"></i></div>
+                                <div class="font-bold text-slate-800 text-lg leading-tight mb-1">Remote Source</div>
+                                <div class="text-xs font-medium text-slate-500">GitHub, Wiki, etc.</div>
+                            </div>
+
+                            <!-- Arrow: Sync Layer -->
+                            <div class="flex flex-col items-center justify-center text-amber-600 md:px-2">
+                                <div class="text-[9px] font-bold uppercase tracking-wider mb-1 whitespace-nowrap">Sync Layer</div>
+                                <i class="ph-bold ph-arrow-right text-xl hidden md:block"></i>
+                                <i class="ph-bold ph-arrow-down text-xl md:hidden"></i>
+                            </div>
+
+                            <!-- 2. Local Workspace -->
+                            <div class="bg-orange-50 border border-orange-200 rounded-xl p-5 w-full md:w-1/3 flex flex-col items-center justify-center text-center shadow-sm relative mt-2 md:mt-0">
+                                <div class="absolute -top-3 md:-top-3 right-1/2 translate-x-1/2 md:translate-x-0 md:right-3 bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm whitespace-nowrap z-10">
+                                    <i class="ph-fill ph-warning-circle text-xs"></i> Staleness Risk
+                                </div>
+                                <div class="text-orange-600 mb-3"><i class="ph-fill ph-hard-drives text-2xl"></i></div>
+                                <div class="font-bold text-orange-700 text-lg leading-tight mb-1">Local Workspace</div>
+                                <div class="text-xs font-medium text-orange-600/80">Materialized Copy</div>
+                            </div>
+
+                            <!-- Arrow: Local Search -->
+                            <div class="flex flex-col items-center justify-center text-blue-500 md:px-2 mt-2 md:mt-0">
+                                <div class="text-[9px] font-bold uppercase tracking-wider mb-1 whitespace-nowrap">Local Search</div>
+                                <i class="ph-bold ph-arrow-right text-xl hidden md:block"></i>
+                                <i class="ph-bold ph-arrow-down text-xl md:hidden"></i>
+                            </div>
+
+                            <!-- 3. Query Index -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 w-full md:w-1/3 flex flex-col items-center justify-center text-center shadow-sm mt-2 md:mt-0">
+                                <div class="text-blue-600 mb-3"><i class="ph-fill ph-database text-2xl"></i></div>
+                                <div class="font-bold text-blue-800 text-lg leading-tight mb-1">Query Index</div>
+                                <div class="text-xs font-medium text-blue-600/80">FTS5 + Code Graphs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Demo -->
+                    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl mb-6 font-mono text-sm text-slate-300">
+                        <div class="flex items-center gap-2 mb-4 text-slate-500 border-b border-slate-700 pb-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="ml-2">bash ~ local-search repo list</span>
+                        </div>
+                        <div><span class="text-brand-400">NAME</span>                  <span class="text-brand-400">ADDED</span>  <span class="text-brand-400">LAST SCAN</span>  <span class="text-brand-400">LAST UPDATE</span>  <span class="text-brand-400">COMMIT</span>    <span class="text-brand-400">GRAPH</span></div>
+                        <div>platform-example-repo 8d     7d         <span class="text-red-400">—</span>            <span class="text-red-400">—</span>         —</div>
+                        <div>docs-workspace        7d     7d         9m           d6a799e   —</div>
+                        <div>squirrel              6d     6d         5d           18d1075   <span class="text-emerald-400">graphify</span></div>
+                        <div>foyer-platform        6d     6d         <span class="text-red-400">—</span>            1133104   —</div>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. The Constraint That Starts Everything",
+                        content: `<p class="mb-3 text-slate-700">Agents cannot always use MCP servers freely due to environment limits, compatibility, auth, or permissions. Thus, <strong>MCP is an acquisition mechanism, not necessarily the final query mechanism.</strong> Pull context down; query locally.</p>`
+                    },
+                    {
+                        title: "2. The Risk Nobody Plans For: Staleness",
+                        content: `<p class="mb-3 text-slate-700">Notice the missing data in the terminal above? There are 5 failure cases for staleness:</p>
+                        <table class="w-full text-left border-collapse text-sm mb-4">
+                            <thead><tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500"><th class="p-2">Case</th><th class="p-2">What happened</th><th class="p-2">Symptom</th></tr></thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr><td class="p-2 font-bold">1</td><td class="p-2">Remote source updated, local copy old</td><td class="p-2 text-slate-600">Agent answers with last quarter's design.</td></tr>
+                                <tr><td class="p-2 font-bold">2</td><td class="p-2">Local copy updated, index old</td><td class="p-2 text-slate-600">Search misses a file that exists on disk.</td></tr>
+                                <tr><td class="p-2 font-bold">3</td><td class="p-2 text-red-600 font-medium">Partial update (Worst case)</td><td class="p-2 text-slate-600">Half the answer is current, half isn't.</td></tr>
+                                <tr><td class="p-2 font-bold">4</td><td class="p-2">Wrong branch</td><td class="p-2 text-slate-600">Coherent answer, but about a reverted feature.</td></tr>
+                                <tr><td class="p-2 font-bold">5</td><td class="p-2">Materialized copy w/o provenance</td><td class="p-2 text-slate-600">You can't even tell which of 1-4 you're in.</td></tr>
+                            </tbody>
+                        </table>`
+                    },
+                    {
+                        title: "3. Division of Responsibility",
+                        content: `<p class="text-slate-700">Local Search indexes what is on disk and is honest about when it last looked. It is <strong>not</strong> responsible for syncing your copies or maintaining original sources. A separate sync layer is required for materialization.</p>`
+                    }
+                ],
+                demo: `Run <code>local-search repo list</code>. Point at the LAST UPDATE and COMMIT columns. Ask the room: <em>Is this context valid?</em> Checkpoint: ensure every participant can say which of the 7 states (up to date, outdated, unknown origin, etc.) their repos are in.`
+            },
+            {
+                id: "module-2",
+                title: "Module 2: Generating Local Context",
+                icon: "ph-magic-wand",
+                objective: "Generate and securely bind high-level platform requirements (PRDs) with low-level component behavior derived from code using grep-able @spec markers.",
+                diagram: `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 text-center">Traceability Hierarchy</h3>
+                        <div class="flex flex-col items-center max-w-3xl mx-auto">
+                            <!-- Level 1 -->
+                            <div class="w-full bg-[#1e293b] text-white rounded-xl p-4 shadow-sm relative z-10 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-[#334155] p-2 rounded-lg text-slate-300"><i class="ph-bold ph-globe text-xl"></i></div>
+                                    <div>
+                                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Platform Level (PRD / EARS Clause)</div>
+                                        <div class="font-semibold text-[15px]">Every inbound call without a verifiable token is rejected</div>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0f172a]/50 px-3 py-1.5 rounded-lg font-mono text-sm text-slate-300 border border-slate-600">req://identity/token-verification@1.0#R1</div>
+                            </div>
+                            <div class="h-6 w-px bg-slate-300 my-1"></div>
+                            <!-- Level 2 -->
+                            <div class="w-11/12 bg-[#eff6ff] border border-blue-200/60 rounded-xl p-4 shadow-sm relative z-10 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-[#dbeafe] p-2 rounded-lg text-blue-600"><i class="ph-bold ph-puzzle-piece text-xl"></i></div>
+                                    <div>
+                                        <div class="text-[10px] text-blue-600 font-bold uppercase tracking-wider mb-0.5">Component Level (Reverse Engineered)</div>
+                                        <div class="font-semibold text-slate-800 text-[15px]">Identity Service / Token Validator</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white px-3 py-1.5 rounded-lg font-mono text-sm text-blue-600 border border-blue-200 shadow-sm">req://identity/token-verification@1.0</div>
+                            </div>
+                            <div class="h-6 w-px bg-slate-300 my-1"></div>
+                            <!-- Level 3 -->
+                            <div class="w-10/12 bg-[#ecfdf5] border border-emerald-200/60 rounded-xl p-4 shadow-sm relative z-10 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-[#d1fae5] p-2 rounded-lg text-emerald-600"><i class="ph-bold ph-code text-xl"></i></div>
+                                    <div>
+                                        <div class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-0.5">Code Level Specifics (@spec Binding)</div>
+                                        <div class="font-semibold text-slate-800 text-[15px]">def test_rejects_unverified_token():</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white px-3 py-1.5 rounded-lg font-mono text-xs text-emerald-600 border border-emerald-200 shadow-sm">@spec req://identity/token-verification@1.0#R1</div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. Two Levels That Must Stay Connected",
+                        content: `<p class="mb-3 text-slate-700"><strong>Platform Context</strong> (what it does/PRDs) vs <strong>Component Context</strong> (what the code actually does). The gap between them is where every stale-doc incident lives.</p>`
+                    },
+                    {
+                        title: "2. The Strict PRD Lifecycle",
+                        content: `<ul class="list-disc pl-5 text-slate-700 space-y-2">
+                            <li>A PRD may only be opened from a brief that is <code>status: validated</code>.</li>
+                            <li>The done-gate refuses closure if the component's reality doc has an <code>updated:</code> date older than the PRD's <code>created:</code> date. <strong>A change is done only when reality is updated.</strong></li>
+                        </ul>`
+                    },
+                    {
+                        title: "3. The Binding: @spec Markers",
+                        content: `<p class="mb-3 text-slate-700">Code repos are NOT modeled by the docs pipeline. The binding back to governance relies purely on grep-able <code>@spec</code> markers tying tests to EARS clauses.</p>
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg font-mono text-sm text-slate-700 mt-2">
+                            # @spec req://payments/settlement-finality@1.0#R2<br>
+                            def test_duplicate_payment_order_is_screened_once():<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;...
+                        </div>`
+                    }
+                ],
+                demo: `<strong>Demo the refusal.</strong> Try to close a PRD before touching the reality doc, and let the gate fail.<br><br>
+                Show Graphify AST extraction: <code>graphify .</code><br>
+                Show grep working everywhere forever: <code>grep -rn "@spec req://" examples/banking/</code>`
+            },
+            {
+                id: "module-3",
+                title: "Module 3: Local Search Retrieval",
+                icon: "ph-magnifying-glass",
+                objective: "Understand the overarching Context Retrieval Process and learn when to route queries to Local Search versus Graphify.",
+                diagram: `
+                    <!-- Logical Aggregation Layer -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm overflow-hidden mb-6">
+                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-8 text-center">Logical Aggregation Layer</h3>
+                        
+                        <!-- Folders Row -->
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-4 relative z-10 w-full max-w-2xl mx-auto">
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl py-4 px-6 w-full md:flex-1 flex flex-col items-center justify-center shadow-sm">
+                                <i class="ph-fill ph-folder text-blue-500 text-3xl mb-2"></i>
+                                <span class="font-mono text-[11px] text-slate-600">payment-specs/</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl py-4 px-6 w-full md:flex-1 flex flex-col items-center justify-center shadow-sm">
+                                <i class="ph-fill ph-folder text-blue-500 text-3xl mb-2"></i>
+                                <span class="font-mono text-[11px] text-slate-600">account-specs/</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl py-4 px-6 w-full md:flex-1 flex flex-col items-center justify-center shadow-sm">
+                                <i class="ph-fill ph-folder text-purple-400 text-3xl mb-2"></i>
+                                <span class="font-mono text-[11px] text-slate-600">platform-reality/</span>
+                            </div>
+                        </div>
+
+                        <!-- Connection Lines (Desktop) -->
+                        <div class="hidden md:block w-full max-w-2xl mx-auto h-12 relative z-0 opacity-40">
+                            <svg width="100%" height="100%" viewBox="0 0 400 40" preserveAspectRatio="none">
+                                <path d="M 66 0 C 66 25, 200 15, 200 40" stroke="#60a5fa" stroke-width="2" fill="none"/>
+                                <path d="M 200 0 L 200 40" stroke="#60a5fa" stroke-width="2" fill="none"/>
+                                <path d="M 333 0 C 333 25, 200 15, 200 40" stroke="#60a5fa" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Connection Lines (Mobile) -->
+                        <div class="md:hidden flex justify-center my-3 text-blue-300">
+                            <i class="ph-bold ph-arrow-down text-2xl"></i>
+                        </div>
+
+                        <!-- Local Search Engine Box -->
+                        <div class="bg-[#2563eb] rounded-xl p-6 md:p-8 shadow-xl max-w-lg mx-auto w-full text-center relative z-10 border border-blue-700">
+                            <div class="bg-white/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                                <i class="ph-bold ph-database text-white text-2xl"></i>
+                            </div>
+                            <h4 class="text-white font-bold text-xl md:text-2xl mb-1">Local Search Engine</h4>
+                            <p class="text-blue-200 text-xs md:text-sm font-medium mb-6">Unified SQLite & Vector Database</p>
+
+                            <!-- Search Input Mock -->
+                            <div class="bg-[#1e40af]/80 rounded-xl p-3 md:p-4 flex items-center justify-between border border-blue-400/20 text-left shadow-inner">
+                                <div>
+                                    <div class="text-blue-300 text-[10px] uppercase font-bold tracking-widest mb-1">Query:</div>
+                                    <div class="text-white font-mono text-xs md:text-sm">"declined payment flow"</div>
+                                </div>
+                                <div class="bg-blue-600/50 p-2 rounded-lg">
+                                    <i class="ph-bold ph-magnifying-glass text-blue-100 text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Comparison -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm overflow-hidden mb-6">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-brand-50 border border-brand-200 p-4 rounded-xl">
+                                <h4 class="font-bold text-brand-900 font-mono text-sm mb-2">search "&lt;q&gt;"</h4>
+                                <ul class="text-sm text-brand-800 space-y-1">
+                                    <li>• Hybrid FTS5 + BM25</li>
+                                    <li>• Scope: Specs only</li>
+                                    <li>• Use for: Quick keyword lookups</li>
+                                </ul>
+                            </div>
+                            <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl">
+                                <h4 class="font-bold text-purple-900 font-mono text-sm mb-2">find "&lt;q&gt;" --scope &lt;repo&gt;</h4>
+                                <ul class="text-sm text-purple-800 space-y-1">
+                                    <li>• Unified scoped search</li>
+                                    <li>• Scope: Specs AND Code Graphs</li>
+                                    <li>• Use for: Comprehensive analysis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. What 'Hybrid FTS5 + BM25' Actually Means",
+                        content: `<ul class="list-disc pl-5 text-slate-700 space-y-2">
+                            <li><strong>FTS5 (The Source):</strong> SQLite's full-text search. No daemon, no network. It's an inverted index on disk.</li>
+                            <li><strong>BM25 (The Ranking):</strong> Scores documents based on term frequency with saturation, inverse document frequency (IDF), and length normalisation.</li>
+                            <li><strong>Hybrid:</strong> Blends keyword score with structural signals (centrality in code graph) and embedding scores (<code>--semantic</code>).</li>
+                        </ul>`
+                    },
+                    {
+                        title: "2. The Search vs Find Trap",
+                        content: `<p class="mb-3 text-slate-700">These are not aliases. <code>search</code> looks across specs globally. <code>find --scope</code> unifies specs + code graph for a specific repository. They even read different scope config files (<code>.local-search.toml</code> vs <code>init --json</code> resolution).</p>`
+                    },
+                    {
+                        title: "3. Wiring into Claude",
+                        content: `<p class="mb-2 text-slate-700">Install via <code>local-search install-skill</code>. The skill dynamically resolves scope using <code>init --json</code> before queries, ensuring agents search exactly what your CLI does. There is <strong>no MCP server</strong> here by deliberate design.</p>`
+                    }
+                ],
+                demo: `Run <code>local-search search "same-day pickup"</code> and point out <code>[source=fts · rank=bm25 · repos=1 (0 with graphs)]</code>.<br> Then show the difference with <code>local-search find "same-day pickup" --scope moonbeam-os</code>.`
+            },
+            {
+                id: "module-4",
+                title: "Module 4: Reaching for Graphify",
+                icon: "ph-graph",
+                objective: "Understand the Context Retrieval Orchestration decision matrix and the critical difference between EXTRACTED and INFERRED edges.",
+                diagram: `
+                    <!-- Context Retrieval Orchestration Diagram -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-10 shadow-sm flex flex-col items-center relative overflow-hidden mb-8">
+                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-8 text-center">Context Retrieval Orchestration</h3>
+                        
+                        <!-- Top Node -->
+                        <div class="bg-[#1e293b] text-white px-6 py-3 rounded-full font-medium shadow-sm flex items-center gap-2 relative z-10 text-sm md:text-base">
+                            <i class="ph-bold ph-robot text-lg"></i> Agent Task: Update retry logic
+                        </div>
+
+                        <!-- Connection lines (Top to Boxes) -->
+                        <div class="w-full max-w-xl h-8 relative -mt-1 z-0 hidden md:block">
+                            <div class="absolute left-1/4 right-1/4 top-1/2 bottom-0 border-t-2 border-l-2 border-r-2 border-slate-300 rounded-t-xl"></div>
+                            <div class="absolute left-1/2 top-0 bottom-1/2 border-l-2 border-slate-300"></div>
+                        </div>
+                        <div class="md:hidden h-8 border-l-2 border-slate-300"></div>
+
+                        <!-- Two Boxes -->
+                        <div class="flex flex-col md:flex-row gap-8 md:gap-6 w-full max-w-3xl relative z-10 mt-2 md:mt-0">
+                            <!-- Box 1 -->
+                            <div class="flex-1 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-6 relative shadow-sm">
+                                <div class="absolute -top-3 left-6 bg-[#3b82f6] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">The "What & Why"</div>
+                                <div class="flex items-center gap-3 mb-5 mt-2">
+                                    <div class="bg-blue-100 p-2 rounded-lg text-blue-600"><i class="ph-fill ph-file-text text-xl"></i></div>
+                                    <div class="text-xl font-bold text-slate-800">Local Search</div>
+                                </div>
+                                <ul class="space-y-3 text-sm text-slate-700 font-medium">
+                                    <li class="flex items-center gap-2"><i class="ph-bold ph-check text-blue-500 text-lg"></i> Business rules</li>
+                                    <li class="flex items-center gap-2"><i class="ph-bold ph-check text-blue-500 text-lg"></i> PRDs & ADRs</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Box 2 -->
+                            <div class="flex-1 bg-[#faf5ff] border border-[#e9d5ff] rounded-xl p-6 relative shadow-sm">
+                                <div class="absolute -top-3 left-6 bg-[#a855f7] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">The "How & Where"</div>
+                                <div class="flex items-center gap-3 mb-5 mt-2">
+                                    <div class="bg-purple-100 p-2 rounded-lg text-purple-600"><i class="ph-fill ph-graph text-xl"></i></div>
+                                    <div class="text-xl font-bold text-slate-800">Graphify</div>
+                                </div>
+                                <ul class="space-y-3 text-sm text-slate-700 font-medium">
+                                    <li class="flex items-center gap-2"><i class="ph-bold ph-check text-purple-500 text-lg"></i> Call graphs</li>
+                                    <li class="flex items-center gap-2"><i class="ph-bold ph-check text-purple-500 text-lg"></i> Code dependencies</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Connection lines (Boxes to Bottom) -->
+                        <div class="w-full max-w-xl h-10 relative mt-2 z-0 hidden md:block">
+                            <div class="absolute left-1/4 right-1/4 top-0 bottom-1/2 border-b-2 border-l-2 border-r-2 border-dashed border-slate-400 rounded-b-xl"></div>
+                            <div class="absolute left-1/2 top-1/2 bottom-0 border-l-2 border-dashed border-slate-400"></div>
+                            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-slate-400 rounded-full"></div>
+                        </div>
+                        <div class="md:hidden h-8 border-l-2 border-dashed border-slate-400"></div>
+
+                        <!-- Bottom Node -->
+                        <div class="bg-[#10b981] text-white px-8 py-5 rounded-xl flex flex-col items-center justify-center relative z-10 w-full max-w-md mt-0 shadow-md">
+                            <i class="ph-fill ph-shield-check text-3xl mb-1 opacity-90"></i>
+                            <div class="text-2xl font-bold">Safe Execution</div>
+                            <div class="text-sm font-medium opacity-90 mt-1">Correlated Context Delivered</div>
+                        </div>
+                    </div>
+
+                    <!-- The Query Routing Table -->
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm mb-6">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">The Question</th>
+                                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">First Tool</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-slate-100">
+                                <tr><td class="p-4 font-medium">What does the platform do / why?</td><td class="p-4 text-brand-600 font-bold">Local Search</td></tr>
+                                <tr><td class="p-4 font-medium">Where is X defined / how does X work?</td><td class="p-4 font-mono text-purple-600 bg-purple-50 rounded">graphify explain "X"</td></tr>
+                                <tr><td class="p-4 font-medium">How does X relate to Y?</td><td class="p-4 font-mono text-purple-600 bg-purple-50 rounded">graphify path "X" "Y"</td></tr>
+                                <tr><td class="p-4 font-medium">What touches the auth flow?</td><td class="p-4 font-mono text-purple-600 bg-purple-50 rounded">graphify query "&lt;q&gt;"</td></tr>
+                                <tr><td class="p-4 font-medium">Give me the architecture overview</td><td class="p-4 font-mono text-slate-600 bg-slate-100 rounded">read GRAPH_REPORT.md</td></tr>
+                                <tr><td class="p-4 font-medium">Who owns this / what governs it?</td><td class="p-4 text-emerald-600 font-bold">Governed docs layer</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. The Context Retrieval Process",
+                        content: `<p class="mb-3 text-slate-700">No single retrieval engine understands the entire platform. The Context Retrieval Process is the overarching architectural layer that orchestrates different specialized engines to build a complete view across Company OS, Platform OS, Team OS, and Personal OS.</p>`
+                    },
+                    {
+                        title: "2. Local Search: The \"What\" and \"Why\"",
+                        content: `<ul class="list-disc pl-5 text-slate-700 space-y-2">
+                            <li><strong>Primary Responsibility:</strong> Retrieve functional and business knowledge stored in documentation.</li>
+                            <li><strong>Use Cases:</strong> Platform reality, domain knowledge, business rules, ADRs, PRDs.</li>
+                            <li><strong>Example Query:</strong> <span class="italic text-slate-600">"What are the business rules for validating a funding source?"</span></li>
+                        </ul>`
+                    },
+                    {
+                        title: "3. Graphify: The \"How\"",
+                        content: `<ul class="list-disc pl-5 text-slate-700 space-y-2">
+                            <li><strong>Primary Responsibility:</strong> Retrieve implementation knowledge directly from the source code.</li>
+                            <li><strong>Use Cases:</strong> Repository structure, call graphs, module dependencies, API events.</li>
+                            <li><strong>Example Query:</strong> <span class="italic text-slate-600">"Which specific microservices consume the PaymentDeclined event, and what database tables do they update?"</span></li>
+                        </ul>`
+                    },
+                    {
+                        title: "4. Context Correlation",
+                        content: `<p class="mb-4 text-slate-700">The magic happens when agents combine both. An agent receives a task, queries Local Search to understand the business requirement, queries Graphify to find exactly where that logic lives in the codebase, and correlates the two to execute the task safely.</p>
+                        
+                        <!-- Correlation Equation Diagram -->
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 shadow-sm">
+                            <div class="text-center">
+                                <div class="text-[#2563eb] font-bold text-xl mb-1">Local Search</div>
+                                <div class="text-slate-500 text-xs font-semibold uppercase tracking-widest">Business Logic</div>
+                            </div>
+                            <i class="ph-bold ph-plus text-slate-300 text-3xl hidden md:block"></i>
+                            <i class="ph-bold ph-plus text-slate-300 text-xl md:hidden"></i>
+                            <div class="text-center">
+                                <div class="text-[#9333ea] font-bold text-xl mb-1">Graphify</div>
+                                <div class="text-slate-500 text-xs font-semibold uppercase tracking-widest">Source Code</div>
+                            </div>
+                            <i class="ph-bold ph-arrow-right text-slate-300 text-3xl hidden md:block"></i>
+                            <i class="ph-bold ph-arrow-down text-slate-300 text-xl md:hidden"></i>
+                            <div class="text-center">
+                                <div class="text-[#059669] font-bold text-xl mb-1">Safe Execution</div>
+                                <div class="text-slate-500 text-xs font-semibold uppercase tracking-widest">Correlated Context</div>
+                            </div>
+                        </div>`
+                    }
+                ],
+                demo: `<code>cd ~/others/metuur/adhd/squirrel</code> (the repo with GRAPH = graphify).<br>
+                Run <code>graphify explain "task capture"</code> and <code>graphify path "InboxItem" "Notification"</code>.<br>
+                View the god nodes: <code>head -60 graphify-out/GRAPH_REPORT.md</code>.`
+            },
+            {
+                id: "module-5",
+                title: "Module 5: Governed Docs Layer - WIP PoC",
+                icon: "ph-folder-lock",
+                objective: "Implement the synchronization layer to resolve staleness and map cross-domain knowledge using Canonical IDs and Tags.",
+                diagram: `
+                    <div class="bg-slate-900 rounded-xl p-4 shadow-sm mb-6 font-mono text-sm text-slate-300">
+                        <span class="text-slate-500"># workspace.yaml</span><br>
+                        <span class="text-brand-300">version:</span> 1<br>
+                        <span class="text-brand-300">repos:</span><br>
+                        &nbsp;&nbsp;- <span class="text-brand-300">name:</span> component-library<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-brand-300">pin:</span> {tag: v1.2.0} <span class="text-slate-500"># Prevents branch drift</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-brand-300">slices:</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {paths: [docs/sdd], localDirectory: knowledge/components/..}<br>
+                    </div>
+                `,
+                concepts: [
+                    {
+                        title: "1. The `knowledge/` Sync Layer",
+                        content: `<p class="mb-2 text-slate-700">This is the direct answer to Module 1's staleness problem. It uses an explicit pin (tag) and an <strong>allowlist</strong> of paths to materialize read-only slices (<code>0444</code>). Gate <code>[8/8]</code> fails on any hand-edit or un-synced slice change.</p>`
+                    },
+                    {
+                        title: "2. Indexed, Not Governed",
+                        content: `<p class="mb-2 text-slate-700">Foreign docs in <code>knowledge/</code> carry no frontmatter IDs and skip validate gates 1-7. If you want a document governed, it belongs in a platform or team root, not the catalog.</p>`
+                    },
+                    {
+                        title: "3. IDs, Tags, and Composition",
+                        content: `<p class="text-slate-700">IDs are canonical (e.g., <code>capability://</code>). Tags are strictly derived by <code>graph build</code>. You can compose searches across teams, tiers, and capabilities entirely via derived tags.</p>`
+                    }
+                ],
+                demo: `Demonstrate <code>workspace status</code> to report pin/slice-set drift. Show a composability search: <code>tag:#component/notification-service -tag:#status/completed</code>`
+            },
+            {
+                id: "module-6",
+                title: "Wrap: The Retrieval Sequence",
+                icon: "ph-list-checks",
+                objective: "Summarize the 7-step sequence for manual or agentic context retrieval.",
+                diagram: ``,
+                concepts: [
+                    {
+                        title: "The 7-Step Sequence",
+                        content: `<ol class="list-decimal pl-5 text-slate-700 font-medium space-y-2">
+                            <li><strong>Is context fresh?</strong> <code>workspace status</code> or <code>local-search repo list</code></li>
+                            <li><strong>What & why?</strong> <code>local-search search</code> (specs) or <code>find --scope</code> (unified)</li>
+                            <li><strong>How is it built?</strong> <code>graphify explain / path / query</code></li>
+                            <li><strong>Who owns it?</strong> <code>governance explain &lt;component&gt;</code></li>
+                            <li><strong>Is it satisfied?</strong> <code>grep -rn "@spec req://..."</code></li>
+                            <li><strong>Act.</strong> (Execute task)</li>
+                            <li><strong>Leave it current.</strong> <code>graphify update .</code> and <code>graph build</code></li>
+                        </ol>`
+                    },
+                    {
+                        title: "Facilitator Safety Net",
+                        content: `<ul class="list-disc pl-5 text-slate-700 space-y-1 mt-2 text-sm">
+                            <li><strong>Why not MCP?</strong> Auth, compatibility, permissions. MCP = acquisition. Local = query.</li>
+                            <li><strong>Edit in knowledge/?</strong> No. 0444 read-only. Fix upstream.</li>
+                            <li><strong>No graphify-out?</strong> Use the pre-built <code>squirrel</code> repo demo.</li>
+                        </ul>`
+                    }
+                ],
+                demo: `Distribute the 7-step sequence. Deliver the closing line: <em>"The governed layers organize knowledge; the Context Retrieval Process is the mechanism that finds it and puts it into context to solve a task."</em>`
+            }
+        ];
+
+        const navContainer = document.getElementById('nav-container');
+        const contentContainer = document.getElementById('content-container');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        let activeModuleId = workshopData[0].id;
+
+        function renderNavigation() {
+            navContainer.innerHTML = workshopData.map((module, index) => {
+                const isActive = module.id === activeModuleId;
+                
+                // Parse the title to format "Intro" vs "Module X"
+                const titleParts = module.title.split(': ');
+                const preTitle = titleParts.length > 1 ? titleParts[0] : module.title;
+                const mainTitle = titleParts.length > 1 ? titleParts.slice(1).join(': ') : '';
+
+                return `
+                    <button onclick="selectModule('${module.id}')" 
+                        class="w-full text-left px-3 py-3 rounded-xl flex items-center gap-3 transition-all duration-200 group relative overflow-hidden ${isActive ? 'bg-brand-50 shadow-sm border border-brand-100' : 'hover:bg-slate-100 text-slate-600 border border-transparent'}">
+                        ${isActive ? '<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-brand-500 rounded-r-full"></div>' : ''}
+                        <div class="${isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-brand-500 transition-colors'}">
+                            <i class="ph-fill ${module.icon} text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold uppercase tracking-wider ${isActive ? 'text-brand-600' : 'text-slate-500'}">${preTitle}</div>
+                            ${mainTitle ? `<div class="text-sm font-semibold truncate ${isActive ? 'text-brand-900' : 'text-slate-700'}">${mainTitle}</div>` : ''}
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderContent() {
+            const module = workshopData.find(m => m.id === activeModuleId);
+            if (!module) return;
+
+            // Trigger reflow for animation
+            contentContainer.classList.remove('fade-enter-active');
+            void contentContainer.offsetWidth; 
+            contentContainer.classList.add('fade-enter');
+
+            contentContainer.innerHTML = `
+                <div class="mb-8">
+                    <div class="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white border border-slate-200 shadow-sm mb-6">
+                        <i class="ph-fill ${module.icon} text-3xl text-brand-600"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">${module.title}</h1>
+                </div>
+
+                <section class="bg-gradient-to-br from-brand-50 to-white border border-brand-200 rounded-2xl p-6 md:p-8 mb-10 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 text-brand-100 hidden md:block">
+                        <i class="ph-fill ph-target text-9xl"></i>
+                    </div>
+                    <h2 class="text-brand-700 font-bold uppercase tracking-widest text-sm flex items-center gap-2 mb-3 relative z-10">
+                        <i class="ph-bold ph-crosshair"></i> Objective
+                    </h2>
+                    <p class="text-lg md:text-xl text-slate-800 font-medium leading-relaxed relative z-10">${module.objective}</p>
+                </section>
+                
+                <!-- Architecture Diagram Injection -->
+                ${module.diagram ? `
+                <section class="mb-12">
+                    <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
+                        <i class="ph-fill ph-blueprint text-brand-500"></i> Architecture Map
+                    </h2>
+                    ${module.diagram}
+                </section>
+                ` : ''}
+
+                <section class="mb-12">
+                    <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
+                        <i class="ph-fill ph-brain text-brand-500"></i> Key Concepts
+                    </h2>
+                    <div class="space-y-6">
+                        ${module.concepts.map(concept => `
+                            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:border-slate-300 transition-colors">
+                                <h3 class="text-lg font-bold text-brand-800 mb-4">${concept.title}</h3>
+                                <div class="text-slate-700 leading-relaxed text-sm md:text-base">
+                                    ${concept.content}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+
+                <section class="bg-emerald-50 border border-emerald-100 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="bg-emerald-100/50 border-b border-emerald-100 px-6 py-4 flex items-center gap-3">
+                        <i class="ph-fill ph-terminal-window text-emerald-600 text-xl"></i>
+                        <h2 class="text-emerald-900 font-bold">Demo Scenario</h2>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <p class="text-emerald-900 text-lg leading-relaxed italic border-l-4 border-emerald-400 pl-4 py-1">
+                            ${module.demo}
+                        </p>
+                    </div>
+                </section>
+            `;
+
+            setTimeout(() => {
+                contentContainer.classList.replace('fade-enter', 'fade-enter-active');
+            }, 10);
+        }
+
+        window.selectModule = function(id) {
+            activeModuleId = id;
+            renderNavigation();
+            renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Close mobile menu if open
+            if (window.innerWidth < 768) {
+                toggleMobileMenu(false);
+            }
+        };
+
+        function toggleMobileMenu(forceState) {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            const newState = forceState !== undefined ? forceState : !isOpen;
+            
+            if (newState) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                sidebarOverlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', () => toggleMobileMenu());
+        sidebarOverlay.addEventListener('click', () => toggleMobileMenu(false));
+
+        // Initial Render
+        renderNavigation();
+        renderContent();
+
+    </script>
+</body>
+</html>
