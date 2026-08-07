@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Spec: Plain Guide & Alignment Handbook</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Light Theme Smooth Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .sidebar-item-active {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-left: 3px solid #0284c7;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-sky-500/20">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-lg text-slate-900 tracking-tight">PLATFORM SPEC</span>
+                        <span class="bg-sky-50 text-sky-700 border border-sky-200 text-xs px-2 py-0.5 rounded-full font-mono font-medium">Diátaxis Guide</span>
+                    </div>
+                    <p class="text-xs text-slate-500 hidden sm:block">Everyone Finished. Nothing Worked. A Plain Guide.</p>
+                </div>
+            </div>
+
+            <!-- Diátaxis Framework Selector Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2 text-xs sm:text-sm font-medium">
+                <button onclick="switchDiataxisMode('explanation')" id="tab-btn-explanation" class="px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 bg-sky-50 text-sky-800 border border-sky-200 font-bold shadow-sm">
+                    <i class="fa-solid fa-book-open text-sky-600"></i>
+                    <span>Explanation</span>
+                    <span class="bg-sky-100 text-sky-800 text-[10px] px-1.5 py-0.5 rounded font-mono hidden md:inline">Understanding</span>
+                </button>
+                <button onclick="switchDiataxisMode('howto')" id="tab-btn-howto" class="px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i class="fa-solid fa-list-check text-emerald-600"></i>
+                    <span>How-To Guides</span>
+                    <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-mono hidden md:inline">Task-Oriented</span>
+                </button>
+                <button onclick="switchDiataxisMode('builder')" id="tab-btn-builder" class="px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i class="fa-solid fa-pen-to-square text-amber-600"></i>
+                    <span>Spec Builder</span>
+                    <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-mono hidden md:inline">Interactive</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area with Sidebar -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+            <div class="sticky top-24 bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-6">
+                
+                <!-- Explanation Links -->
+                <div id="sidebar-explanation-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+                        <span>Explanations</span>
+                        <i class="fa-solid fa-brain text-slate-400"></i>
+                    </h3>
+                    <nav class="space-y-1 text-sm">
+                        <a href="#exp-story" class="sidebar-link sidebar-item-active block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">The Story: Everyone Finished</a>
+                        <a href="#exp-definition" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">What a Platform Spec Is</a>
+                        <a href="#exp-questions" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">The 3 Questions: Why/What/How</a>
+                        <a href="#exp-agreements" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Agreements & Ownership</a>
+                        <a href="#exp-contributions" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Contributions Go Two Ways</a>
+                        <a href="#exp-slices" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Deliver in Slices, Not Layers</a>
+                        <a href="#exp-roles" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Three People Who Need Names</a>
+                        <a href="#exp-wrong" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">The Ways This Goes Wrong</a>
+                    </nav>
+                </div>
+
+                <!-- How-To Links -->
+                <div id="sidebar-howto-group" class="hidden">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+                        <span>How-To Guides</span>
+                        <i class="fa-solid fa-wrench text-slate-400"></i>
+                    </h3>
+                    <nav class="space-y-1 text-sm">
+                        <a href="#howto-decision" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">When You Need One (Tree)</a>
+                        <a href="#howto-write" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">How to Draft in 5 Steps</a>
+                        <a href="#howto-objections" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Handling Team Objections</a>
+                        <a href="#howto-component-spec" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Component Spec 4 Questions</a>
+                    </nav>
+                </div>
+
+                <!-- Spec Builder Info -->
+                <div id="sidebar-builder-group" class="hidden">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+                        <span>Toolkit Tools</span>
+                        <i class="fa-solid fa-sliders text-slate-400"></i>
+                    </h3>
+                    <nav class="space-y-1 text-sm">
+                        <a href="#builder-form" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Live Spec Builder</a>
+                        <a href="#builder-audit" class="sidebar-link block px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Diátaxis Quality Audit</a>
+                    </nav>
+                </div>
+
+                <!-- Diátaxis Framework Context Banner -->
+                <div class="p-3 bg-slate-100/80 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1 font-mono">
+                    <div class="text-sky-700 font-semibold flex items-center space-x-1">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Diátaxis Context</span>
+                    </div>
+                    <p id="diataxis-sidebar-note">
+                        Explanations clarify design rationale, background stories, and mental models for cross-team coordination.
+                    </p>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 min-w-0">
+
+            <!-- SECTION 1: EXPLANATION VIEW -->
+            <div id="view-explanation" class="space-y-8">
+                
+                <!-- Section Intro Banner -->
+                <div class="bg-gradient-to-r from-sky-50 via-white to-indigo-50 border border-sky-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+                    <div class="inline-flex items-center space-x-2 bg-sky-100 border border-sky-200 text-sky-800 text-xs px-3 py-1 rounded-full font-mono mb-3 font-semibold">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>DIÁTAXIS TYPE: EXPLANATION</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">Everyone Finished. Nothing Worked.</h1>
+                    <p class="text-sky-800 font-medium text-sm sm:text-base mb-3">A plain guide to the Platform Spec</p>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Why cross-team initiatives fail even when everyone does good work, and how a shared agreement bridges the space between teams without micromanaging code.
+                    </p>
+                </div>
+
+                <!-- Section: The Problem in One Story -->
+                <section id="exp-story" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                            <span>The Problem, in One Story</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Case Study</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                        A bank decides customers should be able to close their accounts online. It seems simple. Three teams are involved: the <strong>Web team</strong> builds the screen, the <strong>Ledger team</strong> handles account state, and the <strong>Payments team</strong> moves any leftover money.
+                    </p>
+
+                    <!-- Breakdown Graphic -->
+                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-4">
+                        <p class="text-xs sm:text-sm text-slate-700 font-medium">
+                            Three months later, all three report their work complete:
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-slate-800">Web team</span>
+                                    <div class="text-[11px] text-slate-500 font-sans mt-0.5">Built closure flow</div>
+                                </div>
+                                <span class="text-emerald-600 font-bold text-base">done ✓</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-slate-800">Ledger team</span>
+                                    <div class="text-[11px] text-slate-500 font-sans mt-0.5">Built closure state</div>
+                                </div>
+                                <span class="text-emerald-600 font-bold text-base">done ✓</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-slate-800">Payments team</span>
+                                    <div class="text-[11px] text-slate-500 font-sans mt-0.5">Built transfer API</div>
+                                </div>
+                                <span class="text-emerald-600 font-bold text-base">done ✓</span>
+                            </div>
+                        </div>
+
+                        <!-- Failure Banner -->
+                        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-rose-900 font-bold text-sm">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i>
+                                <span>The feature: BROKEN</span>
+                            </div>
+                            <span class="text-xs bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-1 rounded font-mono">Integration Failure</span>
+                        </div>
+
+                        <div class="space-y-2 text-xs sm:text-sm text-slate-700 font-sans leading-relaxed pt-2">
+                            <p><strong>Then someone tries it:</strong></p>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li>The screen asks the ledger whether the account can be closed — but the ledger's answer doesn't account for pending transactions, because nobody told them it should.</li>
+                                <li>The payments team built the transfer as an overnight batch, while the web team assumed it happened instantly and shows a confirmation that isn't true yet.</li>
+                                <li>When a test account is closed before its transfer clears, the customer is locked out of their own money.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-sky-50 border border-sky-200 rounded-xl text-sky-950 text-xs sm:text-sm leading-relaxed space-y-2">
+                        <p class="font-semibold text-sky-900">
+                            Nobody did bad work. Each team solved the problem they were given, correctly, inside their own boundary. What was missing was a shared answer to a small number of questions that none of them owned alone.
+                        </p>
+                        <p class="text-slate-700">
+                            That shared answer is what a <strong>Platform Spec</strong> is.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Section: What a Platform Spec Is -->
+                <section id="exp-definition" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-map text-sky-600"></i>
+                            <span>What a Platform Spec Is</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Conceptual Boundary</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                        A Platform Spec is the agreement between teams who must change different code to produce one outcome. It says <strong>why</strong> the change matters, <strong>what</strong> must be true when it's finished, <strong>how</strong> the pieces work together, <strong>what</strong> each team contributes, and <strong>what</strong> the teams must agree on between them.
+                    </p>
+
+                    <!-- Driver Map Metaphor Graphic -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                        <div class="p-5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+                            <div class="font-bold text-amber-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-hand text-amber-600"></i>
+                                <span>What It Deliberately Does NOT Say</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed text-xs">
+                                It deliberately does not say how any team should build its part. That's the line that makes it useful. The moment a shared document starts prescribing someone's internal design, two things happen: the people who actually know that system stop reading it, and it becomes wrong the first time they learn something.
+                            </p>
+                        </div>
+
+                        <div class="p-5 bg-sky-50/70 border border-sky-200 rounded-xl space-y-2">
+                            <div class="font-bold text-sky-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-compass text-sky-600"></i>
+                                <span>The Driver & Map Analogy</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed text-xs">
+                                Think of it as a map agreed between drivers, not a set of turn-by-turn instructions. The map fixes the destination and the rules of the road where paths cross. Each driver picks their own route.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: The Three Questions -->
+                <section id="exp-questions" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-sitemap text-sky-600"></i>
+                            <span>The Three Questions: Why → What → How</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Core Narrative Structure</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        Everything in a Platform Spec hangs off three questions, in order. Skipping any one of them produces a predictable failure:
+                    </p>
+
+                    <!-- Failure Mode Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                        <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+                            <div class="font-bold text-rose-800 text-sm">Skip WHY ➔</div>
+                            <div class="text-slate-700 font-sans text-xs">Teams optimize the wrong thing beautifully.</div>
+                        </div>
+                        <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+                            <div class="font-bold text-rose-800 text-sm">Skip WHAT ➔</div>
+                            <div class="text-slate-700 font-sans text-xs">Everyone builds toward a different finish line.</div>
+                        </div>
+                        <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+                            <div class="font-bold text-rose-800 text-sm">Skip HOW ➔</div>
+                            <div class="text-slate-700 font-sans text-xs">Discover mismatches during integration testing.</div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown: WHY, WHAT, HOW -->
+                    <div class="space-y-6 text-xs sm:text-sm pt-2">
+                        
+                        <!-- WHY Deep Dive -->
+                        <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-extrabold text-sky-800 text-base">1. WHY — The Problem, in Three Sentences</span>
+                                <span class="bg-sky-100 text-sky-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">Strict 3-Sentence Limit</span>
+                            </div>
+                            <p class="text-slate-700">Who has the problem, and what it costs.</p>
+                            <div class="p-3.5 bg-white border border-slate-200 rounded-lg text-slate-800 font-mono text-xs shadow-sm">
+                                "Customers can't close accounts online. It generates around 400 support calls a month, each averaging eleven minutes. New regulation requires a self-service closure path this year."
+                            </div>
+                            <p class="text-slate-600 text-xs">
+                                Three sentences is a genuine limit, not a stylistic preference. If you need more, you've started describing a solution, anchoring everyone before they've understood the problem. The Why lets teams choose sensibly when hitting unanticipated design decisions without convening a meeting.
+                            </p>
+                        </div>
+
+                        <!-- WHAT Deep Dive -->
+                        <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-extrabold text-sky-800 text-base">2. WHAT — The Outcome, Written So Someone Can Watch It Happen</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">Demonstrable</span>
+                            </div>
+                            <p class="text-slate-700">State what is true when finished, in language a non-engineer can verify by looking at a screen:</p>
+                            <div class="p-3.5 bg-white border border-slate-200 rounded-lg text-emerald-900 font-mono text-xs border-l-4 border-l-emerald-500 shadow-sm">
+                                "A customer can close an eligible account and receive written confirmation, with any remaining balance transferred, within one business day."
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+                                <div class="bg-rose-50 p-3 rounded-lg border border-rose-200 text-rose-900">
+                                    <strong class="text-rose-700">❌ "Improve account management experience"</strong>
+                                    <div class="text-[11px] text-slate-600 mt-0.5">Unverifiable. Nobody can tell when it's done.</div>
+                                </div>
+                                <div class="bg-rose-50 p-3 rounded-lg border border-rose-200 text-rose-900">
+                                    <strong class="text-rose-700">❌ "Build the account closure API"</strong>
+                                    <div class="text-[11px] text-slate-600 mt-0.5">Task wearing an outcome's clothing. Complete API ≠ customer can close account.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HOW Deep Dive -->
+                        <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-extrabold text-sky-800 text-base">3. HOW — The Way the Pieces Work Together</span>
+                                <span class="bg-indigo-100 text-indigo-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold">Interaction Flow</span>
+                            </div>
+                            <p class="text-slate-700">
+                                Describes where the flow starts, who participates, what information moves, and in what order.
+                            </p>
+
+                            <!-- Flow Sequence -->
+                            <div class="p-4 bg-white rounded-lg border border-slate-200 font-mono text-xs space-y-2 text-slate-800 shadow-sm">
+                                <div>1. Customer ➔ requests closure in Account UI</div>
+                                <div>2. Account UI ➔ asks Ledger: "is this account eligible?"</div>
+                                <div class="text-indigo-700 font-semibold pl-4">└─ Ledger needs facts from Balance & Compliance</div>
+                                <div>3. Ledger ➔ returns "eligible"</div>
+                                <div>4. Balance ➔ transfers funds, returns receipt</div>
+                                <div class="bg-amber-100 p-2 rounded text-amber-950 font-bold border border-amber-300">
+                                    5. Ledger ➔ close ONLY after a receipt exists!
+                                </div>
+                                <div>6. Account UI ➔ confirmation to customer</div>
+                            </div>
+
+                            <p class="text-slate-700 text-xs leading-relaxed">
+                                Look at step 5: It's one line, and it's the difference between a working feature and a customer locked out of their money. It isn't a web decision, a ledger decision, or a payments decision. It's a decision about how they relate — which means it has no natural home except this document.
+                            </p>
+
+                            <!-- What Stays Out Box -->
+                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                                <strong>What deliberately stays OUT of the How:</strong> Endpoint paths, field names, payload formats, database schemas, class/function names, and deployment settings. All of that belongs to the teams who own the code.
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Section: Agreements (The Part Everyone Underestimates) -->
+                <section id="exp-agreements" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-handshake text-sky-600"></i>
+                            <span>The Part Everyone Underestimates: Agreements</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Ownership Matrix</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        If the three questions are the skeleton, this section is where the document earns its cost: <strong>the decisions that no single team can make alone.</strong>
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+                        <!-- Platform Decides -->
+                        <div class="bg-sky-50/70 p-5 rounded-xl border border-sky-200 space-y-3">
+                            <div class="font-bold text-sky-900 border-b border-sky-200 pb-2 text-base flex items-center space-x-2">
+                                <i class="fa-solid fa-shield-halved text-sky-600"></i>
+                                <span>THE PLATFORM DECIDES</span>
+                            </div>
+                            <ul class="space-y-2 text-slate-700">
+                                <li>• The shared outcome</li>
+                                <li>• Who owns which responsibility</li>
+                                <li>• The contracts between components</li>
+                                <li>• What happens when something is down</li>
+                                <li>• Rules that span more than one component</li>
+                                <li>• What "done" means, and who checks</li>
+                            </ul>
+                        </div>
+
+                        <!-- Each Team Decides -->
+                        <div class="bg-indigo-50/70 p-5 rounded-xl border border-indigo-200 space-y-3">
+                            <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-2 text-base flex items-center space-x-2">
+                                <i class="fa-solid fa-cube text-indigo-600"></i>
+                                <span>EACH TEAM DECIDES</span>
+                            </div>
+                            <ul class="space-y-2 text-slate-700">
+                                <li>• Its internal design and data model</li>
+                                <li>• Its language, framework, code structure</li>
+                                <li>• How it tests</li>
+                                <li>• How it migrates and rolls out</li>
+                                <li>• Its own estimate and plan</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 3 Callouts for Agreements -->
+                    <div class="space-y-4 pt-2">
+                        <h3 class="font-bold text-slate-900 text-sm">Three Agreements Teams Routinely Push Downward:</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                <div class="font-bold text-sky-800 text-sm">1. Contracts</div>
+                                <p class="text-slate-600 leading-relaxed">
+                                    The interface belongs to neither side. Agree up front: who provides, who consumes, inputs, outputs, error cases — in plain terms, not wire formats.
+                                </p>
+                            </div>
+
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                <div class="font-bold text-sky-800 text-sm">2. What Customer Sees When Broken</div>
+                                <div class="space-y-1 font-mono text-[11px]">
+                                    <div class="p-1.5 bg-white border rounded"><strong>Compliance down ➔</strong> "Can't process online — call us" (fail closed!)</div>
+                                    <div class="p-1.5 bg-white border rounded"><strong>Balance down ➔</strong> Closure blocked, untouched</div>
+                                    <div class="p-1.5 bg-white border rounded"><strong>Ledger down ➔</strong> "Try again shortly"</div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                <div class="font-bold text-sky-800 text-sm">3. Rules Spanning Components</div>
+                                <p class="text-slate-600 leading-relaxed">
+                                    "Eligible to close" requires facts from Balance, Ledger, and Compliance.
+                                </p>
+                                <div class="p-2 bg-emerald-50 border border-emerald-200 rounded text-emerald-900 font-mono font-bold">
+                                    Decision: Ledger composes eligibility; Balance & Compliance expose facts only.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Contributions Go Two Ways -->
+                <section id="exp-contributions" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-right-left text-sky-600"></i>
+                            <span>Contributions Go Two Ways</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Feedback Loops</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        Cross-team work usually fails because a team discovers an assigned task is impossible or built on invalid assumptions. Responsibilities are recorded with a status, and status matters more than anything else in the table:
+                    </p>
+
+                    <!-- Status Workflow Diagram -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4 font-mono text-xs">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="px-3 py-1 bg-sky-100 border border-sky-300 text-sky-800 rounded font-bold">PROPOSED</span>
+                            <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                            <span class="px-3 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded font-bold">ACCEPTED</span>
+                            <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                            <span class="px-3 py-1 bg-indigo-100 border border-indigo-300 text-indigo-900 rounded font-bold">TEAM BUILDS</span>
+                        </div>
+
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 space-y-2 font-sans shadow-sm">
+                            <div class="font-bold text-rose-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                                <span>Objected: "We can't transfer synchronously at that latency"</span>
+                            </div>
+                            <p class="text-slate-600 text-xs">
+                                Spec owner amends the spec or writes down why constraint stands ➔ Resets to <strong>Proposed</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="text-slate-700 text-xs sm:text-sm leading-relaxed">
+                        Objecting isn't obstruction. It's the mechanism by which the spec finds out it was wrong while that's still cheap to fix. When reality contradicts the spec, it changes that day, with a line recording what changed and why. A stale spec is worse than no spec, because people still believe it.
+                    </p>
+                </section>
+
+                <!-- Section: Deliver in Slices, Not in Layers -->
+                <section id="exp-slices" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-layer-group text-sky-600"></i>
+                            <span>Deliver in Slices, Not in Layers</span>
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Roadmap Strategy</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+                        <!-- Layers (Bad) -->
+                        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-3">
+                            <div class="font-bold text-rose-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-xmark text-rose-600"></i>
+                                <span>BY LAYER (Fails Consistently)</span>
+                            </div>
+                            <div class="space-y-1 font-mono text-xs text-slate-700">
+                                <div class="bg-white p-2 rounded border border-rose-200">Phase 1: All the screens</div>
+                                <div class="bg-white p-2 rounded border border-rose-200">Phase 2: All the APIs</div>
+                                <div class="bg-white p-2 rounded border border-rose-200">Phase 3: All data changes</div>
+                                <div class="bg-rose-100 p-2 rounded border border-rose-300 text-rose-900 font-bold">Phase 4: Connect together ⚠️ (Risks land here!)</div>
+                            </div>
+                            <p class="text-slate-600 text-xs">
+                                Defers every integration question to the end, when schedule has no room left and assumptions have hardened.
+                            </p>
+                        </div>
+
+                        <!-- Slices (Good) -->
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                            <div class="font-bold text-emerald-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-check text-emerald-600"></i>
+                                <span>BY SLICE (Platform Spec Approach)</span>
+                            </div>
+                            <div class="space-y-1 font-mono text-xs text-slate-700">
+                                <div class="bg-white p-2 rounded border-l-4 border-l-emerald-500 border-slate-200">Slice 1: See whether account can be closed</div>
+                                <div class="bg-white p-2 rounded border-l-4 border-l-emerald-500 border-slate-200">Slice 2: Close an empty account</div>
+                                <div class="bg-white p-2 rounded border-l-4 border-l-emerald-500 border-slate-200">Slice 3: Close one with money in it</div>
+                                <div class="bg-white p-2 rounded border-l-4 border-l-emerald-500 border-slate-200">Slice 4: Edge cases and bulk</div>
+                            </div>
+                            <p class="text-slate-600 text-xs">
+                                Crosses every layer needed and can be shown working. Every slice includes its own error and empty states!
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Three People Who Need Names -->
+                <section id="exp-roles" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-sky-600"></i>
+                        <span>Three People Who Need Names</span>
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div class="font-bold text-sky-800 text-base">Spec Owner</div>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                One named person. Keeps document true, resolves objections. Usually whoever most needs the outcome—not necessarily a manager.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div class="font-bold text-indigo-800 text-base">Component Owner</div>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                One per team. Accepts or objects to responsibility, works out team delivery, gives estimation ranges.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div class="font-bold text-emerald-800 text-base">Slice Verifier</div>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                One per slice (rotating). The ONLY person who can declare a slice finished by demonstrating it working end-to-end.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Verification Comparison Box -->
+                    <div class="p-4 bg-slate-100 rounded-xl border border-slate-300 font-mono text-xs flex flex-col sm:flex-row justify-around items-center gap-4">
+                        <div class="text-rose-700 font-bold">
+                            Team A: complete | Team B: complete ➔ NOT DONE ❌
+                        </div>
+                        <i class="fa-solid fa-arrow-right text-slate-400 hidden sm:block"></i>
+                        <div class="text-emerald-700 font-bold">
+                            Slice Verifier demonstrates working ➔ DONE ✓
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: The Ways This Goes Wrong -->
+                <section id="exp-wrong" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                        <span>The Ways This Goes Wrong</span>
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
+                        <div class="p-4 bg-rose-50/50 border border-rose-200 rounded-xl space-y-1">
+                            <strong class="text-rose-800 font-bold">1. The spec grows</strong>
+                            <p class="text-slate-600">Someone adds field names, sequence diagrams, suggested class structures. Teams stop reading it. Cut anything that isn't a decision made here.</p>
+                        </div>
+
+                        <div class="p-4 bg-rose-50/50 border border-rose-200 rounded-xl space-y-1">
+                            <strong class="text-rose-800 font-bold">2. The spec never changes</strong>
+                            <p class="text-slate-600">Either nothing has been learned in a month (impossible), or people stopped updating it. A stale spec is worse than no spec.</p>
+                        </div>
+
+                        <div class="p-4 bg-rose-50/50 border border-rose-200 rounded-xl space-y-1">
+                            <strong class="text-rose-800 font-bold">3. Objections stop happening</strong>
+                            <p class="text-slate-600">If no team pushes back, check safety. A spec owner treating objections as authority challenges gets compliance instead of truth.</p>
+                        </div>
+
+                        <div class="p-4 bg-rose-50/50 border border-rose-200 rounded-xl space-y-1">
+                            <strong class="text-rose-800 font-bold">4. The hardening phase reappears</strong>
+                            <p class="text-slate-600">Error handling drifts to the end of the plan one slice at a time. Watch for it closely.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- SECTION 2: HOW-TO GUIDES VIEW -->
+            <div id="view-howto" class="space-y-8 hidden">
+                
+                <!-- Section Intro Banner -->
+                <div class="bg-gradient-to-r from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+                    <div class="inline-flex items-center space-x-2 bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs px-3 py-1 rounded-full font-mono mb-3 font-semibold">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>DIÁTAXIS TYPE: HOW-TO GUIDES</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">Practical Procedures & Execution Guides</h1>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Step-by-step instructions for determining spec necessity, drafting, managing objections, and writing component specs.
+                    </p>
+                </div>
+
+                <!-- Guide 1: Decision Tree Tool -->
+                <section id="howto-decision" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-network-wired text-emerald-600"></i>
+                            <span>When You Need One — And When You Don't</span>
+                        </h2>
+                        <span class="text-xs font-mono text-emerald-700 font-semibold">Interactive Decision Tree</span>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-6">
+                        <div class="space-y-4">
+                            <!-- Question 1 -->
+                            <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                                <label class="block text-sm font-semibold text-slate-800">
+                                    1. Does this initiative require more than ONE team to change code?
+                                </label>
+                                <div class="flex space-x-4">
+                                    <button onclick="answerDecision(1, 'no')" id="q1-no" class="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-mono hover:bg-slate-100 transition shadow-sm">No</button>
+                                    <button onclick="answerDecision(1, 'yes')" id="q1-yes" class="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-mono hover:bg-slate-100 transition shadow-sm">Yes</button>
+                                </div>
+                            </div>
+
+                            <!-- Question 2 -->
+                            <div id="q2-container" class="p-4 bg-white rounded-xl border border-slate-200 space-y-3 opacity-50 pointer-events-none transition-all shadow-sm">
+                                <label class="block text-sm font-semibold text-slate-800">
+                                    2. Is there ONE outcome none of them can deliver alone?
+                                </label>
+                                <div class="flex space-x-4">
+                                    <button onclick="answerDecision(2, 'no')" id="q2-no" class="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-mono hover:bg-slate-100 transition shadow-sm">No</button>
+                                    <button onclick="answerDecision(2, 'yes')" id="q2-yes" class="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-mono hover:bg-slate-100 transition shadow-sm">Yes</button>
+                                </div>
+                            </div>
+
+                            <!-- Decision Result Box -->
+                            <div id="decision-result" class="p-4 rounded-xl border hidden text-sm font-semibold font-mono flex items-center space-x-3 shadow-sm">
+                                <i id="decision-icon" class="text-xl"></i>
+                                <span id="decision-text">Select options above...</span>
+                            </div>
+                        </div>
+
+                        <!-- Notes on Boundary -->
+                        <div class="border-t border-slate-200 pt-4 space-y-2 text-xs text-slate-600">
+                            <div class="font-bold text-slate-800">Two Clarifications Worth Stating Plainly:</div>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Count teams, not repositories.</strong> One team across four repos coordinates in hallway conversations. Two teams sharing one repo need an agreement. Ownership is the expensive boundary.</li>
+                                <li><strong>One new API call between two teams isn't an initiative.</strong> Agree inputs/outputs, open two tickets, move on.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Guide 2: Step-by-Step Drafting -->
+                <section id="howto-write" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-nib text-emerald-600"></i>
+                        <span>How to Draft a Platform Spec in 5 Steps</span>
+                    </h2>
+
+                    <div class="space-y-4 text-xs sm:text-sm">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex space-x-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 border border-emerald-300">1</span>
+                            <div>
+                                <strong class="text-slate-800">Write 3-Sentence WHY:</strong> Who has the problem and what it costs. No solution language.
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex space-x-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 border border-emerald-300">2</span>
+                            <div>
+                                <strong class="text-slate-800">Define Demonstrable WHAT:</strong> Write an outcome verifiable by watching a screen.
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex space-x-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 border border-emerald-300">3</span>
+                            <div>
+                                <strong class="text-slate-800">Map HOW Sequence & Ordering Constraints:</strong> Step-by-step flow. Highlight constraints no single team owns (e.g., close ONLY after receipt).
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex space-x-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 border border-emerald-300">4</span>
+                            <div>
+                                <strong class="text-slate-800">Record Agreements & Send Proposed Contributions:</strong> Assign status PROPOSED until teams accept or object.
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex space-x-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 border border-emerald-300">5</span>
+                            <div>
+                                <strong class="text-slate-800">Define Vertical Slices & Name Slice Verifier:</strong> Order demonstrable slices including error states.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Guide 3: Component Spec -->
+                <section id="howto-component-spec" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-code text-emerald-600"></i>
+                        <span>What Each Team Writes for Itself (Component Spec)</span>
+                    </h2>
+
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        Once a team accepts a responsibility, they write their own short document. It answers 4 questions and inherits everything else by reference (doesn't restate Why or re-derive contract):
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                            <div class="font-bold text-emerald-800 text-sm">1. Architectural Meaning</div>
+                            <p class="text-slate-600">What does this responsibility mean inside our system?</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                            <div class="font-bold text-emerald-800 text-sm">2. Implementation</div>
+                            <p class="text-slate-600">How will we build it — design, data changes, migration?</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                            <div class="font-bold text-emerald-800 text-sm">3. Verification & Proof</div>
+                            <p class="text-slate-600">How will we prove it works, including failure cases?</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                            <div class="font-bold text-emerald-800 text-sm">4. Ranged Estimation</div>
+                            <p class="text-slate-600">What's our estimate range, and what would change it?</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- SECTION 3: INTERACTIVE BUILDER VIEW -->
+            <div id="view-builder" class="space-y-8 hidden">
+                
+                <!-- Section Intro Banner -->
+                <div class="bg-gradient-to-r from-amber-50 via-white to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+                    <div class="inline-flex items-center space-x-2 bg-amber-100 border border-amber-200 text-amber-800 text-xs px-3 py-1 rounded-full font-mono mb-3 font-semibold">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>TOOLKIT: INTERACTIVE SPEC BUILDER</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">Draft & Audit a Platform Spec</h1>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Generate a Diátaxis-compliant Platform Spec with automated compliance audits.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Form Input Section -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5" id="builder-form">
+                        <h2 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
+                            <span>Spec Inputs</span>
+                            <button onclick="loadSampleData()" class="text-xs text-amber-700 hover:underline font-mono font-bold">Load Sample Data</button>
+                        </h2>
+
+                        <!-- Spec Title -->
+                        <div class="space-y-1">
+                            <label class="block text-xs font-semibold text-slate-700">Initiative Title</label>
+                            <input type="text" id="input-title" placeholder="e.g. Self-Service Account Closure" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                        </div>
+
+                        <!-- Spec Owner -->
+                        <div class="space-y-1">
+                            <label class="block text-xs font-semibold text-slate-700">Spec Owner (Named Person)</label>
+                            <input type="text" id="input-owner" placeholder="e.g. A. Silva" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                        </div>
+
+                        <!-- WHY -->
+                        <div class="space-y-2 border-t border-slate-100 pt-3">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-xs font-bold text-amber-800">WHY — Problem (Max 3 Sentences)</label>
+                                <span id="why-count" class="text-[10px] font-mono text-slate-400">0/3 Sentences</span>
+                            </div>
+                            <textarea id="input-why" rows="3" oninput="validateWhySentences()" placeholder="Customers can't close accounts online. It generates 400 support calls/mo. Regulation requires closure this year." class="w-full bg-white border border-slate-300 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"></textarea>
+                        </div>
+
+                        <!-- WHAT -->
+                        <div class="space-y-2 border-t border-slate-100 pt-3">
+                            <label class="block text-xs font-bold text-amber-800">WHAT — Verifiable Outcome</label>
+                            <textarea id="input-what" rows="2" placeholder="A customer can close an eligible account and receive confirmation..." class="w-full bg-white border border-slate-300 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"></textarea>
+                        </div>
+
+                        <!-- HOW -->
+                        <div class="space-y-2 border-t border-slate-100 pt-3">
+                            <label class="block text-xs font-bold text-amber-800">HOW — Sequence & Critical Constraints</label>
+                            <textarea id="input-how" rows="3" placeholder="1. Customer requests closure. 2. UI asks Ledger eligibility. 3. Ledger closes ONLY after transfer receipt exists." class="w-full bg-white border border-slate-300 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono"></textarea>
+                        </div>
+
+                        <!-- Generator Button -->
+                        <button onclick="generateMarkdownSpec()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold rounded-xl text-sm transition shadow-md shadow-amber-500/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-code"></i>
+                            <span>Generate Markdown Spec</span>
+                        </button>
+                    </div>
+
+                    <!-- Output & Preview Section -->
+                    <div class="space-y-6">
+                        <!-- Compliance Audit Widget -->
+                        <div id="builder-audit" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-2">
+                                <span>Diátaxis Quality Audit</span>
+                                <i class="fa-solid fa-list-check text-amber-600"></i>
+                            </h3>
+                            <div class="space-y-2 text-xs font-mono" id="audit-checklist">
+                                <div class="flex items-center space-x-2 text-slate-500" id="rule-check-1">
+                                    <i class="fa-regular fa-circle"></i>
+                                    <span>Rule 1: WHY is &lt;= 3 sentences</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-slate-500" id="rule-check-2">
+                                    <i class="fa-regular fa-circle"></i>
+                                    <span>Rule 2: WHAT is demonstrable/verifiable</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-slate-500" id="rule-check-3">
+                                    <i class="fa-regular fa-circle"></i>
+                                    <span>Rule 3: Spec Owner named</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-slate-500" id="rule-check-4">
+                                    <i class="fa-regular fa-circle"></i>
+                                    <span>Rule 7: Excludes internal code details</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Generated Markdown Output -->
+                        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <span class="text-xs font-bold text-slate-700 font-mono">Generated Markdown Output</span>
+                                <button onclick="copyGeneratedMarkdown()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded border border-slate-300 flex items-center space-x-1 font-sans transition">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span>Copy Markdown</span>
+                                </button>
+                            </div>
+                            <pre id="markdown-output" class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-800 font-mono text-xs overflow-x-auto max-h-96 whitespace-pre-wrap">Click "Generate Markdown Spec" above to create document...</pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Interactivity JavaScript -->
+    <script>
+        // Switch between Diataxis View Modes in Light Theme
+        function switchDiataxisMode(mode) {
+            const expView = document.getElementById('view-explanation');
+            const howtoView = document.getElementById('view-howto');
+            const builderView = document.getElementById('view-builder');
+
+            const btnExp = document.getElementById('tab-btn-explanation');
+            const btnHowto = document.getElementById('tab-btn-howto');
+            const btnBuilder = document.getElementById('tab-btn-builder');
+
+            const groupExp = document.getElementById('sidebar-explanation-group');
+            const groupHowto = document.getElementById('sidebar-howto-group');
+            const groupBuilder = document.getElementById('sidebar-builder-group');
+
+            const note = document.getElementById('diataxis-sidebar-note');
+
+            // Reset all tabs styling
+            [btnExp, btnHowto, btnBuilder].forEach(btn => {
+                btn.className = "px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+            });
+
+            // Hide all views & groups
+            expView.classList.add('hidden');
+            howtoView.classList.add('hidden');
+            builderView.classList.add('hidden');
+
+            groupExp.classList.add('hidden');
+            groupHowto.classList.add('hidden');
+            groupBuilder.classList.add('hidden');
+
+            if (mode === 'explanation') {
+                expView.classList.remove('hidden');
+                groupExp.classList.remove('hidden');
+                btnExp.className = "px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 bg-sky-50 text-sky-800 border border-sky-200 font-bold shadow-sm";
+                note.innerText = "Explanations clarify design rationale, background stories, and mental models for cross-team coordination.";
+            } else if (mode === 'howto') {
+                howtoView.classList.remove('hidden');
+                groupHowto.classList.remove('hidden');
+                btnHowto.className = "px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold shadow-sm";
+                note.innerText = "How-To Guides provide concrete step-by-step procedures to complete specific architecture tasks.";
+            } else if (mode === 'builder') {
+                builderView.classList.remove('hidden');
+                groupBuilder.classList.remove('hidden');
+                btnBuilder.className = "px-3 sm:px-4 py-2 rounded-lg transition-all flex items-center space-x-2 bg-amber-50 text-amber-800 border border-amber-200 font-bold shadow-sm";
+                note.innerText = "Use the interactive builder to construct a spec and audit it against Diátaxis principles.";
+            }
+        }
+
+        // Decision Guide logic
+        function answerDecision(qNum, answer) {
+            const btnYes = document.getElementById(`q${qNum}-yes`);
+            const btnNo = document.getElementById(`q${qNum}-no`);
+            const q2Container = document.getElementById('q2-container');
+            const resultBox = document.getElementById('decision-result');
+            const resultIcon = document.getElementById('decision-icon');
+            const resultText = document.getElementById('decision-text');
+
+            if (qNum === 1) {
+                if (answer === 'no') {
+                    btnNo.className = "px-4 py-2 rounded-lg bg-sky-600 text-white text-xs font-mono font-bold shadow-sm";
+                    btnYes.className = "px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs font-mono";
+                    q2Container.classList.add('opacity-50', 'pointer-events-none');
+                    
+                    resultBox.className = "p-4 rounded-xl border border-sky-200 bg-sky-50 text-sky-900 flex items-center space-x-3 shadow-sm";
+                    resultIcon.className = "fa-solid fa-circle-check text-sky-600 text-xl";
+                    resultText.innerHTML = "<strong>RESULT: Just build it!</strong> Single-team changes do not require a Platform Spec.";
+                    resultBox.classList.remove('hidden');
+                } else {
+                    btnYes.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-mono font-bold shadow-sm";
+                    btnNo.className = "px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs font-mono";
+                    q2Container.classList.remove('opacity-50', 'pointer-events-none');
+                    resultBox.classList.add('hidden');
+                }
+            } else if (qNum === 2) {
+                if (answer === 'no') {
+                    btnNo.className = "px-4 py-2 rounded-lg bg-sky-600 text-white text-xs font-mono font-bold shadow-sm";
+                    btnYes.className = "px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs font-mono";
+                    
+                    resultBox.className = "p-4 rounded-xl border border-slate-300 bg-slate-100 text-slate-800 flex items-center space-x-3 shadow-sm";
+                    resultIcon.className = "fa-solid fa-ticket text-slate-500 text-xl";
+                    resultText.innerHTML = "<strong>RESULT: Separate Tickets.</strong> Agree the inter-team contract, open 2 tickets, and move on.";
+                    resultBox.classList.remove('hidden');
+                } else {
+                    btnYes.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-mono font-bold shadow-sm";
+                    btnNo.className = "px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs font-mono";
+
+                    resultBox.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 flex items-center space-x-3 shadow-sm";
+                    resultIcon.className = "fa-solid fa-file-signature text-emerald-600 text-xl";
+                    resultText.innerHTML = "<strong>RESULT: Write a Platform Spec!</strong> Multiple teams are needed to deliver 1 shared outcome.";
+                    resultBox.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Validate WHY Sentence count
+        function validateWhySentences() {
+            const text = document.getElementById('input-why').value.trim();
+            const counter = document.getElementById('why-count');
+            const check1 = document.getElementById('rule-check-1');
+
+            if (!text) {
+                counter.innerText = "0/3 Sentences";
+                counter.className = "text-[10px] font-mono text-slate-400";
+                return;
+            }
+
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const count = sentences.length;
+
+            counter.innerText = `${count}/3 Sentences`;
+
+            if (count > 0 && count <= 3) {
+                counter.className = "text-[10px] font-mono text-emerald-700 font-bold";
+                check1.className = "flex items-center space-x-2 text-emerald-700 font-bold";
+                check1.querySelector('i').className = "fa-solid fa-circle-check";
+            } else {
+                counter.className = "text-[10px] font-mono text-rose-600 font-bold";
+                check1.className = "flex items-center space-x-2 text-slate-400";
+                check1.querySelector('i').className = "fa-regular fa-circle";
+            }
+        }
+
+        // Load sample data into spec builder
+        function loadSampleData() {
+            document.getElementById('input-title').value = "Self-Service Account Closure";
+            document.getElementById('input-owner').value = "A. Silva";
+            document.getElementById('input-why').value = "Customers can't close accounts online. It generates around 400 support calls a month, each averaging eleven minutes. New regulation requires a self-service closure path this year.";
+            document.getElementById('input-what').value = "A customer can close an eligible account and receive written confirmation, with any remaining balance transferred, within one business day.";
+            document.getElementById('input-how').value = "1. Customer requests closure in Account UI.\n2. Account UI asks Ledger eligibility.\n3. Ledger asks Balance & Compliance facts.\n4. Ledger closes ONLY AFTER transfer receipt exists.";
+            
+            validateWhySentences();
+            
+            const check2 = document.getElementById('rule-check-2');
+            const check3 = document.getElementById('rule-check-3');
+            const check4 = document.getElementById('rule-check-4');
+
+            check2.className = "flex items-center space-x-2 text-emerald-700 font-bold";
+            check2.querySelector('i').className = "fa-solid fa-circle-check";
+
+            check3.className = "flex items-center space-x-2 text-emerald-700 font-bold";
+            check3.querySelector('i').className = "fa-solid fa-circle-check";
+
+            check4.className = "flex items-center space-x-2 text-emerald-700 font-bold";
+            check4.querySelector('i').className = "fa-solid fa-circle-check";
+
+            generateMarkdownSpec();
+        }
+
+        // Generate Spec Markdown
+        function generateMarkdownSpec() {
+            const title = document.getElementById('input-title').value || "[Initiative Title]";
+            const owner = document.getElementById('input-owner').value || "[Spec Owner]";
+            const why = document.getElementById('input-why').value || "[Why problem statement]";
+            const what = document.getElementById('input-what').value || "[What demonstrable outcome]";
+            const how = document.getElementById('input-how').value || "[How interaction sequence]";
+
+            const markdown = `# PLATFORM SPEC: ${title}
+**Spec Owner:** ${owner}
+**Status:** DRAFT
+
+---
+
+## 1. WHY (The Problem, in 3 sentences)
+${why}
+
+---
+
+## 2. WHAT (The Outcome, demonstrable)
+${what}
+
+---
+
+## 3. HOW (How the pieces work together)
+${how}
+
+---
+
+## 4. CONTRIBUTIONS
+| Component | Team | Responsibility | Status |
+| :--- | :--- | :--- | :--- |
+| Account UI | Web | Closure flow & confirmation | ACCEPTED |
+| Ledger | Core | Eligibility decision, closure state | ACCEPTED |
+| Balance | Payments | Final transfer & receipt | OBJECTED |
+
+---
+
+## 5. AGREEMENTS
+### Platform Decides:
+- The shared outcome
+- Who owns which responsibility
+- Contracts between components
+- What happens when something is down (Compliance down -> fail closed)
+- Rules spanning components (Ledger composes eligibility)
+
+### Each Team Decides:
+- Internal design & data model
+- Language, framework, code structure
+- Local testing approach & estimates
+
+---
+
+## 6. VERTICAL SLICES
+1. **Slice 1:** See whether account can be closed (Verifier: ${owner})
+2. **Slice 2:** Close an empty account (Verifier: ${owner})
+3. **Slice 3:** Close account with money in it (Verifier: ${owner})
+4. **Slice 4:** Edge cases and bulk (Verifier: ${owner})
+`;
+
+            document.getElementById('markdown-output').innerText = markdown;
+        }
+
+        // Copy Clipboard Helper
+        function copyGeneratedMarkdown() {
+            const content = document.getElementById('markdown-output').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const btn = event.currentTarget;
+            const original = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i><span>Copied!</span>`;
+            setTimeout(() => {
+                btn.innerHTML = original;
+            }, 2000);
+        }
+
+        // Active link tracker on scroll
+        window.addEventListener('DOMContentLoaded', () => {
+            const links = document.querySelectorAll('.sidebar-link');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    links.forEach(l => l.classList.remove('sidebar-item-active'));
+                    link.classList.add('sidebar-item-active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
