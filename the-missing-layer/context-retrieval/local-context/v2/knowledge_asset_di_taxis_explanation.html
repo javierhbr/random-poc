@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge as an Asset — Diátaxis Explanation</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        diataxis: {
+                            explanation: '#7c3aed',
+                            light: '#f5f3ff',
+                            border: '#ddd6fe'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .prose p {
+            margin-bottom: 1.25rem;
+            line-height: 1.75;
+            color: #334155;
+        }
+        .prose h2 {
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        .prose h3 {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .glow-subtle {
+            box-shadow: 0 4px 20px -2px rgba(2, 132, 199, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                    K
+                </div>
+                <div>
+                    <span class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">Knowledge System Architecture</span>
+                    <span class="hidden sm:inline-block ml-2 text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Organizational Blueprint</span>
+                </div>
+            </div>
+
+            <!-- Diátaxis Archetype Badge -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleDiataxisModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition text-xs sm:text-sm font-semibold">
+                    <i class="fa-solid fa-compass text-purple-600"></i>
+                    <span>Diátaxis: <strong>Explanation</strong></span>
+                    <i class="fa-solid fa-circle-info text-purple-400 ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Diátaxis Archetype Explanation Modal / Drawer -->
+    <div id="diataxis-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
+            <button onclick="toggleDiataxisModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-purple-100 text-purple-700 rounded-xl">
+                    <i class="fa-solid fa-lightbulb text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Diátaxis Quadrant: Explanation Document</h3>
+                    <p class="text-xs text-purple-700 font-medium">Understanding-Oriented • Discursive • Conceptual</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-sm text-slate-600 leading-relaxed mb-6">
+                <p>This document is explicitly structured as an <strong>Explanation</strong> under the Diátaxis technical documentation framework.</p>
+                <div class="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                    <div class="p-2 bg-white rounded border border-slate-200 opacity-60">
+                        <span class="font-bold block text-slate-800">Tutorials</span>
+                        <span>Learning-oriented (Hands-on)</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border border-slate-200 opacity-60">
+                        <span class="font-bold block text-slate-800">How-To Guides</span>
+                        <span>Task-oriented (Problem solving)</span>
+                    </div>
+                    <div class="p-2 bg-purple-100 border-2 border-purple-500 text-purple-900 rounded font-semibold">
+                        <span class="font-bold block text-purple-950">Explanation ✓</span>
+                        <span>Understanding-oriented (Concepts & Reason)</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border border-slate-200 opacity-60">
+                        <span class="font-bold block text-slate-800">Reference</span>
+                        <span>Information-oriented (Facts & Specs)</span>
+                    </div>
+                </div>
+                <p><strong>Why this style?</strong> Explanation documents clarify background context, expose underlying paradigms, and explain <em>why</em> a system should be designed in a certain way rather than prescribing immediate step-by-step commands.</p>
+            </div>
+            <button onclick="toggleDiataxisModal()" class="w-full py-2.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition">Got it, continue reading</button>
+        </div>
+    </div>
+
+    <!-- Main Content Container with Sidebar Layout -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- Left Sidebar Navigation & Table of Contents -->
+            <aside class="lg:col-span-3 sticky top-24 space-y-6 hidden lg:block">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Document Index</h4>
+                    <nav class="space-y-1 text-sm font-medium" id="toc-nav">
+                        <a href="#thesis" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>The Core Thesis</span>
+                        </a>
+                        <a href="#problem" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>Scattered Information</span>
+                        </a>
+                        <a href="#first-step" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>The Trusted Foundation</span>
+                        </a>
+                        <a href="#standardization" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>Standardization vs Tooling</span>
+                        </a>
+                        <a href="#consumers" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>Human & AI Consumers</span>
+                        </a>
+                        <a href="#query-demo" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>Concept Resolution Demo</span>
+                        </a>
+                        <a href="#pipeline" class="toc-item flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            <span>The Maturity Pipeline</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Diátaxis Quadrant Quick Map Box -->
+                <div class="bg-purple-50/60 rounded-xl p-4 border border-purple-100 text-xs space-y-2">
+                    <span class="font-bold text-purple-900 block flex items-center gap-1">
+                        <i class="fa-solid fa-compass"></i> Diátaxis Explanation Mode
+                    </span>
+                    <p class="text-purple-800 leading-relaxed">
+                        This document focuses on <strong>understanding</strong> concepts, contextual background, and structural relationships rather than offering procedural step-by-step guides.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="lg:col-span-9 space-y-10">
+
+                <!-- Hero / Header Title Section -->
+                <section class="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-50 rounded-full blur-3xl -z-10 -mr-20 -mt-20"></div>
+                    
+                    <div class="flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">
+                        <span class="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-100">Conceptual Blueprint</span>
+                        <span>•</span>
+                        <span>Knowledge Management</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
+                        Knowledge Is an Asset, Not a Collection of Documents
+                    </h1>
+
+                    <p class="text-lg text-slate-600 leading-relaxed max-w-3xl mb-6">
+                        An architectural explanation of why AI agents do not replace documentation structure, and how standardizing organizational knowledge creates a shared foundation for both humans and intelligent systems.
+                    </p>
+
+                    <!-- Summary Chips -->
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-slate-100 text-xs font-medium text-slate-600">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700">
+                            <i class="fa-solid fa-database text-indigo-500"></i> Single Source of Truth
+                        </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700">
+                            <i class="fa-solid fa-robot text-purple-500"></i> AI & Human Dual Consumers
+                        </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700">
+                            <i class="fa-solid fa-layer-group text-emerald-500"></i> Standardized Domain Layer
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 1: Core Thesis -->
+                <section id="thesis" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm prose max-w-none">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">1</div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 m-0">The Core Paradigm Shift</h2>
+                            <p class="text-xs text-slate-500 m-0">Moving from document accumulation to operational representation</p>
+                        </div>
+                    </div>
+
+                    <p>
+                        Every organization creates knowledge every day. It defines <strong>how the business operates</strong>, <strong>how the product is designed</strong>, <strong>what decisions have been made</strong>, <strong>what the business rules are</strong>, <strong>which processes exist</strong>, and <strong>which standards should be followed</strong>.
+                    </p>
+
+                    <div class="my-6 p-5 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl">
+                        <h4 class="text-amber-900 font-bold text-base m-0 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i> The Fundamental Problem
+                        </h4>
+                        <p class="text-amber-800 text-sm m-0 mt-2 leading-relaxed">
+                            This knowledge usually ends up scattered across multiple locations, stored in different formats, documented at varying levels of detail, and maintained in disconnected versions. Over time, duplicate information appears, inconsistencies emerge, and documents become outdated until no one knows which version is valid—causing human trust in documentation to collapse.
+                        </p>
+                    </div>
+
+                    <p>
+                        This is not about building a solution for AI. It is about building a <strong>trusted, standardized representation of your organization’s knowledge</strong>. If people can find it, understand it, and trust it, then AI agents can too. AI is not the starting point—it is one of the primary beneficiaries of well-organized knowledge.
+                    </p>
+                </section>
+
+                <!-- SECTION 2: Interactive Architecture Comparison -->
+                <section id="problem" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+                        <div>
+                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Interactive Comparison</span>
+                            <h2 class="text-xl font-bold text-slate-900">Fragmented Silos vs. Standardized Foundation</h2>
+                        </div>
+                        
+                        <!-- Toggle Controls -->
+                        <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold self-start sm:self-auto">
+                            <button id="btn-arch-fragmented" onclick="switchArchView('fragmented')" class="px-4 py-2 rounded-lg transition bg-white text-rose-600 shadow-sm">
+                                <i class="fa-solid fa-ban mr-1.5"></i> Fragmented State
+                            </button>
+                            <button id="btn-arch-unified" onclick="switchArchView('unified')" class="px-4 py-2 rounded-lg transition text-slate-600 hover:text-slate-900">
+                                <i class="fa-solid fa-circle-check mr-1.5"></i> Unified Foundation
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- View 1: Fragmented State -->
+                    <div id="view-fragmented" class="space-y-6">
+                        <div class="p-6 bg-rose-50/50 border border-rose-200 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-rose-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-diagram-project text-rose-500"></i> Traditional Paradigm: Fragmented Document Silos
+                                </h3>
+                                <span class="text-xs font-semibold px-2.5 py-1 bg-rose-100 text-rose-700 rounded-full">High Friction & Friction</span>
+                            </div>
+
+                            <!-- Architecture Graphic -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                                <div class="bg-white p-4 rounded-lg border border-rose-200 shadow-sm space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+                                        <span>Notion / Wikis</span>
+                                        <i class="fa-solid fa-file-lines text-rose-400"></i>
+                                    </div>
+                                    <p class="text-xs text-slate-600">Business rules documented in informal free text. Deprecated definitions remaining active.</p>
+                                    <div class="text-[11px] font-mono bg-rose-50 text-rose-700 p-1.5 rounded">Rule A = Active Customer</div>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg border border-rose-200 shadow-sm space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+                                        <span>Google Drive / Docs</span>
+                                        <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                                    </div>
+                                    <p class="text-xs text-slate-600">Static PDFs from 2023 explaining premium tiers with conflicting definitions.</p>
+                                    <div class="text-[11px] font-mono bg-rose-50 text-rose-700 p-1.5 rounded">Rule B = Premium Tier</div>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg border border-rose-200 shadow-sm space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+                                        <span>Git Repos / Code</span>
+                                        <i class="fa-solid fa-code-branch text-rose-400"></i>
+                                    </div>
+                                    <p class="text-xs text-slate-600">Database schemas with arbitrary column titles lacking semantic domain definitions.</p>
+                                    <div class="text-[11px] font-mono bg-rose-50 text-rose-700 p-1.5 rounded">tbl_usr_st = 3</div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-white rounded-lg border border-rose-200 text-xs text-rose-800 space-y-1">
+                                <strong class="block font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> Consequence:</strong>
+                                <p>Humans waste hours asking around in chat channels. AI agents hallucinate because conflicting rules exist simultaneously across formats.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- View 2: Unified Foundation State (Hidden by default) -->
+                    <div id="view-unified" class="hidden space-y-6">
+                        <div class="p-6 bg-emerald-50/50 border border-emerald-200 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-emerald-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> Paradigm Shift: Shared Knowledge Foundation
+                                </h3>
+                                <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full">Single Source of Truth</span>
+                            </div>
+
+                            <!-- Single Layer Box -->
+                            <div class="bg-white p-5 rounded-xl border-2 border-emerald-500 shadow-sm mb-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Authoritative Knowledge Foundation</span>
+                                    <span class="text-xs bg-emerald-100 text-emerald-800 font-mono px-2 py-0.5 rounded">Canonical Source</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                    <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+                                        <strong class="text-slate-800 block">Common Standards</strong>
+                                        <span class="text-slate-500">Shared naming & schemas</span>
+                                    </div>
+                                    <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+                                        <strong class="text-slate-800 block">Clear Ownership</strong>
+                                        <span class="text-slate-500">Review & maintenance cycles</span>
+                                    </div>
+                                    <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+                                        <strong class="text-slate-800 block">Live Verification</strong>
+                                        <span class="text-slate-500">Continuously updated</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fan out to Consumers -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs">
+                                <div class="p-3 bg-white rounded-lg border border-emerald-200 shadow-sm">
+                                    <i class="fa-solid fa-users text-indigo-500 mb-1 text-base"></i>
+                                    <span class="block font-bold text-slate-800">Human Teams</span>
+                                    <span class="text-slate-500 text-[11px]">Fast onboarding & trust</span>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg border border-emerald-200 shadow-sm">
+                                    <i class="fa-solid fa-network-wired text-emerald-500 mb-1 text-base"></i>
+                                    <span class="block font-bold text-slate-800">APIs & Systems</span>
+                                    <span class="text-slate-500 text-[11px]">Shared business logic</span>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg border border-emerald-200 shadow-sm">
+                                    <i class="fa-solid fa-robot text-purple-500 mb-1 text-base"></i>
+                                    <span class="block font-bold text-slate-800">AI Agents & MCP</span>
+                                    <span class="text-slate-500 text-[11px]">Zero hallucinated rules</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: Standardization Over Tooling -->
+                <section id="standardization" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm prose max-w-none">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">2</div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 m-0">Standardization Is More Important Than the Tool</h2>
+                            <p class="text-xs text-slate-500 m-0">Why organizational alignment precedes software selection</p>
+                        </div>
+                    </div>
+
+                    <p>
+                        Most organizations already have the information they need. What they lack is <strong>organization</strong>. It does not matter whether knowledge lives in a wiki, Git repositories, a custom portal, or a hybrid toolchain. What matters is having a single authoritative reference.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 not-prose">
+                        <!-- Without Standards -->
+                        <div class="p-5 rounded-xl bg-rose-50/60 border border-rose-200 space-y-3">
+                            <h4 class="font-bold text-rose-900 flex items-center gap-2">
+                                <i class="fa-solid fa-xmark text-rose-500"></i> Without Common Standards
+                            </h4>
+                            <ul class="text-xs text-rose-800 space-y-2 list-disc list-inside">
+                                <li>Information becomes difficult to find.</li>
+                                <li>The same business rule is documented multiple times in conflicting ways.</li>
+                                <li>Maintaining documentation becomes prohibitively expensive.</li>
+                                <li>No one knows which version is currently valid.</li>
+                            </ul>
+                        </div>
+
+                        <!-- With Standards -->
+                        <div class="p-5 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-3">
+                            <h4 class="font-bold text-emerald-900 flex items-center gap-2">
+                                <i class="fa-solid fa-check text-emerald-600"></i> With Common Standards
+                            </h4>
+                            <ul class="text-xs text-emerald-800 space-y-2 list-disc list-inside">
+                                <li>Knowledge is significantly easier to create and iterate on.</li>
+                                <li>Maintenance costs drop because canonical entries exist in one place.</li>
+                                <li>Searchability increases for both text search and vector models.</li>
+                                <li>Most importantly, it rebuilds <strong>organizational trust</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: Humans and AI Need the Exact Same Things -->
+                <section id="consumers" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm prose max-w-none">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">3</div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 m-0">AI Agents Change Who Consumes Knowledge</h2>
+                            <p class="text-xs text-slate-500 m-0">Not how knowledge should be organized</p>
+                        </div>
+                    </div>
+
+                    <p>
+                        In the past, documentation was created primarily for human readers. Today, AI agents consume that same knowledge. However, both human workers and artificial intelligence require identical foundational properties:
+                    </p>
+
+                    <!-- Core Pillars Card Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6 not-prose">
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                            <i class="fa-solid fa-bullseye text-indigo-600 text-xl"></i>
+                            <h4 class="font-bold text-slate-900 text-sm">Accurate</h4>
+                            <p class="text-xs text-slate-500">Reflects true reality without misleading gaps</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                            <i class="fa-solid fa-equals text-emerald-600 text-xl"></i>
+                            <h4 class="font-bold text-slate-900 text-sm">Consistent</h4>
+                            <p class="text-xs text-slate-500">Uniform terminology across departments</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-600 text-xl"></i>
+                            <h4 class="font-bold text-slate-900 text-sm">Up-to-Date</h4>
+                            <p class="text-xs text-slate-500">Maintained continuously with clear ownership</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                            <i class="fa-solid fa-magnifying-glass text-purple-600 text-xl"></i>
+                            <h4 class="font-bold text-slate-900 text-sm">Discoverable</h4>
+                            <p class="text-xs text-slate-500">Easy to find via search, API, or semantic index</p>
+                        </div>
+                    </div>
+
+                    <p>
+                        AI does not eliminate the need for good documentation. <strong>It makes good documentation even more critical.</strong> Without standardized knowledge, an AI assistant simply accelerates the rate at which inaccurate information is propagated across the enterprise.
+                    </p>
+                </section>
+
+                <!-- SECTION 5: Interactive Query Resolution Simulator -->
+                <section id="query-demo" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                    <div class="mb-6 pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2 text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+                            <span>Interactive Simulation</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">From Documentation to Intelligent Systems</h2>
+                        <p class="text-xs text-slate-500 mt-1">See how standardized knowledge translates a natural language question into exact operational data execution.</p>
+                    </div>
+
+                    <!-- Sandbox Box -->
+                    <div class="p-6 bg-slate-900 text-white rounded-xl shadow-md space-y-6">
+                        
+                        <!-- User Query Box -->
+                        <div>
+                            <span class="text-[11px] font-mono text-indigo-400 block mb-2 uppercase tracking-wider">Natural Language User Input</span>
+                            <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-between">
+                                <span class="font-mono text-sm sm:text-base text-emerald-400">“How many active premium customers signed up this month?”</span>
+                                <span class="text-xs px-2.5 py-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">AI Prompt</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Clickable Concepts -->
+                        <div>
+                            <span class="text-[11px] font-mono text-slate-400 block mb-2 uppercase">Step 1: Identify Standardized Business Concepts (Click term to inspect)</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="selectConcept('customer')" id="btn-concept-customer" class="concept-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-mono transition text-left active-concept">
+                                    Customer
+                                </button>
+                                <button onclick="selectConcept('premium')" id="btn-concept-premium" class="concept-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-mono transition text-left">
+                                    Premium Customer
+                                </button>
+                                <button onclick="selectConcept('active')" id="btn-concept-active" class="concept-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-mono transition text-left">
+                                    Active
+                                </button>
+                                <button onclick="selectConcept('signup')" id="btn-concept-signup" class="concept-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-mono transition text-left">
+                                    Signup Date
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Concept Resolution Detail Pane -->
+                        <div class="p-4 bg-slate-800/80 rounded-lg border border-slate-700 space-y-3" id="concept-detail-box">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <!-- Step 2: System Execution Preview -->
+                        <div class="pt-4 border-t border-slate-800">
+                            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+                                <span>Resolved SQL / MCP Tool Call Output</span>
+                                <span class="text-emerald-400"><i class="fa-solid fa-check-double"></i> Executed safely via MCP</span>
+                            </div>
+                            <pre class="p-3 bg-slate-950 rounded text-xs font-mono text-slate-300 overflow-x-auto custom-scrollbar border border-slate-800">
+SELECT COUNT(u.id) FROM users u 
+JOIN subscriptions s ON u.id = s.user_id 
+WHERE s.tier_code IN ('PRO', 'ENTERPRISE') 
+  AND s.is_active = 1 AND s.last_billed_at >= NOW() - INTERVAL '30 DAYS'
+  AND u.created_at >= DATE_TRUNC('month', CURRENT_DATE);</pre>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mt-4 italic">
+                        * Without standardized knowledge, the agent only sees random database columns (`usr_tbl`, `st=3`). With standardized knowledge, it understands the business meaning behind the data.
+                    </p>
+                </section>
+
+                <!-- SECTION 6: The Operational Progression Pipeline -->
+                <section id="pipeline" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                    <div class="mb-6 pb-4 border-b border-slate-100">
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Sequential Dependency Framework</span>
+                        <h2 class="text-xl font-bold text-slate-900">The Progression Pipeline</h2>
+                        <p class="text-xs text-slate-500 mt-1">Technology does not fix unorganized knowledge. Each stage strictly relies on the success of the previous.</p>
+                    </div>
+
+                    <!-- Pipeline Steps Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-center text-xs font-semibold my-6" id="pipeline-steps-container">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Active Step Detail Card -->
+                    <div id="pipeline-detail-card" class="p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                        <!-- Dynamic details injected by JS -->
+                    </div>
+                </section>
+
+                <!-- SECTION 7: Access Mechanisms vs Foundation -->
+                <section class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm prose max-w-none">
+                    <h2 class="text-xl font-bold text-slate-900 pb-3 border-b border-slate-100 m-0">Building on Top of the Knowledge Foundation</h2>
+                    <p class="text-sm text-slate-600 mt-4">
+                        Once knowledge is standardized and trusted, it can be exposed through different technologies without changing the underlying information:
+                    </p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 not-prose text-xs">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-800">
+                            <i class="fa-solid fa-magnifying-glass text-indigo-500 mr-1.5"></i> Traditional Search
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-800">
+                            <i class="fa-solid fa-brain text-purple-500 mr-1.5"></i> Semantic Indexes
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-800">
+                            <i class="fa-solid fa-diagram-project text-emerald-500 mr-1.5"></i> Knowledge Graphs
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-800">
+                            <i class="fa-solid fa-plug text-amber-500 mr-1.5"></i> MCP Servers
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600">
+                        These are simply <strong>different ways of accessing the same knowledge</strong>—not different versions of it. The knowledge remains constant; only the access mechanism changes.
+                    </p>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8 mt-12 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-800">Knowledge Architecture Explanation</span>
+                <span>•</span>
+                <span>Diátaxis Framework Compliant</span>
+            </div>
+            <p class="text-slate-400">Light Mode • Single Source of Truth Archetype</p>
+        </div>
+    </footer>
+
+    <script>
+
+        // Diátaxis Modal Toggle
+        function toggleDiataxisModal() {
+            const modal = document.getElementById('diataxis-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Switch Architecture View (Fragmented vs Unified)
+        function switchArchView(type) {
+            const fragView = document.getElementById('view-fragmented');
+            const unifView = document.getElementById('view-unified');
+            const btnFrag = document.getElementById('btn-arch-fragmented');
+            const btnUnif = document.getElementById('btn-arch-unified');
+
+            if (type === 'fragmented') {
+                fragView.classList.remove('hidden');
+                unifView.classList.add('hidden');
+                
+                btnFrag.className = "px-4 py-2 rounded-lg transition bg-white text-rose-600 shadow-sm font-semibold";
+                btnUnif.className = "px-4 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 font-semibold";
+            } else {
+                fragView.classList.add('hidden');
+                unifView.classList.remove('hidden');
+
+                btnUnif.className = "px-4 py-2 rounded-lg transition bg-white text-emerald-600 shadow-sm font-semibold";
+                btnFrag.className = "px-4 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 font-semibold";
+            }
+        }
+
+        // Concept Resolution Sandbox Data
+        const concepts = {
+            customer: {
+                title: "Concept: Customer",
+                definition: "An operational entity holding an active or historical account in the billing system.",
+                owner: "Identity & Billing Domain Team",
+                system: "Users PostgreSQL Database (`users` table)",
+                rule: "Identified uniquely by immutable UUID `u.id`."
+            },
+            premium: {
+                title: "Concept: Premium Customer",
+                definition: "Any account associated with a paid subscription tier ('PRO' or 'ENTERPRISE').",
+                owner: "Revenue Operations Team",
+                system: "Subscriptions Microservice (`subscriptions` table)",
+                rule: "Excludes legacy 'TIER_0' trials and internal test accounts."
+            },
+            active: {
+                title: "Concept: Active Status",
+                definition: "Subscription where `is_active = 1` AND last bill was cleared within 30 days.",
+                owner: "Finance & Accounting",
+                system: "Stripe Billing Events API",
+                rule: "Accounts in 14-day grace period for failed payment are excluded from active reporting."
+            },
+            signup: {
+                title: "Concept: Signup Date",
+                definition: "Timestamp recorded when the initial user record was persisted in UTC.",
+                owner: "Core Platform Engineering",
+                system: "User Audit Log",
+                rule: "Must be truncated to month start using `DATE_TRUNC('month', CURRENT_DATE)`."
+            }
+        };
+
+        function selectConcept(key) {
+            const data = concepts[key];
+            const detailBox = document.getElementById('concept-detail-box');
+            
+            // Highlight buttons
+            document.querySelectorAll('.concept-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`btn-concept-${key}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-600');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+            }
+
+            detailBox.innerHTML = `
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                    <h4 class="font-bold text-sm text-indigo-300 font-mono">${data.title}</h4>
+                    <span class="text-[10px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">Owner: ${data.owner}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                    <div><strong>Standard Definition:</strong> ${data.definition}</div>
+                    <div><strong>Target System:</strong> <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">${data.system}</code></div>
+                </div>
+                <div class="text-xs text-slate-400 pt-1 border-t border-slate-800">
+                    <strong class="text-slate-300">Enforced Business Rule:</strong> ${data.rule}
+                </div>
+            `;
+        }
+
+        // Progression Pipeline Data
+        const pipelineSteps = [
+            { stage: "Knowledge", icon: "fa-brain", title: "1. Capture Knowledge", desc: "Document operational choices, business logic, and rules without worrying about AI integrations yet." },
+            { stage: "Standardization", icon: "fa-layer-group", title: "2. Standardize", desc: "Establish canonical naming, shared domain models, and single authoritative sources for every concept." },
+            { stage: "Trust", icon: "fa-shield-halved", title: "3. Build Trust", desc: "Institute review processes, ownership, and deprecation policies to guarantee freshness." },
+            { stage: "Discoverability", icon: "fa-magnifying-glass", title: "4. Index & Discover", desc: "Make knowledge easily searchable for both human personnel and semantic search tools." },
+            { stage: "Automation", icon: "fa-gears", title: "5. Expose via APIs & MCP", desc: "Connect canonical definitions to live data sources through APIs and Model Context Protocol servers." },
+            { stage: "Intelligence", icon: "fa-robot", title: "6. Autonomous AI", desc: "Deploy AI agents that accurately navigate business systems with zero hallucinated logic." }
+        ];
+
+        function renderPipeline() {
+            const container = document.getElementById('pipeline-steps-container');
+            container.innerHTML = pipelineSteps.map((s, idx) => `
+                <button onclick="selectPipelineStep(${idx})" id="pipe-btn-${idx}" class="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 transition text-left space-y-1">
+                    <div class="flex items-center justify-between text-slate-400 text-xs">
+                        <i class="fa-solid ${s.icon} text-indigo-500"></i>
+                        <span>0${idx + 1}</span>
+                    </div>
+                    <span class="block font-bold text-slate-800 text-xs truncate">${s.stage}</span>
+                </button>
+            `).join('');
+
+            selectPipelineStep(0);
+        }
+
+        function selectPipelineStep(index) {
+            const step = pipelineSteps[index];
+            const detailCard = document.getElementById('pipeline-detail-card');
+
+            pipelineSteps.forEach((_, i) => {
+                const btn = document.getElementById(`pipe-btn-${i}`);
+                if(btn) {
+                    if(i === index) {
+                        btn.className = "p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50/80 text-left space-y-1 shadow-sm";
+                    } else {
+                        btn.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition text-left space-y-1";
+                    }
+                }
+            });
+
+            detailCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                        <i class="fa-solid ${step.icon}"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-base m-0">${step.title}</h4>
+                        <span class="text-xs text-indigo-600 font-semibold">Stage ${index + 1} of 6 in Maturity Pipeline</span>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">${step.desc}</p>
+                <div class="p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-500">
+                    <strong>Architectural Note:</strong> ${index > 0 ? `Requires Stage ${index} (${pipelineSteps[index-1].stage}) to be fully established first.` : 'This is the initial foundation layer.'}
+                </div>
+            `;
+        }
+
+        // Initialize components on load
+        window.addEventListener('DOMContentLoaded', () => {
+            selectConcept('customer');
+            renderPipeline();
+        });
+    </script>
+</body>
+</html>
