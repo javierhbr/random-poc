@@ -1,4 +1,4 @@
-# How to Define the Search Scope with Local Search
+`# How to Define the Search Scope with Local Search
 
 ## Introduction
 
@@ -334,4 +334,4 @@ The combination of default repositories and repositories added on demand makes i
 
 The central idea is simple:
 
-> Each project defines its normal context. Each prompt can extend that context when the task requires it. Local Search searches only within that scope and provides the agent with the most relevant sources needed to understand the problem and respond accurately.
+> Each project defines its normal context. Each prompt can extend that context when the task requires it. Local Search searches only within that scope and provides the agent with the most relevant sources needed to understand the problem and respond accurately.`
