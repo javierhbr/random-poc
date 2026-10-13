@@ -88,3 +88,5 @@ data/
 tmp/
 temp/
 *.tmp
+.serena/
+**/.headroom*
