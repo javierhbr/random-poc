@@ -1,0 +1,600 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Interview Feedback Composer</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container": "#eaedff",
+          "surface-variant": "#dae2fd",
+          "on-primary-fixed-variant": "#3323cc",
+          "error-container": "#ffdad6",
+          "on-tertiary-container": "#ffd2b1",
+          "on-surface-variant": "#464555",
+          "error": "#ba1a1a",
+          "inverse-on-surface": "#eef0ff",
+          "tertiary": "#703a00",
+          "on-background": "#131b2e",
+          "surface-tint": "#4d44e3",
+          "on-error": "#ffffff",
+          "tertiary-fixed-dim": "#ffb77d",
+          "outline-variant": "#c7c4d8",
+          "on-secondary-container": "#00714e",
+          "surface-bright": "#faf8ff",
+          "on-tertiary": "#ffffff",
+          "on-primary": "#ffffff",
+          "primary-container": "#4f46e5",
+          "on-secondary-fixed-variant": "#005137",
+          "secondary-container": "#82f5c1",
+          "background": "#faf8ff",
+          "on-primary-fixed": "#0f0069",
+          "on-tertiary-fixed": "#2f1500",
+          "inverse-primary": "#c3c0ff",
+          "on-error-container": "#93000a",
+          "tertiary-fixed": "#ffdcc3",
+          "primary-fixed-dim": "#c3c0ff",
+          "primary": "#3525cd",
+          "surface-container-low": "#f2f3ff",
+          "tertiary-container": "#934e00",
+          "on-secondary-fixed": "#002114",
+          "on-surface": "#131b2e",
+          "surface": "#faf8ff",
+          "on-tertiary-fixed-variant": "#6e3900",
+          "secondary-fixed": "#85f8c4",
+          "secondary-fixed-dim": "#68dba9",
+          "on-secondary": "#ffffff",
+          "on-primary-container": "#dad7ff",
+          "surface-container-lowest": "#ffffff",
+          "surface-dim": "#d2d9f4",
+          "secondary": "#006c4a",
+          "outline": "#777587",
+          "primary-fixed": "#e2dfff",
+          "surface-container-highest": "#dae2fd",
+          "inverse-surface": "#283044",
+          "surface-container-high": "#e2e7ff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "gutter": "1.5rem",
+          "space-lg": "1.5rem",
+          "space-xs": "0.25rem",
+          "gutter-mobile": "1rem",
+          "space-xl": "2.5rem",
+          "margin-mobile": "1rem",
+          "margin": "2rem",
+          "space-md": "1rem",
+          "space-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "headline-xl": ["Hanken Grotesk"],
+          "label-md": ["Geist"],
+          "body-sm": ["Hanken Grotesk"],
+          "label-sm": ["Geist"],
+          "label-lg": ["Geist"],
+          "body-lg": ["Hanken Grotesk"],
+          "headline-md": ["Hanken Grotesk"],
+          "body-md": ["Hanken Grotesk"],
+          "headline-sm": ["Hanken Grotesk"],
+          "headline-xl-mobile": ["Hanken Grotesk"],
+          "headline-lg": ["Hanken Grotesk"],
+          "code-sm": ["JetBrains Mono"]
+        },
+        "fontSize": {
+          "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+          "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+          "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "headline-xl-mobile": ["26px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-slate-50 text-slate-900 font-body-md antialiased selection:bg-indigo-100 selection:text-indigo-900 min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"><div class="h-16 w-full px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg min-w-0"><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span><span class="font-headline-sm text-headline-sm text-slate-900 tracking-tight whitespace-nowrap">Feedback Composer</span></div><span class="font-body-sm text-body-sm text-slate-500 truncate hidden xl:inline">Capture observations, not sentences. Compose feedback, don't rewrite it.</span></div><nav class="hidden md:flex items-center bg-slate-100 p-space-xs rounded-lg border border-slate-200" data-active-classes="bg-indigo-600 text-white font-semibold rounded-lg"><a aria-current="page" class="px-space-md py-space-xs transition-colors bg-indigo-600 text-white font-semibold rounded-lg shadow-sm font-label-md text-label-md" data-path="live-session" href="#">1. Live Session</a><a class="font-label-md text-label-md px-space-md py-space-xs rounded text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-colors" data-path="feedback-review" href="#">2. Feedback Review</a></nav></div><div class="flex items-center gap-space-md shrink-0"><div class="hidden lg:flex items-center gap-space-md bg-slate-100 border border-slate-200 px-space-md py-space-xs rounded-lg"><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-slate-500 uppercase">Flow</span><span class="font-code-sm text-code-sm text-indigo-700 font-semibold">Step 1 of 2: Live Session</span></div><span class="w-1 h-1 rounded-full bg-slate-300"></span><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-slate-500 uppercase">Candidate</span><span class="font-code-sm text-code-sm text-slate-900 font-semibold">Elena Rostova</span></div><span class="w-1 h-1 rounded-full bg-slate-300"></span><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-slate-500 uppercase">Template</span><span class="font-code-sm text-code-sm text-emerald-700 font-medium">Staff_Eng_L6.json</span></div><span class="w-1 h-1 rounded-full bg-slate-300"></span><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span><span class="font-code-sm text-code-sm text-emerald-700">Autosaved local</span></div></div><div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm"><span class="material-symbols-outlined text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-slate-50 flex-1"><div class="flex flex-col w-full">
+<!-- Dynamic Audio/Visual Ambient Micro-Ticker (Zero distraction, pure state awareness) -->
+<div class="w-full bg-white border-b border-slate-200 px-margin py-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<span class="inline-flex items-center gap-space-xs font-label-sm text-label-sm uppercase tracking-widest text-slate-500">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+        Microphone Live Ingest
+      </span>
+<span class="font-code-sm text-code-sm text-indigo-700 font-medium hidden sm:inline">Rubric Buffer: Sync Active (0 dropped events)</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-code-sm text-code-sm text-amber-800 font-medium hidden md:inline">Hotkeys: [1..4] Select • [N] Notes • [⌘+Enter] Synthesize</span>
+<div class="flex items-center gap-1">
+<span class="w-1 h-3 bg-emerald-500 rounded-full"></span>
+<span class="w-1 h-4 bg-emerald-500 rounded-full animate-pulse"></span>
+<span class="w-1 h-2 bg-emerald-500 rounded-full"></span>
+<span class="w-1 h-5 bg-emerald-600 rounded-full"></span>
+<span class="w-1 h-3 bg-emerald-500 rounded-full"></span>
+</div>
+</div>
+</div>
+<!-- Top Exercise Navigation & Session Banner -->
+<section class="w-full bg-white border-b border-slate-200 px-margin py-space-md shadow-sm">
+<div class="max-w-[1720px] mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<!-- Candidate & Meta Details -->
+<div class="flex flex-wrap items-center gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-headline-sm text-headline-sm font-semibold">
+            ER
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-slate-900 font-semibold tracking-tight">Elena Rostova</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase font-semibold">Staff AI Systems Engineer</span>
+</div>
+<div class="flex items-center gap-space-md mt-0.5">
+<div class="flex items-center gap-space-xs text-slate-500 font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[15px] text-amber-700">timer</span>
+<span class="text-slate-900 font-semibold" id="elapsed-time">27:36</span>
+<span class="">/ 45:00</span>
+</div>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span class="font-code-sm text-code-sm text-emerald-700 flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[14px]">cloud_done</span> Autosaved to local memory
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stepper Pills for Section Progress -->
+<nav aria-label="Session Exercises" class="flex flex-wrap items-center gap-space-xs">
+<!-- Step 1 Complete -->
+<a class="group flex items-center gap-space-xs px-space-md py-space-xs rounded-xl bg-slate-100 hover:bg-slate-200/70 border border-slate-200 transition-colors" href="#exercise-1">
+<span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-code-sm text-code-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-slate-800 font-medium truncate max-w-[190px]">1. Prompt Decomposition</span>
+<span class="font-code-sm text-code-sm text-emerald-700 font-medium">Complete • 3/3 logged</span>
+</div>
+</a>
+<!-- Step 2 Active -->
+<a class="group flex items-center gap-space-xs px-space-md py-space-xs rounded-xl bg-indigo-50/80 border border-indigo-300 shadow-sm ring-1 ring-indigo-200" href="#exercise-2">
+<span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-code-sm text-code-sm font-semibold animate-pulse">
+            2
+          </span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-indigo-950 font-semibold truncate max-w-[210px]">2. Code Synthesis &amp; Edge Cases</span>
+<span class="font-code-sm text-code-sm text-indigo-700 font-semibold">ACTIVE • 2/4 logged</span>
+</div>
+</a>
+<!-- Step 3 Upcoming -->
+<a class="group flex items-center gap-space-xs px-space-md py-space-xs rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors opacity-70" href="#exercise-3">
+<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-code-sm text-code-sm font-semibold">
+            3
+          </span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-slate-600 font-medium truncate max-w-[190px]">3. Architecture Trade-offs</span>
+<span class="font-code-sm text-code-sm text-slate-500">Upcoming • 0/3 logged</span>
+</div>
+</a>
+</nav>
+</div>
+</section>
+<!-- Dual-Stream Workbench Container -->
+<main class="w-full max-w-[1720px] mx-auto px-margin py-space-lg flex-1">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Primary Stream (Left ~68% on Desktop: 8 cols of 12) -->
+<section class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Exercise Schema Title Banner -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-white border border-slate-200 px-space-lg py-space-md rounded-xl shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm text-indigo-700 uppercase tracking-wider font-semibold">Active Schema: exercise-2.json</span>
+<span class="font-code-sm text-code-sm text-slate-500">• L6 Benchmark</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-slate-900 font-semibold mt-0.5">
+              Exercise 2: Code Synthesis &amp; Edge Case Handling
+            </h1>
+</div>
+<div class="flex items-center gap-space-xs self-start sm:self-center">
+<span class="font-label-sm text-label-sm px-space-sm py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">Live Weight: 35%</span>
+<button class="px-space-sm py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-label-sm text-label-sm hover:bg-slate-200 transition-colors flex items-center gap-1 font-medium" type="button">
+<span class="material-symbols-outlined text-[14px]">tune</span> Rubric Guide
+            </button>
+</div>
+</div>
+<!-- Evaluation Stream Criteria Cards -->
+<div class="flex flex-col gap-space-md">
+<!-- Card 1: Single Select Segmented Pills (Decomposed multi-step) -->
+<article class="criterion-card bg-white border border-slate-200 rounded-xl p-space-md shadow-sm transition-all duration-150 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500" data-criterion-id="crit-2-1" tabindex="0">
+<div class="flex flex-wrap items-center justify-between gap-space-xs mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 font-semibold">CRIT 2.1</span>
+<h2 class="font-headline-sm text-headline-sm text-slate-900 font-medium">Decomposed multi-step problem before code invocation</h2>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase tracking-wider font-semibold">
+                Critical Thinking
+              </span>
+</div>
+<!-- Segmented Pill Select Group with hotkeys [1..4] -->
+<div aria-label="Criterion 2.1 Options" class="grid grid-cols-2 sm:grid-cols-4 gap-space-xs mb-space-sm" role="radiogroup">
+<!-- Pill 1 (Active/Filled) -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-emerald-600 text-white font-body-md text-body-md font-semibold transition-transform active:scale-95 shadow-sm border border-emerald-700" type="button">
+<span class="truncate">Thoroughly Decomposed</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-white/20 text-white font-bold shrink-0 ml-1">1</span>
+</button>
+<!-- Pill 2 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Partially Decomposed</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">2</span>
+</button>
+<!-- Pill 3 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Jumped to Code</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">3</span>
+</button>
+<!-- Pill 4 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Not Observed</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">4</span>
+</button>
+</div>
+<!-- Feedback preview mapping tag & Quick Note trigger -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+<span class="">Maps to: Positive Critical Thinking evidence (+1.0)</span>
+</div>
+<span class="font-label-sm text-label-sm text-slate-500">Press <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700 font-code-sm font-semibold">N</kbd> to edit note</span>
+</div>
+<!-- Inline Captured Note (allowNotes: true) -->
+<div class="mt-space-sm bg-slate-50 border border-slate-200 rounded-lg p-space-sm flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-indigo-600 text-[18px] mt-0.5">edit_note</span>
+<div class="flex-1 min-w-0">
+<label class="sr-only" for="note-crit-2-1">Quick Observation Note</label>
+<input class="w-full bg-transparent font-body-md text-body-md text-slate-900 placeholder:text-slate-400 focus:outline-none" id="note-crit-2-1" placeholder="Add specific observation fact (Press N to focus)..." type="text" value="Drafted step-by-step edge cases on scratchpad before running model.">
+</div>
+<span class="font-code-sm text-code-sm text-slate-500 font-medium shrink-0">Captured @ 14:02</span>
+</div>
+</article>
+<!-- Card 2: Single Select Segmented Buttons (Detailed Prompt) -->
+<article class="criterion-card bg-white border border-slate-200 rounded-xl p-space-md shadow-sm transition-all duration-150 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500" data-criterion-id="crit-2-2" tabindex="0">
+<div class="flex flex-wrap items-center justify-between gap-space-xs mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 font-semibold">CRIT 2.2</span>
+<h2 class="font-headline-sm text-headline-sm text-slate-900 font-medium">Created a detailed prompt with contextual constraints</h2>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase tracking-wider font-semibold">
+                Critical Thinking
+              </span>
+</div>
+<!-- Segmented Pills: 4 Options -->
+<div aria-label="Criterion 2.2 Options" class="grid grid-cols-2 sm:grid-cols-4 gap-space-xs mb-space-sm" role="radiogroup">
+<!-- Pill 1 (Active/Filled) -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-emerald-600 text-white font-body-md text-body-md font-semibold transition-transform active:scale-95 shadow-sm border border-emerald-700" type="button">
+<span class="truncate">Detailed</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-white/20 text-white font-bold shrink-0 ml-1">1</span>
+</button>
+<!-- Pill 2 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Basic</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">2</span>
+</button>
+<!-- Pill 3 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Not Done</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">3</span>
+</button>
+<!-- Pill 4 -->
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 font-body-md text-body-md transition-all active:scale-95 border border-slate-200" type="button">
+<span class="truncate">Not Observed</span>
+<span class="font-code-sm text-code-sm px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-600 font-medium shrink-0 ml-1">4</span>
+</button>
+</div>
+<!-- Inline Note Input Field -->
+<div class="mt-space-sm bg-slate-50 border border-slate-200 rounded-lg p-space-sm flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-indigo-600 text-[18px] mt-0.5">edit_note</span>
+<div class="flex-1 min-w-0">
+<label class="sr-only" for="note-crit-2-2">Criterion 2.2 Observation Note</label>
+<input class="w-full bg-transparent font-body-md text-body-md text-slate-900 placeholder:text-slate-400 focus:outline-none" id="note-crit-2-2" placeholder="Capture key verbatim phrase or observation..." type="text" value="Specified exact JSON schema constraints and retry parameters.">
+</div>
+<span class="font-code-sm text-code-sm text-slate-500 font-medium shrink-0">Captured @ 18:41</span>
+</div>
+</article>
+<!-- Card 3: Checklist / Multi-select with Edge Cases -->
+<article class="criterion-card bg-white border border-slate-200 rounded-xl p-space-md shadow-sm transition-all duration-150 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500" data-criterion-id="crit-2-3" tabindex="0">
+<div class="flex flex-wrap items-center justify-between gap-space-xs mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 font-semibold">CRIT 2.3</span>
+<h2 class="font-headline-sm text-headline-sm text-slate-900 font-medium">Observed Edge Case Validations</h2>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wider font-semibold">
+                Technical Depth
+              </span>
+</div>
+<!-- Configurable Checkbox Group -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm mb-space-sm">
+<!-- Item 1 (Checked) -->
+<label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer select-none transition-colors">
+<input checked="" class="w-4 h-4 rounded text-indigo-600 bg-white border-slate-300 focus:ring-indigo-500 cursor-pointer accent-indigo-600" type="checkbox">
+<span class="font-body-md text-body-md text-slate-900 font-medium">Token limit overflow handled</span>
+</label>
+<!-- Item 2 (Checked) -->
+<label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer select-none transition-colors">
+<input checked="" class="w-4 h-4 rounded text-indigo-600 bg-white border-slate-300 focus:ring-indigo-500 cursor-pointer accent-indigo-600" type="checkbox">
+<span class="font-body-md text-body-md text-slate-900 font-medium">Async timeout fallback configured</span>
+</label>
+<!-- Item 3 (Unchecked) -->
+<label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-slate-50/70 hover:bg-slate-100 border border-slate-200 cursor-pointer select-none transition-colors">
+<input class="w-4 h-4 rounded text-indigo-600 bg-white border-slate-300 focus:ring-indigo-500 cursor-pointer accent-indigo-600" type="checkbox">
+<span class="font-body-md text-body-md text-slate-600">Empty response recovery</span>
+</label>
+</div>
+<!-- Inline Quick Note -->
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-space-sm flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-indigo-600 text-[18px] mt-0.5">terminal</span>
+<div class="flex-1 min-w-0">
+<label class="sr-only" for="note-crit-2-3">Edge Case Notes</label>
+<input class="w-full bg-transparent font-body-md text-body-md text-slate-900 placeholder:text-slate-400 focus:outline-none" id="note-crit-2-3" placeholder="Note edge case nuance..." type="text" value="Configured backoff exponential jitter gracefully in python wrapper.">
+</div>
+<span class="font-code-sm text-code-sm text-slate-500 font-medium shrink-0">Captured @ 21:10</span>
+</div>
+</article>
+<!-- Card 4: Numeric Scale 1-4 with Descriptive Labels -->
+<article class="criterion-card bg-white border border-slate-200 rounded-xl p-space-md shadow-sm transition-all duration-150 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500" data-criterion-id="crit-2-4" tabindex="0">
+<div class="flex flex-wrap items-center justify-between gap-space-xs mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 font-semibold">CRIT 2.4</span>
+<h2 class="font-headline-sm text-headline-sm text-slate-900 font-medium">Communication clarity during prompt iterations</h2>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider font-semibold">
+                Communication
+              </span>
+</div>
+<!-- Rating Segment Scale 1-4 -->
+<div aria-label="Communication Clarity Scale" class="grid grid-cols-2 sm:grid-cols-4 gap-space-xs mb-space-xs" role="radiogroup">
+<button class="flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors" type="button">
+<span class="font-headline-sm text-headline-sm font-semibold">1</span>
+<span class="font-body-sm text-body-sm text-slate-400">Unclear</span>
+</button>
+<button class="flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors" type="button">
+<span class="font-headline-sm text-headline-sm font-semibold">2</span>
+<span class="font-body-sm text-body-sm text-slate-500">Adequate</span>
+</button>
+<!-- Selected Scale Item (3) -->
+<button class="flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg bg-indigo-600 text-white border border-indigo-700 shadow-md transition-transform scale-[1.02]" type="button">
+<span class="font-headline-sm text-headline-sm font-bold">3</span>
+<span class="font-body-sm text-body-sm font-medium">Clear &amp; Articulate</span>
+</button>
+<button class="flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors" type="button">
+<span class="font-headline-sm text-headline-sm font-semibold">4</span>
+<span class="font-body-sm text-body-sm text-emerald-700 font-medium">Exceptional</span>
+</button>
+</div>
+</article>
+<!-- Card 5: Free-Form Observations per Exercise -->
+<article class="criterion-card bg-white border border-slate-200 rounded-xl p-space-md shadow-sm transition-all duration-150 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500" data-criterion-id="crit-2-freeform" tabindex="0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-amber-600 text-[20px]">lightbulb</span>
+<h2 class="font-headline-sm text-headline-sm text-slate-900 font-semibold">
+                  Exercise 2 Free-Form Observations
+                </h2>
+</div>
+<span class="font-label-sm text-label-sm text-slate-500">Unexpected behaviors • Unconfigured notes</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-600 mb-space-sm">
+              Jot non-rubric nuance, meta-strategies, or spontaneous candidate reasoning below for AI synthesis.
+            </p>
+<div class="relative bg-slate-50 border border-slate-200 rounded-lg p-space-sm">
+<label class="sr-only" for="freeform-notes">Free-form observations</label>
+<textarea class="w-full bg-transparent font-body-md text-body-md text-slate-900 placeholder:text-slate-400 focus:outline-none resize-none leading-relaxed" id="freeform-notes" placeholder="Type raw observations here..." rows="3">Candidate leveraged an innovative meta-prompting technique not originally anticipated in standard rubric; demonstrated deep understanding of attention mechanisms and context length compression.</textarea>
+<div class="flex items-center justify-between mt-space-xs pt-space-xs text-slate-500 border-t border-slate-200/60">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">#meta-prompting</span>
+<span class="font-code-sm text-code-sm px-space-xs py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">#attention-depth</span>
+</div>
+<span class="font-label-sm text-label-sm">Autosaved • 176 chars</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Right Sidebar (~32% on Desktop: 4 cols of 12) - Live Evidence HUD & Ergonomics -->
+<aside class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- Live Evidence HUD Container -->
+<div class="bg-white border border-slate-200 rounded-xl p-space-md shadow-sm sticky top-20 flex flex-col gap-space-md">
+<!-- HUD Header -->
+<div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-emerald-600 text-[22px]">analytics</span>
+<h3 class="font-headline-sm text-headline-sm text-slate-900 font-semibold">Evidence HUD</h3>
+</div>
+<span class="font-code-sm text-code-sm px-space-sm py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+              8 Observations
+            </span>
+</div>
+<!-- Total Captured Fact Meter -->
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="text-slate-800 font-semibold">Session Completion Rate</span>
+<span class="font-code-sm text-code-sm text-emerald-700 font-bold">68%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full w-[68%] transition-all duration-300"></div>
+</div>
+<span class="font-body-sm text-body-sm text-slate-500">5/7 required rubrics observed across active phases</span>
+</div>
+<!-- Real-time Competency Coverage Bars -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-slate-500 uppercase tracking-wider font-semibold">
+              Competency Evidence Balance
+            </span>
+<!-- Competency 1: Critical Thinking -->
+<div class="flex flex-col gap-1 bg-slate-50 border border-slate-200 p-space-xs rounded-lg">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-slate-800 font-medium">Critical Thinking</span>
+<span class="font-code-sm text-code-sm text-emerald-700 font-semibold">4 pts • High coverage</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+<div class="h-full bg-emerald-600 rounded-full w-[100%]"></div>
+</div>
+</div>
+<!-- Competency 2: Technical Depth -->
+<div class="flex flex-col gap-1 bg-slate-50 border border-slate-200 p-space-xs rounded-lg">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-slate-800 font-medium">Technical Depth</span>
+<span class="font-code-sm text-code-sm text-emerald-700 font-semibold">3 pts • Sufficient coverage</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+<div class="h-full bg-emerald-500 rounded-full w-[75%]"></div>
+</div>
+</div>
+<!-- Competency 3: Communication -->
+<div class="flex flex-col gap-1 bg-slate-50 border border-slate-200 p-space-xs rounded-lg">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-slate-800 font-medium">Communication</span>
+<span class="font-code-sm text-code-sm text-indigo-700 font-semibold">2 pts • Good coverage</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+<div class="h-full bg-indigo-600 rounded-full w-[50%]"></div>
+</div>
+</div>
+<!-- Competency 4: Pragmatic Execution -->
+<div class="flex flex-col gap-1 bg-slate-50 border border-slate-200 p-space-xs rounded-lg">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-slate-800 font-medium">Pragmatic Execution</span>
+<span class="font-code-sm text-code-sm text-amber-700 font-semibold">1 pt • Needs 1 more</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full w-[25%] animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- Live Generation Preview Pill / Synthesis Readiness -->
+<div class="p-space-sm rounded-xl bg-indigo-50 border border-indigo-200 flex items-center gap-space-sm shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-ping shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-indigo-700 font-semibold">Live Synthesizer Ready</span>
+<span class="font-code-sm text-code-sm text-slate-800 truncate font-medium">14 sentences queued in buffer</span>
+</div>
+</div>
+<!-- Candidate Context Visual Pill -->
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-space-sm flex items-center gap-space-sm">
+<img class="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200 shadow-sm" data-alt="Close up professional portrait of candidate Elena Rostova, software engineer in quiet studio ambient lighting, dark neutral clothing, calm focused gaze, modern minimal tech photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAHtc7bzF-xpl6tKmhw_o7h-B7dwgl3GWj6b8rXXxNxVhAWutFrcv34wTCd70lR7hFpzydDGVgf9Xp75oGc0fTzksKQ5_VRc_Mk0ijNvcD2lBC4qn6CbBc-ZrvKvor6ElTltiUaAfQxz5yPe36oNRkM_h64Nd9wrvaPCxcyj6Ldq_qUIRe2urSWqAvdKfYepWxN023ceJJrPpiB5BzkumlV4nIWdMc1q5cM8gu60K0fMEgdxQBpoM5g">
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-slate-500 uppercase font-medium">Target Level</span>
+<span class="font-body-md text-body-md text-slate-900 font-semibold truncate">Staff Systems Eng (L6)</span>
+<span class="font-code-sm text-code-sm text-emerald-700 truncate font-semibold">Threshold: 8.5/10.0</span>
+</div>
+</div>
+<!-- Keyboard Ergonomics Cheatsheet -->
+<div class="bg-white border border-slate-200 rounded-xl p-space-md flex flex-col gap-space-xs shadow-sm">
+<div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
+<span class="font-label-sm text-label-sm text-slate-900 font-semibold uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-indigo-600">keyboard</span>
+                Keyboard Ergonomics
+              </span>
+<span class="font-code-sm text-code-sm text-slate-500 font-medium">Hands-On-Desk</span>
+</div>
+<ul class="flex flex-col gap-2 font-code-sm text-code-sm text-slate-600 pt-1">
+<li class="flex items-center justify-between">
+<span class="">Next / Prev criterion</span>
+<span class="text-slate-800 font-semibold bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">Tab / ⇧+Tab</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="">Select option pill</span>
+<span class="text-slate-800 font-semibold bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">1 - 4</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="">Focus quick note input</span>
+<span class="text-slate-800 font-semibold bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">N</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="">Finish &amp; Synthesize</span>
+<span class="text-indigo-700 font-semibold bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">⌘ + Enter</span>
+</li>
+</ul>
+</div>
+<!-- Primary Submit Action Button -->
+<button class="w-full py-space-md px-space-lg rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-space-xs shadow-md hover:shadow-lg transition-all active:scale-95 group" id="btn-finish-session" type="button">
+<span class="">Finish Session &amp; Compose Feedback</span>
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+<p class="font-body-sm text-body-sm text-center text-slate-500 -mt-1 font-medium">
+            Zero re-typing required • Auto-maps to rubric matrix
+          </p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Client Interaction Script for Keyboard Ergonomics & Visual State -->
+<script>
+    (function initErgonomicHotkeys() {
+      // Stopwatch simulation for live session timer
+      const timerElement = document.getElementById('elapsed-time');
+      if (timerElement) {
+        let totalSeconds = 24 * 60 + 18;
+        setInterval(() => {
+          totalSeconds++;
+          const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+          const secs = String(totalSeconds % 60).padStart(2, '0');
+          timerElement.textContent = `${mins}:${secs}`;
+        }, 1000);
+      }
+
+      // Keyboard ergonomics: 1-4 option selection and 'N' hotkey for active card
+      document.addEventListener('keydown', (e) => {
+        // Meta + Enter -> Compose Feedback
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+          e.preventDefault();
+          const btn = document.getElementById('btn-finish-session');
+          if (btn) {
+            btn.classList.add('scale-95');
+            setTimeout(() => {
+              btn.classList.remove('scale-95');
+              alert('Advancing to Screen 3: Feedback Review & Synthesis...');
+            }, 120);
+          }
+          return;
+        }
+
+        // Check if currently typing in an input or textarea
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        const isEditingText = activeTag === 'input' || activeTag === 'textarea';
+
+        if (!isEditingText) {
+          // 'N' hotkey triggers focus on first visible quick note
+          if (e.key === 'n' || e.key === 'N') {
+            e.preventDefault();
+            const firstNote = document.getElementById('note-crit-2-1');
+            if (firstNote) firstNote.focus();
+          }
+
+          // Numeric 1-4 selection on currently focused or first criterion
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            const focusedCard = document.activeElement && document.activeElement.classList.contains('criterion-card')
+              ? document.activeElement
+              : document.querySelector('.criterion-card');
+            
+            if (focusedCard) {
+              const buttons = focusedCard.querySelectorAll('[role="radiogroup"] button');
+              const index = parseInt(e.key, 10) - 1;
+              if (buttons && buttons[index]) {
+                buttons[index].click();
+              }
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</div></main><footer class="w-full bg-white border-t border-slate-200 py-space-md mt-auto shadow-sm"><div class="w-full px-margin flex flex-col sm:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-slate-500 font-semibold">INTERVIEW COMPOSER ENGINE v2.4</span><span class="font-code-sm text-code-sm text-slate-400">RUBRIC-STRICT // LATENCY &lt;16ms</span></div><div class="flex items-center gap-space-lg"><span class="font-code-sm text-code-sm text-slate-500 hidden md:inline">Hotkeys: [⌘+K] Evidence Pill • [⌘+S] Sync Diff</span><span class="font-body-sm text-body-sm text-slate-500">© 2025 Feedback Composer. Objective Evidence Engine.</span></div></div></footer>
+
+</body></html>
