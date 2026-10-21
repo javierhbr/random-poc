@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project Knowledge"
+  short_description: "Understand, remember, and refresh project knowledge"
+  default_prompt: "Use $okf-knowledge to find the relevant project knowledge and answer with sources."
+policy:
+  allow_implicit_invocation: true
